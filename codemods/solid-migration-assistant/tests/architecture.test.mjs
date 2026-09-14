@@ -233,7 +233,7 @@ test("composes every named rule as its own inline jssg definition, analyzers as 
   }
   assert.match(
     analyzeWorkflow,
-    /^import \{ jssg, parallel, workflow \} from "@codemod\.com\/orchestration";$/m,
+    /^import \{ jssg, parallel, sequence, workflow \} from "@codemod\.com\/orchestration";$/m,
   );
   assert.match(
     transformWorkflow,
@@ -250,7 +250,7 @@ test("composes every named rule as its own inline jssg definition, analyzers as 
     assert.doesNotMatch(workflow, /codemod:workflow|acquireLock|getState|setState|console\.log/);
   }
 
-  // The analyze body declares every definition as one parallel group and the
+  // The analyze graph declares every definition as one parallel group and the
   // transform body awaits its three one at a time, in the recorded order.
   // Both return the aggregated strings as data. Nothing else runs.
   assert.deepEqual(
@@ -259,11 +259,11 @@ test("composes every named rule as its own inline jssg definition, analyzers as 
   );
   assert.match(
     analyzeWorkflow,
-    /export default workflow\(async \(\) => \{\n  const commands: string\[\]\[\]\[\] = await parallel\(analyzers\);\n  return \{ guidance: aggregateReport\(commands\) \};\n\}\);\n$/,
+    /export default sequence\(parallel\(analyzers\), workflow\(aggregateReport\)\);\n$/,
   );
   // One group over the whole list: no manual chunking and no author-declared
   // concurrency, so the engine scheduler alone decides what actually overlaps.
-  assert.equal((analyzeWorkflow.match(/await parallel\(/g) ?? []).length, 1);
+  assert.equal((analyzeWorkflow.match(/sequence\(/g) ?? []).length, 1);
   assert.equal((analyzeWorkflow.match(/parallel\(analyzers\)/g) ?? []).length, 1);
   assert.doesNotMatch(
     analyzeWorkflow,

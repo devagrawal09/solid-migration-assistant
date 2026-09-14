@@ -449,7 +449,7 @@ test("declares the 37 analyzers as one parallel group of workspace-semantic comm
   assert.deepEqual(completionOrder(), [...expectedAnalyzers].reverse());
   // The exact same aggregate as a one-at-a-time run: flattened, exact
   // deduplicated, and sorted as whole strings.
-  assert.deepEqual(result.output, { guidance: ["a", "b\nsecond line", "c"] });
+  assert.deepEqual(result.output, ["a", "b\nsecond line", "c"]);
   assert.equal(result.replayed, false);
   // Commands are still issued in declaration order, so command identity and
   // history do not depend on the schedule.
@@ -495,7 +495,7 @@ test("lets the engine's admission scheduler, not the group, decide how many anal
 
   const result = await run(exports.default, { executor, scheduler });
 
-  assert.deepEqual(result.output, { guidance: [] });
+  assert.deepEqual(result.output, []);
   assert.deepEqual([...new Set(weights())], [4]);
   assert.deepEqual(admitted().sort(), [...expectedAnalyzers].sort());
   // The scheduler's own accounting: the group did overlap, and it never

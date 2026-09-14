@@ -61,7 +61,7 @@ test("describes the two workflows the launcher can run", () => {
   assert.deepEqual(Object.keys(COMMANDS), ["analyze", "transform"]);
   assert.deepEqual(COMMANDS.analyze, {
     workflow: "workflows/analyze.ts",
-    report: "guidance",
+    report: null,
     separator: "\n\n",
     disclosure: true,
     noun: "analyzer",
@@ -195,11 +195,13 @@ test("renders guidance as blank-line-separated blocks and reports as lines, in t
   assert.equal(stdout.text(), "b\nsecond line\n\na\nx\ny\n");
 
   assert.deepEqual(reportOf({ guidance: ["a"] }, "guidance"), ["a"]);
+  assert.deepEqual(reportOf(["a"], null), ["a"]);
   assert.deepEqual(reportOf({ report: [] }, "report"), []);
   assert.throws(() => reportOf({ guidance: "a" }, "guidance"), /no guidance list/);
   assert.throws(() => reportOf({ guidance: [1] }, "guidance"), /no guidance list/);
   assert.throws(() => reportOf(null, "report"), /no report list/);
   assert.throws(() => reportOf(["a"], "report"), /no report list/);
+  assert.throws(() => reportOf({ guidance: ["a"] }, null), /no string list/);
 });
 
 test("ends successful, failed, and thrown analyzer runs with the disclosure", async () => {

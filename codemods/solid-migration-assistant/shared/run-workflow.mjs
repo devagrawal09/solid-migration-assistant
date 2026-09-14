@@ -33,7 +33,7 @@ Feedback: ${FEEDBACK_URL}
 export const COMMANDS = Object.freeze({
   analyze: Object.freeze({
     workflow: "workflows/analyze.ts",
-    report: "guidance",
+    report: null,
     separator: "\n\n",
     disclosure: true,
     noun: "analyzer",
@@ -173,14 +173,16 @@ export async function runWorkflowFile({ workflowPath, target, bridge, signal }) 
   return output;
 }
 
-/** The string list a workflow returned under `key`, or an error. */
+/** The string list returned directly or under `key`, or an error. */
 export function reportOf(output, key) {
   const report =
-    output && typeof output === "object" && !Array.isArray(output)
-      ? output[key]
-      : undefined;
+    key === null
+      ? output
+      : output && typeof output === "object" && !Array.isArray(output)
+        ? output[key]
+        : undefined;
   if (!Array.isArray(report) || report.some((line) => typeof line !== "string")) {
-    throw new Error(`workflow returned no ${key} list`);
+    throw new Error(`workflow returned no ${key ?? "string"} list`);
   }
   return report;
 }

@@ -5,8 +5,8 @@
  * step: every command indexes the complete selected file set, so a rule's
  * cross-file `references()` lookups see every project file. A transform
  * returns each file's guidance as structured output and never an edit; the
- * workflow body flattens, deduplicates, and sorts the strings and returns
- * them as data for the launcher to print.
+ * final workflow stage flattens, deduplicates, and sorts the strings and
+ * returns them as data for the launcher to print.
  *
  * The analyzers read the target and share nothing, so they are declared as
  * one `parallel()` group rather than awaited one at a time. The group states
@@ -19,7 +19,7 @@
  * A transform may only use its parameters and imported bindings, so each one
  * delegates to the bundled `analyzeFile` adapter with the rule it imports.
  */
-import { jssg, parallel, workflow } from "@codemod.com/orchestration";
+import { jssg, parallel, sequence, workflow } from "@codemod.com/orchestration";
 import { analyzeBeta32SubpathImports } from "../rules/analysis/imports/beta32-subpaths/beta32-subpaths.ts";
 import { analyzeWebImport } from "../rules/analysis/imports/web-import/web-import.ts";
 import { analyzeJsxClassListAttributes } from "../rules/analysis/jsx/class-list/class-list.ts";
@@ -486,7 +486,4 @@ export const analyzers = [
   unwrap,
 ];
 
-export default workflow(async () => {
-  const commands: string[][][] = await parallel(analyzers);
-  return { guidance: aggregateReport(commands) };
-});
+export default sequence(parallel(analyzers), workflow(aggregateReport));
