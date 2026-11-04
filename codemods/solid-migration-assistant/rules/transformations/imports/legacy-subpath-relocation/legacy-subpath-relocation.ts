@@ -1,9 +1,10 @@
 import type { Edit, SgNode } from "codemod:ast-grep";
 import type TSX from "codemod:ast-grep/langs/tsx";
 import { findModuleReferences } from "../../../../shared/analysis.ts";
+import { findBindings } from "../../../../shared/bindings.ts";
 
 export const SOLID_SOURCE_COMMIT =
-  "ff4d3c4479163fbdd3327f5b22d0c3ea7bd1a2c5";
+  "2105ffb8ca2fced55f5fac0763177fc93f97c2c2";
 
 export const TRANSFORM_MIGRATION_GUIDE = `https://github.com/solidjs/solid/blob/${SOLID_SOURCE_COMMIT}/documentation/solid-2.0/MIGRATION.md#imports-where-things-live-now`;
 
@@ -52,83 +53,6 @@ function isReExportSource(source: SgNode<TSX>): boolean {
 }
 
 /**
- * Kinds of syntax nodes that can directly hold a `require` binding. For the
- * position-sensitive kinds, `isShadowBinding` narrows the match to the actual
- * binding slot so adjacent references never count.
- */
-const REQUIRE_BINDING_PARENT_KINDS = new Set([
-  "function_declaration",
-  "class_declaration",
-  "variable_declarator",
-  "required_parameter",
-  "optional_parameter",
-  "rest_pattern",
-  "array_pattern",
-  "object_pattern",
-  "pair_pattern",
-  "import_clause",
-  "namespace_import",
-  "import_specifier",
-  "catch_clause",
-  "assignment_pattern",
-  "object_assignment_pattern",
-]);
-
-function samePosition(left: SgNode<TSX>, right: SgNode<TSX>): boolean {
-  const a = left.range().start;
-  const b = right.range().start;
-  return a.line === b.line && a.column === b.column;
-}
-
-/**
- * True when the identifier occupies the binding slot of its parent node and
- * not merely a reference next to it. This keeps the scan precise in both
- * directions: `import { require as r }`, `function f(a = require)`, and
- * `const alias = require` are references (the local binding is `r`, `a`, and
- * `alias`), while `const [require] = arr`, `const { require = 1 } = obj`, and
- * `function g(require = 1)` all bind `require` and must suppress relocation
- * of bare `require(...)` calls.
- */
-function isShadowBinding(node: SgNode<TSX>): boolean {
-  const parent = node.parent();
-  if (!parent || !REQUIRE_BINDING_PARENT_KINDS.has(parent.kind())) {
-    return false;
-  }
-  switch (parent.kind()) {
-    case "import_specifier": {
-      const alias = parent.field("alias");
-      return (
-        alias === null ||
-        alias.text() === "require" ||
-        samePosition(alias, node)
-      );
-    }
-    case "required_parameter":
-    case "optional_parameter": {
-      const pattern = parent.field("pattern");
-      return pattern !== null && samePosition(pattern, node);
-    }
-    case "assignment_pattern":
-    case "object_assignment_pattern": {
-      const left = parent.field("left");
-      return left !== null && samePosition(left, node);
-    }
-    case "pair_pattern": {
-      const value = parent.field("value");
-      return value !== null && samePosition(value, node);
-    }
-    case "function_declaration":
-    case "class_declaration":
-    case "variable_declarator": {
-      const name = parent.field("name");
-      return name !== null && samePosition(name, node);
-    }
-    default:
-      return true;
-  }
-}
-
-/**
  * Bare `require(...)` calls are module references only when `require` is the
  * ambient CommonJS require. The transform workflow has no semantic provider,
  * so shadowing is detected syntactically: if the file declares its own
@@ -141,26 +65,7 @@ function isShadowBinding(node: SgNode<TSX>): boolean {
  * `const alias = require` never count as shadows.
  */
 function hasShadowingRequireBinding(rootNode: SgNode<TSX>): boolean {
-  const kinds = [
-    "identifier",
-    "type_identifier",
-    "shorthand_property_identifier_pattern",
-  ] as const;
-  for (const kind of kinds) {
-    for (const node of rootNode.findAll({
-      rule: { kind, regex: "^require$" },
-    })) {
-      if (
-        node.ancestors().some(
-          (ancestor) => ancestor.kind() === "ambient_declaration",
-        )
-      ) {
-        continue;
-      }
-      if (isShadowBinding(node)) return true;
-    }
-  }
-  return false;
+  return findBindings(rootNode, "require", { ignoreAmbient: true }).length > 0;
 }
 
 /**

@@ -55,6 +55,54 @@ nodes:
             - "**/build/**"
             - "**/coverage/**"
             - "**/*.d.ts"
+      - name: rewriteContextProvider
+        js-ast-grep:
+          js_file: scripts/transformations/rewriteContextProvider.ts
+          base_path: "."
+          language: "tsx"
+          include:
+            - "**/*.js"
+            - "**/*.jsx"
+            - "**/*.ts"
+            - "**/*.tsx"
+          exclude:
+            - "**/node_modules/**"
+            - "**/dist/**"
+            - "**/build/**"
+            - "**/coverage/**"
+            - "**/*.d.ts"
+      - name: rewriteIndexToFor
+        js-ast-grep:
+          js_file: scripts/transformations/rewriteIndexToFor.ts
+          base_path: "."
+          language: "tsx"
+          include:
+            - "**/*.js"
+            - "**/*.jsx"
+            - "**/*.ts"
+            - "**/*.tsx"
+          exclude:
+            - "**/node_modules/**"
+            - "**/dist/**"
+            - "**/build/**"
+            - "**/coverage/**"
+            - "**/*.d.ts"
+      - name: rewriteLowercaseEventHandlers
+        js-ast-grep:
+          js_file: scripts/transformations/rewriteLowercaseEventHandlers.ts
+          base_path: "."
+          language: "tsx"
+          include:
+            - "**/*.js"
+            - "**/*.jsx"
+            - "**/*.ts"
+            - "**/*.tsx"
+          exclude:
+            - "**/node_modules/**"
+            - "**/dist/**"
+            - "**/build/**"
+            - "**/coverage/**"
+            - "**/*.d.ts"
       - name: Emit the rewrite report once in deterministic whole-string order
         js-ast-grep:
           js_file: scripts/emit-report.ts

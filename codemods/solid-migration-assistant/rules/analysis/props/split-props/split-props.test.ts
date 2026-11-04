@@ -3,7 +3,7 @@ import type TSX from "codemod:ast-grep/langs/tsx";
 import { analyzeSplitProps } from "./split-props.ts";
 
 const MIGRATION_GUIDE =
-  "https://github.com/solidjs/solid/blob/ff4d3c4479163fbdd3327f5b22d0c3ea7bd1a2c5/documentation/solid-2.0/MIGRATION.md#mergeprops--splitprops--merge--omit";
+  "https://github.com/solidjs/solid/blob/2105ffb8ca2fced55f5fac0763177fc93f97c2c2/documentation/solid-2.0/MIGRATION.md#mergeprops--splitprops--merge--omit";
 
 const testSplitPropsRule: Codemod<TSX> = async (root) => {
   const filename = root.relativeFilename().replaceAll("\\", "/");
@@ -24,7 +24,7 @@ const testSplitPropsRule: Codemod<TSX> = async (root) => {
   const expected = sites.map(
     ([location, keyGroupCount]) =>
       `${filename}:${location} Manual review required: migrate this splitProps tuple to reviewed omit-based values.
-Why: Solid 2.0.0-rc.0 replaces splitProps with omit, but omit returns one object while splitProps returns a tuple containing one selected object per key group plus a final remainder, so migration depends on how those positions are consumed. This call has ${keyGroupCount} key group(s).
+Why: Solid 2.0.0-rc.21 replaces splitProps with omit, but omit returns one object while splitProps returns a tuple containing one selected object per key group plus a final remainder, so migration depends on how those positions are consumed. This call has ${keyGroupCount} key group(s).
 Guidance: Trace the complete tuple destructuring or other call-site use, list the exact keys represented by every group, and trace every downstream consumer and reactive property access for each selected value and the remainder. Design explicit omit-based values only after proving how every old tuple member will be produced and that live reactive property access is preserved. Make and validate this migration yourself; this analyzer never edits or runs the target project. Stop without proposing a replacement when keys are dynamic or overlapping, more than one selected group is consumed, the tuple escapes or is indexed dynamically, rest destructuring or reassignment is involved, props or store proxy identity matters, or any consumer is unclear. Ask for the smallest focused test or runtime observation that exposes each consumed tuple member's keys, value, reactive updates, and identity boundary. Official migration guide: ${MIGRATION_GUIDE}`,
   );
 

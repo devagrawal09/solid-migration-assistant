@@ -3,11 +3,11 @@ import type TSX from "codemod:ast-grep/langs/tsx";
 import { analyzeJsxComponentRenames } from "./component-renames.ts";
 
 const SUSPENSE_BOUNDARY_GUIDE =
-  "https://github.com/solidjs/solid/blob/ff4d3c4479163fbdd3327f5b22d0c3ea7bd1a2c5/documentation/solid-2.0/MIGRATION.md#suspense--errorboundary--loading--errored";
+  "https://github.com/solidjs/solid/blob/2105ffb8ca2fced55f5fac0763177fc93f97c2c2/documentation/solid-2.0/MIGRATION.md#suspense--errorboundary--loading--errored";
 const INDEX_GUIDE =
-  "https://github.com/solidjs/solid/blob/ff4d3c4479163fbdd3327f5b22d0c3ea7bd1a2c5/documentation/solid-2.0/MIGRATION.md#list-rendering-index-is-gone-and-for-handles-each-keying-mode";
+  "https://github.com/solidjs/solid/blob/2105ffb8ca2fced55f5fac0763177fc93f97c2c2/documentation/solid-2.0/MIGRATION.md#list-rendering-index-is-gone-and-for-handles-each-keying-mode";
 const SUSPENSE_LIST_GUIDE =
-  "https://github.com/solidjs/solid/blob/ff4d3c4479163fbdd3327f5b22d0c3ea7bd1a2c5/documentation/solid-2.0/MIGRATION.md#coordinating-loading-boundaries-suspenselist--reveal";
+  "https://github.com/solidjs/solid/blob/2105ffb8ca2fced55f5fac0763177fc93f97c2c2/documentation/solid-2.0/MIGRATION.md#coordinating-loading-boundaries-suspenselist--reveal";
 
 const testJsxComponentRenames: Codemod<TSX> = async (root) => {
   const filename = root.relativeFilename().replaceAll("\\", "/");

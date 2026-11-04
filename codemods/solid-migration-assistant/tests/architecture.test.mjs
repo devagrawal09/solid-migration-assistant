@@ -17,6 +17,7 @@ const EXPECTED_ANALYSIS_PRODUCTION = [
   "jsx/context-provider/context-provider.ts",
   "jsx/dom-attr-namespaces/dom-attr-namespaces.ts",
   "jsx/dom-event-namespaces/dom-event-namespaces.ts",
+  "jsx/dom-lowercase-events/dom-lowercase-events.ts",
   "jsx/dom-use-directive/dom-use-directive.ts",
   "lifecycle/on-cleanup/on-cleanup.ts",
   "lifecycle/on-mount/on-mount.ts",
@@ -47,6 +48,7 @@ const EXPECTED_ANALYSIS_TESTS = [
   "jsx/context-provider/context-provider.test.ts",
   "jsx/dom-attr-namespaces/dom-attr-namespaces.test.ts",
   "jsx/dom-event-namespaces/dom-event-namespaces.test.ts",
+  "jsx/dom-lowercase-events/dom-lowercase-events.test.ts",
   "jsx/dom-use-directive/dom-use-directive.test.ts",
   "lifecycle/on-cleanup/on-cleanup.test.ts",
   "lifecycle/on-mount/on-mount.test.ts",
@@ -77,6 +79,7 @@ const EXPECTED_ANALYSIS_FIXTURES = [
   "jsx/context-provider/normal.fixture.tsx",
   "jsx/dom-attr-namespaces/normal.fixture.tsx",
   "jsx/dom-event-namespaces/normal.fixture.tsx",
+  "jsx/dom-lowercase-events/normal.fixture.tsx",
   "jsx/dom-use-directive/normal.fixture.tsx",
   "lifecycle/on-cleanup/direct-call.fixture.tsx",
   "lifecycle/on-cleanup/non-solid.fixture.tsx",
@@ -128,11 +131,17 @@ const EXPECTED_TRANSFORM_PRODUCTION = [
   "imports/legacy-subpath-relocation/legacy-subpath-relocation.ts",
   "imports/web-package-relocation/web-package-relocation.ts",
   "jsx/class-list-to-class/class-list-to-class.ts",
+  "jsx/context-provider-to-context/context-provider-to-context.ts",
+  "jsx/index-to-for/index-to-for.ts",
+  "jsx/lowercase-event-handlers/lowercase-event-handlers.ts",
 ];
 const EXPECTED_TRANSFORM_TESTS = [
   "imports/legacy-subpath-relocation/legacy-subpath-relocation.test.ts",
   "imports/web-package-relocation/web-package-relocation.test.ts",
   "jsx/class-list-to-class/class-list-to-class.test.ts",
+  "jsx/context-provider-to-context/context-provider-to-context.test.ts",
+  "jsx/index-to-for/index-to-for.test.ts",
+  "jsx/lowercase-event-handlers/lowercase-event-handlers.test.ts",
 ];
 const EXPECTED_TRANSFORM_FIXTURES = [
   "imports/legacy-subpath-relocation/fixtures/destructured-require.fixture.tsx",
@@ -147,6 +156,7 @@ const EXPECTED_TRANSFORM_FIXTURES = [
   "imports/legacy-subpath-relocation/fixtures/single-quotes.fixture.tsx",
   "imports/legacy-subpath-relocation/fixtures/static-imports.fixture.tsx",
   "imports/web-package-relocation/fixtures/coexistence.fixture.tsx",
+  "imports/web-package-relocation/fixtures/dynamic-bindings.fixture.tsx",
   "imports/web-package-relocation/fixtures/escaped-specifiers.fixture.tsx",
   "imports/web-package-relocation/fixtures/local-exports.fixture.tsx",
   "imports/web-package-relocation/fixtures/mixed-bindings.fixture.tsx",
@@ -164,6 +174,34 @@ const EXPECTED_TRANSFORM_FIXTURES = [
   "jsx/class-list-to-class/fixtures/non-intrinsic-elements.fixture.tsx",
   "jsx/class-list-to-class/fixtures/rewrites.fixture.tsx",
   "jsx/class-list-to-class/fixtures/spread-attributes.fixture.tsx",
+  "jsx/context-provider-to-context/fixtures/aliased-import.fixture.tsx",
+  "jsx/context-provider-to-context/fixtures/attribute-shapes.fixture.tsx",
+  "jsx/context-provider-to-context/fixtures/no-matches.fixture.tsx",
+  "jsx/context-provider-to-context/fixtures/real-world-solid-context-spec.fixture.tsx",
+  "jsx/context-provider-to-context/fixtures/rewrites.fixture.tsx",
+  "jsx/context-provider-to-context/fixtures/shadowed-bindings.fixture.tsx",
+  "jsx/context-provider-to-context/fixtures/shadowed-create-context.fixture.tsx",
+  "jsx/context-provider-to-context/fixtures/unproven-contexts.fixture.tsx",
+  "jsx/index-to-for/fixtures/attribute-shapes.fixture.tsx",
+  "jsx/index-to-for/fixtures/for-conflicts.fixture.tsx",
+  "jsx/index-to-for/fixtures/for-imported-after.fixture.tsx",
+  "jsx/index-to-for/fixtures/for-imported-before.fixture.tsx",
+  "jsx/index-to-for/fixtures/import-shapes.fixture.tsx",
+  "jsx/index-to-for/fixtures/no-matches.fixture.tsx",
+  "jsx/index-to-for/fixtures/real-world-solid-primitives-active-element.fixture.tsx",
+  "jsx/index-to-for/fixtures/rewrites.fixture.tsx",
+  "jsx/index-to-for/fixtures/separate-for-import.fixture.tsx",
+  "jsx/index-to-for/fixtures/shadowed-bindings.fixture.tsx",
+  "jsx/index-to-for/fixtures/unsupported-references.fixture.tsx",
+  "jsx/index-to-for/fixtures/web-import.fixture.tsx",
+  "jsx/lowercase-event-handlers/fixtures/attribute-values.fixture.tsx",
+  "jsx/lowercase-event-handlers/fixtures/conflicts.fixture.tsx",
+  "jsx/lowercase-event-handlers/fixtures/no-matches.fixture.tsx",
+  "jsx/lowercase-event-handlers/fixtures/non-intrinsic-elements.fixture.tsx",
+  "jsx/lowercase-event-handlers/fixtures/real-world-solid-primitives-memo-lazy.fixture.tsx",
+  "jsx/lowercase-event-handlers/fixtures/rewrites.fixture.tsx",
+  "jsx/lowercase-event-handlers/fixtures/spread-attributes.fixture.tsx",
+  "jsx/lowercase-event-handlers/fixtures/unknown-events.fixture.tsx",
 ];
 const EXPECTED_TRANSFORM_FOLDERS = EXPECTED_TRANSFORM_PRODUCTION.map((path) =>
   dirname(path),
@@ -190,8 +228,8 @@ test("composes every named rule as its own workflow step", () => {
     ({ name }) => "scripts/transformations/" + name + ".ts",
   );
 
-  assert.equal(analysisRules.length, 37);
-  assert.equal(transformRules.length, 3);
+  assert.equal(analysisRules.length, 38);
+  assert.equal(transformRules.length, 6);
   assert.deepEqual(
     [...analyzeWorkflow.matchAll(/js_file:\s*(\S+)/g)].map(
       (match) => match[1],
@@ -439,14 +477,39 @@ test("keeps each transform rule inside its declared scope", () => {
   assert.ok(allowlist, "web rule must declare PROVEN_WEB_BINDINGS as a Set");
   assert.deepEqual(
     [...allowlist[1].matchAll(/"([A-Za-z]+)"/g)].map((match) => match[1]),
-    ["hydrate", "isServer", "render"],
+    ["Dynamic", "hydrate", "isServer", "render"],
   );
-  // Dynamic is prescribed by upstream prose and by the Babel plugin's
-  // auto-import defaults, but no such export exists in the rc.7 runtime
-  // source. A list that promises proven bindings must not admit it, and the
-  // rule must say why rather than leaving the omission unexplained.
-  assert.doesNotMatch(allowlist[1], /Dynamic/);
-  assert.match(webRule, /`Dynamic` is deliberately \*\*not\*\* on this list/);
+  // Dynamic was vetoed while it existed only in upstream prose and compiler
+  // configuration; it is admitted now that `packages/web/src/index.ts` at the
+  // pinned rc.21 commit exports it, and the rule must still record that
+  // evidence (and the deprecation) rather than widen the list silently.
+  assert.match(webRule, /`Dynamic` is on this list because/);
+  assert.match(webRule, /deprecated/);
+  for (const vetoed of ["Portal", "isDev", "createDynamic", "Index", "SuspenseList"]) {
+    assert.doesNotMatch(allowlist[1], new RegExp(`"${vetoed}"`), vetoed);
+  }
+
+  // The JSX rewrites stay on JSX syntax: only the Index rule may touch an
+  // import statement (to rename or remove the Index specifier), and none of
+  // them may rewrite a module source string.
+  for (const [rule, touchesImports] of [
+    ["jsx/context-provider-to-context/context-provider-to-context.ts", true],
+    ["jsx/index-to-for/index-to-for.ts", true],
+    ["jsx/lowercase-event-handlers/lowercase-event-handlers.ts", false],
+  ]) {
+    const source = readFileSync(resolve(transformationsDirectory, rule), "utf8");
+    assert.match(source, /jsx_opening_element/, rule);
+    assert.match(source, /jsx_self_closing_element/, rule);
+    assert.doesNotMatch(source, /export_statement|findModuleReferences/, rule);
+    if (!touchesImports) assert.doesNotMatch(source, /import_statement/, rule);
+  }
+  for (const analyzer of [
+    "jsx/context-provider/context-provider.ts",
+    "jsx/component-renames/component-renames.ts",
+    "jsx/dom-lowercase-events/dom-lowercase-events.ts",
+  ]) {
+    assert.equal(existsSync(resolve(analysisDirectory, analyzer)), true, analyzer);
+  }
 
   // The classList rewrite is JSX-only and must stay off the import rules'
   // territory, and the read-only classList analyzer stays in place to report
@@ -474,6 +537,8 @@ test("uses normal analyzer end-to-end fixtures", () => {
     "empty",
     "fixture",
     "packaging.test.mjs",
+    "rc-compat",
+    "rc-compat.test.mjs",
     "rules.test.mjs",
     "transform-expected",
     "transform-fixture",

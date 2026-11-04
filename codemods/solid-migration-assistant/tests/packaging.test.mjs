@@ -35,6 +35,7 @@ const expectedFiles = [
   "rules/analysis/jsx/context-provider/context-provider.ts",
   "rules/analysis/jsx/dom-attr-namespaces/dom-attr-namespaces.ts",
   "rules/analysis/jsx/dom-event-namespaces/dom-event-namespaces.ts",
+  "rules/analysis/jsx/dom-lowercase-events/dom-lowercase-events.ts",
   "rules/analysis/jsx/dom-use-directive/dom-use-directive.ts",
   "rules/analysis/lifecycle/on-cleanup/on-cleanup.ts",
   "rules/analysis/lifecycle/on-mount/on-mount.ts",
@@ -59,6 +60,9 @@ const expectedFiles = [
   "rules/transformations/imports/legacy-subpath-relocation/legacy-subpath-relocation.ts",
   "rules/transformations/imports/web-package-relocation/web-package-relocation.ts",
   "rules/transformations/jsx/class-list-to-class/class-list-to-class.ts",
+  "rules/transformations/jsx/context-provider-to-context/context-provider-to-context.ts",
+  "rules/transformations/jsx/index-to-for/index-to-for.ts",
+  "rules/transformations/jsx/lowercase-event-handlers/lowercase-event-handlers.ts",
   "scripts/analysis/analyzeBatch.ts",
   "scripts/analysis/analyzeBeta32SubpathImports.ts",
   "scripts/analysis/analyzeCatchError.ts",
@@ -73,6 +77,7 @@ const expectedFiles = [
   "scripts/analysis/analyzeCreateSelector.ts",
   "scripts/analysis/analyzeDomAttrNamespaces.ts",
   "scripts/analysis/analyzeDomEventNamespaces.ts",
+  "scripts/analysis/analyzeDomLowercaseEvents.ts",
   "scripts/analysis/analyzeDomUseDirective.ts",
   "scripts/analysis/analyzeEnableScheduling.ts",
   "scripts/analysis/analyzeEqualFn.ts",
@@ -100,15 +105,20 @@ const expectedFiles = [
   "scripts/transformations/relocateLegacySubpaths.ts",
   "scripts/transformations/relocateWebPackage.ts",
   "scripts/transformations/rewriteClassListToClass.ts",
+  "scripts/transformations/rewriteContextProvider.ts",
+  "scripts/transformations/rewriteIndexToFor.ts",
+  "scripts/transformations/rewriteLowercaseEventHandlers.ts",
   "shared/analysis.ts",
+  "shared/bindings.ts",
   "shared/entrypoint.ts",
+  "shared/jsx.ts",
   "shared/run-workflow.mjs",
   "shared/transform.ts",
   "transform.yaml",
   "workflow.yaml"
 ];
 const expectedDescription =
-  "Solid 1.9 to Solid 2 RC migration assistant: read-only analyzer plus deterministic legacy import-path relocation and intrinsic JSX classList-to-class rewriting for project-owned JavaScript and TypeScript source";
+  "Solid 1.9 to Solid 2 RC migration assistant: read-only analyzer plus deterministic legacy import-path relocation and narrow intrinsic JSX rewrites (classList to class, Context.Provider to Context, Index to For keyed={false}, lowercase event handlers to camelCase) for project-owned JavaScript and TypeScript source";
 const expectedKeywords = [
   "solid",
   "solidjs",
@@ -127,7 +137,7 @@ test("publishes complete public npm and Codemod metadata", () => {
     readFileSync(resolve(packageDirectory, "package.json"), "utf8"),
   );
   assert.equal(packageJson.name, "solid-migration-assistant");
-  assert.equal(packageJson.version, "0.3.0");
+  assert.equal(packageJson.version, "0.4.0");
   assert.equal(packageJson.description, expectedDescription);
   assert.deepEqual(packageJson.keywords, expectedKeywords);
   assert.equal(packageJson.license, "MIT");
@@ -149,7 +159,7 @@ test("publishes complete public npm and Codemod metadata", () => {
     resolve(packageDirectory, "codemod.yaml"),
     "utf8",
   );
-  assert.match(codemod, /^version: "0\.3\.0"$/m);
+  assert.match(codemod, /^version: "0\.4\.0"$/m);
   const codemodLines = codemod.split("\n");
   assert.ok(codemodLines.includes(`description: "${expectedDescription}"`));
   assert.ok(
@@ -193,7 +203,7 @@ test(
     );
 
     try {
-      assert.equal(expectedFiles.length, 84);
+      assert.equal(expectedFiles.length, 94);
       const packDirectory = join(temporaryRoot, "pack");
       mkdirSync(packDirectory);
       const pack = command(
@@ -289,7 +299,7 @@ test(
         assert.match(smoke.stdout, /Move this Solid web renderer/);
         assert.match(
           smoke.stdout,
-          /github\.com\/solidjs\/solid\/blob\/ff4d3c44.*imports-where-things-live-now/,
+          /github\.com\/solidjs\/solid\/blob\/2105ffb8.*imports-where-things-live-now/,
         );
         assert.doesNotMatch(smoke.stdout, /S2-IMPORT-WEB-001/);
         assertFinalDisclosure(smoke.stderr);
@@ -307,10 +317,13 @@ test(
         "complete analyzer-owned guidance bytes changed between packed runs",
       );
       const comparableRuns = smokeRuns.map((smoke, index) => {
+        // Codemod colors its envelope only when stderr is a terminal (or the
+        // platform forces color), so both the colored and the plain spelling
+        // of each line are accepted; only the generated values are masked.
         const workflowId =
-          /^(\u001b\[36mWorkflow started\u001b\[0m \u001b\[2m)([0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12})(\u001b\[0m\r?)$/gm;
+          /^((?:\u001b\[36m)?Workflow started(?:\u001b\[0m)? (?:\u001b\[2m)?)([0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12})((?:\u001b\[0m)?\r?)$/gm;
         const workflowDuration =
-          /^(\u001b\[32mWorkflow completed\u001b\[0m \u001b\[2min )([0-9]+(?:\.[0-9]+)?(?:ms|s))(\u001b\[0m\r?)$/gm;
+          /^((?:\u001b\[32m)?Workflow completed(?:\u001b\[0m)? (?:\u001b\[2m)?in )([0-9]+(?:\.[0-9]+)?(?:ms|s))((?:\u001b\[0m)?\r?)$/gm;
         assert.equal(
           [...smoke.stderr.matchAll(workflowId)].length,
           1,

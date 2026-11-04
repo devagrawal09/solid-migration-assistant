@@ -53,6 +53,7 @@ const ruleCases = [
   { directory: "rules/analysis/jsx/context-provider" },
   { directory: "rules/analysis/jsx/dom-attr-namespaces" },
   { directory: "rules/analysis/jsx/dom-event-namespaces" },
+  { directory: "rules/analysis/jsx/dom-lowercase-events" },
   { directory: "rules/analysis/jsx/dom-use-directive" },
   {
     directory: "rules/analysis/reactivity/batch",
@@ -107,9 +108,9 @@ const existingAdapters = findFiles(rulesDirectory, (name) =>
   .map((path) => relative(packageDirectory, path))
   .sort();
 
-if (configuredAdapters.length !== 28 || existingAdapters.length !== 28) {
+if (configuredAdapters.length !== 29 || existingAdapters.length !== 29) {
   throw new Error(
-    `Expected 28 rule adapters, found ${configuredAdapters.length} configured and ${existingAdapters.length} on disk.`,
+    `Expected 29 rule adapters, found ${configuredAdapters.length} configured and ${existingAdapters.length} on disk.`,
   );
 }
 if (configuredAdapters.join("\n") !== existingAdapters.join("\n")) {
@@ -137,9 +138,9 @@ const existingFixtures = findFiles(rulesDirectory, (name) =>
   .map((path) => relative(packageDirectory, path))
   .sort();
 
-if (configuredFixtures.length !== 48 || existingFixtures.length !== 48) {
+if (configuredFixtures.length !== 49 || existingFixtures.length !== 49) {
   throw new Error(
-    `Expected 48 colocated fixture cases, found ${configuredFixtures.length} configured and ${existingFixtures.length} on disk.`,
+    `Expected 49 colocated fixture cases, found ${configuredFixtures.length} configured and ${existingFixtures.length} on disk.`,
   );
 }
 if (configuredFixtures.join("\n") !== existingFixtures.join("\n")) {

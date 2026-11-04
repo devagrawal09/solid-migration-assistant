@@ -126,6 +126,23 @@ nodes:
             - "**/build/**"
             - "**/coverage/**"
             - "**/*.d.ts"
+      - name: analyzeDomLowercaseEvents
+        js-ast-grep:
+          js_file: scripts/analysis/analyzeDomLowercaseEvents.ts
+          base_path: "."
+          language: "tsx"
+          semantic_analysis: workspace
+          include:
+            - "**/*.js"
+            - "**/*.jsx"
+            - "**/*.ts"
+            - "**/*.tsx"
+          exclude:
+            - "**/node_modules/**"
+            - "**/dist/**"
+            - "**/build/**"
+            - "**/coverage/**"
+            - "**/*.d.ts"
       - name: analyzeDomUseDirective
         js-ast-grep:
           js_file: scripts/analysis/analyzeDomUseDirective.ts

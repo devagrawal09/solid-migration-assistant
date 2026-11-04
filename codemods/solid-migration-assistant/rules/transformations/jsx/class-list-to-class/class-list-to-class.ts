@@ -2,7 +2,7 @@ import type { Edit, SgNode } from "codemod:ast-grep";
 import type TSX from "codemod:ast-grep/langs/tsx";
 
 export const SOLID_SOURCE_COMMIT =
-  "ff4d3c4479163fbdd3327f5b22d0c3ea7bd1a2c5";
+  "2105ffb8ca2fced55f5fac0763177fc93f97c2c2";
 
 export const CLASS_LIST_MIGRATION_GUIDE = `https://github.com/solidjs/solid/blob/${SOLID_SOURCE_COMMIT}/documentation/solid-2.0/MIGRATION.md#classlist--class-objectarray-forms`;
 
@@ -18,7 +18,7 @@ export type ClassListRewrite = {
  * `class`, which now accepts a string, an object whose truthy keys are applied
  * as class names, or an array of those (`documentation/solid-2.0/07-dom.md`,
  * "Enhanced class prop"). The upstream `next` implementation inspected at
- * commit 7f416cf75dde3b89739d53b15305ac6c3c41355c applies an object-valued
+ * commit 2105ffb8ca2fced55f5fac0763177fc93f97c2c2 applies an object-valued
  * `class` through `className()` in `packages/web/src/client.ts`, whose
  * `classListToObject()` helper skips falsy values, skips empty and "undefined"
  * keys, and splits whitespace inside a key — the same per-key toggling Solid

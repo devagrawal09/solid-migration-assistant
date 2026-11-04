@@ -3,13 +3,15 @@ import type TSX from "codemod:ast-grep/langs/tsx";
 import { stringLiteralValue } from "../../../../shared/analysis.ts";
 
 /**
- * The upstream Solid `next` commit whose worktree was read to build the
- * allowlist below. `packages/web/package.json` is `@solidjs/web`
- * `2.0.0-rc.7` at this commit, and the `v1.9.13` tag in the same repository
- * supplies the legacy `solid-js/web` side of every comparison.
+ * The upstream Solid commit whose worktree was read to build the allowlist
+ * below: the `gitHead` published with `@solidjs/web@2.0.0-rc.21` and
+ * `solid-js@2.0.0-rc.21` on npm, where `packages/web/package.json` is
+ * `@solidjs/web` `2.0.0-rc.21`. The `v1.9.13` tag in the same repository and
+ * the published `solid-js@1.9.13` build supply the legacy `solid-js/web` side
+ * of every comparison.
  */
 export const SOLID_WEB_SOURCE_COMMIT =
-  "7f416cf75dde3b89739d53b15305ac6c3c41355c";
+  "2105ffb8ca2fced55f5fac0763177fc93f97c2c2";
 
 export const WEB_MIGRATION_GUIDE = `https://github.com/solidjs/solid/blob/${SOLID_WEB_SOURCE_COMMIT}/documentation/solid-2.0/MIGRATION.md#imports-where-things-live-now`;
 
@@ -19,12 +21,20 @@ export const WEB_RELOCATION_TARGET = "@solidjs/web";
 /**
  * `solid-js/web` is *not* a pure package relocation. Unlike the five subpaths
  * handled by legacy-subpath-relocation, the web entry's export surface changed
- * between Solid 1.9.13 and 2.0.0-rc.7: exports were removed (`createDynamic`,
- * `Index`, `SuspenseList`, `renderToStringAsync`, `ssrClassList`,
- * `pipeToNodeWritable`), renamed (`Suspense` → `Loading`, `ErrorBoundary` →
- * `Errored`, `mergeProps` → `merge`), or behaviorally changed (`Portal` lost
- * `useShadow`, `isSVG`, and `ref`; `isDev` is no longer hard-coded to `false`
- * on the server entry).
+ * between Solid 1.9.13 and 2.0.0-rc.21. Comparing the published client builds
+ * (`solid-js/web/dist/web.js` at 1.9.13 against `@solidjs/web/dist/web.js` at
+ * rc.21), these 1.9 exports are gone: `createDynamic`, `Index`, `Hydration`,
+ * `NoHydration`, `renderToStringAsync`, `ssrClassList`, `ssrSpread`,
+ * `classList`, `addEventListener`, `clearDelegatedEvents`, `setBoolAttribute`,
+ * `innerHTML`, `use`, `Aliases`, `Properties`, `SVGNamespace`, `getPropAlias`,
+ * `Assets`, `getAssets`, and `useAssets` (and `pipeToNodeWritable` /
+ * `pipeToWritable` on the server build); `Suspense`, `ErrorBoundary`,
+ * `SuspenseList`, and `mergeProps` are no longer re-exported for application
+ * code (`Loading`, `Errored`, `Reveal`, and `merge` replace them; the
+ * `mergeProps` that rc.21 still exports is a compiler-emitted helper marked
+ * `@internal`); `Portal` lost `useShadow`, `isSVG`, and `ref` and renders
+ * nothing on the server; and `isDev` is no longer pinned to `false` on the
+ * server entry.
  *
  * So the module string alone never justifies a rewrite. This rule is
  * default-deny: it moves a statement only when *every* name that statement
@@ -34,43 +44,54 @@ export const WEB_RELOCATION_TARGET = "@solidjs/web";
  * - `render`, `hydrate` — `documentation/solid-2.0/MIGRATION.md` opens the
  *   "Imports: where things live now" section by relocating exactly this pair
  *   from `solid-js/web` to `@solidjs/web` with the import unchanged.
- *   Both are declared in `packages/web/src/client.ts` at rc.7 and re-exported
+ *   Both are declared in `packages/web/src/client.ts` at rc.21 and re-exported
  *   from the web entry, keeping their 1.9 shapes:
  *   `render(code, element, init?, options?) => () => void` and
  *   `hydrate(code, element, options?) => () => void`.
  * - `isServer` — declared identically on all four entries: `false` in
  *   `packages/(solid/)web/src/index.ts` and `true` in the server entry, on
- *   both 1.9.13 and rc.7.
+ *   both 1.9.13 and rc.21 (`packages/web/src/index.server.ts`).
+ * - `Dynamic` is on this list because rc.21 exports it: `packages/web/src/
+ *   index.ts` declares `export function Dynamic<T extends ValidComponent>(
+ *   props: DynamicProps<T>): JSX.Element`, implemented as
+ *   `createComponent(dynamic(() => props.component), omit(props,
+ *   "component"))`, and both published rc.21 builds (`dist/web.js` and
+ *   `dist/server.js`) export the name. Its user-facing contract is the 1.9.13
+ *   one (`packages/solid/web/src/index.ts` at `v1.9.13`: render
+ *   `props.component`, a component or native tag name, with the remaining
+ *   props forwarded and the tag reactive), and the migration guide's
+ *   "Dynamic components" section states that existing `<Dynamic>` code keeps
+ *   working in 2.0. The same section marks `<Dynamic>` **deprecated** (no
+ *   runtime warning) in favor of the `dynamic(source)` factory, so the report
+ *   line for a relocation that carries `Dynamic` says so; a deprecated but
+ *   exported binding is a valid relocation target, which an unexported name
+ *   never was. Until rc.21 was published the identifier did not exist under
+ *   `packages/` (it was absent at rc.7), and this list refused it on exactly
+ *   that ground; an allowlist that promises proven bindings admits a name only
+ *   against a located export site.
  *
- * `Dynamic` is deliberately **not** on this list, and its exclusion states the
- * evidence bar the list holds to. Upstream prose and compiler configuration
- * both point at it: `documentation/solid-2.0/MIGRATION.md` says
- * `<Dynamic component={...}>` "still exists and is user-facing unchanged" and
- * shows `import { Dynamic } from "@solidjs/web"` as the 2.0 form, and
- * `packages/babel-plugin/src/config.ts` auto-imports `Dynamic` from its
- * default `moduleName` of `@solidjs/web`. But no `Dynamic` export exists: the
- * identifier does not appear anywhere under `packages/` at rc.7. A guide
- * describes the intended end state and a compiler config describes what the
- * compiler expects to exist; neither is a binding that can be proven
- * compatible, which is what this list promises. Rewriting an import to a name
- * the target package does not export would break the build it claims to
- * migrate, so `Dynamic` stays vetoed until an actual exported implementation
- * lands, at which point it can be added against a located export site.
- *
- * Everything else — including `Dynamic`, `Portal`, `isDev`, `renderToString`,
+ * Everything else — including `Portal`, `isDev`, `renderToString`,
  * `renderToStream`, `generateHydrationScript`, `getRequestEvent`, `For`,
  * `Show`, `Switch`, `Match`, `NoHydration`, `template`, `insert`, `spread`,
- * and `default` — is vetoed. Some of those names are genuinely gone or
- * changed; the rest are simply not proven here, and an unproven name must
- * block the move rather than ride along with a proven one. The read-only
+ * `mergeProps`, and `default` — is vetoed. Some of those names are genuinely
+ * gone or changed; the rest are simply not proven here, and an unproven name
+ * must block the move rather than ride along with a proven one. The read-only
  * web-import analyzer (`rules/analysis/imports/web-import/`) is unchanged and
- * still reports every statement this rule refuses, `Dynamic` included.
+ * still reports every statement this rule refuses.
  */
 export const PROVEN_WEB_BINDINGS: ReadonlySet<string> = new Set([
+  "Dynamic",
   "hydrate",
   "isServer",
   "render",
 ]);
+
+/**
+ * Appended to the report line of every relocation that carries `Dynamic`, so
+ * a user who moves the import is also told that the component is deprecated.
+ */
+export const DYNAMIC_DEPRECATION_NOTE =
+  "Note: Dynamic is deprecated in Solid 2 in favor of the dynamic(source) factory; it keeps working without a runtime warning.";
 
 export type WebPackageRelocation = {
   edit: Edit;
@@ -197,9 +218,10 @@ function relocation(
 ): WebPackageRelocation {
   const start = source.range().start;
   const quote = source.text()[0];
+  const note = names.includes("Dynamic") ? ` ${DYNAMIC_DEPRECATION_NOTE}` : "";
   return {
     edit: source.replace(`${quote}${WEB_RELOCATION_TARGET}${quote}`),
-    report: `${filename}:${start.line + 1}:${start.column + 1} Relocate ${LEGACY_WEB_MODULE} to ${WEB_RELOCATION_TARGET} for proven bindings ${names.join(", ")}. Official migration guide: ${WEB_MIGRATION_GUIDE}`,
+    report: `${filename}:${start.line + 1}:${start.column + 1} Relocate ${LEGACY_WEB_MODULE} to ${WEB_RELOCATION_TARGET} for proven bindings ${names.join(", ")}.${note} Official migration guide: ${WEB_MIGRATION_GUIDE}`,
   };
 }
 

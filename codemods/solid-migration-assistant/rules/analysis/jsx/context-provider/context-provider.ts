@@ -1,7 +1,7 @@
 import type { SgNode } from "codemod:ast-grep";
 import type TSX from "codemod:ast-grep/langs/tsx";
 
-const MIGRATION_GUIDE = "https://github.com/solidjs/solid/blob/ff4d3c4479163fbdd3327f5b22d0c3ea7bd1a2c5/documentation/solid-2.0/MIGRATION.md#context-providers-contextprovider--context-is-the-provider";
+const MIGRATION_GUIDE = "https://github.com/solidjs/solid/blob/2105ffb8ca2fced55f5fac0763177fc93f97c2c2/documentation/solid-2.0/MIGRATION.md#context-providers-contextprovider--context-is-the-provider";
 
 export function analyzeContextProvider(
   rootNode: SgNode<TSX>,
@@ -24,8 +24,8 @@ export function analyzeContextProvider(
       const contextName = object.text();
       findings.push(
         `${context.filename}:${start.line + 1}:${start.column + 1} Manual review required: migrate this Context.Provider JSX site to direct context provider syntax.
-Why: Solid 2 removes the Context.Provider pattern; use the context value directly as a JSX component: <${contextName} value={...}>.
-Guidance: Replace <${contextName}.Provider value={...}> with <${contextName} value={...}>. Remove the .Provider suffix — the context itself is now the provider component. The value prop and children remain unchanged. Make and validate that edit yourself; this analyzer never edits or runs the target project. Official migration guide: ${MIGRATION_GUIDE}`,
+Why: Solid 2.0.0-rc.21 removes the Context.Provider pattern (createContext now returns the provider component itself, and .Provider is undefined); use the context value directly as a JSX component: <${contextName} value={...}>.
+Guidance: Replace <${contextName}.Provider value={...}> with <${contextName} value={...}>. Remove the .Provider suffix — the context itself is now the provider component. The value prop and children remain unchanged, but confirm the value is never undefined: Solid 2 treats value={undefined} as no provider, so a default-less context then throws ContextNotFoundError instead of falling back as 1.x did; use null as an explicit empty value. Make and validate that edit yourself; this analyzer never edits or runs the target project. Official migration guide: ${MIGRATION_GUIDE}`,
       );
     }
   }

@@ -3,7 +3,7 @@ import type TSX from "codemod:ast-grep/langs/tsx";
 import { findImportedCalls } from "../../../../shared/analysis.ts";
 
 const MIGRATION_GUIDE =
-  "https://github.com/solidjs/solid/blob/ff4d3c4479163fbdd3327f5b22d0c3ea7bd1a2c5/documentation/solid-2.0/MIGRATION.md#mergeprops--splitprops--merge--omit";
+  "https://github.com/solidjs/solid/blob/2105ffb8ca2fced55f5fac0763177fc93f97c2c2/documentation/solid-2.0/MIGRATION.md#mergeprops--splitprops--merge--omit";
 
 export function analyzeMergeProps(
   rootNode: SgNode<TSX>,
@@ -18,7 +18,7 @@ export function analyzeMergeProps(
         ? " At least one semantic argument uses spread syntax."
         : "";
       return `${filename}:${start.line + 1}:${start.column + 1} Manual review required: migrate this mergeProps call to a reviewed merge.
-Why: Solid 2.0.0-rc.0 replaces mergeProps with merge, but merge treats a property that exists on a later source with the value undefined as the winner instead of falling through to an earlier source. This call has ${argumentNodes.length} semantic argument(s).${spreadDetail}
+Why: Solid 2.0.0-rc.21 replaces mergeProps with merge, but merge treats a property that exists on a later source with the value undefined as the winner instead of falling through to an earlier source. This call has ${argumentNodes.length} semantic argument(s).${spreadDetail}
 Guidance: Read every source in argument order, list all overlapping keys, and trace every consumer of the merged value. Replace mergeProps with merge from solid-js only after proving that every later overlapping value is non-undefined and that zero-argument behavior, one-source result identity, and mutation semantics do not matter. Make and validate this migration yourself; this analyzer never edits or runs the target project. Stop without proposing a replacement when existing TypeScript types or the inferred Merge result type are the only runtime-safety evidence, a source is any/unknown/union-typed at runtime, a props or store proxy, a function, or has getters or dynamic key presence, source or result identity or mutation is observed, or a consumer depends on fallback-through-undefined behavior. If old undefined-fallback behavior is required, preserve live reactive reads with a targeted manual guard at the disputed property boundary rather than object spread or Object.assign. Ask for the smallest focused test or runtime observation that exposes the disputed property's value, precedence, identity, and mutation boundary. Official migration guide: ${MIGRATION_GUIDE}`;
     },
   );
