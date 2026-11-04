@@ -46,15 +46,17 @@ export type IndexRewrite = {
  * - the file has exactly one named, unaliased, non-type `Index` import from
  *   `solid-js`;
  * - every other `Index` identifier in the file is the name of a JSX element
- *   (opening, closing, or self-closing), never a value reference, a type
- *   query, a parameter, or another declaration;
+ *   (opening, closing, or self-closing), never a value reference, a shorthand
+ *   object property (`{ Index }`), a destructuring pattern, a type query, a
+ *   parameter, or another declaration;
  * - every `For` identifier in the file is either the name of one named,
  *   unaliased, non-type `For` import from `solid-js` or the name of a JSX
  *   element; no `Index` or `For` type identifier exists; and
  * - every `<Index>` element carries only plainly named `each` and `fallback`
  *   attributes given as single-expression containers, with `each` present, no
- *   duplicate names, no spread attribute, and (for an element with children)
- *   a closing `</Index>` tag.
+ *   duplicate names, no spread attribute, no explicit type arguments
+ *   (`<Index<T>>`), and (for an element with children) a closing `</Index>`
+ *   tag.
  *
  * If any `<Index>` element in the file fails those checks, the whole file is
  * left unchanged: renaming the import while an element still reads `Index`
@@ -84,17 +86,13 @@ export function rewriteIndexToFor(
   if (hasTypeIdentifier(rootNode, REPLACEMENT_COMPONENT)) return [];
 
   const elements: SgNode<TSX>[] = [];
-  for (const identifier of rootNode.findAll({
-    rule: { kind: "identifier", regex: `^${LEGACY_COMPONENT}$` },
-  })) {
+  for (const identifier of namedReferences(rootNode, LEGACY_COMPONENT)) {
     if (identifier.id() === indexSpecifier.field("name")!.id()) continue;
     const element = jsxElementNamedBy(identifier);
     if (element === null) return [];
     if (element.kind() !== "jsx_closing_element") elements.push(element);
   }
-  for (const identifier of rootNode.findAll({
-    rule: { kind: "identifier", regex: `^${REPLACEMENT_COMPONENT}$` },
-  })) {
+  for (const identifier of namedReferences(rootNode, REPLACEMENT_COMPONENT)) {
     if (forSpecifier !== null && identifier.id() === forSpecifier.field("name")!.id()) {
       continue;
     }
@@ -162,6 +160,23 @@ function solidNamedImports(rootNode: SgNode<TSX>): NamedImports | null {
   return { index: found.index[0] ?? null, for: found.for[0] ?? null };
 }
 
+/**
+ * Every node that can reference or bind `name` as a value: plain identifiers,
+ * shorthand object properties (`{ Index }`), and shorthand destructuring
+ * patterns (`const { Index } = …`). Member property names (`list.Index`) are
+ * `property_identifier` nodes and never refer to the import.
+ */
+function namedReferences(rootNode: SgNode<TSX>, name: string): SgNode<TSX>[] {
+  const kinds = [
+    "identifier",
+    "shorthand_property_identifier",
+    "shorthand_property_identifier_pattern",
+  ] as const;
+  return kinds.flatMap((kind) =>
+    rootNode.findAll({ rule: { kind, regex: `^${name}$` } }),
+  );
+}
+
 function hasTypeIdentifier(rootNode: SgNode<TSX>, name: string): boolean {
   return (
     rootNode.findAll({ rule: { kind: "type_identifier", regex: `^${name}$` } })
@@ -191,6 +206,9 @@ function rewriteElement(
   element: SgNode<TSX>,
   filename: string,
 ): { node: SgNode<TSX>; entry: IndexRewrite }[] | null {
+  if (element.children().some((child) => child.kind() === "type_arguments")) {
+    return null;
+  }
   const attributes = collectJsxAttributes(element);
   if (attributes === null) return null;
 

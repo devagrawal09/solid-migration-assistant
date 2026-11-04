@@ -1,20 +1,15 @@
 import type { Codemod } from "codemod:ast-grep";
 import type TSX from "codemod:ast-grep/langs/tsx";
 import {
+  runTransformFixtureCase,
+  type TransformFixtureCase,
+} from "../../../../shared/fixture-harness.ts";
+import {
   EVENT_HANDLER_MIGRATION_GUIDE,
   rewriteLowercaseEventHandlers,
 } from "./lowercase-event-handlers.ts";
 
-type FixtureCase = {
-  /** Expected report lines (location plus message) without the guide link. */
-  reports: ReadonlyArray<string>;
-  /** Exact post-transform file text, or null when the file must stay unchanged. */
-  transformed: string | null;
-  /** Substrings the fixture must contain, proving the case it claims to cover. */
-  evidence: ReadonlyArray<readonly [string, string]>;
-};
-
-const FIXTURE_CASES: Record<string, FixtureCase> = {
+const FIXTURE_CASES: Record<string, TransformFixtureCase> = {
   "attribute-values": {
     reports: [
     ],
@@ -123,58 +118,18 @@ const FIXTURE_CASES: Record<string, FixtureCase> = {
 };
 
 const testLowercaseEventHandlers: Codemod<TSX> = async (root) => {
-  const rootNode = root.root();
-  const filename = root.relativeFilename().replaceAll("\\", "/");
-  const source = root.source();
-  const marker = /\/\/ fixture: ([a-z0-9-]+)/.exec(source)?.[1];
-  if (!marker) {
-    throw new Error(
-      "fixture is missing a `// fixture: <name>` marker on its first line",
-    );
-  }
-
-  const fixtureCase = FIXTURE_CASES[marker];
-  if (!fixtureCase) {
-    throw new Error(`unknown fixture marker: ${marker}`);
-  }
-
-  for (const [label, text] of fixtureCase.evidence) {
-    if (!source.includes(text)) {
-      throw new Error(`fixture ${marker} must prove the ${label} case`);
-    }
-  }
-
-  const rewrites = rewriteLowercaseEventHandlers(rootNode, filename);
-
-  const expected = fixtureCase.reports.map(
-    (report) => `${filename}:${report} Official migration guide: ${EVENT_HANDLER_MIGRATION_GUIDE}`,
-  );
-  // Several edits may share one report line (an opening and closing tag, or
-  // an import and its elements); the workflow deduplicates them exactly.
-  const actual = [...new Set(rewrites.map(({ report }) => report))];
-  if (actual.join("\n") !== expected.join("\n")) {
-    throw new Error(
-      `unexpected rewrite report for ${marker}:\n${actual.join("\n")}\nExpected:\n${expected.join("\n")}`,
-    );
-  }
-
-  const transformed = rootNode.commitEdits(rewrites.map(({ edit }) => edit));
-  const expectedTransformed = fixtureCase.transformed ?? source;
-  if (transformed !== expectedTransformed) {
-    throw new Error(
-      `unexpected transformed output for ${marker}:\n${transformed}\nExpected:\n${expectedTransformed}`,
-    );
-  }
-
-  // Every lowercase handler in a fully positive fixture is rewritable, so its
-  // settled text proves a second run has nothing left to find; the conflicts
-  // fixture deliberately keeps refused sites beside one rewritten attribute.
-  if (fixtureCase.transformed !== null && marker !== "conflicts" && /\bon[a-z]+=\{/.test(transformed)) {
-    throw new Error(
-      `transformed output for ${marker} still contains a lowercase event handler attribute`,
-    );
-  }
-
+  runTransformFixtureCase(root, {
+    rule: rewriteLowercaseEventHandlers,
+    guide: EVENT_HANDLER_MIGRATION_GUIDE,
+    cases: FIXTURE_CASES,
+    settledError: (transformed, marker) =>
+      // Every lowercase handler in a fully positive fixture is rewritable, so
+      // its settled text proves a second run has nothing left to find; the
+      // conflicts fixture deliberately keeps refused sites beside one rewrite.
+      marker !== "conflicts" && /\bon[a-z]+=\{/.test(transformed)
+        ? "transformed output still contains a lowercase event handler attribute"
+        : null,
+  });
   return null;
 };
 

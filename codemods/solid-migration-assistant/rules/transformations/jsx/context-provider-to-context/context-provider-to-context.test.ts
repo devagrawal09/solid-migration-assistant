@@ -1,20 +1,15 @@
 import type { Codemod } from "codemod:ast-grep";
 import type TSX from "codemod:ast-grep/langs/tsx";
 import {
+  runTransformFixtureCase,
+  type TransformFixtureCase,
+} from "../../../../shared/fixture-harness.ts";
+import {
   CONTEXT_PROVIDER_MIGRATION_GUIDE,
   rewriteContextProvider,
 } from "./context-provider-to-context.ts";
 
-type FixtureCase = {
-  /** Expected report lines (location plus message) without the guide link. */
-  reports: ReadonlyArray<string>;
-  /** Exact post-transform file text, or null when the file must stay unchanged. */
-  transformed: string | null;
-  /** Substrings the fixture must contain, proving the case it claims to cover. */
-  evidence: ReadonlyArray<readonly [string, string]>;
-};
-
-const FIXTURE_CASES: Record<string, FixtureCase> = {
+const FIXTURE_CASES: Record<string, TransformFixtureCase> = {
   "aliased-import": {
     reports: [
       "8:5 Rewrite <SettingsContext.Provider> to <SettingsContext>, keeping its value attribute and children unchanged.",
@@ -39,6 +34,15 @@ const FIXTURE_CASES: Record<string, FixtureCase> = {
       ["comment-only container", "<ThemeContext.Provider value={/* only a comment */} />"],
       ["children attribute", "children=\"inline\""],
       ["namespaced value", "ns:value=\"dark\""],
+    ],
+  },
+  "lowercase-names": {
+    reports: [
+    ],
+    transformed: null,
+    evidence: [
+      ["lowercase context name", "const theme = createContext(\"light\");"],
+      ["lowercase provider site", "<theme.Provider value=\"dark\">"],
     ],
   },
   "no-matches": {
@@ -85,12 +89,14 @@ const FIXTURE_CASES: Record<string, FixtureCase> = {
   },
   "shadowed-bindings": {
     reports: [
-      "9:10 Rewrite <ThemeContext.Provider> to <ThemeContext>, keeping its value attribute and children unchanged.",
+      "11:10 Rewrite <ThemeContext.Provider> to <ThemeContext>, keeping its value attribute and children unchanged.",
     ],
-    transformed: "// fixture: shadowed-bindings\nimport { createContext } from \"solid-js\";\n\nconst ThemeContext = createContext(\"light\");\nconst CounterContext = createContext(0);\nconst MenuContext = createContext(\"menu\");\n\nexport function Theme(props: { children: unknown }) {\n  return <ThemeContext value=\"dark\">{props.children}</ThemeContext>;\n}\n\n// CounterContext is also a parameter name, so no site of it is proven.\nexport function Counter(CounterContext: { Provider: (props: unknown) => unknown }) {\n  return <CounterContext.Provider value={1} />;\n}\n\nexport function Outer() {\n  return <CounterContext.Provider value={2} />;\n}\n\n// MenuContext is declared twice, so neither declaration proves its sites.\nexport function Menu() {\n  const MenuContext = { Provider: (props: unknown) => props };\n  return <MenuContext.Provider value=\"inner\" />;\n}\n\nexport const outerMenu = <MenuContext.Provider value=\"outer\" />;\n",
+    transformed: "// fixture: shadowed-bindings\nimport { createContext } from \"solid-js\";\n\nconst ThemeContext = createContext(\"light\");\nconst CounterContext = createContext(0);\nconst MenuContext = createContext(\"menu\");\nconst LoopContext = createContext(\"loop\");\nconst NamedContext = createContext(\"named\");\n\nexport function Theme(props: { children: unknown }) {\n  return <ThemeContext value=\"dark\">{props.children}</ThemeContext>;\n}\n\n// CounterContext is also a parameter name, so no site of it is proven.\nexport function Counter(CounterContext: { Provider: (props: unknown) => unknown }) {\n  return <CounterContext.Provider value={1} />;\n}\n\nexport function Outer() {\n  return <CounterContext.Provider value={2} />;\n}\n\n// MenuContext is declared twice, so neither declaration proves its sites.\nexport function Menu() {\n  const MenuContext = { Provider: (props: unknown) => props };\n  return <MenuContext.Provider value=\"inner\" />;\n}\n\nexport const outerMenu = <MenuContext.Provider value=\"outer\" />;\n\n// A for...of loop variable shadows LoopContext inside the loop body.\nexport function Loop(others: { Provider: (props: unknown) => unknown }[]) {\n  const out = [];\n  for (const LoopContext of others) {\n    out.push(<LoopContext.Provider value=\"inner\" />);\n  }\n  return out;\n}\n\nexport const outerLoop = <LoopContext.Provider value=\"outer\" />;\n\n// A named function expression binds NamedContext inside its own body.\nexport const named = function NamedContext() {\n  return <NamedContext.Provider value=\"inner\" />;\n};\n\nexport const outerNamed = <NamedContext.Provider value=\"outer\" />;\n",
     evidence: [
       ["parameter shadow", "export function Counter(CounterContext:"],
       ["duplicate declaration", "const MenuContext = { Provider:"],
+      ["for-of loop shadow", "for (const LoopContext of others)"],
+      ["named function expression shadow", "function NamedContext()"],
     ],
   },
   "shadowed-create-context": {
@@ -118,58 +124,22 @@ const FIXTURE_CASES: Record<string, FixtureCase> = {
 };
 
 const testContextProvider: Codemod<TSX> = async (root) => {
-  const rootNode = root.root();
-  const filename = root.relativeFilename().replaceAll("\\", "/");
-  const source = root.source();
-  const marker = /\/\/ fixture: ([a-z0-9-]+)/.exec(source)?.[1];
-  if (!marker) {
-    throw new Error(
-      "fixture is missing a `// fixture: <name>` marker on its first line",
-    );
-  }
-
-  const fixtureCase = FIXTURE_CASES[marker];
-  if (!fixtureCase) {
-    throw new Error(`unknown fixture marker: ${marker}`);
-  }
-
-  for (const [label, text] of fixtureCase.evidence) {
-    if (!source.includes(text)) {
-      throw new Error(`fixture ${marker} must prove the ${label} case`);
-    }
-  }
-
-  const rewrites = rewriteContextProvider(rootNode, filename);
-
-  const expected = fixtureCase.reports.map(
-    (report) => `${filename}:${report} Official migration guide: ${CONTEXT_PROVIDER_MIGRATION_GUIDE}`,
-  );
-  // Several edits may share one report line (an opening and closing tag, or
-  // an import and its elements); the workflow deduplicates them exactly.
-  const actual = [...new Set(rewrites.map(({ report }) => report))];
-  if (actual.join("\n") !== expected.join("\n")) {
-    throw new Error(
-      `unexpected rewrite report for ${marker}:\n${actual.join("\n")}\nExpected:\n${expected.join("\n")}`,
-    );
-  }
-
-  const transformed = rootNode.commitEdits(rewrites.map(({ edit }) => edit));
-  const expectedTransformed = fixtureCase.transformed ?? source;
-  if (transformed !== expectedTransformed) {
-    throw new Error(
-      `unexpected transformed output for ${marker}:\n${transformed}\nExpected:\n${expectedTransformed}`,
-    );
-  }
-
-  // Every context named in a report is fully rewritten, so the settled text
-  // holds no <Name.Provider> tag for it and a second run finds nothing.
-  for (const report of actual) {
-    const name = /Rewrite <([A-Za-z0-9_$]+)\.Provider>/.exec(report)?.[1];
-    if (name !== undefined && transformed.includes(`<${name}.Provider`)) {
-      throw new Error(`transformed output for ${marker} still contains <${name}.Provider>`);
-    }
-  }
-
+  runTransformFixtureCase(root, {
+    rule: rewriteContextProvider,
+    guide: CONTEXT_PROVIDER_MIGRATION_GUIDE,
+    cases: FIXTURE_CASES,
+    settledError: (transformed, _marker, reports) => {
+      // Every context named in a report is fully rewritten, so the settled text
+      // holds no <Name.Provider> tag for it and a second run finds nothing.
+      for (const report of reports) {
+        const name = /Rewrite <([A-Za-z0-9_$]+)\.Provider>/.exec(report)?.[1];
+        if (name !== undefined && transformed.includes(`<${name}.Provider`)) {
+          return `transformed output still contains <${name}.Provider>`;
+        }
+      }
+      return null;
+    },
+  });
   return null;
 };
 

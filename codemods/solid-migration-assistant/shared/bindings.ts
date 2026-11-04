@@ -9,10 +9,16 @@ import type TSX from "codemod:ast-grep/langs/tsx";
 const BINDING_PARENT_KINDS = new Set([
   "function_declaration",
   "generator_function_declaration",
+  "function_expression",
+  "generator_function",
   "class_declaration",
   "abstract_class_declaration",
+  "class",
   "enum_declaration",
+  "internal_module",
+  "module",
   "variable_declarator",
+  "for_in_statement",
   "required_parameter",
   "optional_parameter",
   "arrow_function",
@@ -62,7 +68,8 @@ export function isBindingSlot(node: SgNode<TSX>): boolean {
       return parameter !== null && samePosition(parameter, node);
     }
     case "assignment_pattern":
-    case "object_assignment_pattern": {
+    case "object_assignment_pattern":
+    case "for_in_statement": {
       const left = parent.field("left");
       return left !== null && samePosition(left, node);
     }
@@ -72,9 +79,14 @@ export function isBindingSlot(node: SgNode<TSX>): boolean {
     }
     case "function_declaration":
     case "generator_function_declaration":
+    case "function_expression":
+    case "generator_function":
     case "class_declaration":
     case "abstract_class_declaration":
+    case "class":
     case "enum_declaration":
+    case "internal_module":
+    case "module":
     case "variable_declarator": {
       const name = parent.field("name");
       return name !== null && samePosition(name, node);
@@ -86,8 +98,9 @@ export function isBindingSlot(node: SgNode<TSX>): boolean {
 
 /**
  * Every identifier-like node in the file that declares a binding named
- * `name`: function, class, and enum declarations, variables, destructuring
- * patterns, parameters, imports, and catch parameters. The transform
+ * `name`: function, class, enum, and namespace declarations, named function
+ * and class expressions, variables, `for…of` / `for…in` loop variables,
+ * destructuring patterns, parameters, imports, and catch parameters. The transform
  * workflow has no semantic provider, so callers use this syntactic scan to
  * refuse files where a name they rely on is bound more than once or bound by
  * something other than the declaration they proved. Ambient declarations

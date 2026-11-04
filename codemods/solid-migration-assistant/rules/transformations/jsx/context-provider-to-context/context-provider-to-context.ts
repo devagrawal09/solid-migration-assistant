@@ -48,7 +48,10 @@ export type ContextProviderRewrite = {
  * - the file has exactly one named `createContext` import from `solid-js`
  *   (an alias is fine; `import type`, namespace imports, and any other module
  *   are not), and that local name is bound nowhere else in the file;
- * - the context name is declared exactly once in the file, as a `const`
+ * - the context name starts with an uppercase letter, so that the rewritten
+ *   `<Name>` is component syntax to the JSX compiler (a lowercase-initial
+ *   tag such as `<theme>` would become a DOM element and silently provide
+ *   nothing), and it is declared exactly once in the file, as a `const`
  *   whose initializer is a direct call of that imported `createContext`, so
  *   no parameter, destructuring, loop variable, or nested declaration can
  *   shadow it where the JSX appears; and
@@ -66,8 +69,8 @@ export type ContextProviderRewrite = {
  * - contexts imported from another module, created through a namespace
  *   import, created by a wrapper function, or created by another library's
  *   `createContext`, whose provider shape this rule cannot prove;
- * - contexts declared with `let` or `var`, declared more than once, or
- *   shadowed by any other binding of the same name;
+ * - contexts declared with `let` or `var`, declared more than once, shadowed
+ *   by any other binding of the same name, or named with a lowercase initial;
  * - elements with a spread attribute, with no `value`, with a shorthand or
  *   empty `value`, or with any attribute besides `value`; and
  * - non-JSX uses of `.Provider`, such as `const P = Context.Provider`, which
@@ -159,6 +162,7 @@ function provenContextNames(
     const name = declarator.field("name");
     const value = declarator.field("value");
     if (name === null || name.kind() !== "identifier") continue;
+    if (!/^[A-Z]/.test(name.text())) continue;
     if (value === null || value.kind() !== "call_expression") continue;
     const callee = value.field("function");
     if (

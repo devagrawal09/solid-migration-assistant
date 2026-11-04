@@ -1,23 +1,13 @@
 import assert from "node:assert/strict";
 import { spawnSync } from "node:child_process";
-import { createHash } from "node:crypto";
-import {
-  cpSync,
-  existsSync,
-  mkdirSync,
-  mkdtempSync,
-  readFileSync,
-  readdirSync,
-  rmSync,
-  writeFileSync,
-} from "node:fs";
+import { cpSync, existsSync, mkdtempSync, rmSync } from "node:fs";
 import { tmpdir } from "node:os";
-import { dirname, join, relative, resolve } from "node:path";
+import { dirname, join, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 import { DISCLOSURE } from "../shared/run-workflow.mjs";
+import { output, treeSnapshot } from "./helpers.mjs";
 
 const packageDirectory = resolve(dirname(fileURLToPath(import.meta.url)), "..");
-const workspaceDirectory = resolve(packageDirectory, "../..");
 const fixtureDirectory = resolve(packageDirectory, "tests/fixture");
 const emptyDirectory = resolve(packageDirectory, "tests/empty");
 const expectedGuidance = [
@@ -145,10 +135,6 @@ function guidanceBlocks(stdout) {
   return text === "" ? [] : text.split("\n\n");
 }
 
-function output(result) {
-  return `${result.stdout ?? ""}${result.stderr ?? ""}`;
-}
-
 function assertFinalDisclosure(value) {
   const stripped = stripAnsi(value).trimEnd();
   assert.ok(stripped.endsWith(DISCLOSURE));
@@ -178,29 +164,5 @@ function assertNoPersistentArtifacts(target) {
     "dist",
   ]) {
     assert.equal(existsSync(join(target, path)), false, path);
-  }
-}
-
-function treeSnapshot(root) {
-  const snapshot = {};
-  visit(root, root, snapshot);
-  return snapshot;
-}
-
-function visit(root, directory, snapshot) {
-  for (const entry of readdirSync(directory, { withFileTypes: true }).sort(
-    (left, right) => left.name.localeCompare(right.name),
-  )) {
-    const path = join(directory, entry.name);
-    const relativePath = relative(root, path).replaceAll("\\", "/");
-    if (entry.isDirectory()) {
-      snapshot[`directory:${relativePath}`] = true;
-      visit(root, path, snapshot);
-      continue;
-    }
-    if (!entry.isFile()) continue;
-    snapshot[`file:${relativePath}`] = createHash("sha256")
-      .update(readFileSync(path))
-      .digest("hex");
   }
 }

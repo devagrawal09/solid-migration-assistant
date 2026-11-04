@@ -1,18 +1,11 @@
 import assert from "node:assert/strict";
 import { spawnSync } from "node:child_process";
-import { createHash } from "node:crypto";
-import {
-  cpSync,
-  existsSync,
-  mkdtempSync,
-  readFileSync,
-  readdirSync,
-  rmSync,
-} from "node:fs";
+import { cpSync, existsSync, mkdtempSync, rmSync } from "node:fs";
 import { tmpdir } from "node:os";
-import { dirname, join, relative, resolve } from "node:path";
+import { dirname, join, resolve } from "node:path";
 import { test } from "node:test";
 import { fileURLToPath } from "node:url";
+import { output, treeSnapshot } from "./helpers.mjs";
 
 const packageDirectory = resolve(dirname(fileURLToPath(import.meta.url)), "..");
 const codemodLauncher = resolve(
@@ -267,32 +260,4 @@ function assertTreeEquals(actualDirectory, expectedDirectory) {
     treeSnapshot(expectedDirectory),
     "transformed tree differs from the expected tree",
   );
-}
-
-function treeSnapshot(root) {
-  const snapshot = {};
-  visit(root, root, snapshot);
-  return snapshot;
-}
-
-function visit(root, directory, snapshot) {
-  for (const entry of readdirSync(directory, { withFileTypes: true }).sort(
-    (left, right) => left.name.localeCompare(right.name),
-  )) {
-    const path = join(directory, entry.name);
-    const relativePath = relative(root, path).replaceAll("\\", "/");
-    if (entry.isDirectory()) {
-      snapshot[`directory:${relativePath}`] = true;
-      visit(root, path, snapshot);
-      continue;
-    }
-    if (!entry.isFile()) continue;
-    snapshot[`file:${relativePath}`] = createHash("sha256")
-      .update(readFileSync(path))
-      .digest("hex");
-  }
-}
-
-function output(result) {
-  return `${result.stdout ?? ""}${result.stderr ?? ""}`;
 }

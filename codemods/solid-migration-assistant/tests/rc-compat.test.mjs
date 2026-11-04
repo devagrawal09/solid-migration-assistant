@@ -1,18 +1,11 @@
 import assert from "node:assert/strict";
 import { spawnSync } from "node:child_process";
-import { createHash } from "node:crypto";
-import {
-  cpSync,
-  mkdtempSync,
-  readFileSync,
-  readdirSync,
-  rmSync,
-  writeFileSync,
-} from "node:fs";
+import { cpSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
-import { dirname, join, relative, resolve } from "node:path";
+import { dirname, join, resolve } from "node:path";
 import { test } from "node:test";
 import { fileURLToPath } from "node:url";
+import { output, treeSnapshot } from "./helpers.mjs";
 
 /**
  * Opt-in (`pnpm test:rc-compat`): proves the transform's output against the
@@ -196,33 +189,4 @@ function run(executable, argumentsList, cwd) {
     env: { ...process.env, CI: "true", NO_COLOR: "1", FORCE_COLOR: undefined },
     maxBuffer: 50 * 1024 * 1024,
   });
-}
-
-function output(result) {
-  return `${result.stdout ?? ""}${result.stderr ?? ""}`;
-}
-
-function treeSnapshot(root) {
-  const snapshot = {};
-  visit(root, root, snapshot);
-  return snapshot;
-}
-
-function visit(root, directory, snapshot) {
-  for (const entry of readdirSync(directory, { withFileTypes: true }).sort(
-    (left, right) => left.name.localeCompare(right.name),
-  )) {
-    if (entry.name === "node_modules") continue;
-    const path = join(directory, entry.name);
-    const relativePath = relative(root, path).replaceAll("\\", "/");
-    if (entry.isDirectory()) {
-      snapshot[`directory:${relativePath}`] = true;
-      visit(root, path, snapshot);
-      continue;
-    }
-    if (!entry.isFile()) continue;
-    snapshot[`file:${relativePath}`] = createHash("sha256")
-      .update(readFileSync(path))
-      .digest("hex");
-  }
 }

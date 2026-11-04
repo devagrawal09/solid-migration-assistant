@@ -3,6 +3,7 @@ import { existsSync, readFileSync, readdirSync } from "node:fs";
 import { basename, dirname, relative, resolve } from "node:path";
 import { test } from "node:test";
 import { fileURLToPath } from "node:url";
+import { DISCLOSURE } from "../shared/run-workflow.mjs";
 
 const packageDirectory = resolve(dirname(fileURLToPath(import.meta.url)), "..");
 const analysisDirectory = resolve(packageDirectory, "rules/analysis");
@@ -176,6 +177,7 @@ const EXPECTED_TRANSFORM_FIXTURES = [
   "jsx/class-list-to-class/fixtures/spread-attributes.fixture.tsx",
   "jsx/context-provider-to-context/fixtures/aliased-import.fixture.tsx",
   "jsx/context-provider-to-context/fixtures/attribute-shapes.fixture.tsx",
+  "jsx/context-provider-to-context/fixtures/lowercase-names.fixture.tsx",
   "jsx/context-provider-to-context/fixtures/no-matches.fixture.tsx",
   "jsx/context-provider-to-context/fixtures/real-world-solid-context-spec.fixture.tsx",
   "jsx/context-provider-to-context/fixtures/rewrites.fixture.tsx",
@@ -192,6 +194,9 @@ const EXPECTED_TRANSFORM_FIXTURES = [
   "jsx/index-to-for/fixtures/rewrites.fixture.tsx",
   "jsx/index-to-for/fixtures/separate-for-import.fixture.tsx",
   "jsx/index-to-for/fixtures/shadowed-bindings.fixture.tsx",
+  "jsx/index-to-for/fixtures/shorthand-pattern.fixture.tsx",
+  "jsx/index-to-for/fixtures/shorthand-references.fixture.tsx",
+  "jsx/index-to-for/fixtures/type-arguments.fixture.tsx",
   "jsx/index-to-for/fixtures/unsupported-references.fixture.tsx",
   "jsx/index-to-for/fixtures/web-import.fixture.tsx",
   "jsx/lowercase-event-handlers/fixtures/attribute-values.fixture.tsx",
@@ -536,6 +541,7 @@ test("uses normal analyzer end-to-end fixtures", () => {
     "cli.test.mjs",
     "empty",
     "fixture",
+    "helpers.mjs",
     "packaging.test.mjs",
     "rc-compat",
     "rc-compat.test.mjs",
@@ -564,6 +570,36 @@ test("uses normal analyzer end-to-end fixtures", () => {
   assert.equal(emptyPackage.dependencies, undefined);
   assert.doesNotMatch(readFixtureText(), /codemod-reports|transform|report/i);
 });
+
+test("cites one pinned upstream Solid commit everywhere", () => {
+  const pinned = /source commit ([0-9a-f]{40})/.exec(DISCLOSURE)?.[1];
+  assert.ok(pinned, "the disclosure must name the pinned source commit");
+  const citations = new Map();
+  for (const file of sourceFiles()) {
+    for (const [, hash] of readFileSync(file, "utf8").matchAll(
+      /github\.com\/solidjs\/solid\/(?:blob|tree)\/([0-9a-f]{40})/g,
+    )) {
+      if (hash !== pinned) citations.set(relative(packageDirectory, file), hash);
+    }
+  }
+  assert.deepEqual([...citations], [], "every upstream citation must use the pinned commit");
+});
+
+/** Every shipped or reviewed text file: rules, scripts, shared, workflows, READMEs, and tests. */
+function sourceFiles() {
+  const files = [];
+  const walk = (directory) => {
+    for (const entry of readdirSync(directory, { withFileTypes: true })) {
+      if (entry.name === "node_modules" || entry.name === ".git") continue;
+      const path = resolve(directory, entry.name);
+      if (entry.isDirectory()) walk(path);
+      else if (/\.(?:ts|tsx|mjs|yaml|md)$/.test(entry.name)) files.push(path);
+    }
+  };
+  walk(packageDirectory);
+  files.push(resolve(packageDirectory, "../../README.md"));
+  return files;
+}
 
 function namedRuleExports(directory, prefix) {
   const pattern = new RegExp(

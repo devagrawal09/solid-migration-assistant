@@ -1,5 +1,6 @@
 import type { SgNode } from "codemod:ast-grep";
 import type TSX from "codemod:ast-grep/langs/tsx";
+import { isIntrinsicElementName } from "../../../../shared/jsx.ts";
 
 const MIGRATION_GUIDE =
   "https://github.com/solidjs/solid/blob/2105ffb8ca2fced55f5fac0763177fc93f97c2c2/documentation/solid-2.0/MIGRATION.md#attributes--events-closer-to-html-and-fewer-namespaces";
@@ -21,14 +22,7 @@ export function analyzeDomLowercaseEvents(
     "jsx_self_closing_element",
   ] as const) {
     for (const element of rootNode.findAll({ rule: { kind: elementKind } })) {
-      const elementName = element.field("name");
-      if (
-        !elementName ||
-        elementName.kind() !== "identifier" ||
-        !/^[a-z][A-Za-z0-9-]*$/.test(elementName.text())
-      ) {
-        continue;
-      }
+      if (!isIntrinsicElementName(element.field("name"))) continue;
       for (const attribute of element
         .children()
         .filter((child) => child.kind() === "jsx_attribute")) {
