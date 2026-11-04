@@ -34,11 +34,13 @@ test(
       assertContextProviderReport(first.stderr);
       assertIndexReport(first.stderr);
       assertEventHandlerReport(first.stderr);
+      assertJsxTypeReport(first.stderr);
       assert.equal(
         reportLines(first.stderr).length,
-        22 + 7 + 5 + 2 + 8 + 5,
+        22 + 7 + 5 + 2 + 2 + 8 + 5 + 2,
         "unexpected total number of rewrite report lines",
       );
+      assertSummary(first.stderr, 53, 10);
       assert.deepEqual(
         reportLines(first.stderr),
         [...reportLines(first.stderr)].sort(),
@@ -99,7 +101,9 @@ function reportLines(stderr) {
 }
 
 function relocationLines(stderr) {
-  return reportLines(stderr).filter((line) => line.includes("Relocate "));
+  return reportLines(stderr).filter(
+    (line) => line.includes("Relocate ") && !line.includes("JSX type import"),
+  );
 }
 
 function classListLines(stderr) {
@@ -114,6 +118,7 @@ const CLASS_LIST_GUIDE = `${GUIDE}#classlist--class-objectarray-forms`;
 const CONTEXT_PROVIDER_GUIDE = `${GUIDE}#context-providers-contextprovider--context-is-the-provider`;
 const INDEX_GUIDE = `${GUIDE}#list-rendering-index-is-gone-and-for-handles-each-keying-mode`;
 const EVENT_HANDLER_GUIDE = `${GUIDE}#attributes--events-closer-to-html-and-fewer-namespaces`;
+const JSX_TYPE_GUIDE = `${GUIDE}#typescript-jsx-solid-js--renderer-package`;
 
 /**
  * The transform rewrites exactly the five intrinsic classList attributes whose
@@ -129,6 +134,44 @@ function assertClassListReport(stderr) {
     `src/combined.tsx:18:11 Rewrite the classList attribute on <ul> to class, preserving its value expression. Official migration guide: ${CLASS_LIST_GUIDE}`,
     `src/nested/deep.jsx:11:41 Rewrite the classList attribute on <div> to class, preserving its value expression. Official migration guide: ${CLASS_LIST_GUIDE}`,
   ]);
+  // The literal class plus object classList pairs with disjoint keys merge
+  // into the array form; the colliding `class="a b"` plus `{ b }` pair stays.
+  assert.deepEqual(
+    reportLines(stderr).filter((line) => line.includes("Merge the class and classList")),
+    [
+      `src/class-list.tsx:20:12 Merge the class and classList attributes on <div> into the class array form, preserving the static string and the object literal. Official migration guide: ${CLASS_LIST_GUIDE}`,
+      `src/real-world/active-element.tsx:21:7 Merge the class and classList attributes on <button> into the class array form, preserving the static string and the object literal. Official migration guide: ${CLASS_LIST_GUIDE}`,
+    ],
+  );
+}
+
+/** The sole-specifier JSX type import and the pragma move; the mixed statement stays. */
+function assertJsxTypeReport(stderr) {
+  assert.deepEqual(
+    reportLines(stderr).filter((line) => line.includes("JSX type import") || line.includes("@jsxImportSource")),
+    [
+      `src/types.tsx:1:1 Rewrite the @jsxImportSource pragma from solid-js to @solidjs/web. Official migration guide: ${JSX_TYPE_GUIDE}`,
+      `src/types.tsx:3:26 Relocate the JSX type import from solid-js to @solidjs/web. Official migration guide: ${JSX_TYPE_GUIDE}`,
+    ],
+  );
+}
+
+/**
+ * The summary tail follows the report lines: a header with the totals, then
+ * per distinct message a count and a sorted site list, with no guide links.
+ */
+function assertSummary(stderr, rewrites, files) {
+  const lines = stderr
+    .split("\n")
+    .map((line) => line.trim())
+    .filter((line) => line !== "");
+  const header = lines.indexOf(`[solid-migration-assistant] Summary: ${rewrites} rewrites in ${files} file(s)`);
+  assert.notEqual(header, -1, "summary header missing");
+  const tail = lines.slice(header + 1).filter((line) => /^\d+ {2}|^sites: /.test(line));
+  assert.ok(tail.length >= 2 && tail.length % 2 === 0, "summary must pair counts with site lists");
+  const counted = tail.filter((line) => /^\d+ {2}/.test(line)).reduce((sum, line) => sum + Number(line.split(" ")[0]), 0);
+  assert.equal(counted, rewrites, "summary counts must add up to the rewrite total");
+  assert.ok(tail.every((line) => !line.includes("Official migration guide")), "summary lines carry no guide links");
 }
 
 /**
@@ -166,7 +209,7 @@ function assertIndexReport(stderr) {
       importLine("src/lists.tsx:2:24"),
       element("src/lists.tsx:9:7"),
       element("src/real-world/active-element.tsx:40:7"),
-      importLine("src/real-world/active-element.tsx:8:40"),
+      importLine("src/real-world/active-element.tsx:9:40"),
     ],
   );
 }

@@ -24,6 +24,23 @@ nodes:
             - "**/build/**"
             - "**/coverage/**"
             - "**/*.d.ts"
+      - name: analyzeJsxTypeImports
+        js-ast-grep:
+          js_file: scripts/analysis/analyzeJsxTypeImports.ts
+          base_path: "."
+          language: "tsx"
+          semantic_analysis: workspace
+          include:
+            - "**/*.js"
+            - "**/*.jsx"
+            - "**/*.ts"
+            - "**/*.tsx"
+          exclude:
+            - "**/node_modules/**"
+            - "**/dist/**"
+            - "**/build/**"
+            - "**/coverage/**"
+            - "**/*.d.ts"
       - name: analyzeWebImport
         js-ast-grep:
           js_file: scripts/analysis/analyzeWebImport.ts

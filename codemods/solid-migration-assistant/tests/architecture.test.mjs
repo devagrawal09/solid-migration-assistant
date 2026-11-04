@@ -12,6 +12,7 @@ const testsDirectory = resolve(packageDirectory, "tests");
 
 const EXPECTED_ANALYSIS_PRODUCTION = [
 "imports/beta32-subpaths/beta32-subpaths.ts",
+  "imports/jsx-types/jsx-types.ts",
   "imports/web-import/web-import.ts",
   "jsx/class-list/class-list.ts",
   "jsx/component-renames/component-renames.ts",
@@ -43,6 +44,7 @@ const EXPECTED_ANALYSIS_PRODUCTION = [
 ];
 const EXPECTED_ANALYSIS_TESTS = [
 "imports/beta32-subpaths/beta32-subpaths.test.ts",
+  "imports/jsx-types/jsx-types.test.ts",
   "imports/web-import/web-import.test.ts",
   "jsx/class-list/class-list.test.ts",
   "jsx/component-renames/component-renames.test.ts",
@@ -74,6 +76,7 @@ const EXPECTED_ANALYSIS_TESTS = [
 ];
 const EXPECTED_ANALYSIS_FIXTURES = [
 "imports/beta32-subpaths/static-imports.fixture.tsx",
+  "imports/jsx-types/static-imports.fixture.tsx",
   "imports/web-import/static-imports.fixture.tsx",
   "jsx/class-list/normal.fixture.tsx",
   "jsx/component-renames/normal.fixture.tsx",
@@ -129,6 +132,7 @@ const EXPECTED_ANALYSIS_FOLDERS = EXPECTED_ANALYSIS_PRODUCTION.map((path) =>
 ).sort();
 
 const EXPECTED_TRANSFORM_PRODUCTION = [
+  "imports/jsx-type-relocation/jsx-type-relocation.ts",
   "imports/legacy-subpath-relocation/legacy-subpath-relocation.ts",
   "imports/web-package-relocation/web-package-relocation.ts",
   "jsx/class-list-to-class/class-list-to-class.ts",
@@ -137,6 +141,7 @@ const EXPECTED_TRANSFORM_PRODUCTION = [
   "jsx/lowercase-event-handlers/lowercase-event-handlers.ts",
 ];
 const EXPECTED_TRANSFORM_TESTS = [
+  "imports/jsx-type-relocation/jsx-type-relocation.test.ts",
   "imports/legacy-subpath-relocation/legacy-subpath-relocation.test.ts",
   "imports/web-package-relocation/web-package-relocation.test.ts",
   "jsx/class-list-to-class/class-list-to-class.test.ts",
@@ -145,6 +150,10 @@ const EXPECTED_TRANSFORM_TESTS = [
   "jsx/lowercase-event-handlers/lowercase-event-handlers.test.ts",
 ];
 const EXPECTED_TRANSFORM_FIXTURES = [
+  "imports/jsx-type-relocation/fixtures/mixed-statements.fixture.tsx",
+  "imports/jsx-type-relocation/fixtures/no-matches.fixture.tsx",
+  "imports/jsx-type-relocation/fixtures/pragma-forms.fixture.tsx",
+  "imports/jsx-type-relocation/fixtures/relocations.fixture.tsx",
   "imports/legacy-subpath-relocation/fixtures/destructured-require.fixture.tsx",
   "imports/legacy-subpath-relocation/fixtures/escaped-specifiers.fixture.tsx",
   "imports/legacy-subpath-relocation/fixtures/negative-forms.fixture.tsx",
@@ -171,6 +180,8 @@ const EXPECTED_TRANSFORM_FIXTURES = [
   "imports/web-package-relocation/fixtures/vetoed-bindings.fixture.tsx",
   "jsx/class-list-to-class/fixtures/attribute-values.fixture.tsx",
   "jsx/class-list-to-class/fixtures/class-conflicts.fixture.tsx",
+  "jsx/class-list-to-class/fixtures/class-merge-refusals.fixture.tsx",
+  "jsx/class-list-to-class/fixtures/class-merges.fixture.tsx",
   "jsx/class-list-to-class/fixtures/no-matches.fixture.tsx",
   "jsx/class-list-to-class/fixtures/non-intrinsic-elements.fixture.tsx",
   "jsx/class-list-to-class/fixtures/rewrites.fixture.tsx",
@@ -233,8 +244,8 @@ test("composes every named rule as its own workflow step", () => {
     ({ name }) => "scripts/transformations/" + name + ".ts",
   );
 
-  assert.equal(analysisRules.length, 38);
-  assert.equal(transformRules.length, 6);
+  assert.equal(analysisRules.length, 39);
+  assert.equal(transformRules.length, 7);
   assert.deepEqual(
     [...analyzeWorkflow.matchAll(/js_file:\s*(\S+)/g)].map(
       (match) => match[1],
@@ -583,6 +594,25 @@ test("cites one pinned upstream Solid commit everywhere", () => {
     }
   }
   assert.deepEqual([...citations], [], "every upstream citation must use the pinned commit");
+
+  // shared/target.ts is the source for every rule; the launcher repeats the
+  // two values because it cannot import TypeScript, so they must agree, and
+  // every rule must read the target from the shared module rather than
+  // embedding its own copy.
+  const target = readFileSync(resolve(packageDirectory, "shared/target.ts"), "utf8");
+  const version = /SOLID_TARGET_VERSION = "([^"]+)"/.exec(target)?.[1];
+  assert.equal(/SOLID_SOURCE_COMMIT =\n\s+"([0-9a-f]{40})"/.exec(target)?.[1], pinned);
+  assert.ok(version, "shared/target.ts must declare SOLID_TARGET_VERSION");
+  assert.match(DISCLOSURE, new RegExp(`solid-js@${version.replace(/\./g, "\\.")} `));
+  for (const rule of [
+    ...ruleFiles(analysisDirectory, (name) => name.endsWith(".ts") && !name.endsWith(".test.ts")).map((path) => resolve(analysisDirectory, path)),
+    ...ruleFiles(transformationsDirectory, (name) => name.endsWith(".ts") && !name.endsWith(".test.ts")).map((path) => resolve(transformationsDirectory, path)),
+  ]) {
+    const source = readFileSync(rule, "utf8");
+    assert.match(source, /from "(?:\.\.\/)+shared\/target\.ts"/, relative(packageDirectory, rule));
+    assert.doesNotMatch(source, /blob\/[0-9a-f]{40}\/documentation/, relative(packageDirectory, rule));
+  }
+  assert.equal(existsSync(resolve(packageDirectory, "tools/bump-target.mjs")), true);
 });
 
 /** Every shipped or reviewed text file: rules, scripts, shared, workflows, READMEs, and tests. */

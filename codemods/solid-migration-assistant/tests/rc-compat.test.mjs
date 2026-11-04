@@ -120,7 +120,7 @@ test(
       const compiled = JSON.parse(compile.stdout);
       assert.equal(compiled.dom.error, null, compiled.dom.error);
       assert.equal(compiled.ssr.error, null, compiled.ssr.error);
-      assert.match(compiled.legacy.error ?? "", /`classList` on <li> was removed in Solid 2\.0/);
+      assert.match(compiled.legacy.error ?? "", /`classList` on <(?:li|b)> was removed in Solid 2\.0/);
       // The DOM build binds the renamed handler as a Solid event and never
       // emits an `onclick` attribute write.
       assert.match(compiled.dom.code, /_\$\$click|"click"/);
@@ -142,7 +142,7 @@ test(
 );
 
 const EXPECTED_HTML =
-  '<ul data-server="true"><li data-index="0" data-theme="dark" class="themed"><b>a</b></li><li data-index="1" data-theme="dark" class="themed"><b>b</b></li></ul>';
+  '<ul data-server="true"><li data-index="0" data-theme="dark" class="themed"><b class="badge">a</b></li><li data-index="1" data-theme="dark" class="themed"><b class="badge">b</b></li></ul>';
 
 const COMPILE_SCRIPT = `import { transformAsync } from "@babel/core";
 import { readFileSync, writeFileSync } from "node:fs";

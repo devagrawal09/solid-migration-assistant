@@ -1,6 +1,7 @@
 import type { Edit, SgNode } from "codemod:ast-grep";
 import type TSX from "codemod:ast-grep/langs/tsx";
 import { stringLiteralValue } from "../../../../shared/analysis.ts";
+import { MIGRATION_GUIDE_URL, SOLID_SOURCE_COMMIT } from "../../../../shared/target.ts";
 
 /**
  * The upstream Solid commit whose worktree was read to build the allowlist
@@ -10,10 +11,9 @@ import { stringLiteralValue } from "../../../../shared/analysis.ts";
  * the published `solid-js@1.9.13` build supply the legacy `solid-js/web` side
  * of every comparison.
  */
-export const SOLID_WEB_SOURCE_COMMIT =
-  "2105ffb8ca2fced55f5fac0763177fc93f97c2c2";
+export const SOLID_WEB_SOURCE_COMMIT = SOLID_SOURCE_COMMIT;
 
-export const WEB_MIGRATION_GUIDE = `https://github.com/solidjs/solid/blob/${SOLID_WEB_SOURCE_COMMIT}/documentation/solid-2.0/MIGRATION.md#imports-where-things-live-now`;
+export const WEB_MIGRATION_GUIDE = `${MIGRATION_GUIDE_URL}#imports-where-things-live-now`;
 
 export const LEGACY_WEB_MODULE = "solid-js/web";
 export const WEB_RELOCATION_TARGET = "@solidjs/web";

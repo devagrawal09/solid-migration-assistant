@@ -2,11 +2,11 @@ import type { Edit, SgNode } from "codemod:ast-grep";
 import type TSX from "codemod:ast-grep/langs/tsx";
 import { findModuleReferences } from "../../../../shared/analysis.ts";
 import { findBindings } from "../../../../shared/bindings.ts";
+import { MIGRATION_GUIDE_URL } from "../../../../shared/target.ts";
 
-export const SOLID_SOURCE_COMMIT =
-  "2105ffb8ca2fced55f5fac0763177fc93f97c2c2";
+export { SOLID_SOURCE_COMMIT } from "../../../../shared/target.ts";
 
-export const TRANSFORM_MIGRATION_GUIDE = `https://github.com/solidjs/solid/blob/${SOLID_SOURCE_COMMIT}/documentation/solid-2.0/MIGRATION.md#imports-where-things-live-now`;
+export const TRANSFORM_MIGRATION_GUIDE = `${MIGRATION_GUIDE_URL}#imports-where-things-live-now`;
 
 /**
  * The deterministic, semantics-preserving subset of the Solid 2 import-path

@@ -7,6 +7,22 @@ nodes:
     name: Apply the deterministic Solid 2 source rewrites
     type: automatic
     steps:
+      - name: relocateJsxTypes
+        js-ast-grep:
+          js_file: scripts/transformations/relocateJsxTypes.ts
+          base_path: "."
+          language: "tsx"
+          include:
+            - "**/*.js"
+            - "**/*.jsx"
+            - "**/*.ts"
+            - "**/*.tsx"
+          exclude:
+            - "**/node_modules/**"
+            - "**/dist/**"
+            - "**/build/**"
+            - "**/coverage/**"
+            - "**/*.d.ts"
       - name: relocateLegacySubpaths
         js-ast-grep:
           js_file: scripts/transformations/relocateLegacySubpaths.ts

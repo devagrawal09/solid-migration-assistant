@@ -10,6 +10,11 @@ type FixtureCase = {
     location: string;
     element: string;
   }>;
+  /** Elements whose literal class and object classList merge into the array form. */
+  merges?: ReadonlyArray<{
+    location: string;
+    element: string;
+  }>;
   /** Exact post-transform file text, or null when the file must stay unchanged. */
   transformed: string | null;
   /** Substrings the fixture must contain, proving the case it claims to cover. */
@@ -55,6 +60,43 @@ const FIXTURE_CASES: Record<string, FixtureCase> = {
       ["member component", "<Components.Widget classList={flags} />"],
       ["namespaced element", "<svg:circle classList={flags} />"],
       ["component with children", "<Widget classList={flags}>child</Widget>"],
+    ],
+  },
+  "class-merges": {
+    rewrites: [],
+    merges: [
+      { location: "9:12", element: "div" },
+      { location: "10:15", element: "button" },
+      { location: "14:9", element: "span" },
+      { location: "21:49", element: "my-element" },
+    ],
+    transformed: "// fixture: class-merges\nconst isActive = () => true;\nconst isOpen = () => false;\nconst active = true;\n\nexport function View() {\n  return (\n    <section>\n      <div class={[\"card\", { active: isActive(), hidden: !isActive() }]} />\n      <button class={[\"btn btn-primary\", { \"is-open\": isOpen(), active }]}>\n        merged\n      </button>\n      <span\n        class={[\"px-2 hover:bg-red-500\", {\n          // A comment inside the object literal must survive byte-for-byte.\n          \"ring-2 ring-offset-1\": isActive(),\n        }]}\n        id=\"first\"\n      />\n      <my-element class={[\"host\", { ready: active }]} />\n    </section>\n  );\n}\n",
+    evidence: [
+      ["call values", '<div class="card" classList={{ active: isActive(), hidden: !isActive() }} />'],
+      ["string key and shorthand", '<button class="btn btn-primary" classList={{ "is-open": isOpen(), active }}>'],
+      ["comment inside the object literal", "// A comment inside the object literal"],
+      ["other attribute after classList", 'id="first"'],
+      ["classList before class", '<my-element classList={{ ready: active }} class="host" />'],
+    ],
+  },
+  "class-merge-refusals": {
+    rewrites: [],
+    transformed: null,
+    evidence: [
+      ["colliding key", '<div class="a b" classList={{ b: active }} />'],
+      ["colliding token inside a key", '<div class="a" classList={{ "a b": active }} />'],
+      ["computed key", "classList={{ [key]: active }}"],
+      ["spread property", "classList={{ ...flags }}"],
+      ["getter", "get hidden()"],
+      ["numeric key", "classList={{ 1: active }}"],
+      ["undefined key", "classList={{ undefined: active }}"],
+      ["identifier value", '<div class="card" classList={flags} />'],
+      ["non-object expression", "classList={{ ...{} } && flags}"],
+      ["entity in the static string", 'class="a &amp; b"'],
+      ["single-quoted static string", "class='quoted'"],
+      ["line break in the static string", 'class="line\nbreak"'],
+      ["expression class", 'class={"expression"}'],
+      ["duplicate class attribute", 'class="twice"'],
     ],
   },
   "class-conflicts": {
@@ -134,12 +176,20 @@ const testClassListToClass: Codemod<TSX> = async (root) => {
 
   const rewrites = rewriteClassListToClass(rootNode, filename);
 
-  const expected = fixtureCase.rewrites.map(
-    ({ location, element }) =>
-      `${filename}:${location} Rewrite the classList attribute on <${element}> to class, preserving its value expression. Official migration guide: ${CLASS_LIST_MIGRATION_GUIDE}`,
-  );
+  const expected = [
+    ...fixtureCase.rewrites.map(
+      ({ location, element }) =>
+        `${filename}:${location} Rewrite the classList attribute on <${element}> to class, preserving its value expression. Official migration guide: ${CLASS_LIST_MIGRATION_GUIDE}`,
+    ),
+    ...(fixtureCase.merges ?? []).map(
+      ({ location, element }) =>
+        `${filename}:${location} Merge the class and classList attributes on <${element}> into the class array form, preserving the static string and the object literal. Official migration guide: ${CLASS_LIST_MIGRATION_GUIDE}`,
+    ),
+  ];
 
-  const actual = rewrites.map(({ report }) => report);
+  // A merge produces two edits that share one report line; the workflow
+  // deduplicates them exactly, so reports are compared as a unique list.
+  const actual = [...new Set(rewrites.map(({ report }) => report))];
   if (actual.join("\n") !== expected.join("\n")) {
     throw new Error(
       `unexpected classList rewrite report for ${marker}:\n${actual.join("\n")}\nExpected:\n${expected.join("\n")}`,

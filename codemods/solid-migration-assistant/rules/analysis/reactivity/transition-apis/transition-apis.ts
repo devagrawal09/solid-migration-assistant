@@ -1,9 +1,10 @@
 import type { SgNode } from "codemod:ast-grep";
 import type TSX from "codemod:ast-grep/langs/tsx";
 import { findImportedCalls } from "../../../../shared/analysis.ts";
+import { MIGRATION_GUIDE_URL, SOLID_TARGET_VERSION } from "../../../../shared/target.ts";
 
 const GUIDE =
-  "https://github.com/solidjs/solid/blob/2105ffb8ca2fced55f5fac0763177fc93f97c2c2/documentation/solid-2.0/MIGRATION.md";
+  MIGRATION_GUIDE_URL;
 
 function transitionGuidance(
   name: string,
@@ -17,7 +18,7 @@ function transitionGuidance(
     useTransition:
       "Solid 2 removes useTransition; use isPending() and Loading boundaries to track transition state.",
     createDeferred:
-      "Solid 2.0.0-rc.21 keeps the createDeferred name with a new meaning: an async memo that may lag but never leads, keeping its last answer while a refetch is in flight (isPending reports the refetch). The 1.x idle-time deferral and the timeoutMs option are gone, and with a synchronous function it behaves like createMemo.",
+      "Solid ${SOLID_TARGET_VERSION} keeps the createDeferred name with a new meaning: an async memo that may lag but never leads, keeping its last answer while a refetch is in flight (isPending reports the refetch). The 1.x idle-time deferral and the timeoutMs option are gone, and with a synchronous function it behaves like createMemo.",
   };
   const steps: Record<string, string> = {
     startTransition:

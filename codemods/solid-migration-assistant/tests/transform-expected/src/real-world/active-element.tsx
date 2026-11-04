@@ -3,8 +3,9 @@
 // Client components with the local primitive imports replaced by inline stubs.
 // License: MIT
 // (https://github.com/solidjs-community/solid-primitives/blob/9c81cd0d64591e80afafd30e9facf7dccfb0f4ab/LICENSE).
-// The classList beside a class attribute and the use: directive are left for
-// the analyzer; the Index element and the lowercase onclick are rewritten.
+// The use: directive is left for the analyzer; the Index element, the
+// lowercase onclick, and the class plus classList pair (disjoint literal keys)
+// are rewritten.
 import { type Component, createSignal, For, type ParentComponent } from "solid-js";
 
 type NodeData = { id: number; x: number; y: number; size: number };
@@ -17,10 +18,9 @@ const Node: ParentComponent<{ x: number; y: number; size: number }> = props => {
   return (
     <button
       use:focus={setIsFocused}
-      class="fixed left-0 top-0 h-48 w-48 cursor-pointer rounded-full border-none bg-orange-700 text-4xl font-extrabold text-gray-900 hover:bg-orange-600"
-      classList={{
+      class={["fixed left-0 top-0 h-48 w-48 cursor-pointer rounded-full border-none bg-orange-700 text-4xl font-extrabold text-gray-900 hover:bg-orange-600", {
         "!bg-indigo-700 !hover:bg-indigo-600": isFocused(),
-      }}
+      }]}
       style={{
         transform: `translate(${props.x}px, ${props.y}px) scale(${props.size})`,
         transition: "transform 500ms, background 200ms",

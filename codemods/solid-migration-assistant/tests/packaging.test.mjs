@@ -29,6 +29,7 @@ const expectedFiles = [
   "bin/solid-migration-assistant.mjs",
   "package.json",
   "rules/analysis/imports/beta32-subpaths/beta32-subpaths.ts",
+  "rules/analysis/imports/jsx-types/jsx-types.ts",
   "rules/analysis/imports/web-import/web-import.ts",
   "rules/analysis/jsx/class-list/class-list.ts",
   "rules/analysis/jsx/component-renames/component-renames.ts",
@@ -57,6 +58,7 @@ const expectedFiles = [
   "rules/analysis/store/mutable/mutable.ts",
   "rules/analysis/store/produce/produce.ts",
   "rules/analysis/store/unwrap/unwrap.ts",
+  "rules/transformations/imports/jsx-type-relocation/jsx-type-relocation.ts",
   "rules/transformations/imports/legacy-subpath-relocation/legacy-subpath-relocation.ts",
   "rules/transformations/imports/web-package-relocation/web-package-relocation.ts",
   "rules/transformations/jsx/class-list-to-class/class-list-to-class.ts",
@@ -86,6 +88,7 @@ const expectedFiles = [
   "scripts/analysis/analyzeIndexArray.ts",
   "scripts/analysis/analyzeJsxClassListAttributes.ts",
   "scripts/analysis/analyzeJsxComponentRenames.ts",
+  "scripts/analysis/analyzeJsxTypeImports.ts",
   "scripts/analysis/analyzeMergeProps.ts",
   "scripts/analysis/analyzeModifyMutable.ts",
   "scripts/analysis/analyzeObservable.ts",
@@ -102,6 +105,7 @@ const expectedFiles = [
   "scripts/analysis/analyzeWebImport.ts",
   "scripts/analysis/analyzeWriteSignal.ts",
   "scripts/emit-report.ts",
+  "scripts/transformations/relocateJsxTypes.ts",
   "scripts/transformations/relocateLegacySubpaths.ts",
   "scripts/transformations/relocateWebPackage.ts",
   "scripts/transformations/rewriteClassListToClass.ts",
@@ -113,6 +117,7 @@ const expectedFiles = [
   "shared/entrypoint.ts",
   "shared/jsx.ts",
   "shared/run-workflow.mjs",
+  "shared/target.ts",
   "shared/transform.ts",
   "transform.yaml",
   "workflow.yaml"
@@ -203,7 +208,7 @@ test(
     );
 
     try {
-      assert.equal(expectedFiles.length, 94);
+      assert.equal(expectedFiles.length, 99);
       const packDirectory = join(temporaryRoot, "pack");
       mkdirSync(packDirectory);
       const pack = command(

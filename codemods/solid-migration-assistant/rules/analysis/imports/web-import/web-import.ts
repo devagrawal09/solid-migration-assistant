@@ -2,10 +2,11 @@ import type { SgNode } from "codemod:ast-grep";
 import type TSX from "codemod:ast-grep/langs/tsx";
 import { findModuleReferences } from "../../../../shared/analysis.ts";
 import type { ModuleReference } from "../../../../shared/analysis.ts";
+import { migrationGuide } from "../../../../shared/target.ts";
 
 const LEGACY_WEB_MODULE = "solid-js/web";
 const MIGRATION_GUIDE =
-  "https://github.com/solidjs/solid/blob/2105ffb8ca2fced55f5fac0763177fc93f97c2c2/documentation/solid-2.0/MIGRATION.md#imports-where-things-live-now";
+  migrationGuide("imports-where-things-live-now");
 
 const FORM_LABELS: Record<ModuleReference["form"], string> = {
   import: "static import",

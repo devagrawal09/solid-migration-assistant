@@ -40,10 +40,14 @@ const expectedGuidance = [
   'src/nonmatches.tsx:5:1 Manual review required: split this one-argument createEffect into compute and apply callbacks.\nWhy: Solid 2 requires separate compute and apply callbacks; the correct split depends on which reads are reactive inputs and which statements are side effects.\nGuidance: Read the full callback, imports, and nearby reactive declarations. Identify the reactive reads that should trigger the effect, move those reads into the compute callback, return the value the side effect needs, and perform the imperative operation in the apply callback without adding reactive dependencies. Make and validate this migration yourself; this analyzer never edits or runs the target project. Stop without proposing a rewrite when the effect contains cleanup, async work, nested control flow affecting reads, reactive primitive creation, unrelated operations, writes that may affect its own inputs, or unclear intent. Ask for the smallest focused test or runtime observation that makes the missing behavior decision observable. Official migration guide: https://github.com/solidjs/solid/blob/2105ffb8ca2fced55f5fac0763177fc93f97c2c2/documentation/solid-2.0/MIGRATION.md#effects-lifecycle-and-cleanup',
   'src/nonmatches.tsx:7:24 Move this Solid web renderer re-export.\nWhy: Solid 2 publishes the web renderer from @solidjs/web instead of the solid-js/web subpath.\nGuidance: Change only this re-export\'s module source to @solidjs/web and preserve its export form and quote style. Make and validate that edit yourself; this analyzer never edits or runs the target project. Official migration guide: https://github.com/solidjs/solid/blob/2105ffb8ca2fced55f5fac0763177fc93f97c2c2/documentation/solid-2.0/MIGRATION.md#imports-where-things-live-now',
   'src/nonmatches.tsx:8:30 Move this Solid web renderer dynamic import().\nWhy: Solid 2 publishes the web renderer from @solidjs/web instead of the solid-js/web subpath.\nGuidance: Change only this dynamic import\'s module source to @solidjs/web and preserve its quote style. Make and validate that edit yourself; this analyzer never edits or runs the target project. Official migration guide: https://github.com/solidjs/solid/blob/2105ffb8ca2fced55f5fac0763177fc93f97c2c2/documentation/solid-2.0/MIGRATION.md#imports-where-things-live-now',
+  'src/types.tsx:1:1 Manual review required: point this @jsxImportSource pragma at the renderer package.\nWhy: Solid 2.0.0-rc.21 does not ship jsx-runtime type entries from solid-js; web JSX types come from @solidjs/web (hyperscript from @solidjs/h).\nGuidance: Change the pragma to @jsxImportSource @solidjs/web for web components, and mirror the change in tsconfig.json\'s compilerOptions.jsxImportSource, which this analyzer does not scan. Make and validate that edit yourself; this analyzer never edits or runs the target project. Official migration guide: https://github.com/solidjs/solid/blob/2105ffb8ca2fced55f5fac0763177fc93f97c2c2/documentation/solid-2.0/MIGRATION.md#typescript-jsx-solid-js--renderer-package',
+  'src/types.tsx:2:15 Manual review required: move this JSX type import off solid-js.\nWhy: Solid 2.0.0-rc.21 no longer exports the JSX namespace or the JSXElement alias from solid-js; renderer packages own JSX types, and web projects import JSX from @solidjs/web.\nGuidance: Move this specifier to a separate import type { JSX } from "@solidjs/web" statement (or set jsxImportSource to @solidjs/web and use the global JSX namespace), leaving every other solid-js binding in place. Also set compilerOptions.jsxImportSource to @solidjs/web in tsconfig.json, which this analyzer does not scan. Make and validate that edit yourself; this analyzer never edits or runs the target project. Official migration guide: https://github.com/solidjs/solid/blob/2105ffb8ca2fced55f5fac0763177fc93f97c2c2/documentation/solid-2.0/MIGRATION.md#typescript-jsx-solid-js--renderer-package',
+  'src/types.tsx:2:20 Manual review required: move this JSXElement type import off solid-js.\nWhy: Solid 2.0.0-rc.21 no longer exports the JSX namespace or the JSXElement alias from solid-js; renderer packages own JSX types, and web projects import JSX from @solidjs/web.\nGuidance: Replace JSXElement with JSX.Element from @solidjs/web, or with Element from solid-js for renderer-neutral component code. Also set compilerOptions.jsxImportSource to @solidjs/web in tsconfig.json, which this analyzer does not scan. Make and validate that edit yourself; this analyzer never edits or runs the target project. Official migration guide: https://github.com/solidjs/solid/blob/2105ffb8ca2fced55f5fac0763177fc93f97c2c2/documentation/solid-2.0/MIGRATION.md#typescript-jsx-solid-js--renderer-package',
   'src/workspace-reference.tsx:3:32 Manual review required: migrate this mergeProps call to a reviewed merge.\nWhy: Solid 2.0.0-rc.21 replaces mergeProps with merge, but merge treats a property that exists on a later source with the value undefined as the winner instead of falling through to an earlier source. This call has 2 semantic argument(s).\nGuidance: Read every source in argument order, list all overlapping keys, and trace every consumer of the merged value. Replace mergeProps with merge from solid-js only after proving that every later overlapping value is non-undefined and that zero-argument behavior, one-source result identity, and mutation semantics do not matter. Make and validate this migration yourself; this analyzer never edits or runs the target project. Stop without proposing a replacement when existing TypeScript types or the inferred Merge result type are the only runtime-safety evidence, a source is any/unknown/union-typed at runtime, a props or store proxy, a function, or has getters or dynamic key presence, source or result identity or mutation is observed, or a consumer depends on fallback-through-undefined behavior. If old undefined-fallback behavior is required, preserve live reactive reads with a targeted manual guard at the disputed property boundary rather than object spread or Object.assign. Ask for the smallest focused test or runtime observation that exposes the disputed property\'s value, precedence, identity, and mutation boundary. Official migration guide: https://github.com/solidjs/solid/blob/2105ffb8ca2fced55f5fac0763177fc93f97c2c2/documentation/solid-2.0/MIGRATION.md#mergeprops--splitprops--merge--omit',
 ];
 
 const analyzerLauncher = resolve(packageDirectory, "bin/solid-migration-assistant.mjs");
+const SUMMARY_PREFIX = "[solid-migration-assistant] Summary: ";
 
 /**
  * Exercises the read-only analyze workflow end to end through the published
@@ -71,6 +75,7 @@ try {
   const first = runAnalyzer(["--target", target]);
   assert.equal(first.status, 0, output(first));
   assert.deepEqual(guidanceBlocks(first.stdout), expectedGuidance);
+  assertSummary(first.stdout, expectedGuidance);
   assertFinalDisclosure(first.stderr);
   assertDetectionOnlyTerminalOutput(first.stdout + first.stderr);
   assert.deepEqual(treeSnapshot(target), before, "the first run changed the target");
@@ -99,6 +104,7 @@ try {
   const emptyRun = runAnalyzer(["--target", empty]);
   assert.equal(emptyRun.status, 0, output(emptyRun));
   assert.deepEqual(guidanceBlocks(emptyRun.stdout), []);
+  assert.deepEqual(summaryLines(emptyRun.stdout), []);
   assertFinalDisclosure(emptyRun.stderr);
   assert.deepEqual(treeSnapshot(empty), emptyBefore, "the empty run changed the target");
   assertNoPersistentArtifacts(empty);
@@ -108,6 +114,30 @@ try {
   );
 } finally {
   rmSync(temporaryRoot, { recursive: true, force: true });
+}
+
+/**
+ * The summary must be derivable from the findings themselves: one header with
+ * the total and file count, then for each distinct headline (sorted) a count
+ * line and the sorted site list.
+ */
+function assertSummary(stdout, findings) {
+  const byHeadline = new Map();
+  const files = new Set();
+  for (const finding of findings) {
+    const match = /^(\S+:\d+:\d+) (.*)$/.exec(finding.split("\n")[0]);
+    files.add(match[1].slice(0, match[1].indexOf(":")));
+    byHeadline.set(match[2], [...(byHeadline.get(match[2]) ?? []), match[1]]);
+  }
+  const expected = [
+    `${SUMMARY_PREFIX}${findings.length} findings in ${files.size} file(s)`,
+  ];
+  for (const headline of [...byHeadline.keys()].sort()) {
+    const sites = byHeadline.get(headline);
+    expected.push(`${String(sites.length).padStart(4)}  ${headline}`);
+    expected.push(`      sites: ${[...sites].sort().join(", ")}`);
+  }
+  assert.deepEqual(summaryLines(stdout), expected);
 }
 
 function runAnalyzer(argumentsList, cwd = packageDirectory) {
@@ -126,13 +156,27 @@ function runAnalyzer(argumentsList, cwd = packageDirectory) {
  * one blank line between findings.
  */
 function guidanceBlocks(stdout) {
-  const text = stripAnsi(stdout)
+  const lines = stripAnsi(stdout)
     .split("\n")
     .filter((line) => line.startsWith("  "))
-    .map((line) => line.slice(2))
-    .join("\n")
-    .trim();
+    .map((line) => line.slice(2));
+  const summary = lines.findIndex((line) => line.startsWith(SUMMARY_PREFIX));
+  const text = (summary === -1 ? lines : lines.slice(0, summary)).join("\n").trim();
   return text === "" ? [] : text.split("\n\n");
+}
+
+
+/**
+ * The summary tail printed after the guidance: its header plus one count line
+ * and one `sites:` line per distinct headline.
+ */
+function summaryLines(stdout) {
+  const lines = stripAnsi(stdout)
+    .split("\n")
+    .filter((line) => line.startsWith("  "))
+    .map((line) => line.slice(2));
+  const summary = lines.findIndex((line) => line.startsWith(SUMMARY_PREFIX));
+  return summary === -1 ? [] : lines.slice(summary).filter((line) => line.trim() !== "");
 }
 
 function assertFinalDisclosure(value) {

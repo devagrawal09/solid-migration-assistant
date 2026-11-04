@@ -1,11 +1,13 @@
+/** @jsxImportSource solid-js */
 import { createContext, createSignal, Index, useContext } from "solid-js";
+import type { JSX } from "solid-js";
 import { Dynamic, isServer } from "solid-js/web";
 import h from "solid-js/h";
 
 const ThemeContext = createContext("light");
 
-function Badge(props: { children: string }) {
-  return <b>{props.children}</b>;
+function Badge(props: { children: string }): JSX.Element {
+  return <b class="badge" classList={{ "badge-wide": props.children.length > 1, hidden: false }}>{props.children}</b>;
 }
 
 function Item(props: { label: string; index: number }) {

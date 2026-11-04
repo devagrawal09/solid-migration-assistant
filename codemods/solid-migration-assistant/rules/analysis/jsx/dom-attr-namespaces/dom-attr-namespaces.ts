@@ -1,7 +1,8 @@
 import type { SgNode } from "codemod:ast-grep";
 import type TSX from "codemod:ast-grep/langs/tsx";
+import { migrationGuide } from "../../../../shared/target.ts";
 
-const MIGRATION_GUIDE = "https://github.com/solidjs/solid/blob/2105ffb8ca2fced55f5fac0763177fc93f97c2c2/documentation/solid-2.0/MIGRATION.md#attributes--events-closer-to-html-and-fewer-namespaces";
+const MIGRATION_GUIDE = migrationGuide("attributes--events-closer-to-html-and-fewer-namespaces");
 
 const NAMESPACE_PREFIXES = ["attr:", "bool:"] as const;
 

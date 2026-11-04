@@ -7,14 +7,14 @@ import {
   isIntrinsicElementName,
   type JsxAttribute,
 } from "../../../../shared/jsx.ts";
+import { MIGRATION_GUIDE_URL, SOLID_TARGET_VERSION } from "../../../../shared/target.ts";
 
-export const SOLID_SOURCE_COMMIT =
-  "2105ffb8ca2fced55f5fac0763177fc93f97c2c2";
+export { SOLID_SOURCE_COMMIT } from "../../../../shared/target.ts";
 
-export const EVENT_HANDLER_MIGRATION_GUIDE = `https://github.com/solidjs/solid/blob/${SOLID_SOURCE_COMMIT}/documentation/solid-2.0/MIGRATION.md#attributes--events-closer-to-html-and-fewer-namespaces`;
+export const EVENT_HANDLER_MIGRATION_GUIDE = `${MIGRATION_GUIDE_URL}#attributes--events-closer-to-html-and-fewer-namespaces`;
 
 /**
- * Every camelCase event handler attribute declared by the Solid 2.0.0-rc.21
+ * Every camelCase event handler attribute declared by the Solid ${SOLID_TARGET_VERSION}
  * web JSX types (`packages/web/jsx/jsx.d.ts` at the pinned commit: the
  * `EventHandlersElement` and `EventHandlersWindow` interfaces). The rewrite
  * targets only these spellings, so a renamed attribute is both the runtime
@@ -79,7 +79,7 @@ export type EventHandlerRewrite = {
  * delegated, and server-rendered identically, and the 1.x JSX types declared
  * both spellings.
  *
- * Solid 2.0.0-rc.21 narrows that rule to `on` followed by an uppercase
+ * Solid ${SOLID_TARGET_VERSION} narrows that rule to `on` followed by an uppercase
  * letter (`packages/web/src/client.ts`, `assignProp`); a lowercase `on*`
  * name is a plain attribute in the browser, in SSR output, and through
  * spreads, so `onclick={fn}` now stringifies the function into an `onclick`

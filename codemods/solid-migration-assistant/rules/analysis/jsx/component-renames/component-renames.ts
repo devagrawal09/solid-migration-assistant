@@ -1,13 +1,14 @@
 import type { SgNode } from "codemod:ast-grep";
 import type TSX from "codemod:ast-grep/langs/tsx";
 import { stringLiteralValue } from "../../../../shared/analysis.ts";
+import { migrationGuide } from "../../../../shared/target.ts";
 
 const SUSPENSE_BOUNDARY_GUIDE =
-  "https://github.com/solidjs/solid/blob/2105ffb8ca2fced55f5fac0763177fc93f97c2c2/documentation/solid-2.0/MIGRATION.md#suspense--errorboundary--loading--errored";
+  migrationGuide("suspense--errorboundary--loading--errored");
 const INDEX_GUIDE =
-  "https://github.com/solidjs/solid/blob/2105ffb8ca2fced55f5fac0763177fc93f97c2c2/documentation/solid-2.0/MIGRATION.md#list-rendering-index-is-gone-and-for-handles-each-keying-mode";
+  migrationGuide("list-rendering-index-is-gone-and-for-handles-each-keying-mode");
 const SUSPENSE_LIST_GUIDE =
-  "https://github.com/solidjs/solid/blob/2105ffb8ca2fced55f5fac0763177fc93f97c2c2/documentation/solid-2.0/MIGRATION.md#coordinating-loading-boundaries-suspenselist--reveal";
+  migrationGuide("coordinating-loading-boundaries-suspenselist--reveal");
 
 const COMPONENT_MIGRATIONS = {
   Suspense: "Loading",

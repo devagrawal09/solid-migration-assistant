@@ -3,8 +3,9 @@
 // Client components with the local primitive imports replaced by inline stubs.
 // License: MIT
 // (https://github.com/solidjs-community/solid-primitives/blob/9c81cd0d64591e80afafd30e9facf7dccfb0f4ab/LICENSE).
-// The classList beside a class attribute and the use: directive are left for
-// the analyzer; the Index element and the lowercase onclick are rewritten.
+// The use: directive is left for the analyzer; the Index element, the
+// lowercase onclick, and the class plus classList pair (disjoint literal keys)
+// are rewritten.
 import { type Component, createSignal, Index, type ParentComponent } from "solid-js";
 
 type NodeData = { id: number; x: number; y: number; size: number };

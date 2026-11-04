@@ -8,11 +8,11 @@ import {
   hasSingleExpressionValue,
   hasStringValue,
 } from "../../../../shared/jsx.ts";
+import { MIGRATION_GUIDE_URL } from "../../../../shared/target.ts";
 
-export const SOLID_SOURCE_COMMIT =
-  "2105ffb8ca2fced55f5fac0763177fc93f97c2c2";
+export { SOLID_SOURCE_COMMIT } from "../../../../shared/target.ts";
 
-export const CONTEXT_PROVIDER_MIGRATION_GUIDE = `https://github.com/solidjs/solid/blob/${SOLID_SOURCE_COMMIT}/documentation/solid-2.0/MIGRATION.md#context-providers-contextprovider--context-is-the-provider`;
+export const CONTEXT_PROVIDER_MIGRATION_GUIDE = `${MIGRATION_GUIDE_URL}#context-providers-contextprovider--context-is-the-provider`;
 
 export const SOLID_CORE_MODULE = "solid-js";
 
