@@ -2,7 +2,7 @@
 
 Solid Migration Assistant is an experimental Solid 1.9 → Solid 2 migration assistant targeting Solid `2.0.0-rc.21` (upstream commit [`2105ffb8`](https://github.com/solidjs/solid/tree/2105ffb8ca2fced55f5fac0763177fc93f97c2c2), the newest published RC, available on npm under the `next` dist-tag while `latest` still resolves to Solid 1.9). It ships two workflows: a read-only `analyze` workflow that prints guidance for supported migration sites, and a deterministic `transform` workflow that relocates a small, pure subset of legacy import subpaths, relocates `solid-js/web` statements whose complete named binding set is proven compatible, relocates sole-specifier `JSX` type imports and `@jsxImportSource` pragmas to `@solidjs/web`, and applies four narrow, provably equivalent JSX rewrites: intrinsic `classList` attributes to `class` (including the literal `class` plus object `classList` merge with disjoint keys), same-file `Context.Provider` elements to the context itself, `Index` elements to `For keyed={false}`, and lowercase `on*` handlers on intrinsic elements to their camelCase spellings.
 
-The assistant scans project-owned `.js`, `.jsx`, `.ts`, and `.tsx` source, prints one detailed guidance string for each supported detection, and exits successfully when migration work is found. Each of the 39 named analyzers is a separate JSSG entrypoint and sequential workflow step; the workflow is the only production composition layer. Guidance is accumulated across those steps, sorted deterministically, and printed to standard output followed by a per-headline summary with counts and sites; the Codemod runtime's progress lines and the final disclosure are written to standard error. The analyzer never edits the target and does not generate reports, dashboards, or other output there. Codemod analytics are disabled. Codemod may persist workflow and task state in normal platform user-data directories outside the target; the assistant does not redirect or remove that runtime state.
+The assistant scans project-owned `.js`, `.jsx`, `.ts`, and `.tsx` source, prints one detailed guidance string for each supported detection, and exits successfully when migration work is found. Each of the 43 named analyzers is a separate JSSG entrypoint and sequential workflow step; the workflow is the only production composition layer. Guidance is accumulated across those steps, sorted deterministically, and printed to standard output followed by a per-headline summary with counts and sites; the Codemod runtime's progress lines and the final disclosure are written to standard error. The analyzer never edits the target and does not generate reports, dashboards, or other output there. Codemod analytics are disabled. Codemod may persist workflow and task state in normal platform user-data directories outside the target; the assistant does not redirect or remove that runtime state.
 
 ## Run the RC analyzer and transform
 
@@ -27,7 +27,9 @@ The supported rules detect the complete Solid 2 RC migration quick rename / remo
 **Imports** — `solid-js/web`, store, renderer, and JSX-runtime subpath repackaging, plus `JSX` type imports and `@jsxImportSource` pragmas moving to the renderer package.
 **JSX** — component renames (`Suspense`/`Loading`, `ErrorBoundary`/`Errored`, `Index`/`For keyed=false`, `SuspenseList`/`Reveal`), `classList` removal, DOM attribute/event namespace removal (`attr:`, `bool:`, `on:`, `oncapture:`), lowercase `on*` handlers becoming plain attributes, `use:` directive removal, and `Context.Provider` → direct context syntax.
 **Reactivity & lifecycle** — `createComputed`, `createEffect`, `createMemo`, `batch`, `createResource`, `on`, `onError`/`catchError`/`resetErrorBoundaries`, `startTransition`/`useTransition`/`createDeferred` (which keeps its name with a new meaning), `createSelector`/`indexArray`, `createDynamic`/`from`/`observable` (`from` now returns an async iterable for a memo), `onCleanup` ownership review, and `equalFn`/`getListener`/`writeSignal`/`enableScheduling`.
-**Props & store** — `mergeProps`/`splitProps`, `onMount`, `unwrap`, `produce`, and `createMutable`/`modifyMutable`.
+**Props & store** — `mergeProps`/`splitProps`, `onMount`, `unwrap`, `produce`, `createMutable`/`modifyMutable`, and every 1.x store setter call shape that the draft-only 2.0 setter no longer accepts.
+**Ownership** — inline ref callbacks doing owner-dependent work, nested `createRoot` calls, and deprecated `<Dynamic>` elements.
+**Project files** — the launcher reads `package.json` and `tsconfig.json` and reports a Solid 1 dependency range, a missing `@solidjs/web`, legacy compiler plugins, and a `solid-js` `jsxImportSource`.
 Coverage is deliberately limited. Even when no guidance is printed, review the documented exclusions and perform the application's normal type, build, and behavior validation; a clean analyzer run is not a readiness result.
 
 ## Transform
@@ -70,11 +72,13 @@ Three further rules cover syntax that rc.21 removed outright. `createContext()` 
 
 All seven rules emit one per-edit report line (`file:line:column`, what changed, plus the migration-guide link). The workflow is idempotent and writes no report files or other artifacts in the target. It deliberately leaves `solid-js/store` (whose `createStore` setter semantics changed), already-migrated paths, and near-miss subpaths such as `solid-js/h-extra`, `vendor/solid-js/h`, and `solid-js/web/storage` untouched.
 
-In this repository, run `pnpm transform` against the current directory, or invoke the Codemod CLI directly to target another directory:
+Run it through the launcher, which refuses a target whose git working tree is dirty or not a repository unless `--allow-dirty` is passed:
 
 ```sh
-node ./node_modules/codemod/codemod --disable-analytics workflow run -w transform.yaml -t /path/to/a/solid-project --allow-dirty --no-interactive
+npx --yes solid-migration-assistant@latest transform --target /path/to/a/solid-project
 ```
+
+In this repository, `pnpm transform` runs the same subcommand with `--allow-dirty` against the package directory.
 
 After publication, select the `transform` workflow from the Codemod platform (it is registered with `default: false`).
 

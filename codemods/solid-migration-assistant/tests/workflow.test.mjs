@@ -49,6 +49,13 @@ const expectedGuidance = [
 const analyzerLauncher = resolve(packageDirectory, "bin/solid-migration-assistant.mjs");
 const SUMMARY_PREFIX = "[solid-migration-assistant] Summary: ";
 
+/** Headlines of the launcher-side findings, which Codemod does not indent. */
+function launcherFindings(stdout) {
+  return stripAnsi(stdout)
+    .split("\n")
+    .filter((line) => /^(?:package|tsconfig)\.json:1:1 /.test(line));
+}
+
 /**
  * Exercises the read-only analyze workflow end to end through the published
  * launcher: exact, deterministic guidance for the checked-in fixture (which
@@ -75,6 +82,12 @@ try {
   const first = runAnalyzer(["--target", target]);
   assert.equal(first.status, 0, output(first));
   assert.deepEqual(guidanceBlocks(first.stdout), expectedGuidance);
+  // The launcher's own read-only findings for the manifest and tsconfig print
+  // first, unindented, before the Codemod-run guidance block.
+  assert.deepEqual(launcherFindings(first.stdout), [
+    "package.json:1:1 Manual review required: move this project's Solid dependencies to solid-js@2.0.0-rc.21.",
+    "tsconfig.json:1:1 Manual review required: point jsxImportSource at the Solid 2 renderer package.",
+  ]);
   assertSummary(first.stdout, expectedGuidance);
   assertFinalDisclosure(first.stderr);
   assertDetectionOnlyTerminalOutput(first.stdout + first.stderr);
@@ -105,6 +118,7 @@ try {
   assert.equal(emptyRun.status, 0, output(emptyRun));
   assert.deepEqual(guidanceBlocks(emptyRun.stdout), []);
   assert.deepEqual(summaryLines(emptyRun.stdout), []);
+  assert.deepEqual(launcherFindings(emptyRun.stdout), []);
   assertFinalDisclosure(emptyRun.stderr);
   assert.deepEqual(treeSnapshot(empty), emptyBefore, "the empty run changed the target");
   assertNoPersistentArtifacts(empty);

@@ -11,7 +11,7 @@ const transformationsDirectory = resolve(packageDirectory, "rules/transformation
 const testsDirectory = resolve(packageDirectory, "tests");
 
 const EXPECTED_ANALYSIS_PRODUCTION = [
-"imports/beta32-subpaths/beta32-subpaths.ts",
+  "imports/beta32-subpaths/beta32-subpaths.ts",
   "imports/jsx-types/jsx-types.ts",
   "imports/web-import/web-import.ts",
   "jsx/class-list/class-list.ts",
@@ -21,6 +21,8 @@ const EXPECTED_ANALYSIS_PRODUCTION = [
   "jsx/dom-event-namespaces/dom-event-namespaces.ts",
   "jsx/dom-lowercase-events/dom-lowercase-events.ts",
   "jsx/dom-use-directive/dom-use-directive.ts",
+  "jsx/dynamic-component/dynamic-component.ts",
+  "jsx/ref-callback-scope/ref-callback-scope.ts",
   "lifecycle/on-cleanup/on-cleanup.ts",
   "lifecycle/on-mount/on-mount.ts",
   "props/merge-props/merge-props.ts",
@@ -35,15 +37,17 @@ const EXPECTED_ANALYSIS_PRODUCTION = [
   "reactivity/error-handling/error-handling.ts",
   "reactivity/from-observable/from-observable.ts",
   "reactivity/index-array/index-array.ts",
+  "reactivity/nested-create-root/nested-create-root.ts",
   "reactivity/on-helper/on-helper.ts",
   "reactivity/transition-apis/transition-apis.ts",
   "reactivity/utility-renames/utility-renames.ts",
   "store/mutable/mutable.ts",
   "store/produce/produce.ts",
+  "store/setter-calls/setter-calls.ts",
   "store/unwrap/unwrap.ts",
 ];
 const EXPECTED_ANALYSIS_TESTS = [
-"imports/beta32-subpaths/beta32-subpaths.test.ts",
+  "imports/beta32-subpaths/beta32-subpaths.test.ts",
   "imports/jsx-types/jsx-types.test.ts",
   "imports/web-import/web-import.test.ts",
   "jsx/class-list/class-list.test.ts",
@@ -53,6 +57,8 @@ const EXPECTED_ANALYSIS_TESTS = [
   "jsx/dom-event-namespaces/dom-event-namespaces.test.ts",
   "jsx/dom-lowercase-events/dom-lowercase-events.test.ts",
   "jsx/dom-use-directive/dom-use-directive.test.ts",
+  "jsx/dynamic-component/dynamic-component.test.ts",
+  "jsx/ref-callback-scope/ref-callback-scope.test.ts",
   "lifecycle/on-cleanup/on-cleanup.test.ts",
   "lifecycle/on-mount/on-mount.test.ts",
   "props/merge-props/merge-props.test.ts",
@@ -67,15 +73,17 @@ const EXPECTED_ANALYSIS_TESTS = [
   "reactivity/error-handling/error-handling.test.ts",
   "reactivity/from-observable/from-observable.test.ts",
   "reactivity/index-array/index-array.test.ts",
+  "reactivity/nested-create-root/nested-create-root.test.ts",
   "reactivity/on-helper/on-helper.test.ts",
   "reactivity/transition-apis/transition-apis.test.ts",
   "reactivity/utility-renames/utility-renames.test.ts",
   "store/mutable/mutable.test.ts",
   "store/produce/produce.test.ts",
+  "store/setter-calls/setter-calls.test.ts",
   "store/unwrap/unwrap.test.ts",
 ];
 const EXPECTED_ANALYSIS_FIXTURES = [
-"imports/beta32-subpaths/static-imports.fixture.tsx",
+  "imports/beta32-subpaths/static-imports.fixture.tsx",
   "imports/jsx-types/static-imports.fixture.tsx",
   "imports/web-import/static-imports.fixture.tsx",
   "jsx/class-list/normal.fixture.tsx",
@@ -85,6 +93,8 @@ const EXPECTED_ANALYSIS_FIXTURES = [
   "jsx/dom-event-namespaces/normal.fixture.tsx",
   "jsx/dom-lowercase-events/normal.fixture.tsx",
   "jsx/dom-use-directive/normal.fixture.tsx",
+  "jsx/dynamic-component/normal.fixture.tsx",
+  "jsx/ref-callback-scope/normal.fixture.tsx",
   "lifecycle/on-cleanup/direct-call.fixture.tsx",
   "lifecycle/on-cleanup/non-solid.fixture.tsx",
   "lifecycle/on-mount/direct-call.fixture.tsx",
@@ -113,6 +123,8 @@ const EXPECTED_ANALYSIS_FIXTURES = [
   "reactivity/from-observable/non-solid.fixture.tsx",
   "reactivity/index-array/direct-call.fixture.tsx",
   "reactivity/index-array/non-solid.fixture.tsx",
+  "reactivity/nested-create-root/direct-call.fixture.tsx",
+  "reactivity/nested-create-root/non-solid.fixture.tsx",
   "reactivity/on-helper/direct-call.fixture.tsx",
   "reactivity/on-helper/non-solid.fixture.tsx",
   "reactivity/transition-apis/direct-call.fixture.tsx",
@@ -123,6 +135,8 @@ const EXPECTED_ANALYSIS_FIXTURES = [
   "store/mutable/non-solid.fixture.tsx",
   "store/produce/direct-call.fixture.tsx",
   "store/produce/non-solid.fixture.tsx",
+  "store/setter-calls/direct-call.fixture.tsx",
+  "store/setter-calls/non-solid.fixture.tsx",
   "store/unwrap/direct-call.fixture.tsx",
   "store/unwrap/non-solid.fixture.tsx",
 ];
@@ -244,7 +258,7 @@ test("composes every named rule as its own workflow step", () => {
     ({ name }) => "scripts/transformations/" + name + ".ts",
   );
 
-  assert.equal(analysisRules.length, 39);
+  assert.equal(analysisRules.length, 43);
   assert.equal(transformRules.length, 7);
   assert.deepEqual(
     [...analyzeWorkflow.matchAll(/js_file:\s*(\S+)/g)].map(

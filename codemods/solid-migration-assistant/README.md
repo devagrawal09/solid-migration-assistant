@@ -1,6 +1,6 @@
 # Solid Migration Assistant
 
-This package implements Solid Migration Assistant as two workflows for a narrow Solid 1.9 client-application profile. The read-only `analyze` workflow runs each of 39 named analyzers as a separate JSSG entrypoint and sequential workflow step, prints one detailed, location-bearing guidance string per supported migration site, returns no edits, and writes no files. The `transform` workflow runs each of seven deterministic rules as its own sequential JSSG step: relocating sole-specifier `JSX` type imports and `@jsxImportSource` pragmas from `solid-js` to `@solidjs/web`, relocating a small, pure subset of legacy import subpaths, relocating `solid-js/web` statements whose complete named binding set is proven compatible, and rewriting four narrow, provably equivalent subsets of JSX syntax: intrinsic `classList` attributes to `class` (including the literal `class` plus object `classList` merge with disjoint keys), same-file `Context.Provider` elements to the context itself, `Index` elements to `For keyed={false}`, and lowercase `on*` event handlers on intrinsic elements to their camelCase spellings. The YAML workflows are the only production composition layer.
+This package implements Solid Migration Assistant as two workflows for a narrow Solid 1.9 client-application profile. The read-only `analyze` workflow runs each of 43 named analyzers as a separate JSSG entrypoint and sequential workflow step, prints one detailed, location-bearing guidance string per supported migration site, returns no edits, and writes no files. The `transform` workflow runs each of seven deterministic rules as its own sequential JSSG step: relocating sole-specifier `JSX` type imports and `@jsxImportSource` pragmas from `solid-js` to `@solidjs/web`, relocating a small, pure subset of legacy import subpaths, relocating `solid-js/web` statements whose complete named binding set is proven compatible, and rewriting four narrow, provably equivalent subsets of JSX syntax: intrinsic `classList` attributes to `class` (including the literal `class` plus object `classList` merge with disjoint keys), same-file `Context.Provider` elements to the context itself, `Index` elements to `For keyed={false}`, and lowercase `on*` event handlers on intrinsic elements to their camelCase spellings. The YAML workflows are the only production composition layer.
 
 The migration target is pinned to Solid `2.0.0-rc.21` at upstream commit [`2105ffb8`](https://github.com/solidjs/solid/tree/2105ffb8ca2fced55f5fac0763177fc93f97c2c2), the `gitHead` recorded on npm for `solid-js@2.0.0-rc.21`, `@solidjs/web@2.0.0-rc.21`, `@solidjs/signals@2.0.0-rc.21`, `@solidjs/h@2.0.0-rc.21`, `@solidjs/html@2.0.0-rc.21`, `@solidjs/universal@2.0.0-rc.21`, and `@solidjs/babel-plugin@2.0.0-rc.21` (all published 2026-11-04 under the `next` dist-tag; `latest` still resolves to Solid 1.9). Every guidance string and report line links the migration guide at that commit; the version and commit live in one place, `shared/target.ts` (mirrored for the launcher's disclosure in `shared/run-workflow.mjs`), and `node tools/bump-target.mjs <version> <commit>` moves both plus every citation when a newer RC is published. The Solid 1.9 side of each comparison is `solid-js@1.9.13` (tag `v1.9.13`), whose `solid-js/web` export surface is identical to `1.9.18`, the current `latest`.
 
@@ -22,7 +22,7 @@ The current directory is the default target. An explicit target may be absolute 
 npx --yes solid-migration-assistant@latest --target /path/to/a/solid-project
 ```
 
-A run with detections exits successfully. Complete opaque guidance strings are exact-deduplicated, sorted lexically as whole strings, and printed once to standard output as a terminal aggregate, followed by a summary tail: the total number of findings and files, then for each distinct headline its count and the sorted `file:line:column` sites, so a long run can be surveyed before reading every paragraph. The transform workflow prints the same kind of tail after its report lines. The Codemod runtime's progress lines and the final disclosure are written to standard error. To capture the findings in a file, redirect standard output: `npx --yes solid-migration-assistant@latest --target . > report.txt`; to also capture progress and the disclosure, redirect both streams: `npx --yes solid-migration-assistant@latest --target . > report.txt 2>&1`. The analyzer does not edit the target or create persistent output there, and Codemod analytics are disabled. Codemod may persist workflow and task state in normal platform user-data directories outside the target; the assistant does not redirect or remove that runtime state.
+Before the workflow runs, the launcher itself reads `package.json` and `tsconfig.json` in the target (never writing either) and prints a finding when `solid-js` is declared at a Solid 1 range, `@solidjs/web` is missing, `babel-preset-solid` or `vite-plugin-solid` is declared, or `jsxImportSource` is `solid-js`; these two files sit outside the JSSG analyzers' JavaScript and TypeScript surface, and the guidance mirrors the official `solid-v2` templates. A run with detections exits successfully. Complete opaque guidance strings are exact-deduplicated, sorted lexically as whole strings, and printed once to standard output as a terminal aggregate, followed by a summary tail: the total number of findings and files, then for each distinct headline its count and the sorted `file:line:column` sites, so a long run can be surveyed before reading every paragraph. The transform workflow prints the same kind of tail after its report lines. The Codemod runtime's progress lines and the final disclosure are written to standard error. To capture the findings in a file, redirect standard output: `npx --yes solid-migration-assistant@latest --target . > report.txt`; to also capture progress and the disclosure, redirect both streams: `npx --yes solid-migration-assistant@latest --target . > report.txt 2>&1`. The analyzer does not edit the target or create persistent output there, and Codemod analytics are disabled. Codemod may persist workflow and task state in normal platform user-data directories outside the target; the assistant does not redirect or remove that runtime state.
 
 ## Supported detections
 
@@ -39,6 +39,7 @@ A run with detections exits successfully. Complete opaque guidance strings are e
 - **Lowercase DOM event handlers** — `onclick`-style attributes on intrinsic elements, which Solid 2 treats as plain attributes → camelCase handlers.
 - **`use:` directives** — Solid 1.x directive syntax → `ref` directive factories.
 - **`Context.Provider` JSX sites** — `<Context.Provider value={...}>` → `<Context value={...}>`.
+- **`<Dynamic>` elements** — kept but deprecated in Solid 2 → `dynamic(source)` factory.
 
 ### Reactivity
 - **`createComputed`** — removed; choose `createMemo`, `createEffect`, or derived `createSignal`.
@@ -57,10 +58,13 @@ A run with detections exits successfully. Complete opaque guidance strings are e
 ### Lifecycle & props
 - **`onMount`** — removed; closest replacement is `onSettled`.
 - **`onCleanup`** — still exported for owned scopes; reviewed because split effects, `onSettled`, and now-unowned ref callbacks change where cleanup belongs.
+- **Ref callbacks** — inline `ref={el => …}` callbacks on intrinsic elements that call `onCleanup`, effects, primitives, or `getOwner`, which run unowned in Solid 2.
+- **Nested `createRoot`** — calls inside a function body, whose root is now disposed with the parent owner.
 - **`mergeProps`** — replaced by `merge` with reviewed undefined-value semantics.
 - **`splitProps`** — replaced by `omit` with reviewed key-group restructuring.
 
 ### Store
+- **Store setter calls** — path-style `setStore("a", "b", v)`, object-merge `setStore({ … })`, callbacks that return a value (merged in 1.x, adopted as the whole state in 2.0), and setters passed as values → draft callbacks.
 - **`unwrap(store)`** → `snapshot(store)` for point-in-time non-reactive capture.
 - **`produce`** — removed; draft-first setters are now the default.
 - **`createMutable` / `modifyMutable`** — removed; use `createStore` with draft setters.
@@ -159,7 +163,13 @@ Custom event names, string values, components, spreads, conflicts, and the remov
 
 All seven rules deliberately leave `solid-js/store`, already-migrated paths, and near-miss subpaths such as `solid-js/h-extra`, `vendor/solid-js/h`, and `solid-js/web/storage` untouched. `solid-js/store` is not relocated even though the guide maps it to `solid-js`: `createStore` setters are draft-first in 2.0, `reconcile` changed its signature, and `unwrap`, `produce`, `createMutable`, and `modifyMutable` are renamed or removed, so no store binding meets the proof bar this workflow holds to.
 
-In this repository, run `pnpm transform` against the current directory, or invoke the Codemod CLI directly to target another directory:
+Run the transform through the launcher's `transform` subcommand:
+
+```sh
+npx --yes solid-migration-assistant@latest transform --target /path/to/a/solid-project
+```
+
+Because this workflow rewrites files in place, the launcher first runs `git status` in the target and refuses when the tree has uncommitted changes or is not inside a git repository, so every rewrite lands on a clean checkout that `git diff` can review and `git checkout` can revert; pass `--allow-dirty` to skip that check. In this repository, `pnpm transform` runs the same subcommand with `--allow-dirty` against the package directory; the raw Codemod invocation still works and performs no git check of its own:
 
 ```sh
 node ./node_modules/codemod/codemod --disable-analytics workflow run -w transform.yaml -t /path/to/a/solid-project --allow-dirty --no-interactive

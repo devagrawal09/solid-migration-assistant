@@ -38,6 +38,8 @@ const expectedFiles = [
   "rules/analysis/jsx/dom-event-namespaces/dom-event-namespaces.ts",
   "rules/analysis/jsx/dom-lowercase-events/dom-lowercase-events.ts",
   "rules/analysis/jsx/dom-use-directive/dom-use-directive.ts",
+  "rules/analysis/jsx/dynamic-component/dynamic-component.ts",
+  "rules/analysis/jsx/ref-callback-scope/ref-callback-scope.ts",
   "rules/analysis/lifecycle/on-cleanup/on-cleanup.ts",
   "rules/analysis/lifecycle/on-mount/on-mount.ts",
   "rules/analysis/props/merge-props/merge-props.ts",
@@ -52,11 +54,13 @@ const expectedFiles = [
   "rules/analysis/reactivity/error-handling/error-handling.ts",
   "rules/analysis/reactivity/from-observable/from-observable.ts",
   "rules/analysis/reactivity/index-array/index-array.ts",
+  "rules/analysis/reactivity/nested-create-root/nested-create-root.ts",
   "rules/analysis/reactivity/on-helper/on-helper.ts",
   "rules/analysis/reactivity/transition-apis/transition-apis.ts",
   "rules/analysis/reactivity/utility-renames/utility-renames.ts",
   "rules/analysis/store/mutable/mutable.ts",
   "rules/analysis/store/produce/produce.ts",
+  "rules/analysis/store/setter-calls/setter-calls.ts",
   "rules/analysis/store/unwrap/unwrap.ts",
   "rules/transformations/imports/jsx-type-relocation/jsx-type-relocation.ts",
   "rules/transformations/imports/legacy-subpath-relocation/legacy-subpath-relocation.ts",
@@ -81,6 +85,7 @@ const expectedFiles = [
   "scripts/analysis/analyzeDomEventNamespaces.ts",
   "scripts/analysis/analyzeDomLowercaseEvents.ts",
   "scripts/analysis/analyzeDomUseDirective.ts",
+  "scripts/analysis/analyzeDynamicComponent.ts",
   "scripts/analysis/analyzeEnableScheduling.ts",
   "scripts/analysis/analyzeEqualFn.ts",
   "scripts/analysis/analyzeFrom.ts",
@@ -91,15 +96,18 @@ const expectedFiles = [
   "scripts/analysis/analyzeJsxTypeImports.ts",
   "scripts/analysis/analyzeMergeProps.ts",
   "scripts/analysis/analyzeModifyMutable.ts",
+  "scripts/analysis/analyzeNestedCreateRoot.ts",
   "scripts/analysis/analyzeObservable.ts",
   "scripts/analysis/analyzeOnCleanup.ts",
   "scripts/analysis/analyzeOnError.ts",
   "scripts/analysis/analyzeOnHelper.ts",
   "scripts/analysis/analyzeOnMount.ts",
   "scripts/analysis/analyzeProduce.ts",
+  "scripts/analysis/analyzeRefCallbackScope.ts",
   "scripts/analysis/analyzeResetErrorBoundaries.ts",
   "scripts/analysis/analyzeSplitProps.ts",
   "scripts/analysis/analyzeStartTransition.ts",
+  "scripts/analysis/analyzeStoreSetterCalls.ts",
   "scripts/analysis/analyzeUnwrap.ts",
   "scripts/analysis/analyzeUseTransition.ts",
   "scripts/analysis/analyzeWebImport.ts",
@@ -208,7 +216,7 @@ test(
     );
 
     try {
-      assert.equal(expectedFiles.length, 99);
+      assert.equal(expectedFiles.length, 107);
       const packDirectory = join(temporaryRoot, "pack");
       mkdirSync(packDirectory);
       const pack = command(
