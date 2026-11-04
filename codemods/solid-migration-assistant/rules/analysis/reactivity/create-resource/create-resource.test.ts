@@ -25,6 +25,17 @@ const testCreateResourceRule: Codemod<TSX> = async (root) => {
     }
   }
 
+  // Exact sites: three call sites, then the tuple members resolved from the
+  // `[user, { refetch, mutate }]` and `[posts]` bindings. `otherObj.loading`
+  // and `otherObj.error` (lines 33 and 34) must stay unreported: they are not
+  // resource bindings, and a text match would have flagged them.
+  if (isFixture) {
+    const expectedLocations = ["6:1", "23:37", "37:19", "25:1", "40:20", "26:1", "43:19", "29:1", "46:30", "30:1", "47:30"];
+    const actualLocations = guidance.map((entry) => /^[^:]*:(\d+:\d+) /.exec(entry)?.[1] ?? entry);
+    if (actualLocations.join(",") !== expectedLocations.join(",")) {
+      throw new Error(`expected findings at ${expectedLocations.join(", ")} but got ${actualLocations.join(", ")}`);
+    }
+  }
   if (guidance.some((entry) => !entry.includes(MIGRATION_GUIDE))) {
     throw new Error("every createResource finding must link the migration guide");
   }

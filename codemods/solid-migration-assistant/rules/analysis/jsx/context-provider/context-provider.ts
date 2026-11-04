@@ -1,5 +1,6 @@
 import type { SgNode } from "codemod:ast-grep";
 import type TSX from "codemod:ast-grep/langs/tsx";
+import { findBindings } from "../../../../shared/bindings.ts";
 import { migrationGuide, SOLID_TARGET_VERSION } from "../../../../shared/target.ts";
 
 const MIGRATION_GUIDE = migrationGuide("context-providers-contextprovider--context-is-the-provider");
@@ -21,6 +22,7 @@ export function analyzeContextProvider(
         (child) => child.kind() === "identifier",
       );
       if (!object) continue;
+      if (!couldBeContext(rootNode, object.text())) continue;
       const start = element.range().start;
       const contextName = object.text();
       findings.push(
@@ -31,4 +33,27 @@ Guidance: Replace <${contextName}.Provider value={...}> with <${contextName} val
     }
   }
   return findings;
+}
+
+/**
+ * True unless the file itself proves the identifier is not a Solid context:
+ * when every in-file binding of the name is a declaration whose initializer
+ * is something other than a `createContext(...)` call (an object literal with
+ * its own `Provider` member, a function, a class), the `.Provider` is that
+ * value's own property and no finding is produced. Imported bindings, bindings
+ * initialized by a `createContext` call (any import form), and unresolved
+ * globals keep the finding, since the file cannot rule a context out.
+ */
+function couldBeContext(rootNode: SgNode<TSX>, name: string): boolean {
+  const bindings = findBindings(rootNode, name);
+  if (bindings.length === 0) return true;
+  return bindings.some((binding) => {
+    const parent = binding.parent();
+    if (parent === null) return true;
+    if (parent.kind() !== "variable_declarator") return parent.kind() !== "function_declaration" && parent.kind() !== "class_declaration";
+    const value = parent.field("value");
+    if (value === null || value.kind() !== "call_expression") return false;
+    const callee = value.field("function");
+    return callee !== null && /(^|\.)createContext$/.test(callee.text());
+  });
 }

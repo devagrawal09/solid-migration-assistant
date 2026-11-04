@@ -153,7 +153,7 @@ function guidance({ node, filename, shape, detail }: SetterSite): string {
     case "path":
       return `${location} Manual review required: rewrite this path-style store setter call as a draft write.${detail}
 ${why}
-Guidance: Read the path segments and the final value. Replace the call with setStore(state => { ... }) that walks the same path on the draft: a string or number segment becomes a property access, an array of keys becomes a loop over those keys, a range becomes a loop over its indices, a filter function becomes a loop with an if, and a final function value becomes a read-modify-write of the draft property. Setting undefined to remove a key becomes delete.${shared}`;
+Guidance: Read the path segments and the final value. Replace the call with setStore(state => { ... }) that walks the same path on the draft: a string or number segment becomes a property access, an array of keys becomes a loop over those keys, a range becomes a loop over its indices, a filter function becomes a loop with an if, and a final function value becomes a read-modify-write of the draft property: in 1.x an object it returned was merged into the existing node, so on the draft assign only the properties it changed (assigning a whole object replaces the node). Setting undefined to remove a key becomes delete.${shared}`;
     case "merge":
       return `${location} Manual review required: rewrite this object-merge store setter call as draft assignments.${detail}
 ${why}

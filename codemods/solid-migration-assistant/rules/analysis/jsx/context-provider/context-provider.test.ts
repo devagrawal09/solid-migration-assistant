@@ -8,8 +8,10 @@ const testContextProviderRule: Codemod<TSX> = async (root) => {
   const filename = root.relativeFilename().replaceAll("\\", "/");
   const guidance = analyzeContextProvider(root.root(), { filename });
 
-  if (guidance.length === 0) {
-    throw new Error("expected findings but got none");
+  const expectedLocations = ["8:5", "9:7"];
+  const actualLocations = guidance.map((entry) => /^[^:]*:(\d+:\d+) /.exec(entry)?.[1] ?? entry);
+  if (actualLocations.join(",") !== expectedLocations.join(",")) {
+    throw new Error(`expected findings at ${expectedLocations.join(", ")} but got ${actualLocations.join(", ")}`);
   }
 
   if (guidance.some((entry) => !entry.includes(MIGRATION_GUIDE))) {

@@ -564,6 +564,8 @@ test("uses normal analyzer end-to-end fixtures", () => {
   assert.deepEqual(readdirSync(testsDirectory).sort(), [
     "architecture.test.mjs",
     "cli.test.mjs",
+    "corpus",
+    "corpus.test.mjs",
     "empty",
     "fixture",
     "helpers.mjs",

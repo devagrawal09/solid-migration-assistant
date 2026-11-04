@@ -157,7 +157,8 @@
     "transform": "node ./bin/solid-migration-assistant.mjs transform --allow-dirty",
     "test:transform": "node ./tests/transform.test.mjs",
     "benchmark:workspace-passes": "node ./benchmarks/workspace-passes.mjs",
-    "test:rc-compat": "node --test ./tests/rc-compat.test.mjs"
+    "test:rc-compat": "node --test ./tests/rc-compat.test.mjs",
+    "test:corpus": "node --test ./tests/corpus.test.mjs"
   },
   "dependencies": {
     "codemod": "1.12.13"

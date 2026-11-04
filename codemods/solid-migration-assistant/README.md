@@ -38,7 +38,7 @@ Before the workflow runs, the launcher itself reads `package.json` and `tsconfig
 - **DOM event namespaces** — `on:` and `oncapture:` prefixed JSX attributes → camelCase event handlers or ref callbacks.
 - **Lowercase DOM event handlers** — `onclick`-style attributes on intrinsic elements, which Solid 2 treats as plain attributes → camelCase handlers.
 - **`use:` directives** — Solid 1.x directive syntax → `ref` directive factories.
-- **`Context.Provider` JSX sites** — `<Context.Provider value={...}>` → `<Context value={...}>`.
+- **`Context.Provider` JSX sites** — `<Context.Provider value={...}>` → `<Context value={...}>`; an identifier the file declares as something other than a `createContext` call (an object literal or function with its own `Provider` member) is not reported.
 - **`<Dynamic>` elements** — kept but deprecated in Solid 2 → `dynamic(source)` factory.
 
 ### Reactivity
@@ -46,7 +46,7 @@ Before the workflow runs, the launcher itself reads `package.json` and `tsconfig
 - **`createEffect` compute/apply split** — one-argument calls must split into compute and apply callbacks.
 - **`createMemo` initial-value migration** — second argument treated as initial value in 1.x, as options in 2.0.
 - **`batch`** — removed; default microtask batching, use `flush()` sparingly.
-- **`createResource`** — removed; replace with async computations and `Loading` boundaries.
+- **`createResource`** — removed; replace with async computations and `Loading` boundaries. Tuple members (`.loading`, `.error`, `.refetch()`, `.mutate()`, including destructured `refetch`/`mutate`) are reported only through bindings resolved from the `createResource` call, in any file the semantic provider can see; a resource forwarded through props or another module's export is not followed.
 - **`on` helper** — removed; explicit dependency tracking unnecessary with split effects.
 - **`onError` / `catchError` / `resetErrorBoundaries`** — removed; use `Errored` boundaries.
 - **`startTransition` / `useTransition`** — removed; use built-in transitions + `isPending`.
@@ -198,6 +198,8 @@ pnpm verify
 Verification checks the two-workflow architecture, comprehensive analysis and transformation rule boundaries, exact and repeatable terminal output, analyzer fixture immutability, transform idempotency, TypeScript types, and workflow schema validity.
 
 `pnpm test:rc-compat` is an opt-in addition that needs network access and Node 22.12 or newer: it transforms `tests/rc-compat/project`, compares the result with the checked-in expected tree, installs the exact pinned RC packages (`solid-js`, `@solidjs/web`, `@solidjs/h`, and `@solidjs/babel-plugin` at `2.0.0-rc.21` with their tooling), typechecks the transformed source against the RC types, compiles it with the RC Babel plugin in DOM and SSR mode, server-renders it and compares the markup, and proves that the untransformed 1.9 input is rejected by the RC compiler at its `classList` attribute and has no `Context.Provider` at runtime.
+
+`pnpm test:corpus` is a second opt-in check that needs network access and is not part of `verify`. It clones the open-source Solid 1.x projects listed in `tests/corpus/corpus.json` (each pinned to a commit, with the license found in the repository recorded in the manifest) into a temporary directory and proves, for each one, that the analyzer exits successfully, leaves the target byte-identical, and logs no crash; that the transform changes exactly the files it reports and adds or deletes nothing; that every rewritten file still parses; and that a second transform run is a no-op. It prints one JSON summary line per project with finding and rewrite counts and per-phase timings.
 
 ## Fixture provenance
 
