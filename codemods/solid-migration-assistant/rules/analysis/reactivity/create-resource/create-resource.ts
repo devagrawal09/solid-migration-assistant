@@ -1,7 +1,7 @@
 import type { SgNode } from "codemod:ast-grep";
 import type TSX from "codemod:ast-grep/langs/tsx";
 import { findImportedCalls } from "../../../../shared/analysis.ts";
-import { migrationGuide } from "../../../../shared/target.ts";
+import { lintHint, migrationGuide } from "../../../../shared/target.ts";
 
 const MIGRATION_GUIDE =
   migrationGuide("createresource--async-computations--loading");
@@ -26,7 +26,7 @@ export function analyzeCreateResource(
     findings.push(
       `${filename}:${start.line + 1}:${start.column + 1} Manual review required: migrate this createResource call to async computations with Loading boundaries.
 Why: Solid 2 removes createResource; async data fetching uses async computations wrapped in Loading boundaries.
-Guidance: Read the complete source, fetcher, options, and every consumer of the resource tuple (data, loading, error, mutate, refetch). Replace with an async computation and wrap the consuming JSX in a Loading boundary whose fallback handles the not-ready state. Track the resource tuple destructuring sites to confirm the replacement covers every field. Make and validate that edit yourself; this analyzer never edits or runs the target project. Official migration guide: ${MIGRATION_GUIDE}`,
+Guidance: Read the complete source, fetcher, options, and every consumer of the resource tuple (data, loading, error, mutate, refetch). Replace with an async computation and wrap the consuming JSX in a Loading boundary whose fallback handles the not-ready state. Track the resource tuple destructuring sites to confirm the replacement covers every field. Make and validate that edit yourself; this analyzer never edits or runs the target project.${lintHint("removed-api")} Official migration guide: ${MIGRATION_GUIDE}`,
     );
   }
 
@@ -115,7 +115,7 @@ Guidance: Read the complete source, fetcher, options, and every consumer of the 
       findings.push(
         `${context.filename}:${start.line + 1}:${start.column + 1} Manual review required: migrate this ${label}.
 Why: ${why}
-Guidance: ${guidance} Make and validate this migration yourself; this analyzer never edits or runs the target project. Official migration guide: ${MIGRATION_GUIDE}`,
+Guidance: ${guidance} Make and validate this migration yourself; this analyzer never edits or runs the target project.${lintHint("removed-api")} Official migration guide: ${MIGRATION_GUIDE}`,
       );
     }
   }

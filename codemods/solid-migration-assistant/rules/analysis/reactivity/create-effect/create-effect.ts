@@ -1,7 +1,7 @@
 import type { SgNode } from "codemod:ast-grep";
 import type TSX from "codemod:ast-grep/langs/tsx";
 import { findImportedCalls } from "../../../../shared/analysis.ts";
-import { migrationGuide } from "../../../../shared/target.ts";
+import { lintHint, migrationGuide } from "../../../../shared/target.ts";
 
 const MIGRATION_GUIDE =
   migrationGuide("effects-lifecycle-and-cleanup");
@@ -28,7 +28,7 @@ Guidance: Add explicit compute and apply callbacks, or remove the empty call if 
       if (argCount === 1) {
         return `${filename}:${start.line + 1}:${start.column + 1} Manual review required: split this one-argument createEffect into compute and apply callbacks.
 Why: Solid 2 requires separate compute and apply callbacks; the correct split depends on which reads are reactive inputs and which statements are side effects.
-Guidance: Read the full callback, imports, and nearby reactive declarations. Identify the reactive reads that should trigger the effect, move those reads into the compute callback, return the value the side effect needs, and perform the imperative operation in the apply callback without adding reactive dependencies. Make and validate this migration yourself; this analyzer never edits or runs the target project. Stop without proposing a rewrite when the effect contains cleanup, async work, nested control flow affecting reads, reactive primitive creation, unrelated operations, writes that may affect its own inputs, or unclear intent. Ask for the smallest focused test or runtime observation that makes the missing behavior decision observable. Official migration guide: ${MIGRATION_GUIDE}`;
+Guidance: Read the full callback, imports, and nearby reactive declarations. Identify the reactive reads that should trigger the effect, move those reads into the compute callback, return the value the side effect needs, and perform the imperative operation in the apply callback without adding reactive dependencies. Make and validate this migration yourself; this analyzer never edits or runs the target project. Stop without proposing a rewrite when the effect contains cleanup, async work, nested control flow affecting reads, reactive primitive creation, unrelated operations, writes that may affect its own inputs, or unclear intent. Ask for the smallest focused test or runtime observation that makes the missing behavior decision observable.${lintHint("no-single-arg-create-effect")} Official migration guide: ${MIGRATION_GUIDE}`;
       }
 
       if (argCount === 2) {

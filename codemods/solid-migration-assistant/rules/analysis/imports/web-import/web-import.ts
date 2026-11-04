@@ -2,7 +2,7 @@ import type { SgNode } from "codemod:ast-grep";
 import type TSX from "codemod:ast-grep/langs/tsx";
 import { findModuleReferences } from "../../../../shared/analysis.ts";
 import type { ModuleReference } from "../../../../shared/analysis.ts";
-import { migrationGuide } from "../../../../shared/target.ts";
+import { lintHint, migrationGuide } from "../../../../shared/target.ts";
 
 const LEGACY_WEB_MODULE = "solid-js/web";
 const MIGRATION_GUIDE =
@@ -36,6 +36,6 @@ export function analyzeWebImport(
       const start = source.range().start;
       return `${context.filename}:${start.line + 1}:${start.column + 1} Move this Solid web renderer ${FORM_LABELS[form]}.
 Why: Solid 2 publishes the web renderer from @solidjs/web instead of the solid-js/web subpath.
-Guidance:${FORM_GUIDANCE[form]} Make and validate that edit yourself; this analyzer never edits or runs the target project. Official migration guide: ${MIGRATION_GUIDE}`;
+Guidance:${FORM_GUIDANCE[form]} Make and validate that edit yourself; this analyzer never edits or runs the target project.${lintHint("removed-api")} Official migration guide: ${MIGRATION_GUIDE}`;
     });
 }

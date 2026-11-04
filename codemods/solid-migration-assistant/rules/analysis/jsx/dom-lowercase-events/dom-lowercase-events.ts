@@ -1,7 +1,7 @@
 import type { SgNode } from "codemod:ast-grep";
 import type TSX from "codemod:ast-grep/langs/tsx";
 import { isIntrinsicElementName } from "../../../../shared/jsx.ts";
-import { migrationGuide, SOLID_TARGET_VERSION } from "../../../../shared/target.ts";
+import { lintHint, migrationGuide, SOLID_TARGET_VERSION } from "../../../../shared/target.ts";
 
 const MIGRATION_GUIDE =
   migrationGuide("attributes--events-closer-to-html-and-fewer-namespaces");
@@ -36,7 +36,7 @@ export function analyzeDomLowercaseEvents(
         findings.push(
           `${context.filename}:${start.line + 1}:${start.column + 1} Manual review required: migrate this lowercase ${name} attribute to a camelCase event handler.
 Why: Solid ${SOLID_TARGET_VERSION} binds an event only for on followed by an uppercase letter; a lowercase ${name} on a native element is a plain attribute in the browser, in SSR output, and through spreads, so a function value is stringified into the attribute instead of listening for ${eventName} as Solid 1.x did.
-Guidance: Rename ${name} to the camelCase handler spelled by Solid's JSX types (for example onClick, onDblClick, onPointerDown) and keep the handler expression unchanged. Keep a string value only if an HTML inline-handler attribute is intended. For a custom event name or native listener options, use a ref callback that calls addEventListener. Make and validate that edit yourself; this analyzer never edits or runs the target project. Stop without proposing a rewrite when a spread attribute or another on-prefixed attribute on this element could bind the same event, or when the intended camelCase spelling is unclear. Official migration guide: ${MIGRATION_GUIDE}`,
+Guidance: Rename ${name} to the camelCase handler spelled by Solid's JSX types (for example onClick, onDblClick, onPointerDown) and keep the handler expression unchanged. Keep a string value only if an HTML inline-handler attribute is intended. For a custom event name or native listener options, use a ref callback that calls addEventListener. Make and validate that edit yourself; this analyzer never edits or runs the target project. Stop without proposing a rewrite when a spread attribute or another on-prefixed attribute on this element could bind the same event, or when the intended camelCase spelling is unclear.${lintHint("event-handlers")} Official migration guide: ${MIGRATION_GUIDE}`,
         );
       }
     }

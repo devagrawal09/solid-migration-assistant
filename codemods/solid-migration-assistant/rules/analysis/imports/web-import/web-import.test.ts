@@ -41,7 +41,7 @@ const testWebImportRule: Codemod<TSX> = async (root) => {
               : " Change only this static import's module source to @solidjs/web and preserve its import form and quote style.";
       return `${filename}:${location} Move this Solid web renderer ${formLabel}.
 Why: Solid 2 publishes the web renderer from @solidjs/web instead of the solid-js/web subpath.
-Guidance:${formGuidance} Make and validate that edit yourself; this analyzer never edits or runs the target project. Official migration guide: ${MIGRATION_GUIDE}`;
+Guidance:${formGuidance} Make and validate that edit yourself; this analyzer never edits or runs the target project. Ongoing check: after migration, eslint-plugin-solid's solid/removed-api rule (v2 config) reports this site. Official migration guide: ${MIGRATION_GUIDE}`;
     },
   );
 

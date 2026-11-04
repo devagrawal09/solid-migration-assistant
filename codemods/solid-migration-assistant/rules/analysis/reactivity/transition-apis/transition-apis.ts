@@ -1,7 +1,7 @@
 import type { SgNode } from "codemod:ast-grep";
 import type TSX from "codemod:ast-grep/langs/tsx";
 import { findImportedCalls } from "../../../../shared/analysis.ts";
-import { MIGRATION_GUIDE_URL, SOLID_TARGET_VERSION } from "../../../../shared/target.ts";
+import { lintHint, MIGRATION_GUIDE_URL, SOLID_TARGET_VERSION } from "../../../../shared/target.ts";
 
 const GUIDE =
   MIGRATION_GUIDE_URL;
@@ -34,7 +34,7 @@ function transitionGuidance(
       : `migrate this ${name} call to Solid 2 built-in transitions`;
   return `${filename}:${start.line + 1}:${start.column + 1} Manual review required: ${headline}.
 Why: ${reasons[name]}
-Guidance: ${steps[name]} Make and validate that edit yourself; this analyzer never edits or runs the target project. Official migration guide: ${GUIDE}#async-data--transitions`;
+Guidance: ${steps[name]} Make and validate that edit yourself; this analyzer never edits or runs the target project.${lintHint("removed-api")} Official migration guide: ${GUIDE}#async-data--transitions`;
 }
 
 export function analyzeStartTransition(

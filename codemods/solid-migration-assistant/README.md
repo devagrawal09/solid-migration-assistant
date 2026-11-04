@@ -65,7 +65,7 @@ A run with detections exits successfully. Complete opaque guidance strings are e
 - **`produce`** — removed; draft-first setters are now the default.
 - **`createMutable` / `modifyMutable`** — removed; use `createStore` with draft setters.
 
-Every finding links the immutable pinned [RC migration guide](https://github.com/solidjs/solid/blob/2105ffb8ca2fced55f5fac0763177fc93f97c2c2/documentation/solid-2.0/MIGRATION.md). Coverage follows the guide's complete quick rename / removal map.
+Findings for APIs that `eslint-plugin-solid`'s `v2` config keeps reporting after the migration (`solid/removed-api`, `solid/no-single-arg-create-effect`, `solid/prefer-structured-class`, `solid/event-handlers`) say so, so the one-shot guidance and the continuous lint read as one pipeline; the assistant deliberately does not automate four renames that lint rule auto-fixes (`batch`, `mergeProps`, `unwrap`, `onMount`) or the `solid-js/store` move, because the rc.21 sources show each changes behavior. Every finding links the immutable pinned [RC migration guide](https://github.com/solidjs/solid/blob/2105ffb8ca2fced55f5fac0763177fc93f97c2c2/documentation/solid-2.0/MIGRATION.md). Coverage follows the guide's complete quick rename / removal map.
 
 ## Transform
 
