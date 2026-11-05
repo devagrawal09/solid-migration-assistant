@@ -39,6 +39,44 @@ const PINNED_PACKAGES = [
 ];
 const MINIMUM_NODE = [22, 12, 0];
 
+/**
+ * The pinned target, read from the single source every rule imports, so the
+ * drift check below cannot disagree with what the guidance cites.
+ */
+const targetSource = readFileSync(resolve(packageDirectory, "shared/target.ts"), "utf8");
+const PINNED_VERSION = /SOLID_TARGET_VERSION = "([^"]+)"/.exec(targetSource)?.[1];
+const PINNED_COMMIT = /SOLID_SOURCE_COMMIT =\n\s+"([0-9a-f]{40})"/.exec(targetSource)?.[1];
+
+test("the pinned Solid RC is still the newest published one and matches its source commit", (t) => {
+  assert.ok(PINNED_VERSION && PINNED_COMMIT, "shared/target.ts must declare the pinned version and commit");
+  const lookup = (spec, field) =>
+    spawnSync("npm", ["view", spec, field, "--json"], {
+      encoding: "utf8",
+      env: { ...process.env, CI: "true", NO_COLOR: "1" },
+    });
+  const tags = lookup("solid-js", "dist-tags");
+  if (tags.status !== 0) {
+    t.skip(`npm registry unavailable: ${(tags.stderr || tags.stdout).trim().split("\n")[0]}`);
+    return;
+  }
+  // `latest` still resolves to Solid 1, so `next` is the Solid 2 line.
+  const next = JSON.parse(tags.stdout).next;
+  assert.equal(
+    next,
+    PINNED_VERSION,
+    `npm solid-js@next is ${next} but the assistant pins ${PINNED_VERSION}; run tools/bump-target.mjs, re-audit the guidance against the new migration guide, and refresh both baselines`,
+  );
+  for (const name of ["solid-js", "@solidjs/web"]) {
+    const head = lookup(`${name}@${PINNED_VERSION}`, "gitHead");
+    assert.equal(head.status, 0, output(head));
+    assert.equal(
+      JSON.parse(head.stdout),
+      PINNED_COMMIT,
+      `${name}@${PINNED_VERSION} was published from a different commit than the one every guidance link cites`,
+    );
+  }
+});
+
 test(
   "transformed fixture typechecks, compiles, and server-renders on the pinned Solid 2 RC while the 1.9 input does not",
   async (t) => {

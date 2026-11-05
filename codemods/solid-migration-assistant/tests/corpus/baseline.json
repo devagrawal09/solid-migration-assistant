@@ -1,0 +1,396 @@
+{
+  "solid-realworld": {
+    "commit": "f6e77ecd652bf32f0dc9238f291313fd1af7e98b",
+    "analyzerFindings": {
+      "Manual review required: choose a Solid 2 replacement for this createComputed call.": 1,
+      "Manual review required: migrate this .mutate() call.": 3,
+      "Manual review required: migrate this .refetch() call.": 1,
+      "Manual review required: migrate this batch call to default batching or flush(fn).": 1,
+      "Manual review required: migrate this Context.Provider JSX site to direct context provider syntax.": 2,
+      "Manual review required: migrate this createResource call to async computations with Loading boundaries.": 5,
+      "Manual review required: migrate this intrinsic JSX classList attribute to class.": 3,
+      "Manual review required: migrate this useTransition call to Solid 2 built-in transitions.": 2,
+      "Manual review required: move this project's Solid dependencies to solid-js@2.0.0-rc.21.": 1,
+      "Manual review required: review this onCleanup call against Solid 2 ownership.": 1,
+      "Manual review required: split this one-argument createEffect into compute and apply callbacks.": 1,
+      "Move this Solid 2 legacy subpath static import.": 5,
+      "Move this Solid web renderer static import.": 1
+    },
+    "rewrites": {
+      "Merge the class and classList attributes on <button> into the class array form, preserving the static string and the object literal.": 1,
+      "Merge the class and classList attributes on <li> into the class array form, preserving the static string and the object literal.": 1,
+      "Relocate solid-js/web to @solidjs/web for proven bindings render.": 1,
+      "Rewrite <RouterContext.Provider> to <RouterContext>, keeping its value attribute and children unchanged.": 1,
+      "Rewrite <StoreContext.Provider> to <StoreContext>, keeping its value attribute and children unchanged.": 1
+    },
+    "changedFiles": 4,
+    "transformedAnalyzerFindings": 22
+  },
+  "templates-vanilla": {
+    "commit": "63fff34aecfebf16b6485f7fcd88495019d7111b",
+    "analyzerFindings": {
+      "Manual review required: migrate this imported Suspense JSX site to Loading.": 6,
+      "Manual review required: migrate this lowercase onchange attribute to a camelCase event handler.": 4,
+      "Manual review required: migrate this onMount lifecycle callback.": 1,
+      "Manual review required: review this onCleanup call against Solid 2 ownership.": 1,
+      "Manual review required: rewrite this path-style store setter call as a draft write. This call passes 2 arguments.": 2,
+      "Manual review required: rewrite this path-style store setter call as a draft write. This call passes 3 arguments.": 2,
+      "Manual review required: split this one-argument createEffect into compute and apply callbacks.": 2,
+      "Move this Solid 2 legacy subpath static import.": 2,
+      "Move this Solid web renderer static import.": 15
+    },
+    "rewrites": {
+      "Relocate solid-js/web to @solidjs/web for proven bindings render.": 12,
+      "Rewrite the onchange event handler attribute on <input> to onChange, preserving its value expression.": 4
+    },
+    "changedFiles": 16,
+    "transformedAnalyzerFindings": 19
+  },
+  "slippilab": {
+    "commit": "ba4e09172344d1e7957de2d8a6eebab31632d92f",
+    "analyzerFindings": {
+      "Manual review required: choose a Solid 2 replacement for this createComputed call.": 2,
+      "Manual review required: migrate this batch call to default batching or flush(fn).": 5,
+      "Manual review required: migrate this Context.Provider JSX site to direct context provider syntax.": 1,
+      "Manual review required: migrate this createMutable call to an owned createStore tuple.": 1,
+      "Manual review required: migrate this createResource call to async computations with Loading boundaries.": 1,
+      "Manual review required: migrate this intrinsic JSX classList attribute to class.": 5,
+      "Manual review required: migrate this lowercase onkeydown attribute to a camelCase event handler.": 2,
+      "Manual review required: migrate this lowercase onkeyup attribute to a camelCase event handler.": 2,
+      "Manual review required: migrate this on tracking wrapper to Solid 2 split effects.": 3,
+      "Manual review required: migrate this onMount lifecycle callback.": 1,
+      "Manual review required: migrate this splitProps tuple to reviewed omit-based values.": 3,
+      "Manual review required: move this JSX type import off solid-js.": 5,
+      "Manual review required: move this project's Solid dependencies to solid-js@2.0.0-rc.21.": 1,
+      "Manual review required: point jsxImportSource at the Solid 2 renderer package.": 1,
+      "Manual review required: review this onCleanup call against Solid 2 ownership.": 1,
+      "Manual review required: rewrite this object-merge store setter call as draft assignments. The argument is an identifier.": 1,
+      "Manual review required: rewrite this object-merge store setter call as draft assignments. The argument is an object.": 2,
+      "Manual review required: rewrite this path-style store setter call as a draft write. This call passes 2 arguments.": 38,
+      "Manual review required: split this one-argument createEffect into compute and apply callbacks.": 8,
+      "Move this Solid 2 legacy subpath static import.": 4,
+      "Move this Solid web renderer static import.": 5
+    },
+    "rewrites": {
+      "Merge the class and classList attributes on <div> into the class array form, preserving the static string and the object literal.": 2,
+      "Merge the class and classList attributes on <span> into the class array form, preserving the static string and the object literal.": 2,
+      "Relocate solid-js/web to @solidjs/web for proven bindings render.": 1,
+      "Rewrite <DialogPartsContext.Provider> to <DialogPartsContext>, keeping its value attribute and children unchanged.": 1,
+      "Rewrite the onkeydown event handler attribute on <div> to onKeyDown, preserving its value expression.": 2,
+      "Rewrite the onkeyup event handler attribute on <div> to onKeyUp, preserving its value expression.": 2
+    },
+    "changedFiles": 7,
+    "transformedAnalyzerFindings": 82
+  },
+  "openaq-explorer": {
+    "commit": "0271e45a7bcfb68438037e8b8cd361efda893a02",
+    "analyzerFindings": {
+      "Manual review required: migrate this Context.Provider JSX site to direct context provider syntax.": 1,
+      "Manual review required: migrate this imported ErrorBoundary JSX site to Errored.": 1,
+      "Manual review required: migrate this imported Suspense JSX site to Loading.": 1,
+      "Manual review required: migrate this onMount lifecycle callback.": 11,
+      "Manual review required: migrate this produce wrapper to draft-first setter behavior.": 1,
+      "Manual review required: move this JSX type import off solid-js.": 6,
+      "Manual review required: move this project's Solid dependencies to solid-js@2.0.0-rc.21.": 1,
+      "Manual review required: point jsxImportSource at the Solid 2 renderer package.": 1,
+      "Manual review required: review this onCleanup call against Solid 2 ownership.": 5,
+      "Manual review required: rewrite this object-merge store setter call as draft assignments. The argument is a call expression.": 3,
+      "Manual review required: rewrite this object-merge store setter call as draft assignments. The argument is an object.": 39,
+      "Manual review required: rewrite this path-style store setter call as a draft write. This call passes 2 arguments.": 2,
+      "Manual review required: rewrite this path-style store setter call as a draft write. This call passes 3 arguments.": 6,
+      "Manual review required: split this one-argument createEffect into compute and apply callbacks.": 32,
+      "Move this Solid 2 legacy subpath static import.": 5,
+      "Move this Solid web renderer static import.": 1
+    },
+    "rewrites": {
+      "Rewrite <StoreContext.Provider> to <StoreContext>, keeping its value attribute and children unchanged.": 1
+    },
+    "changedFiles": 1,
+    "transformedAnalyzerFindings": 115
+  },
+  "codeimage": {
+    "commit": "27b185f18d36f2baec3a8cc5a43e8794586096c3",
+    "analyzerFindings": {
+      "Manual review required: decide this nested createRoot's lifetime.": 2,
+      "Manual review required: migrate this .error access.": 2,
+      "Manual review required: migrate this .loading access.": 2,
+      "Manual review required: migrate this .mutate() call.": 2,
+      "Manual review required: migrate this .refetch() call.": 1,
+      "Manual review required: migrate this batch call to default batching or flush(fn).": 2,
+      "Manual review required: migrate this Context.Provider JSX site to direct context provider syntax.": 1,
+      "Manual review required: migrate this createResource call to async computations with Loading boundaries.": 10,
+      "Manual review required: migrate this createSelector call to createProjection or function-form createStore.": 2,
+      "Manual review required: migrate this imported ErrorBoundary JSX site to Errored.": 5,
+      "Manual review required: migrate this imported Index JSX site to For keyed={false}.": 1,
+      "Manual review required: migrate this imported Suspense JSX site to Loading.": 20,
+      "Manual review required: migrate this imported SuspenseList JSX site to Reveal.": 1,
+      "Manual review required: migrate this mergeProps call to a reviewed merge.": 9,
+      "Manual review required: migrate this on tracking wrapper to Solid 2 split effects.": 28,
+      "Manual review required: migrate this onMount lifecycle callback.": 21,
+      "Manual review required: migrate this splitProps tuple to reviewed omit-based values.": 3,
+      "Manual review required: migrate this unwrap call to a reviewed snapshot.": 6,
+      "Manual review required: migrate this use: directive to a ref directive factory.": 6,
+      "Manual review required: move this JSX type import off solid-js.": 8,
+      "Manual review required: move this JSXElement type import off solid-js.": 15,
+      "Manual review required: move this project's Solid dependencies to solid-js@2.0.0-rc.21.": 1,
+      "Manual review required: point jsxImportSource at the Solid 2 renderer package.": 1,
+      "Manual review required: replace this deprecated Dynamic element with a dynamic() factory.": 3,
+      "Manual review required: review this onCleanup call against Solid 2 ownership.": 8,
+      "Manual review required: rewrite this object-merge store setter call as draft assignments. The argument is an object.": 4,
+      "Manual review required: split this one-argument createEffect into compute and apply callbacks.": 38,
+      "Move this Solid 2 legacy subpath static import.": 9,
+      "Move this Solid web renderer static import.": 5
+    },
+    "rewrites": {
+      "Relocate solid-js/web to @solidjs/web for proven bindings Dynamic. Note: Dynamic is deprecated in Solid 2 in favor of the dynamic(source) factory; it keeps working without a runtime warning.": 2,
+      "Relocate solid-js/web to @solidjs/web for proven bindings render.": 1,
+      "Relocate the JSX type import from solid-js to @solidjs/web.": 4,
+      "Remove the Index import from solid-js; For is already imported.": 1,
+      "Rewrite <Index> to <For keyed={false}>, keeping its each, fallback, and child callback unchanged.": 1
+    },
+    "changedFiles": 8,
+    "transformedAnalyzerFindings": 208
+  },
+  "tasks-md": {
+    "commit": "8f43374183fb4f1f7bd465b04b85ae4bde834827",
+    "analyzerFindings": {
+      "Manual review required: migrate this batch call to default batching or flush(fn).": 3,
+      "Manual review required: migrate this Context.Provider JSX site to direct context provider syntax.": 3,
+      "Manual review required: migrate this createResource call to async computations with Loading boundaries.": 1,
+      "Manual review required: migrate this onMount lifecycle callback.": 6,
+      "Manual review required: migrate this two-argument createEffect call.": 1,
+      "Manual review required: migrate this use: directive to a ref directive factory.": 2,
+      "Manual review required: move this project's Solid dependencies to solid-js@2.0.0-rc.21.": 1,
+      "Manual review required: review this onCleanup call against Solid 2 ownership.": 5,
+      "Manual review required: rewrite this object-merge store setter call as draft assignments. The argument is a call expression.": 1,
+      "Manual review required: rewrite this object-merge store setter call as draft assignments. The argument is an array.": 1,
+      "Manual review required: rewrite this object-merge store setter call as draft assignments. The argument is an identifier.": 1,
+      "Manual review required: rewrite this path-style store setter call as a draft write. This call passes 2 arguments.": 5,
+      "Manual review required: split this one-argument createEffect into compute and apply callbacks.": 16,
+      "Move this Solid 2 legacy subpath static import.": 1,
+      "Move this Solid web renderer static import.": 4
+    },
+    "rewrites": {
+      "Relocate solid-js/web to @solidjs/web for proven bindings render.": 1,
+      "Rewrite <DragAndDropContext.Provider> to <DragAndDropContext>, keeping its value attribute and children unchanged.": 1,
+      "Rewrite <I18nContext.Provider> to <I18nContext>, keeping its value attribute and children unchanged.": 1
+    },
+    "changedFiles": 3,
+    "transformedAnalyzerFindings": 48
+  },
+  "teardown": {
+    "commit": "7e702ade4f68813b003d9cfb2bdb1dd8f9a54410",
+    "analyzerFindings": {
+      "Manual review required: choose a Solid 2 replacement for this createComputed call.": 1,
+      "Manual review required: migrate this createMemo initial value.": 1,
+      "Manual review required: migrate this intrinsic JSX classList attribute to class.": 5,
+      "Manual review required: migrate this onMount lifecycle callback.": 2,
+      "Manual review required: migrate this splitProps tuple to reviewed omit-based values.": 4,
+      "Manual review required: migrate this two-argument createEffect call.": 1,
+      "Manual review required: move owner-dependent work out of this ref callback.": 7,
+      "Manual review required: move this JSX type import off solid-js.": 18,
+      "Manual review required: move this project's Solid dependencies to solid-js@2.0.0-rc.21.": 1,
+      "Manual review required: review this onCleanup call against Solid 2 ownership.": 20,
+      "Manual review required: split this one-argument createEffect into compute and apply callbacks.": 11,
+      "Move this Solid 2 legacy subpath static import.": 3,
+      "Move this Solid web renderer static import.": 5
+    },
+    "rewrites": {
+      "Merge the class and classList attributes on <button> into the class array form, preserving the static string and the object literal.": 1,
+      "Merge the class and classList attributes on <div> into the class array form, preserving the static string and the object literal.": 3,
+      "Relocate solid-js/jsx-runtime to @solidjs/web/jsx-runtime.": 3,
+      "Relocate solid-js/web to @solidjs/web for proven bindings render.": 1,
+      "Relocate the JSX type import from solid-js to @solidjs/web.": 3,
+      "Rewrite the classList attribute on <tr> to class, preserving its value expression.": 1
+    },
+    "changedFiles": 11,
+    "transformedAnalyzerFindings": 67
+  },
+  "usky-app": {
+    "commit": "b239166e7aa1108a198bbbb4b0fe3a80a42be374",
+    "analyzerFindings": {
+      "Manual review required: migrate this Context.Provider JSX site to direct context provider syntax.": 2,
+      "Manual review required: migrate this createResource call to async computations with Loading boundaries.": 1,
+      "Manual review required: migrate this imported ErrorBoundary JSX site to Errored.": 19,
+      "Manual review required: migrate this imported Suspense JSX site to Loading.": 32,
+      "Manual review required: migrate this lowercase onclick attribute to a camelCase event handler.": 1,
+      "Manual review required: migrate this onMount lifecycle callback.": 5,
+      "Manual review required: move this JSX type import off solid-js.": 4,
+      "Manual review required: move this JSXElement type import off solid-js.": 6,
+      "Manual review required: move this project's Solid dependencies to solid-js@2.0.0-rc.21.": 1,
+      "Manual review required: point jsxImportSource at the Solid 2 renderer package.": 1,
+      "Manual review required: replace this deprecated Dynamic element with a dynamic() factory.": 3,
+      "Manual review required: review the value this store setter callback returns.": 3,
+      "Manual review required: review this onCleanup call against Solid 2 ownership.": 6,
+      "Manual review required: split this one-argument createEffect into compute and apply callbacks.": 5,
+      "Move this Solid 2 legacy subpath static import.": 5,
+      "Move this Solid web renderer static import.": 6
+    },
+    "rewrites": {
+      "Relocate solid-js/web to @solidjs/web for proven bindings Dynamic. Note: Dynamic is deprecated in Solid 2 in favor of the dynamic(source) factory; it keeps working without a runtime warning.": 2,
+      "Relocate solid-js/web to @solidjs/web for proven bindings render.": 1,
+      "Relocate the JSX type import from solid-js to @solidjs/web.": 2,
+      "Rewrite <DialogContext.Provider> to <DialogContext>, keeping its value attribute and children unchanged.": 1,
+      "Rewrite <SessionContext.Provider> to <SessionContext>, keeping its value attribute and children unchanged.": 1,
+      "Rewrite the onclick event handler attribute on <button> to onClick, preserving its value expression.": 1
+    },
+    "changedFiles": 8,
+    "transformedAnalyzerFindings": 92
+  },
+  "metar-live-web": {
+    "commit": "45108f289d3c8a286694d9522f01a0c4e68d6362",
+    "analyzerFindings": {
+      "Manual review required: migrate this Context.Provider JSX site to direct context provider syntax.": 6,
+      "Manual review required: migrate this intrinsic JSX classList attribute to class.": 32,
+      "Manual review required: migrate this mergeProps call to a reviewed merge.": 2,
+      "Manual review required: migrate this onMount lifecycle callback.": 3,
+      "Manual review required: move this JSX type import off solid-js.": 4,
+      "Manual review required: move this JSXElement type import off solid-js.": 1,
+      "Manual review required: move this project's Solid dependencies to solid-js@2.0.0-rc.21.": 1,
+      "Manual review required: point jsxImportSource at the Solid 2 renderer package.": 1,
+      "Manual review required: review this onCleanup call against Solid 2 ownership.": 11,
+      "Manual review required: rewrite this object-merge store setter call as draft assignments. The argument is a call expression.": 1,
+      "Manual review required: rewrite this path-style store setter call as a draft write. This call passes 2 arguments.": 11,
+      "Manual review required: split this one-argument createEffect into compute and apply callbacks.": 18,
+      "Manual review required: trace this store setter that is passed as a value.": 1,
+      "Move this Solid 2 legacy subpath static import.": 4,
+      "Move this Solid web renderer static import.": 4
+    },
+    "rewrites": {
+      "Merge the class and classList attributes on <button> into the class array form, preserving the static string and the object literal.": 8,
+      "Merge the class and classList attributes on <circle> into the class array form, preserving the static string and the object literal.": 2,
+      "Merge the class and classList attributes on <div> into the class array form, preserving the static string and the object literal.": 8,
+      "Merge the class and classList attributes on <path> into the class array form, preserving the static string and the object literal.": 1,
+      "Merge the class and classList attributes on <span> into the class array form, preserving the static string and the object literal.": 9,
+      "Relocate solid-js/web to @solidjs/web for proven bindings render.": 1,
+      "Relocate the JSX type import from solid-js to @solidjs/web.": 1,
+      "Rewrite <FavoriteAirportsStoreContext.Provider> to <FavoriteAirportsStoreContext>, keeping its value attribute and children unchanged.": 1,
+      "Rewrite <GraphQLContext.Provider> to <GraphQLContext>, keeping its value attribute and children unchanged.": 1,
+      "Rewrite <SettingsStoreContext.Provider> to <SettingsStoreContext>, keeping its value attribute and children unchanged.": 1,
+      "Rewrite <StatusStoreContext.Provider> to <StatusStoreContext>, keeping its value attribute and children unchanged.": 1,
+      "Rewrite <TimeStoreContext.Provider> to <TimeStoreContext>, keeping its value attribute and children unchanged.": 1,
+      "Rewrite <UnitStoreContext.Provider> to <UnitStoreContext>, keeping its value attribute and children unchanged.": 1
+    },
+    "changedFiles": 15,
+    "transformedAnalyzerFindings": 64
+  },
+  "schools": {
+    "commit": "e617f9aa2ef58b8d0a835f2b799a31dc9a72e1e4",
+    "analyzerFindings": {
+      "Manual review required: migrate this Context.Provider JSX site to direct context provider syntax.": 1,
+      "Manual review required: migrate this createMutable call to an owned createStore tuple.": 2,
+      "Manual review required: migrate this imported Suspense JSX site to Loading.": 6,
+      "Manual review required: migrate this intrinsic JSX classList attribute to class.": 1,
+      "Manual review required: migrate this lowercase onclick attribute to a camelCase event handler.": 2,
+      "Manual review required: migrate this mergeProps call to a reviewed merge.": 2,
+      "Manual review required: migrate this onMount lifecycle callback.": 3,
+      "Manual review required: migrate this splitProps tuple to reviewed omit-based values.": 34,
+      "Manual review required: migrate this unwrap call to a reviewed snapshot.": 2,
+      "Manual review required: move this JSX type import off solid-js.": 1,
+      "Manual review required: move this project's Solid dependencies to solid-js@2.0.0-rc.21.": 1,
+      "Manual review required: point jsxImportSource at the Solid 2 renderer package.": 1,
+      "Manual review required: review this onCleanup call against Solid 2 ownership.": 5,
+      "Manual review required: split this one-argument createEffect into compute and apply callbacks.": 4,
+      "Move this Solid 2 legacy subpath static import.": 3
+    },
+    "rewrites": {
+      "Rewrite <MapContext.Provider> to <MapContext>, keeping its value attribute and children unchanged.": 1,
+      "Rewrite the onclick event handler attribute on <div> to onClick, preserving its value expression.": 2
+    },
+    "changedFiles": 3,
+    "transformedAnalyzerFindings": 65
+  },
+  "clear": {
+    "commit": "b69964367886b4d9e5092b0f27ab1520f6efbc5c",
+    "analyzerFindings": {
+      "Manual review required: migrate this createResource call to async computations with Loading boundaries.": 4,
+      "Manual review required: migrate this onMount lifecycle callback.": 7,
+      "Manual review required: migrate this produce wrapper to draft-first setter behavior.": 10,
+      "Manual review required: move this project's Solid dependencies to solid-js@2.0.0-rc.21.": 1,
+      "Manual review required: review this onCleanup call against Solid 2 ownership.": 6,
+      "Manual review required: rewrite this object-merge store setter call as draft assignments. The argument is a call expression.": 1,
+      "Manual review required: rewrite this path-style store setter call as a draft write. This call passes 3 arguments.": 1,
+      "Manual review required: split this one-argument createEffect into compute and apply callbacks.": 10,
+      "Manual review required: trace this store setter that is passed as a value.": 3,
+      "Move this Solid 2 legacy subpath static import.": 5,
+      "Move this Solid web renderer static import.": 1
+    },
+    "rewrites": {
+      "Relocate solid-js/web to @solidjs/web for proven bindings render.": 1
+    },
+    "changedFiles": 1,
+    "transformedAnalyzerFindings": 48
+  },
+  "kiwitalk": {
+    "commit": "4e565ca6bfff72f6085f1b0a4a767558c78ff450",
+    "analyzerFindings": {
+      "Manual review required: migrate this .error access.": 3,
+      "Manual review required: migrate this .loading access.": 2,
+      "Manual review required: migrate this .mutate() call.": 1,
+      "Manual review required: migrate this .refetch() call.": 1,
+      "Manual review required: migrate this batch call to default batching or flush(fn).": 1,
+      "Manual review required: migrate this Context.Provider JSX site to direct context provider syntax.": 6,
+      "Manual review required: migrate this createResource call to async computations with Loading boundaries.": 19,
+      "Manual review required: migrate this imported Suspense JSX site to Loading.": 1,
+      "Manual review required: migrate this intrinsic JSX classList attribute to class.": 4,
+      "Manual review required: migrate this mergeProps call to a reviewed merge.": 8,
+      "Manual review required: migrate this on tracking wrapper to Solid 2 split effects.": 20,
+      "Manual review required: migrate this onMount lifecycle callback.": 5,
+      "Manual review required: migrate this splitProps tuple to reviewed omit-based values.": 6,
+      "Manual review required: move this JSX type import off solid-js.": 10,
+      "Manual review required: move this project's Solid dependencies to solid-js@2.0.0-rc.21.": 1,
+      "Manual review required: point jsxImportSource at the Solid 2 renderer package.": 1,
+      "Manual review required: replace this deprecated Dynamic element with a dynamic() factory.": 2,
+      "Manual review required: review this onCleanup call against Solid 2 ownership.": 5,
+      "Manual review required: split this one-argument createEffect into compute and apply callbacks.": 22,
+      "Move this Solid 2 legacy subpath static import.": 2,
+      "Move this Solid web renderer static import.": 3
+    },
+    "rewrites": {
+      "Relocate solid-js/jsx-runtime to @solidjs/web/jsx-runtime.": 2,
+      "Relocate solid-js/web to @solidjs/web for proven bindings render.": 1,
+      "Relocate the JSX type import from solid-js to @solidjs/web.": 1,
+      "Rewrite <ReadyContext.Provider> to <ReadyContext>, keeping its value attribute and children unchanged.": 1,
+      "Rewrite the classList attribute on <div> to class, preserving its value expression.": 2
+    },
+    "changedFiles": 7,
+    "transformedAnalyzerFindings": 116
+  },
+  "exodium": {
+    "commit": "691b6cbec99860eac71b20bb30c472af490fee56",
+    "analyzerFindings": {
+      "Manual review required: decide this nested createRoot's lifetime.": 2,
+      "Manual review required: migrate this batch call to default batching or flush(fn).": 1,
+      "Manual review required: migrate this createMemo initial value.": 2,
+      "Manual review required: migrate this imported ErrorBoundary JSX site to Errored.": 1,
+      "Manual review required: migrate this imported Index JSX site to For keyed={false}.": 9,
+      "Manual review required: migrate this imported Suspense JSX site to Loading.": 1,
+      "Manual review required: migrate this intrinsic JSX classList attribute to class.": 8,
+      "Manual review required: migrate this on tracking wrapper to Solid 2 split effects.": 32,
+      "Manual review required: migrate this onMount lifecycle callback.": 15,
+      "Manual review required: migrate this splitProps tuple to reviewed omit-based values.": 1,
+      "Manual review required: migrate this two-argument createEffect call.": 1,
+      "Manual review required: move owner-dependent work out of this ref callback.": 3,
+      "Manual review required: move this JSX type import off solid-js.": 6,
+      "Manual review required: move this project's Solid dependencies to solid-js@2.0.0-rc.21.": 1,
+      "Manual review required: point jsxImportSource at the Solid 2 renderer package.": 1,
+      "Manual review required: review this onCleanup call against Solid 2 ownership.": 44,
+      "Manual review required: rewrite this path-style store setter call as a draft write. This call passes 2 arguments.": 2,
+      "Manual review required: split this one-argument createEffect into compute and apply callbacks.": 76,
+      "Move this Solid 2 legacy subpath static import.": 1,
+      "Move this Solid web renderer static import.": 42
+    },
+    "rewrites": {
+      "Merge the class and classList attributes on <button> into the class array form, preserving the static string and the object literal.": 2,
+      "Merge the class and classList attributes on <div> into the class array form, preserving the static string and the object literal.": 4,
+      "Merge the class and classList attributes on <label> into the class array form, preserving the static string and the object literal.": 1,
+      "Merge the class and classList attributes on <span> into the class array form, preserving the static string and the object literal.": 1,
+      "Relocate solid-js/web to @solidjs/web for proven bindings render.": 21,
+      "Relocate the JSX type import from solid-js to @solidjs/web.": 1,
+      "Rewrite <Index> to <For keyed={false}>, keeping its each, fallback, and child callback unchanged.": 9,
+      "Rewrite the Index import from solid-js to For.": 3
+    },
+    "changedFiles": 26,
+    "transformedAnalyzerFindings": 210
+  }
+}

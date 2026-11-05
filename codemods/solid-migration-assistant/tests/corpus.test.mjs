@@ -1,6 +1,15 @@
 import assert from "node:assert/strict";
 import { spawnSync } from "node:child_process";
-import { cpSync, mkdirSync, mkdtempSync, readFileSync, rmSync, statSync } from "node:fs";
+import {
+  cpSync,
+  existsSync,
+  mkdirSync,
+  mkdtempSync,
+  readFileSync,
+  rmSync,
+  statSync,
+  writeFileSync,
+} from "node:fs";
 import { tmpdir } from "node:os";
 import { basename, dirname, join, resolve } from "node:path";
 import { test } from "node:test";
@@ -46,13 +55,25 @@ import { output, treeSnapshot } from "./helpers.mjs";
  *    nothing (idempotency);
  * 6. runs the analyzer on the transformed copy and proves it still exits 0;
  * 7. prints one JSON line to stdout with finding and rewrite counts, the
- *    changed-file count, and elapsed milliseconds per phase.
+ *    changed-file count, and elapsed milliseconds per phase; and
+ * 8. compares those counts with `tests/corpus/baseline.json` and fails on any
+ *    difference, so every effect a rule change has on real code becomes a
+ *    reviewed diff of that file instead of a surprise.
+ *
+ * Refreshing the baseline is deliberate: run
+ * `node ./tests/corpus.test.mjs --update-baseline` (or
+ * `pnpm corpus:update-baseline`), which runs every check above and then
+ * rewrites the baseline entry for each project that passed, and commit the
+ * resulting diff together with the change that caused it. Timings are never
+ * part of the baseline.
  */
 const packageDirectory = resolve(dirname(fileURLToPath(import.meta.url)), "..");
 const launcher = resolve(packageDirectory, "bin/solid-migration-assistant.mjs");
 const corpus = JSON.parse(
   readFileSync(resolve(packageDirectory, "tests/corpus/corpus.json"), "utf8"),
 );
+const baselinePath = resolve(packageDirectory, "tests/corpus/baseline.json");
+const updateBaseline = process.argv.includes("--update-baseline");
 
 /**
  * One finding or rewrite report line: two-space indent, `file:line:column`,
@@ -209,22 +230,83 @@ for (const entry of corpus) {
         // 7. One machine-readable line per entry for the run log.
         const rewrites = new Map();
         for (const line of report) increment(rewrites, stripGuide(line.message));
-        console.log(
-          JSON.stringify({
-            name: entry.name,
-            commit: entry.commit,
-            analyzerFindings: sortedObject(findings.counts),
-            rewrites: sortedObject(rewrites),
-            changedFiles: changed.length,
-            transformedAnalyzerFindings: total(transformedFindings.counts),
-            elapsedMs,
-          }),
-        );
+        const counts = {
+          commit: entry.commit,
+          analyzerFindings: sortedObject(findings.counts),
+          rewrites: sortedObject(rewrites),
+          changedFiles: changed.length,
+          transformedAnalyzerFindings: total(transformedFindings.counts),
+        };
+        console.log(JSON.stringify({ name: entry.name, ...counts, elapsedMs }));
+
+        // 8. The counts must match the reviewed baseline exactly. A rule that
+        //    starts reporting more, fewer, or different sites on real code
+        //    fails here until the baseline diff is committed on purpose.
+        if (updateBaseline) {
+          writeBaselineEntry(entry.name, counts);
+        } else {
+          assertMatchesBaseline(entry.name, counts);
+        }
       } finally {
         rmSync(temporaryRoot, { recursive: true, force: true });
       }
     },
     { timeout: 600_000 },
+  );
+}
+
+function readBaseline() {
+  return existsSync(baselinePath) ? JSON.parse(readFileSync(baselinePath, "utf8")) : {};
+}
+
+/**
+ * Tests in one file run one after another, so a read-modify-write per entry
+ * is safe; entries are kept in manifest order and projects no longer in the
+ * manifest are dropped.
+ */
+function writeBaselineEntry(name, counts) {
+  const baseline = readBaseline();
+  baseline[name] = counts;
+  const ordered = {};
+  for (const { name: entryName } of corpus) {
+    if (baseline[entryName] !== undefined) ordered[entryName] = baseline[entryName];
+  }
+  writeFileSync(baselinePath, `${JSON.stringify(ordered, null, 2)}\n`);
+}
+
+/**
+ * Fails with a per-headline delta (`+3`, `-1`, `new`, `gone`) so a reviewer
+ * sees what moved without diffing two JSON blobs by eye.
+ */
+function assertMatchesBaseline(name, counts) {
+  const expected = readBaseline()[name];
+  assert.ok(
+    expected !== undefined,
+    `${name} has no entry in tests/corpus/baseline.json; run \`pnpm corpus:update-baseline\` and review the diff`,
+  );
+  assert.equal(
+    expected.commit,
+    counts.commit,
+    `${name}: the baseline was recorded at ${expected.commit} but the manifest pins ${counts.commit}; refresh the baseline`,
+  );
+  const deltas = [];
+  for (const key of ["analyzerFindings", "rewrites"]) {
+    const headlines = new Set([...Object.keys(expected[key]), ...Object.keys(counts[key])]);
+    for (const headline of [...headlines].sort()) {
+      const before = expected[key][headline];
+      const after = counts[key][headline];
+      if (before === after) continue;
+      const change =
+        before === undefined ? `new (${after})` : after === undefined ? `gone (was ${before})` : `${after - before > 0 ? "+" : ""}${after - before} (${before} -> ${after})`;
+      deltas.push(`  ${key}: ${change}  ${headline}`);
+    }
+  }
+  for (const key of ["changedFiles", "transformedAnalyzerFindings"]) {
+    if (expected[key] !== counts[key]) deltas.push(`  ${key}: ${expected[key]} -> ${counts[key]}`);
+  }
+  assert.ok(
+    deltas.length === 0,
+    `${name} differs from tests/corpus/baseline.json:\n${deltas.join("\n")}\nIf the change is intended, run \`pnpm corpus:update-baseline\` and commit the diff with it.`,
   );
 }
 

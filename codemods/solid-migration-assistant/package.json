@@ -158,7 +158,9 @@
     "test:transform": "node ./tests/transform.test.mjs",
     "benchmark:workspace-passes": "node ./benchmarks/workspace-passes.mjs",
     "test:rc-compat": "node --test ./tests/rc-compat.test.mjs",
-    "test:corpus": "node --test ./tests/corpus.test.mjs"
+    "test:corpus": "node --test ./tests/corpus.test.mjs",
+    "corpus:update-baseline": "node ./tests/corpus.test.mjs --update-baseline",
+    "test:release": "pnpm test:rc-compat && pnpm test:corpus"
   },
   "dependencies": {
     "codemod": "1.12.13"
