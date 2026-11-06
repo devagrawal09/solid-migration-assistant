@@ -57,3 +57,22 @@ function shadowed(createEffect: (callback: () => void) => void) {
 }
 
 void shadowed;
+
+// One-argument effects that need restructuring before a split.
+createEffect((prev) => {
+  console.log("was", prev);
+  return count();
+});
+createEffect(() => {
+  const id = setInterval(() => undefined, 1000);
+  onCleanup(() => clearInterval(id));
+});
+createEffect(() => {
+  const [local] = createSignal(0);
+  console.log(local());
+});
+createEffect(async () => {
+  await Promise.resolve();
+});
+declare const namedCallback: () => void;
+createEffect(namedCallback);

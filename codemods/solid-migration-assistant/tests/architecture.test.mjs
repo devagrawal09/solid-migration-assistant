@@ -4,6 +4,7 @@ import { basename, dirname, relative, resolve } from "node:path";
 import { test } from "node:test";
 import { fileURLToPath } from "node:url";
 import { DISCLOSURE } from "../shared/run-workflow.mjs";
+import { explicitSeverity, severityOf } from "../shared/severity.mjs";
 
 const packageDirectory = resolve(dirname(fileURLToPath(import.meta.url)), "..");
 const analysisDirectory = resolve(packageDirectory, "rules/analysis");
@@ -164,10 +165,15 @@ const EXPECTED_TRANSFORM_TESTS = [
   "jsx/lowercase-event-handlers/lowercase-event-handlers.test.ts",
 ];
 const EXPECTED_TRANSFORM_FIXTURES = [
+  "imports/jsx-type-relocation/fixtures/jsx-element-conflicts.fixture.tsx",
+  "imports/jsx-type-relocation/fixtures/jsx-element-mixed.fixture.tsx",
+  "imports/jsx-type-relocation/fixtures/jsx-element-value-use.fixture.tsx",
+  "imports/jsx-type-relocation/fixtures/jsx-element.fixture.tsx",
   "imports/jsx-type-relocation/fixtures/mixed-statements.fixture.tsx",
   "imports/jsx-type-relocation/fixtures/no-matches.fixture.tsx",
   "imports/jsx-type-relocation/fixtures/pragma-forms.fixture.tsx",
   "imports/jsx-type-relocation/fixtures/relocations.fixture.tsx",
+  "imports/jsx-type-relocation/fixtures/split-refusals.fixture.tsx",
   "imports/legacy-subpath-relocation/fixtures/destructured-require.fixture.tsx",
   "imports/legacy-subpath-relocation/fixtures/escaped-specifiers.fixture.tsx",
   "imports/legacy-subpath-relocation/fixtures/negative-forms.fixture.tsx",
@@ -646,6 +652,52 @@ function sourceFiles() {
   files.push(resolve(packageDirectory, "../../README.md"));
   return files;
 }
+
+test("assigns every analyzer headline an explicit severity tier", () => {
+  // Headlines come from three places: every literal headline template in the
+  // analyzer sources, the exact end-to-end guidance, and every headline the
+  // corpus baseline recorded on real projects. Templated headlines are
+  // expanded by hand below; a new analyzer headline must be added to
+  // shared/severity.mjs before this test passes.
+  const headlines = new Set();
+  for (const file of ruleFiles(analysisDirectory, (name) => name.endsWith(".ts") && !name.endsWith(".test.ts"))) {
+    const source = readFileSync(resolve(analysisDirectory, file), "utf8");
+    for (const match of source.matchAll(/(?:\}|:1:1) ((?:Manual review required: |Move this )[^\n`$]*?\.)$/gm)) {
+      headlines.add(match[1]);
+    }
+  }
+  for (const form of ["static import", "re-export", "dynamic import()", "require() call"]) {
+    headlines.add(`Move this Solid web renderer ${form}.`);
+    headlines.add(`Move this Solid 2 legacy subpath ${form}.`);
+  }
+  for (const name of ["JSX", "JSXElement"]) headlines.add(`Manual review required: move this ${name} type import off solid-js.`);
+  for (const prefix of ["on:", "oncapture:"]) {
+    headlines.add(`Manual review required: migrate this ${prefix}event namespace attribute to Solid 2 event handling.`);
+  }
+  headlines.add("Manual review required: migrate this lowercase onclick attribute to a camelCase event handler.");
+  for (const count of ["zero", "two", "three"]) headlines.add(`Manual review required: migrate this ${count}-argument createEffect call.`);
+  for (const label of [".loading access", ".error access", ".refetch() call", ".mutate() call"]) {
+    headlines.add(`Manual review required: migrate this ${label}.`);
+  }
+  for (const name of ["equalFn", "getListener"]) headlines.add(`Manual review required: migrate this ${name} reference to its Solid 2 replacement.`);
+  for (const name of ["writeSignal", "enableScheduling"]) headlines.add(`Manual review required: remove this ${name} call.`);
+  for (const name of ["startTransition", "useTransition"]) headlines.add(`Manual review required: migrate this ${name} call to Solid 2 built-in transitions.`);
+  headlines.add("Manual review required: review this createDeferred call against its Solid 2 meaning.");
+  headlines.add("Manual review required: move this onCleanup out of the createEffect callback into the apply callback's returned cleanup.");
+  headlines.add("Manual review required: rewrite this path-style store setter call as a draft write. This call passes 3 arguments.");
+  headlines.add("Manual review required: rewrite this object-merge store setter call as draft assignments. The argument is an object.");
+  headlines.add("Manual review required: move this project's Solid dependencies to solid-js@2.0.0-rc.21.");
+  const workflowTest = readFileSync(resolve(testsDirectory, "workflow.test.mjs"), "utf8");
+  for (const match of workflowTest.matchAll(/^ {2}'[^:']+:\d+:\d+ ([^\\]+?)\\n/gm)) headlines.add(match[1]);
+  const baseline = JSON.parse(readFileSync(resolve(testsDirectory, "corpus/baseline.json"), "utf8"));
+  for (const entry of Object.values(baseline)) for (const headline of Object.keys(entry.analyzerFindings)) headlines.add(headline);
+
+  const unclassified = [...headlines].filter((headline) => explicitSeverity(headline) === null).sort();
+  assert.deepEqual(unclassified, [], "every analyzer headline needs an explicit tier in shared/severity.mjs");
+  assert.equal(severityOf("Manual review required: replace this deprecated Dynamic element with a dynamic() factory."), "deprecated");
+  assert.equal(severityOf("Manual review required: migrate this lowercase onclick attribute to a camelCase event handler."), "behavior");
+  assert.equal(severityOf("Move this Solid web renderer static import."), "build");
+});
 
 function namedRuleExports(directory, prefix) {
   const pattern = new RegExp(

@@ -37,10 +37,10 @@ test(
       assertJsxTypeReport(first.stderr);
       assert.equal(
         reportLines(first.stderr).length,
-        22 + 7 + 5 + 2 + 2 + 8 + 5 + 2,
+        22 + 7 + 5 + 2 + 2 + 8 + 5 + 4,
         "unexpected total number of rewrite report lines",
       );
-      assertSummary(first.stderr, 53, 10);
+      assertSummary(first.stderr, 55, 11);
       assert.deepEqual(
         reportLines(first.stderr),
         [...reportLines(first.stderr)].sort(),
@@ -145,13 +145,20 @@ function assertClassListReport(stderr) {
   );
 }
 
-/** The sole-specifier JSX type import and the pragma move; the mixed statement stays. */
+/**
+ * The sole-specifier JSX type import and the pragma move, the type-only JSX
+ * specifier is split out of the mixed statement, and JSXElement is rewritten
+ * in the file that binds no JSX of its own (it is refused in types.tsx,
+ * which does).
+ */
 function assertJsxTypeReport(stderr) {
   assert.deepEqual(
-    reportLines(stderr).filter((line) => line.includes("JSX type import") || line.includes("@jsxImportSource")),
+    reportLines(stderr).filter((line) => /JSX type|JSXElement type|@jsxImportSource/.test(line)),
     [
+      `src/types-element.tsx:3:10 Replace the JSXElement type import from solid-js with JSX from @solidjs/web and rewrite its 3 type reference(s) to JSX.Element. Official migration guide: ${JSX_TYPE_GUIDE}`,
       `src/types.tsx:1:1 Rewrite the @jsxImportSource pragma from solid-js to @solidjs/web. Official migration guide: ${JSX_TYPE_GUIDE}`,
-      `src/types.tsx:3:26 Relocate the JSX type import from solid-js to @solidjs/web. Official migration guide: ${JSX_TYPE_GUIDE}`,
+      `src/types.tsx:4:26 Relocate the JSX type import from solid-js to @solidjs/web. Official migration guide: ${JSX_TYPE_GUIDE}`,
+      `src/types.tsx:5:15 Move the JSX type specifier out of this solid-js import into a separate @solidjs/web type import. Official migration guide: ${JSX_TYPE_GUIDE}`,
     ],
   );
 }

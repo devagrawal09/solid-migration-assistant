@@ -125,6 +125,7 @@ const expectedFiles = [
   "shared/entrypoint.ts",
   "shared/jsx.ts",
   "shared/run-workflow.mjs",
+  "shared/severity.mjs",
   "shared/target.ts",
   "shared/transform.ts",
   "transform.yaml",
@@ -216,7 +217,7 @@ test(
     );
 
     try {
-      assert.equal(expectedFiles.length, 107);
+      assert.equal(expectedFiles.length, 108);
       const packDirectory = join(temporaryRoot, "pack");
       mkdirSync(packDirectory);
       const pack = command(

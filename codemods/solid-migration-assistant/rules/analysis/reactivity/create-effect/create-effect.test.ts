@@ -54,10 +54,30 @@ const testCreateEffectRule: Codemod<TSX> = async (root) => {
   const twoArgSites = ["21:1", "26:1"];
   // 3-arg site
   const threeArgSites = ["34:1"];
+  // 1-arg sites that need restructuring, with the features each must name
+  const restructureSites: Record<string, string> = {
+    "62:1": "reads its previous value",
+    "66:1": "registers onCleanup",
+    "70:1": "creates reactive primitives or nested effects",
+    "74:1": "is async",
+    "78:1": "is defined elsewhere",
+  };
 
   const allExpected = isFixture
-    ? [...oneArgSites, ...zeroArgSites, ...twoArgSites, ...threeArgSites]
+    ? [...oneArgSites, ...zeroArgSites, ...twoArgSites, ...threeArgSites, ...Object.keys(restructureSites)]
     : [];
+
+  for (const entry of guidance) {
+    const location = /^[^:]*:(\d+:\d+) /.exec(entry)?.[1] ?? "";
+    const headline = entry.split("\n")[0] ?? "";
+    if (oneArgSites.includes(location) && !headline.endsWith("into compute and apply callbacks (simple shape).")) {
+      throw new Error(`${location} must be classified as a simple one-argument effect: ${headline}`);
+    }
+    const feature = restructureSites[location];
+    if (feature !== undefined && (!headline.includes("restructure this one-argument createEffect") || !entry.includes(feature))) {
+      throw new Error(`${location} must ask for restructuring and name "${feature}": ${entry.split("\n")[1]}`);
+    }
+  }
 
   const foundLocations = guidance.map((entry) => {
     const afterFile = entry.slice(filename.length + 1);

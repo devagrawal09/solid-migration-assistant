@@ -3,6 +3,7 @@ import type TSX from "codemod:ast-grep/langs/tsx";
 import { acquireLock, getState, setState } from "codemod:workflow";
 import { ANALYSIS_STATE_KEY } from "../shared/analysis.ts";
 import { TRANSFORM_REPORT_STATE_KEY } from "../shared/transform.ts";
+import { SEVERITY_TIERS, severityOf } from "../shared/severity.mjs";
 
 const EMITTED_STATE_KEY = "solid-migration-assistant-report-emitted";
 
@@ -22,8 +23,8 @@ const emitReport: Codemod<TSX> = async () => {
     const blocks = [
       ...(guidance.length > 0 ? [guidance.sort().join("\n\n")] : []),
       ...(report.length > 0 ? [report.sort().join("\n")] : []),
-      ...(guidance.length > 0 ? [summarize("findings", guidance)] : []),
-      ...(report.length > 0 ? [summarize("rewrites", report)] : []),
+      ...(guidance.length > 0 ? [summarize("findings", guidance, true)] : []),
+      ...(report.length > 0 ? [summarize("rewrites", report, false)] : []),
     ];
     if (blocks.length > 0) {
       console.log(blocks.join("\n\n"));
@@ -39,11 +40,12 @@ const emitReport: Codemod<TSX> = async () => {
  * A compact tail for the full guidance above it: the total, the number of
  * files, then one line per distinct headline with its count and a sorted
  * `file:line:column` list, so a long run can be surveyed without reading
- * every paragraph. The headline is the text of a finding's first line after
- * its location; the sites of one headline differ only in location. Every
- * list is sorted, so the summary is as deterministic as the findings.
+ * every paragraph. Analyzer findings are grouped under severity tiers
+ * (`shared/severity.mjs`) in fix order: what will not build first, then
+ * silent behavior changes, then deprecations. Rewrites are listed flat.
+ * Every list is sorted, so the summary is as deterministic as the findings.
  */
-function summarize(noun: string, entries: readonly string[]): string {
+function summarize(noun: string, entries: readonly string[], tiered: boolean): string {
   const files = new Set<string>();
   const byHeadline = new Map<string, string[]>();
   for (const entry of entries) {
@@ -57,11 +59,24 @@ function summarize(noun: string, entries: readonly string[]): string {
   const lines = [
     `[solid-migration-assistant] Summary: ${entries.length} ${noun} in ${files.size} file(s)`,
   ];
-  for (const [headline, sites] of [...byHeadline.entries()].sort(
-    ([left], [right]) => (left < right ? -1 : left > right ? 1 : 0),
-  )) {
-    lines.push(`${String(sites.length).padStart(4)}  ${headline}`);
-    lines.push(`      sites: ${[...sites].sort().join(", ")}`);
+  const sorted = [...byHeadline.entries()].sort(([left], [right]) =>
+    left < right ? -1 : left > right ? 1 : 0,
+  );
+  const groups = tiered
+    ? SEVERITY_TIERS.map((tier) => ({
+        label: tier.label,
+        rows: sorted.filter(([headline]) => severityOf(headline) === tier.id),
+      })).filter(({ rows }) => rows.length > 0)
+    : [{ label: null, rows: sorted }];
+  for (const { label, rows } of groups) {
+    if (label !== null) {
+      const count = rows.reduce((sum, [, sites]) => sum + sites.length, 0);
+      lines.push(`${label}: ${count} ${noun}`);
+    }
+    for (const [headline, sites] of rows) {
+      lines.push(`${String(sites.length).padStart(4)}  ${headline}`);
+      lines.push(`      sites: ${[...sites].sort().join(", ")}`);
+    }
   }
   return lines.join("\n");
 }

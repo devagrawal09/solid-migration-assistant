@@ -7,7 +7,7 @@ import { fileURLToPath } from "node:url";
 const packageDirectory = resolve(dirname(fileURLToPath(import.meta.url)), "..");
 const transformationsDirectory = resolve(packageDirectory, "rules/transformations");
 const EXPECTED_ADAPTER_COUNT = 7;
-const EXPECTED_FIXTURE_COUNT = 68;
+const EXPECTED_FIXTURE_COUNT = 73;
 const ruleCases = [
   { directory: "rules/transformations/imports/jsx-type-relocation" },
   { directory: "rules/transformations/imports/legacy-subpath-relocation" },

@@ -16,8 +16,18 @@ const testOnCleanupRule: Codemod<TSX> = async (root) => {
     root.source().includes('from "solid-js/web"');
 
   if (isFixture) {
-    if (guidance.length === 0) {
-      throw new Error("expected onCleanup findings but got none");
+    const expected = [
+      ["9:3", "createEffect callback"],
+      ["15:3", "onMount callback"],
+      ["20:3", "createEffect callback"],
+      ["21:3", "createEffect callback"],
+    ];
+    const actual = guidance.map((entry) => [
+      /^[^:]*:(\d+:\d+) /.exec(entry)?.[1] ?? entry,
+      /out of the (\w+ callback)/.exec(entry)?.[1] ?? "?",
+    ]);
+    if (JSON.stringify(actual) !== JSON.stringify(expected)) {
+      throw new Error(`unexpected onCleanup findings:\n${JSON.stringify(actual)}\nExpected:\n${JSON.stringify(expected)}`);
     }
   }
 

@@ -275,3 +275,50 @@ export function findModuleReferences(
 
   return matches;
 }
+
+const FUNCTION_LIKE = new Set([
+  "arrow_function",
+  "function_expression",
+  "function_declaration",
+  "generator_function",
+  "generator_function_declaration",
+  "method_definition",
+]);
+
+/** The nearest function-like ancestor of `node`, or null at module scope. */
+export function enclosingFunction(node: SgNode<TSX>): SgNode<TSX> | null {
+  return node.ancestors().find((ancestor) => FUNCTION_LIKE.has(ancestor.kind())) ?? null;
+}
+
+/**
+ * The call whose first argument is exactly `fn` (looking through
+ * parentheses), or null when `fn` is not a first call argument.
+ */
+export function callTakingAsFirstArgument(fn: SgNode<TSX>): SgNode<TSX> | null {
+  let node = fn;
+  let parent = node.parent();
+  while (parent?.kind() === "parenthesized_expression") {
+    node = parent;
+    parent = node.parent();
+  }
+  if (parent === null || parent.kind() !== "arguments") return null;
+  const first = parent.children().find((child) => child.isNamed() && child.kind() !== "comment");
+  if (first?.id() !== node.id()) return null;
+  const call = parent.parent();
+  return call !== null && call.kind() === "call_expression" ? call : null;
+}
+
+/**
+ * Calls to functions, by plain callee name, anywhere inside `fn`'s own body,
+ * not counting calls nested in inner function literals (whose bodies run at
+ * some other time).
+ */
+export function directCalleeNames(fn: SgNode<TSX>): Set<string> {
+  const names = new Set<string>();
+  for (const call of fn.findAll({ rule: { kind: "call_expression" } })) {
+    if (enclosingFunction(call)?.id() !== fn.id()) continue;
+    const callee = call.field("function");
+    if (callee !== null && callee.kind() === "identifier") names.add(callee.text());
+  }
+  return names;
+}

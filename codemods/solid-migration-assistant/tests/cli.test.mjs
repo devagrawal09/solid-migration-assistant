@@ -6,7 +6,9 @@ import { dirname, join, resolve } from "node:path";
 import { test } from "node:test";
 import {
   buildCodemodArguments,
+  buildJsonReport,
   DISCLOSURE,
+  parseStepOutput,
   dirtyTreeReason,
   main,
   parseArguments,
@@ -25,10 +27,14 @@ test("defaults the target to the invocation directory", () => {
 });
 
 test("parses the optional workflow and the transform-only --allow-dirty flag", () => {
-  assert.deepEqual(parseArguments([]), { workflow: "analyze", target: ".", allowDirty: false });
-  assert.deepEqual(parseArguments(["analyze", "--target", "p"]), { workflow: "analyze", target: "p", allowDirty: false });
-  assert.deepEqual(parseArguments(["transform"]), { workflow: "transform", target: ".", allowDirty: false });
-  assert.deepEqual(parseArguments(["transform", "--allow-dirty", "--target", "p"]), { workflow: "transform", target: "p", allowDirty: true });
+  assert.deepEqual(parseArguments([]), { workflow: "analyze", target: ".", allowDirty: false, format: "text" });
+  assert.deepEqual(parseArguments(["analyze", "--target", "p"]), { workflow: "analyze", target: "p", allowDirty: false, format: "text" });
+  assert.deepEqual(parseArguments(["transform"]), { workflow: "transform", target: ".", allowDirty: false, format: "text" });
+  assert.deepEqual(parseArguments(["transform", "--allow-dirty", "--target", "p"]), { workflow: "transform", target: "p", allowDirty: true, format: "text" });
+  assert.deepEqual(parseArguments(["--format", "json"]), { workflow: "analyze", target: ".", allowDirty: false, format: "json" });
+  assert.throws(() => parseArguments(["--format", "xml"]), /--format requires one of: text, json/);
+  assert.throws(() => parseArguments(["--format"]), /--format requires one of/);
+  assert.throws(() => parseArguments(["--format", "json", "--format", "text"]), /--format may only be specified once/);
   assert.throws(() => parseArguments(["--allow-dirty"]), /only accepted with the transform workflow/);
   assert.throws(() => parseArguments(["analyze", "--allow-dirty"]), /only accepted with the transform workflow/);
   assert.deepEqual(buildCodemodArguments("/t", "transform")[4], resolve(packageDirectory, "transform.yaml"));
@@ -133,6 +139,62 @@ test("reports Solid 1 manifests and jsxImportSource read-only, before the analyz
   } finally {
     rmSync(surface, { recursive: true, force: true });
   }
+});
+
+test("--format json re-emits captured findings as one sorted, tiered JSON document", () => {
+  const guide = "https://github.com/solidjs/solid/blob/2105ffb8ca2fced55f5fac0763177fc93f97c2c2/documentation/solid-2.0/MIGRATION.md";
+  const stepOutput = [
+    "Workflow started 00000000-0000-0000-0000-000000000000",
+    "src/last-file-codemod-prints.tsx",
+    `  src/b.tsx:4:2 Manual review required: migrate this lowercase onclick attribute to a camelCase event handler.`,
+    `  Why: plain attribute now. Official migration guide: ${guide}#attributes`,
+    "  ",
+    `  src/a.tsx:2:1 Move this Solid web renderer static import.`,
+    `  Guidance: move it. Official migration guide: ${guide}#imports`,
+    "  ",
+    "  [solid-migration-assistant] Summary: 2 findings in 2 file(s)",
+    "  Will not build or run on Solid 2: 1 findings",
+    "     1  Move this Solid web renderer static import.",
+  ].join("\n");
+  const findings = parseStepOutput(stepOutput, "analyze");
+  assert.deepEqual(findings.map(({ file, line, column }) => `${file}:${line}:${column}`), ["src/b.tsx:4:2", "src/a.tsx:2:1"]);
+  assert.equal(findings[1].guide, `${guide}#imports`);
+
+  const report = buildJsonReport({ workflow: "analyze", target: "/t", entries: findings, status: 0 });
+  assert.equal(report.solid.target, "solid-js@2.0.0-rc.21");
+  assert.deepEqual(report.summary, { findings: 2, files: 2, bySeverity: { build: 1, behavior: 1, deprecated: 0 } });
+  assert.deepEqual(report.findings.map((finding) => [finding.file, finding.severity]), [["src/a.tsx", "build"], ["src/b.tsx", "behavior"]]);
+
+  const rewrites = parseStepOutput(
+    `  src/x.tsx:1:15 Relocate solid-js/h to @solidjs/h. Official migration guide: ${guide}#imports\n  src/x.tsx:3:5 Rewrite the classList attribute on <div> to class, preserving its value expression. Official migration guide: ${guide}#classlist\n`,
+    "transform",
+  );
+  const transformReport = buildJsonReport({ workflow: "transform", target: "/t", entries: rewrites, status: 0 });
+  assert.deepEqual(transformReport.summary, { rewrites: 2, files: 1 });
+  assert.equal(transformReport.rewrites[0].message, "Relocate solid-js/h to @solidjs/h.");
+  assert.equal(transformReport.rewrites[1].guide, `${guide}#classlist`);
+
+  const printed = [];
+  const originalLog = console.log;
+  console.log = (...values) => printed.push(values.join(" "));
+  let options;
+  try {
+    const result = captureMain(["--format", "json"], {
+      cwd: packageDirectory,
+      projectImpl: () => [],
+      runImpl: (target, workflow, runOptions) => {
+        options = runOptions;
+        return { status: 0, stderr: stepOutput };
+      },
+    });
+    assert.equal(result.status, 0);
+    assert.deepEqual(result.diagnostics, [DISCLOSURE]);
+  } finally {
+    console.log = originalLog;
+  }
+  assert.deepEqual(options, { capture: true });
+  assert.equal(printed.length, 1, "JSON mode prints exactly one document on stdout");
+  assert.equal(JSON.parse(printed[0]).summary.findings, 2);
 });
 
 test("rejects unknown, missing, and duplicate options", () => {
