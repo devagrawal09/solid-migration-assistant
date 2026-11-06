@@ -3,7 +3,7 @@ import type TSX from "codemod:ast-grep/langs/tsx";
 import { analyzeWebImport } from "./web-import.ts";
 
 const MIGRATION_GUIDE =
-  "https://github.com/solidjs/solid/blob/ff4d3c4479163fbdd3327f5b22d0c3ea7bd1a2c5/documentation/solid-2.0/MIGRATION.md#imports-where-things-live-now";
+  "https://github.com/solidjs/solid/blob/2105ffb8ca2fced55f5fac0763177fc93f97c2c2/documentation/solid-2.0/MIGRATION.md#imports-where-things-live-now";
 
 const EXPECTED_SITES = [
   // Static imports
@@ -41,7 +41,7 @@ const testWebImportRule: Codemod<TSX> = async (root) => {
               : " Change only this static import's module source to @solidjs/web and preserve its import form and quote style.";
       return `${filename}:${location} Move this Solid web renderer ${formLabel}.
 Why: Solid 2 publishes the web renderer from @solidjs/web instead of the solid-js/web subpath.
-Guidance:${formGuidance} Make and validate that edit yourself; this analyzer never edits or runs the target project. Official migration guide: ${MIGRATION_GUIDE}`;
+Guidance:${formGuidance} Make and validate that edit yourself; this analyzer never edits or runs the target project. Ongoing check: after migration, eslint-plugin-solid's solid/removed-api rule (v2 config) reports this site. Official migration guide: ${MIGRATION_GUIDE}`;
     },
   );
 

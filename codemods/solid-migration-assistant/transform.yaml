@@ -7,6 +7,22 @@ nodes:
     name: Apply the deterministic Solid 2 source rewrites
     type: automatic
     steps:
+      - name: relocateJsxTypes
+        js-ast-grep:
+          js_file: scripts/transformations/relocateJsxTypes.ts
+          base_path: "."
+          language: "tsx"
+          include:
+            - "**/*.js"
+            - "**/*.jsx"
+            - "**/*.ts"
+            - "**/*.tsx"
+          exclude:
+            - "**/node_modules/**"
+            - "**/dist/**"
+            - "**/build/**"
+            - "**/coverage/**"
+            - "**/*.d.ts"
       - name: relocateLegacySubpaths
         js-ast-grep:
           js_file: scripts/transformations/relocateLegacySubpaths.ts
@@ -42,6 +58,54 @@ nodes:
       - name: rewriteClassListToClass
         js-ast-grep:
           js_file: scripts/transformations/rewriteClassListToClass.ts
+          base_path: "."
+          language: "tsx"
+          include:
+            - "**/*.js"
+            - "**/*.jsx"
+            - "**/*.ts"
+            - "**/*.tsx"
+          exclude:
+            - "**/node_modules/**"
+            - "**/dist/**"
+            - "**/build/**"
+            - "**/coverage/**"
+            - "**/*.d.ts"
+      - name: rewriteContextProvider
+        js-ast-grep:
+          js_file: scripts/transformations/rewriteContextProvider.ts
+          base_path: "."
+          language: "tsx"
+          include:
+            - "**/*.js"
+            - "**/*.jsx"
+            - "**/*.ts"
+            - "**/*.tsx"
+          exclude:
+            - "**/node_modules/**"
+            - "**/dist/**"
+            - "**/build/**"
+            - "**/coverage/**"
+            - "**/*.d.ts"
+      - name: rewriteIndexToFor
+        js-ast-grep:
+          js_file: scripts/transformations/rewriteIndexToFor.ts
+          base_path: "."
+          language: "tsx"
+          include:
+            - "**/*.js"
+            - "**/*.jsx"
+            - "**/*.ts"
+            - "**/*.tsx"
+          exclude:
+            - "**/node_modules/**"
+            - "**/dist/**"
+            - "**/build/**"
+            - "**/coverage/**"
+            - "**/*.d.ts"
+      - name: rewriteLowercaseEventHandlers
+        js-ast-grep:
+          js_file: scripts/transformations/rewriteLowercaseEventHandlers.ts
           base_path: "."
           language: "tsx"
           include:

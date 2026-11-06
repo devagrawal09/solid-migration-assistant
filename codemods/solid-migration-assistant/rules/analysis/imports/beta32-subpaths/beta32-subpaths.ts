@@ -2,6 +2,7 @@ import type { SgNode } from "codemod:ast-grep";
 import type TSX from "codemod:ast-grep/langs/tsx";
 import { findModuleReferences } from "../../../../shared/analysis.ts";
 import type { ModuleReference } from "../../../../shared/analysis.ts";
+import { lintHint, migrationGuide } from "../../../../shared/target.ts";
 
 const BETA32_SUBPATH_REPLACEMENTS: Readonly<Record<string, string>> = {
   "solid-js/store": "solid-js",
@@ -12,9 +13,9 @@ const BETA32_SUBPATH_REPLACEMENTS: Readonly<Record<string, string>> = {
   "solid-js/jsx-dev-runtime": "@solidjs/web/jsx-dev-runtime",
 };
 const MIGRATION_GUIDE =
-  "https://github.com/solidjs/solid/blob/ff4d3c4479163fbdd3327f5b22d0c3ea7bd1a2c5/documentation/solid-2.0/MIGRATION.md#imports-where-things-live-now";
+  migrationGuide("imports-where-things-live-now");
 const STORE_STOP_CONDITION =
-  "Stop: do not blindly rewrite this source if the import includes removed or renamed helpers such as unwrap, produce, createMutable, or modifyMutable. Migrate those bindings and call sites first, then move supported store imports to solid-js.";
+  "Stop: do not blindly rewrite this source. The plain createStore setter in Solid 2 accepts only a draft callback, setStore(state => { ... }); 1.x path setters such as setStore(\"user\", \"name\", value) and object merges such as setStore({ count: 1 }) must become draft writes, reconcile(value, options) became reconcile(value, key), and unwrap, produce, createMutable, and modifyMutable are renamed or removed. Migrate those call sites first, then move the surviving store imports to solid-js.";
 
 const FORM_LABELS: Record<ModuleReference["form"], string> = {
   import: "static import",
@@ -55,6 +56,6 @@ export function analyzeBeta32SubpathImports(
       const start = source.range().start;
       return `${context.filename}:${start.line + 1}:${start.column + 1} Move this Solid 2 legacy subpath ${FORM_LABELS[form]}.
 Why: Solid 2 publishes ${moduleName} from ${replacementModule}.
-Guidance:${FORM_GUIDANCE[form]} Make and validate that edit yourself; this analyzer never edits or runs the target project.${moduleName === "solid-js/store" ? ` ${STORE_STOP_CONDITION}` : ""} Official migration guide: ${MIGRATION_GUIDE}`;
+Guidance:${FORM_GUIDANCE[form]} Make and validate that edit yourself; this analyzer never edits or runs the target project.${moduleName === "solid-js/store" ? ` ${STORE_STOP_CONDITION}${lintHint("removed-api")}` : ""} Official migration guide: ${MIGRATION_GUIDE}`;
     });
 }

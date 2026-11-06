@@ -1,9 +1,10 @@
 import type { SgNode } from "codemod:ast-grep";
 import type TSX from "codemod:ast-grep/langs/tsx";
 import { findImportedCalls } from "../../../../shared/analysis.ts";
+import { lintHint, MIGRATION_GUIDE_URL } from "../../../../shared/target.ts";
 
 const GUIDE =
-  "https://github.com/solidjs/solid/blob/ff4d3c4479163fbdd3327f5b22d0c3ea7bd1a2c5/documentation/solid-2.0/MIGRATION.md";
+  MIGRATION_GUIDE_URL;
 
 function utilityGuidance(
   name: string,
@@ -37,7 +38,7 @@ function utilityGuidance(
   };
   return `${filename}:${start.line + 1}:${start.column + 1} Manual review required: ${headline}
 Why: ${why[name]}
-Guidance: ${steps[name]} Make and validate that edit yourself; this analyzer never edits or runs the target project. Official migration guide: ${GUIDE}#quick-rename--removal-map`;
+Guidance: ${steps[name]} Make and validate that edit yourself; this analyzer never edits or runs the target project.${name === "equalFn" || name === "getListener" ? lintHint("removed-api") : ""} Official migration guide: ${GUIDE}#quick-rename--removal-map`;
 }
 
 export function analyzeEqualFn(

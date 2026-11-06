@@ -1,6 +1,7 @@
 import type { Codemod } from "codemod:ast-grep";
 import type TSX from "codemod:ast-grep/langs/tsx";
 import {
+  DYNAMIC_DEPRECATION_NOTE,
   relocateWebPackage,
   WEB_MIGRATION_GUIDE,
 } from "./web-package-relocation.ts";
@@ -38,10 +39,21 @@ const FIXTURE_CASES: Record<string, FixtureCase> = {
   },
   "mixed-bindings": {
     relocations: [
+      { location: "8:70", bindings: "render, Dynamic" },
       { location: "9:65", bindings: "render, isServer" },
       { location: "10:67", bindings: "hydrate, isServer" },
     ],
-    transformed: "// fixture: mixed-bindings\nimport { render, Portal } from \"solid-js/web\";\nimport { Portal as PortalAliased, hydrate as hydrateAliased } from \"solid-js/web\";\nimport { isServer, isDev } from \"solid-js/web\";\nimport { type Dynamic as DynamicMixed, Suspense } from \"solid-js/web\";\nexport { Dynamic, createDynamic } from \"solid-js/web\";\nexport { render as renderOut, Portal as portalOut } from \"solid-js/web\";\nimport { render as mixedWithDynamic, Dynamic as vetoedDynamic } from \"solid-js/web\";\nimport { render as provenAlone, isServer as provenServer } from \"@solidjs/web\";\nexport { hydrate as provenOut, isServer as provenServerOut } from \"@solidjs/web\";\n\nvoid render;\nvoid Portal;\nvoid PortalAliased;\nvoid hydrateAliased;\nvoid isServer;\nvoid isDev;\nvoid Suspense;\nvoid mixedWithDynamic;\nvoid vetoedDynamic;\nvoid provenAlone;\nvoid provenServer;\ntype _DynamicMixed = DynamicMixed;\n",
+    transformed: "// fixture: mixed-bindings\nimport { render, Portal } from \"solid-js/web\";\nimport { Portal as PortalAliased, hydrate as hydrateAliased } from \"solid-js/web\";\nimport { isServer, isDev } from \"solid-js/web\";\nimport { type Dynamic as DynamicMixed, Suspense } from \"solid-js/web\";\nexport { Dynamic, createDynamic } from \"solid-js/web\";\nexport { render as renderOut, Portal as portalOut } from \"solid-js/web\";\nimport { render as mixedWithDynamic, Dynamic as provenDynamic } from \"@solidjs/web\";\nimport { render as provenAlone, isServer as provenServer } from \"@solidjs/web\";\nexport { hydrate as provenOut, isServer as provenServerOut } from \"@solidjs/web\";\n\nvoid render;\nvoid Portal;\nvoid PortalAliased;\nvoid hydrateAliased;\nvoid isServer;\nvoid isDev;\nvoid Suspense;\nvoid mixedWithDynamic;\nvoid provenDynamic;\nvoid provenAlone;\nvoid provenServer;\ntype _DynamicMixed = DynamicMixed;\n",
+  },
+  "dynamic-bindings": {
+    relocations: [
+      { location: "5:25", bindings: "Dynamic" },
+      { location: "6:43", bindings: "Dynamic" },
+      { location: "7:75", bindings: "Dynamic, render" },
+      { location: "8:39", bindings: "Dynamic" },
+      { location: "9:79", bindings: "Dynamic, isServer" },
+    ],
+    transformed: "// fixture: dynamic-bindings\n// Dynamic is exported by @solidjs/web at the pinned rc.21 commit and keeps its\n// 1.9 user-facing contract, so it relocates; every report line that carries it\n// also records that <Dynamic> is deprecated in favor of dynamic().\nimport { Dynamic } from \"@solidjs/web\";\nimport { Dynamic as DynamicAliased } from \"@solidjs/web\";\nimport { Dynamic as DynamicWithRender, render as renderWithDynamic } from \"@solidjs/web\";\nexport { Dynamic as DynamicOut } from \"@solidjs/web\";\nexport { Dynamic as DynamicWithProven, isServer as isServerWithDynamic } from \"@solidjs/web\";\nimport { Dynamic as DynamicWithPortal, Portal } from \"solid-js/web\";\n\nvoid Dynamic;\nvoid DynamicAliased;\nvoid DynamicWithRender;\nvoid renderWithDynamic;\nvoid DynamicWithPortal;\nvoid Portal;\n",
   },
   "named-imports": {
     relocations: [
@@ -115,7 +127,7 @@ const testWebPackageRelocation: Codemod<TSX> = async (root) => {
 
   const expected = fixtureCase.relocations.map(
     ({ location, bindings }) =>
-      `${filename}:${location} Relocate solid-js/web to @solidjs/web for proven bindings ${bindings}. Official migration guide: ${WEB_MIGRATION_GUIDE}`,
+      `${filename}:${location} Relocate solid-js/web to @solidjs/web for proven bindings ${bindings}.${bindings.split(", ").includes("Dynamic") ? ` ${DYNAMIC_DEPRECATION_NOTE}` : ""} Official migration guide: ${WEB_MIGRATION_GUIDE}`,
   );
 
   // Compared in emitted order, not sorted: the rule promises source order.

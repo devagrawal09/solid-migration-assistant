@@ -9,6 +9,7 @@ const rulesDirectory = resolve(packageDirectory, "rules/analysis");
 const ruleCases = [
   { directory: "rules/analysis/imports/web-import" },
   { directory: "rules/analysis/imports/beta32-subpaths" },
+  { directory: "rules/analysis/imports/jsx-types" },
   {
     directory: "rules/analysis/jsx/component-renames",
     semanticWorkspace: true,
@@ -53,6 +54,11 @@ const ruleCases = [
   { directory: "rules/analysis/jsx/context-provider" },
   { directory: "rules/analysis/jsx/dom-attr-namespaces" },
   { directory: "rules/analysis/jsx/dom-event-namespaces" },
+  { directory: "rules/analysis/jsx/dom-lowercase-events" },
+  { directory: "rules/analysis/jsx/ref-callback-scope" },
+  { directory: "rules/analysis/jsx/dynamic-component", semanticWorkspace: true },
+  { directory: "rules/analysis/reactivity/nested-create-root", semanticWorkspace: true },
+  { directory: "rules/analysis/store/setter-calls", semanticWorkspace: true },
   { directory: "rules/analysis/jsx/dom-use-directive" },
   {
     directory: "rules/analysis/reactivity/batch",
@@ -107,9 +113,9 @@ const existingAdapters = findFiles(rulesDirectory, (name) =>
   .map((path) => relative(packageDirectory, path))
   .sort();
 
-if (configuredAdapters.length !== 28 || existingAdapters.length !== 28) {
+if (configuredAdapters.length !== 34 || existingAdapters.length !== 34) {
   throw new Error(
-    `Expected 28 rule adapters, found ${configuredAdapters.length} configured and ${existingAdapters.length} on disk.`,
+    `Expected 34 rule adapters, found ${configuredAdapters.length} configured and ${existingAdapters.length} on disk.`,
   );
 }
 if (configuredAdapters.join("\n") !== existingAdapters.join("\n")) {
@@ -137,9 +143,9 @@ const existingFixtures = findFiles(rulesDirectory, (name) =>
   .map((path) => relative(packageDirectory, path))
   .sort();
 
-if (configuredFixtures.length !== 48 || existingFixtures.length !== 48) {
+if (configuredFixtures.length !== 56 || existingFixtures.length !== 56) {
   throw new Error(
-    `Expected 48 colocated fixture cases, found ${configuredFixtures.length} configured and ${existingFixtures.length} on disk.`,
+    `Expected 56 colocated fixture cases, found ${configuredFixtures.length} configured and ${existingFixtures.length} on disk.`,
   );
 }
 if (configuredFixtures.join("\n") !== existingFixtures.join("\n")) {

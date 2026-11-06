@@ -1,14 +1,17 @@
 import assert from "node:assert/strict";
 import { createRequire } from "node:module";
-import { mkdtempSync, rmSync, writeFileSync } from "node:fs";
+import { mkdirSync, mkdtempSync, rmSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { dirname, join, resolve } from "node:path";
 import { test } from "node:test";
 import {
   buildCodemodArguments,
   DISCLOSURE,
+  dirtyTreeReason,
   main,
+  parseArguments,
   parseTarget,
+  projectFindings,
   resolveCodemodLauncher,
   runCodemod,
 } from "../shared/run-workflow.mjs";
@@ -19,6 +22,117 @@ const require = createRequire(import.meta.url);
 test("defaults the target to the invocation directory", () => {
   assert.equal(parseTarget([]), ".");
   assert.equal(parseTarget(["--target", "project"]), "project");
+});
+
+test("parses the optional workflow and the transform-only --allow-dirty flag", () => {
+  assert.deepEqual(parseArguments([]), { workflow: "analyze", target: ".", allowDirty: false });
+  assert.deepEqual(parseArguments(["analyze", "--target", "p"]), { workflow: "analyze", target: "p", allowDirty: false });
+  assert.deepEqual(parseArguments(["transform"]), { workflow: "transform", target: ".", allowDirty: false });
+  assert.deepEqual(parseArguments(["transform", "--allow-dirty", "--target", "p"]), { workflow: "transform", target: "p", allowDirty: true });
+  assert.throws(() => parseArguments(["--allow-dirty"]), /only accepted with the transform workflow/);
+  assert.throws(() => parseArguments(["analyze", "--allow-dirty"]), /only accepted with the transform workflow/);
+  assert.deepEqual(buildCodemodArguments("/t", "transform")[4], resolve(packageDirectory, "transform.yaml"));
+});
+
+test("refuses to transform a dirty or non-git target unless --allow-dirty", () => {
+  const spawnFor = (result) => () => result;
+  assert.equal(dirtyTreeReason("/t", { spawnImpl: spawnFor({ status: 0, stdout: "" }) }), null);
+  assert.match(dirtyTreeReason("/t", { spawnImpl: spawnFor({ status: 0, stdout: " M a.ts\n?? b.ts\n" }) }), /2 uncommitted change/);
+  assert.match(dirtyTreeReason("/t", { spawnImpl: spawnFor({ status: 128, stdout: "" }) }), /not inside a git repository/);
+  assert.match(dirtyTreeReason("/t", { spawnImpl: spawnFor({ error: new Error("ENOENT") }) }), /not inside a git repository/);
+
+  const blocked = captureMain(["transform"], {
+    cwd: packageDirectory,
+    dirtyImpl: () => "target has 1 uncommitted change(s)",
+    runImpl: () => assert.fail("must not launch Codemod on a dirty tree"),
+  });
+  assert.equal(blocked.status, 2);
+  assert.deepEqual(blocked.diagnostics, [
+    "[solid-migration-assistant] target has 1 uncommitted change(s)",
+    DISCLOSURE,
+  ]);
+
+  let launched;
+  const allowed = captureMain(["transform", "--allow-dirty"], {
+    cwd: packageDirectory,
+    dirtyImpl: () => assert.fail("--allow-dirty must skip the git check"),
+    runImpl: (target, workflow) => {
+      launched = { target, workflow };
+      return { status: 0 };
+    },
+  });
+  assert.equal(allowed.status, 0);
+  assert.deepEqual(launched, { target: packageDirectory, workflow: "transform" });
+
+  const clean = captureMain(["transform"], {
+    cwd: packageDirectory,
+    dirtyImpl: () => null,
+    runImpl: (target, workflow) => ({ status: workflow === "transform" ? 0 : 9 }),
+  });
+  assert.equal(clean.status, 0);
+});
+
+test("reports Solid 1 manifests and jsxImportSource read-only, before the analyzer runs", () => {
+  const surface = mkdtempSync(join(tmpdir(), "sma-project-findings-"));
+  try {
+    const legacy = join(surface, "legacy");
+    mkdirSync(legacy);
+    writeFileSync(join(legacy, "package.json"), JSON.stringify({ dependencies: { "solid-js": "^1.9.3" }, devDependencies: { "vite-plugin-solid": "^2.11.0" } }));
+    writeFileSync(join(legacy, "tsconfig.json"), '{\n  // comment\n  "compilerOptions": { "jsx": "preserve", "jsxImportSource": "solid-js", },\n}\n');
+    const findings = projectFindings(legacy);
+    assert.equal(findings.length, 2);
+    assert.match(findings[0], /^package\.json:1:1 Manual review required: move this project's Solid dependencies to solid-js@2\.0\.0-rc\.21\./);
+    assert.match(findings[0], /declared as "\^1\.9\.3", a Solid 1 range; @solidjs\/web, the Solid 2 web renderer package, is not declared; vite-plugin-solid compile Solid 1 JSX only/);
+    assert.match(findings[1], /^tsconfig\.json:1:1 Manual review required: point jsxImportSource/);
+    assert.match(findings[1], /Official migration guide: https:\/\/github\.com\/solidjs\/solid\/blob\/2105ffb8ca2fced55f5fac0763177fc93f97c2c2\/documentation\/solid-2\.0\/MIGRATION\.md#typescript-jsx-solid-js--renderer-package/);
+
+    const migrated = join(surface, "migrated");
+    mkdirSync(migrated);
+    writeFileSync(join(migrated, "package.json"), JSON.stringify({ dependencies: { "solid-js": "2.0.0-rc.21", "@solidjs/web": "2.0.0-rc.21" } }));
+    writeFileSync(join(migrated, "tsconfig.json"), JSON.stringify({ compilerOptions: { jsxImportSource: "@solidjs/web" } }));
+    assert.deepEqual(projectFindings(migrated), []);
+
+    const broken = join(surface, "broken");
+    mkdirSync(broken);
+    writeFileSync(join(broken, "package.json"), "{ not json");
+    writeFileSync(join(broken, "tsconfig.json"), "also not json");
+    assert.deepEqual(projectFindings(broken), []);
+    assert.deepEqual(projectFindings(join(surface, "missing")), []);
+
+    const printed = [];
+    const originalLog = console.log;
+    console.log = (...values) => printed.push(values.join(" "));
+    let order = [];
+    try {
+      const result = captureMain(["--target", legacy], {
+        cwd: surface,
+        projectImpl: (target) => {
+          order.push("findings");
+          return projectFindings(target);
+        },
+        runImpl: () => {
+          order.push("codemod");
+          return { status: 0 };
+        },
+      });
+      assert.equal(result.status, 0);
+    } finally {
+      console.log = originalLog;
+    }
+    assert.deepEqual(order, ["findings", "codemod"]);
+    assert.equal(printed.length, 1);
+    assert.match(printed[0], /^package\.json:1:1 /);
+    assert.match(printed[0], /\n\ntsconfig\.json:1:1 /);
+
+    const transformRun = captureMain(["transform", "--allow-dirty", "--target", legacy], {
+      cwd: surface,
+      projectImpl: () => assert.fail("transform must not print manifest findings"),
+      runImpl: () => ({ status: 0 }),
+    });
+    assert.equal(transformRun.status, 0);
+  } finally {
+    rmSync(surface, { recursive: true, force: true });
+  }
 });
 
 test("rejects unknown, missing, and duplicate options", () => {
@@ -111,8 +225,8 @@ test("publishes exact immutable public-preview disclosure", () => {
   assert.ok(
     DISCLOSURE.includes(`Analyzer: ${packageJson.name}@${packageJson.version}`),
   );
-  assert.match(DISCLOSURE, /solid-js@2\.0\.0-rc\.0/);
-  assert.match(DISCLOSURE, /ff4d3c4479163fbdd3327f5b22d0c3ea7bd1a2c5/);
+  assert.match(DISCLOSURE, /solid-js@2\.0\.0-rc\.21/);
+  assert.match(DISCLOSURE, /2105ffb8ca2fced55f5fac0763177fc93f97c2c2/);
   assert.match(
     DISCLOSURE,
     /source-only.*incomplete.*no migration-readiness claim/is,
@@ -128,7 +242,7 @@ test("publishes exact immutable public-preview disclosure", () => {
   );
   assert.match(DISCLOSURE, /no analyzer telemetry or generated report/);
   assert.match(DISCLOSURE, /Codemod may retain normal workflow or task state/);
-  assert.match(DISCLOSURE, /github\.com\/solidjs\/solid\/blob\/ff4d3c44/);
+  assert.match(DISCLOSURE, /github\.com\/solidjs\/solid\/blob\/2105ffb8/);
   assert.match(
     DISCLOSURE,
     /github\.com\/devagrawal09\/solid-migration-assistant\/issues/,

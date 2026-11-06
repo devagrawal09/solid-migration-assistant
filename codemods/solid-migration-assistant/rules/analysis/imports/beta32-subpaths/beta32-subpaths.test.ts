@@ -3,9 +3,11 @@ import type TSX from "codemod:ast-grep/langs/tsx";
 import { analyzeBeta32SubpathImports } from "./beta32-subpaths.ts";
 
 const MIGRATION_GUIDE =
-  "https://github.com/solidjs/solid/blob/ff4d3c4479163fbdd3327f5b22d0c3ea7bd1a2c5/documentation/solid-2.0/MIGRATION.md#imports-where-things-live-now";
+  "https://github.com/solidjs/solid/blob/2105ffb8ca2fced55f5fac0763177fc93f97c2c2/documentation/solid-2.0/MIGRATION.md#imports-where-things-live-now";
 const STORE_STOP_CONDITION =
-  "Stop: do not blindly rewrite this source if the import includes removed or renamed helpers such as unwrap, produce, createMutable, or modifyMutable. Migrate those bindings and call sites first, then move supported store imports to solid-js.";
+  "Stop: do not blindly rewrite this source. The plain createStore setter in Solid 2 accepts only a draft callback, setStore(state => { ... }); 1.x path setters such as setStore(\"user\", \"name\", value) and object merges such as setStore({ count: 1 }) must become draft writes, reconcile(value, options) became reconcile(value, key), and unwrap, produce, createMutable, and modifyMutable are renamed or removed. Migrate those call sites first, then move the surviving store imports to solid-js.";
+const LINT_HINT =
+  " Ongoing check: after migration, eslint-plugin-solid's solid/removed-api rule (v2 config) reports this site.";
 const EXPECTED_SITES = [
   // Static imports
   { location: "1:29", legacy: "solid-js/store", replacement: "solid-js", form: "static import" },
@@ -38,7 +40,7 @@ const testBeta32SubpathRule: Codemod<TSX> = async (root) => {
   const expected = EXPECTED_SITES.map(
     ({ location, legacy, replacement, form }) => `${filename}:${location} Move this Solid 2 legacy subpath ${form}.
 Why: Solid 2 publishes ${legacy} from ${replacement}.
-Guidance:${form === "re-export" ? " Change only this re-export's module source and preserve its export form and quote style." : form === "dynamic import()" ? " Change only this dynamic import's module source and preserve its quote style." : form === "require() call" ? " Change only this require call's module source and preserve its quote style." : " Change only this static import's module source and preserve its import form and quote style."} Make and validate that edit yourself; this analyzer never edits or runs the target project.${legacy === "solid-js/store" ? ` ${STORE_STOP_CONDITION}` : ""} Official migration guide: ${MIGRATION_GUIDE}`,
+Guidance:${form === "re-export" ? " Change only this re-export's module source and preserve its export form and quote style." : form === "dynamic import()" ? " Change only this dynamic import's module source and preserve its quote style." : form === "require() call" ? " Change only this require call's module source and preserve its quote style." : " Change only this static import's module source and preserve its import form and quote style."} Make and validate that edit yourself; this analyzer never edits or runs the target project.${legacy === "solid-js/store" ? ` ${STORE_STOP_CONDITION}${LINT_HINT}` : ""} Official migration guide: ${MIGRATION_GUIDE}`,
   );
 
   if (guidance.join("\n---finding---\n") !== expected.join("\n---finding---\n")) {

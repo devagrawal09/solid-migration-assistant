@@ -1,5 +1,5 @@
 import { spawnSync } from "node:child_process";
-import { readFileSync, statSync } from "node:fs";
+import { existsSync, readFileSync, statSync } from "node:fs";
 import { createRequire } from "node:module";
 import { dirname, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
@@ -10,8 +10,8 @@ const packageMetadata = JSON.parse(
   readFileSync(resolve(packageDirectory, "package.json"), "utf8"),
 );
 
-const SOLID_TARGET = "solid-js@2.0.0-rc.0";
-const SOLID_SOURCE_COMMIT = "ff4d3c4479163fbdd3327f5b22d0c3ea7bd1a2c5";
+const SOLID_TARGET = "solid-js@2.0.0-rc.21";
+const SOLID_SOURCE_COMMIT = "2105ffb8ca2fced55f5fac0763177fc93f97c2c2";
 const MIGRATION_GUIDE = `https://github.com/solidjs/solid/blob/${SOLID_SOURCE_COMMIT}/documentation/solid-2.0/MIGRATION.md`;
 const FEEDBACK_URL =
   "https://github.com/devagrawal09/solid-migration-assistant/issues";
@@ -26,14 +26,117 @@ Privacy and output: Analyzer telemetry is disabled and no analyzer telemetry or 
 Feedback: ${FEEDBACK_URL}
 [solid-migration-assistant] End final disclosure`;
 
+/**
+ * Read-only findings for the two files every migration must edit that the
+ * JSSG analyzers never see: the dependency manifest and the TypeScript JSX
+ * configuration. Both are read, never written; a missing or unparsable file
+ * produces no finding. The guidance mirrors the official Solid 2 templates
+ * (solidjs/templates, `solid-v2` group), which depend on `solid-js` and
+ * `@solidjs/web` at the same RC, build with `@solidjs/vite-plugin`, and set
+ * `jsxImportSource` to `@solidjs/web`.
+ */
+export function projectFindings(target) {
+  const findings = [];
+
+  const manifest = readJsonLike(resolve(target, "package.json"));
+  if (manifest && typeof manifest === "object") {
+    const declared = {
+      ...(manifest.dependencies ?? {}),
+      ...(manifest.devDependencies ?? {}),
+    };
+    const solid = declared["solid-js"];
+    const web = declared["@solidjs/web"];
+    const legacyTooling = ["babel-preset-solid", "vite-plugin-solid"].filter(
+      (name) => declared[name] !== undefined,
+    );
+    const onSolid2 = typeof solid === "string" && /(^|[^0-9.])2\.0\.0/.test(solid);
+    const problems = [];
+    if (typeof solid === "string" && !onSolid2) {
+      problems.push(`solid-js is declared as ${JSON.stringify(solid)}, a Solid 1 range`);
+    }
+    if (typeof solid === "string" && web === undefined) {
+      problems.push("@solidjs/web, the Solid 2 web renderer package, is not declared");
+    }
+    if (legacyTooling.length > 0) {
+      problems.push(`${legacyTooling.join(" and ")} compile Solid 1 JSX only`);
+    }
+    if (problems.length > 0) {
+      findings.push(`package.json:1:1 Manual review required: move this project's Solid dependencies to ${SOLID_TARGET}.
+Why: ${problems.join("; ")}. Solid 2 splits the web renderer into @solidjs/web, versions it in lockstep with solid-js, and compiles JSX through @solidjs/vite-plugin (or @solidjs/babel-plugin), which is what the official solid-v2 templates use.
+Guidance: Pin solid-js and @solidjs/web to the exact same RC version (${SOLID_TARGET.split("@")[1]}), replace babel-preset-solid or vite-plugin-solid with @solidjs/vite-plugin, and re-run this analyzer after installing, since Solid 1 source is the input this version understands. Make and validate that edit yourself; this analyzer never edits or runs the target project. Official migration guide: ${MIGRATION_GUIDE}#imports-where-things-live-now`);
+    }
+  }
+
+  const tsconfig = readJsonLike(resolve(target, "tsconfig.json"));
+  const jsxImportSource = tsconfig?.compilerOptions?.jsxImportSource;
+  if (jsxImportSource === "solid-js") {
+    findings.push(`tsconfig.json:1:1 Manual review required: point jsxImportSource at the Solid 2 renderer package.
+Why: compilerOptions.jsxImportSource is "solid-js", but Solid 2 no longer ships JSX runtime type entries from solid-js; web projects take them from @solidjs/web (hyperscript projects from @solidjs/h).
+Guidance: Set compilerOptions.jsxImportSource to "@solidjs/web" (keep "jsx": "preserve"), and move any import type { JSX } from "solid-js" to @solidjs/web; the transform workflow rewrites the sole-specifier form of that import and @jsxImportSource pragmas, but not this file. Make and validate that edit yourself; this analyzer never edits or runs the target project. Official migration guide: ${MIGRATION_GUIDE}#typescript-jsx-solid-js--renderer-package`);
+  }
+
+  return findings;
+}
+
+/**
+ * Parses a JSON file that may carry comments and trailing commas (tsconfig
+ * does); returns undefined when the file is missing or still unparsable.
+ */
+function readJsonLike(path) {
+  let text;
+  try {
+    text = readFileSync(path, "utf8");
+  } catch {
+    return undefined;
+  }
+  try {
+    return JSON.parse(text);
+  } catch {
+    const stripped = text
+      .replace(/("(?:[^"\\]|\\.)*")|\/\*[\s\S]*?\*\/|\/\/[^\n]*/g, (match, string) => string ?? "")
+      .replace(/,(\s*[}\]])/g, "$1");
+    try {
+      return JSON.parse(stripped);
+    } catch {
+      return undefined;
+    }
+  }
+}
+
 export class CliUsageError extends Error {}
 
-export function parseTarget(argumentsList) {
-  let target = ".";
-  let hasExplicitTarget = false;
+export const WORKFLOWS = Object.freeze({
+  analyze: "workflow.yaml",
+  transform: "transform.yaml",
+});
 
-  for (let index = 0; index < argumentsList.length; index += 1) {
+/**
+ * `[workflow] [--target <dir>] [--allow-dirty]`. The workflow defaults to
+ * `analyze`, so every pre-existing invocation keeps its meaning;
+ * `--allow-dirty` is accepted only with `transform`, the one workflow that
+ * writes to the target.
+ */
+export function parseArguments(argumentsList) {
+  let workflow = "analyze";
+  let target = ".";
+  let allowDirty = false;
+  let hasExplicitTarget = false;
+  let index = 0;
+
+  if (argumentsList[0] === "analyze" || argumentsList[0] === "transform") {
+    workflow = argumentsList[0];
+    index = 1;
+  }
+
+  for (; index < argumentsList.length; index += 1) {
     const argument = argumentsList[index];
+    if (argument === "--allow-dirty") {
+      if (workflow !== "transform") {
+        throw new CliUsageError("--allow-dirty is only accepted with the transform workflow");
+      }
+      allowDirty = true;
+      continue;
+    }
     if (argument !== "--target") {
       throw new CliUsageError(`unknown argument: ${argument}`);
     }
@@ -50,31 +153,61 @@ export function parseTarget(argumentsList) {
     index += 1;
   }
 
-  return target;
+  return { workflow, target, allowDirty };
+}
+
+/** Backwards-compatible view of `parseArguments` for the analyze workflow. */
+export function parseTarget(argumentsList) {
+  return parseArguments(argumentsList).target;
+}
+
+/**
+ * The transform workflow rewrites files in place, so like react-codemod,
+ * Next.js's codemods, and `ng update` it refuses a target whose git working
+ * tree has uncommitted changes, or that is not inside a git repository at
+ * all, unless the caller passes `--allow-dirty`. Returns null when the
+ * transform may proceed, else the reason it may not.
+ */
+export function dirtyTreeReason(target, { spawnImpl = spawnSync } = {}) {
+  const status = spawnImpl("git", ["status", "--porcelain", "--untracked-files=all"], {
+    cwd: target,
+    encoding: "utf8",
+  });
+  if (status.error || status.status !== 0) {
+    return "target is not inside a git repository (or git is unavailable); commit it to a repository first, or pass --allow-dirty to transform it anyway";
+  }
+  const dirty = (status.stdout ?? "").split("\n").filter((line) => line.trim() !== "");
+  if (dirty.length > 0) {
+    return `target has ${dirty.length} uncommitted change(s); commit or stash them first, or pass --allow-dirty to transform anyway`;
+  }
+  return null;
 }
 
 export function resolveCodemodLauncher() {
   return resolve(dirname(require.resolve("codemod/package.json")), "codemod");
 }
 
-export function buildCodemodArguments(target) {
+export function buildCodemodArguments(target, workflow = "analyze") {
   return [
     "--disable-analytics",
     "workflow",
     "run",
     "-w",
-    resolve(packageDirectory, "workflow.yaml"),
+    resolve(packageDirectory, WORKFLOWS[workflow]),
     "-t",
     target,
+    // Codemod's own dirty-tree check is bypassed because the launcher runs
+    // its own (`dirtyTreeReason`) before a transform and the analyzer never
+    // writes to the target.
     "--allow-dirty",
     "--no-interactive",
   ];
 }
 
-export function runCodemod(target, { spawnImpl = spawnSync } = {}) {
+export function runCodemod(target, { spawnImpl = spawnSync, workflow = "analyze" } = {}) {
   return spawnImpl(
     process.execPath,
-    [resolveCodemodLauncher(), ...buildCodemodArguments(target)],
+    [resolveCodemodLauncher(), ...buildCodemodArguments(target, workflow)],
     {
       cwd: packageDirectory,
       // Codemod routes all workflow step console output to its stderr and its
@@ -87,12 +220,17 @@ export function runCodemod(target, { spawnImpl = spawnSync } = {}) {
 
 export function main(
   argumentsList = process.argv.slice(2),
-  { cwd, runImpl = runCodemod } = {},
+  {
+    cwd,
+    runImpl = (target, workflow) => runCodemod(target, { workflow }),
+    dirtyImpl = dirtyTreeReason,
+    projectImpl = projectFindings,
+  } = {},
 ) {
   let status = 1;
 
   try {
-    status = run(argumentsList, cwd ?? process.cwd(), runImpl);
+    status = run(argumentsList, cwd ?? process.cwd(), runImpl, dirtyImpl, projectImpl);
   } catch (error) {
     console.error(
       `[solid-migration-assistant] analyzer execution failed: ${error instanceof Error ? error.message : String(error)}`,
@@ -104,16 +242,16 @@ export function main(
   return status;
 }
 
-function run(argumentsList, invocationDirectory, runImpl) {
-  let targetArgument;
+function run(argumentsList, invocationDirectory, runImpl, dirtyImpl, projectImpl) {
+  let parsed;
   try {
-    targetArgument = parseTarget(argumentsList);
+    parsed = parseArguments(argumentsList);
   } catch (error) {
     if (error instanceof CliUsageError) return fail(error.message);
     throw error;
   }
 
-  const target = resolve(invocationDirectory, targetArgument);
+  const target = resolve(invocationDirectory, parsed.target);
   try {
     if (!statSync(target).isDirectory()) {
       return fail(`target is not a directory: ${target}`);
@@ -130,7 +268,17 @@ function run(argumentsList, invocationDirectory, runImpl) {
     throw error;
   }
 
-  const result = runImpl(target);
+  if (parsed.workflow === "transform" && !parsed.allowDirty) {
+    const reason = dirtyImpl(target);
+    if (reason !== null) return fail(reason);
+  }
+
+  if (parsed.workflow === "analyze") {
+    const findings = projectImpl(target);
+    if (findings.length > 0) console.log(findings.join("\n\n"));
+  }
+
+  const result = runImpl(target, parsed.workflow);
   if (result.error) throw result.error;
   return result.status ?? 1;
 }
