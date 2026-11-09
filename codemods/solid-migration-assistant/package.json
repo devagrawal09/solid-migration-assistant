@@ -111,6 +111,7 @@
     "shared/entrypoint.ts",
     "shared/jsx.ts",
     "shared/run-workflow.mjs",
+    "shared/severity.mjs",
     "shared/target.ts",
     "shared/transform.ts",
     "transform.yaml",

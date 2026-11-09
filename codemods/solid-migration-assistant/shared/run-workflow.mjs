@@ -3,6 +3,7 @@ import { existsSync, readFileSync, statSync } from "node:fs";
 import { createRequire } from "node:module";
 import { dirname, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
+import { SEVERITY_TIERS, severityOf } from "./severity.mjs";
 
 const packageDirectory = resolve(dirname(fileURLToPath(import.meta.url)), "..");
 const require = createRequire(import.meta.url);
@@ -110,17 +111,21 @@ export const WORKFLOWS = Object.freeze({
   transform: "transform.yaml",
 });
 
+export const FORMATS = Object.freeze(["text", "json"]);
+
 /**
- * `[workflow] [--target <dir>] [--allow-dirty]`. The workflow defaults to
- * `analyze`, so every pre-existing invocation keeps its meaning;
- * `--allow-dirty` is accepted only with `transform`, the one workflow that
- * writes to the target.
+ * `[workflow] [--target <dir>] [--allow-dirty] [--format text|json]`. The
+ * workflow defaults to `analyze` and the format to `text`, so every
+ * pre-existing invocation keeps its meaning; `--allow-dirty` is accepted only
+ * with `transform`, the one workflow that writes to the target.
  */
 export function parseArguments(argumentsList) {
   let workflow = "analyze";
   let target = ".";
   let allowDirty = false;
+  let format = "text";
   let hasExplicitTarget = false;
+  let hasExplicitFormat = false;
   let index = 0;
 
   if (argumentsList[0] === "analyze" || argumentsList[0] === "transform") {
@@ -135,6 +140,19 @@ export function parseArguments(argumentsList) {
         throw new CliUsageError("--allow-dirty is only accepted with the transform workflow");
       }
       allowDirty = true;
+      continue;
+    }
+    if (argument === "--format") {
+      if (hasExplicitFormat) {
+        throw new CliUsageError("--format may only be specified once");
+      }
+      const value = argumentsList[index + 1];
+      if (!FORMATS.includes(value)) {
+        throw new CliUsageError(`--format requires one of: ${FORMATS.join(", ")}`);
+      }
+      format = value;
+      hasExplicitFormat = true;
+      index += 1;
       continue;
     }
     if (argument !== "--target") {
@@ -153,7 +171,7 @@ export function parseArguments(argumentsList) {
     index += 1;
   }
 
-  return { workflow, target, allowDirty };
+  return { workflow, target, allowDirty, format };
 }
 
 /** Backwards-compatible view of `parseArguments` for the analyze workflow. */
@@ -204,7 +222,10 @@ export function buildCodemodArguments(target, workflow = "analyze") {
   ];
 }
 
-export function runCodemod(target, { spawnImpl = spawnSync, workflow = "analyze" } = {}) {
+export function runCodemod(
+  target,
+  { spawnImpl = spawnSync, workflow = "analyze", capture = false } = {},
+) {
   return spawnImpl(
     process.execPath,
     [resolveCodemodLauncher(), ...buildCodemodArguments(target, workflow)],
@@ -212,17 +233,94 @@ export function runCodemod(target, { spawnImpl = spawnSync, workflow = "analyze"
       cwd: packageDirectory,
       // Codemod routes all workflow step console output to its stderr and its
       // progress envelope to stdout. Swap the child's fds so the guidance (the
-      // product) reaches our stdout while progress stays on our stderr.
-      stdio: [0, 2, 1],
+      // product) reaches our stdout while progress stays on our stderr. With
+      // `capture`, the step output is collected instead so the launcher can
+      // re-emit it as JSON; progress still streams to our stderr.
+      stdio: capture ? [0, 2, "pipe"] : [0, 2, 1],
+      ...(capture ? { encoding: "utf8", maxBuffer: 256 * 1024 * 1024 } : {}),
     },
   );
+}
+
+const STEP_OUTPUT_SUMMARY = "[solid-migration-assistant] Summary: ";
+const LOCATED = /^(\S+):(\d+):(\d+) (.*)$/;
+const GUIDE_LINK = / Official migration guide: (\S+)$/;
+
+/**
+ * The located entries in captured workflow step output. Codemod prefixes
+ * every console line from a step with two spaces; the guidance block is that
+ * text up to the summary tail, with one blank line between findings, while
+ * transform report lines are one per line. Unindented lines are Codemod's
+ * own and are ignored.
+ */
+export function parseStepOutput(text, workflow) {
+  const lines = String(text ?? "")
+    .split("\n")
+    .map((line) => line.replace(/\r$/, ""))
+    .filter((line) => line.startsWith("  "))
+    .map((line) => line.slice(2));
+  const summary = lines.findIndex((line) => line.startsWith(STEP_OUTPUT_SUMMARY));
+  const body = (summary === -1 ? lines : lines.slice(0, summary)).join("\n").trim();
+  if (body === "") return [];
+  const entries = workflow === "transform" ? body.split("\n").filter((line) => line.trim() !== "") : body.split("\n\n");
+  return entries.map(toEntry).filter((entry) => entry !== null);
+}
+
+function toEntry(text) {
+  const [first = ""] = text.split("\n");
+  const located = LOCATED.exec(first);
+  if (located === null) return null;
+  const guide = GUIDE_LINK.exec(text)?.[1] ?? null;
+  return {
+    file: located[1],
+    line: Number(located[2]),
+    column: Number(located[3]),
+    headline: located[4].replace(GUIDE_LINK, ""),
+    guide,
+    text,
+  };
+}
+
+/**
+ * One JSON document for a run: the pinned target, totals (by severity tier
+ * for findings), and every finding or rewrite with its location, headline,
+ * guide link, and full text. Entries are sorted by file, line, and column.
+ */
+export function buildJsonReport({ workflow, target, entries, status }) {
+  const sorted = [...entries].sort(
+    (left, right) =>
+      (left.file < right.file ? -1 : left.file > right.file ? 1 : 0) ||
+      left.line - right.line ||
+      left.column - right.column,
+  );
+  const files = new Set(sorted.map((entry) => entry.file));
+  const report = {
+    tool: packageMetadata.name,
+    version: packageMetadata.version,
+    workflow,
+    solid: { target: SOLID_TARGET, sourceCommit: SOLID_SOURCE_COMMIT },
+    target,
+    status,
+  };
+  if (workflow === "analyze") {
+    const findings = sorted.map((entry) => ({ ...entry, severity: severityOf(entry.headline) }));
+    const bySeverity = Object.fromEntries(SEVERITY_TIERS.map((tier) => [tier.id, 0]));
+    for (const finding of findings) bySeverity[finding.severity] += 1;
+    return { ...report, summary: { findings: findings.length, files: files.size, bySeverity }, findings };
+  }
+  return {
+    ...report,
+    summary: { rewrites: sorted.length, files: files.size },
+    rewrites: sorted.map(({ file, line, column, headline, guide }) => ({ file, line, column, message: headline, guide })),
+  };
 }
 
 export function main(
   argumentsList = process.argv.slice(2),
   {
     cwd,
-    runImpl = (target, workflow) => runCodemod(target, { workflow }),
+    runImpl = (target, workflow, { capture = false } = {}) =>
+      runCodemod(target, { workflow, capture }),
     dirtyImpl = dirtyTreeReason,
     projectImpl = projectFindings,
   } = {},
@@ -273,14 +371,23 @@ function run(argumentsList, invocationDirectory, runImpl, dirtyImpl, projectImpl
     if (reason !== null) return fail(reason);
   }
 
-  if (parsed.workflow === "analyze") {
-    const findings = projectImpl(target);
-    if (findings.length > 0) console.log(findings.join("\n\n"));
+  const projectEntries = parsed.workflow === "analyze" ? projectImpl(target) : [];
+  if (parsed.format === "text") {
+    if (projectEntries.length > 0) console.log(projectEntries.join("\n\n"));
+    const result = runImpl(target, parsed.workflow, { capture: false });
+    if (result.error) throw result.error;
+    return result.status ?? 1;
   }
 
-  const result = runImpl(target, parsed.workflow);
+  const result = runImpl(target, parsed.workflow, { capture: true });
   if (result.error) throw result.error;
-  return result.status ?? 1;
+  const status = result.status ?? 1;
+  const entries = [
+    ...projectEntries.map(toEntry).filter((entry) => entry !== null),
+    ...parseStepOutput(result.stderr, parsed.workflow),
+  ];
+  console.log(JSON.stringify(buildJsonReport({ workflow: parsed.workflow, target, entries, status }), null, 2));
+  return status;
 }
 
 function fail(message) {

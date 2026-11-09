@@ -1,40 +1,57 @@
-import { /* before */ onCleanup /* after */ } from "solid-js";
+import { createEffect, createRoot, onCleanup, onMount } from "solid-js";
 import { onCleanup as cleanup } from "solid-js";
 import * as Solid from "solid-js";
-import * as Other from "other-library";
 
+// Reported: the one-argument effect becomes a split effect whose apply
+// callback returns its cleanup.
 createEffect(() => {
   const id = setInterval(() => console.log("tick"), 1000);
   onCleanup(() => clearInterval(id));
 });
 
-// prettier-ignore
-(onCleanup /* callee */)(() => {
-  document.body.classList.remove("active");
+// Reported: onMount becomes onSettled, which takes a returned cleanup.
+onMount(() => {
+  window.addEventListener("resize", onResize);
+  onCleanup(() => window.removeEventListener("resize", onResize));
 });
 
-onCleanup(/* leading */ () => console.log("leading comment"));
-onCleanup(() => console.log("trailing comment") /* trailing */);
-// prettier-ignore
-(onCleanup)(/* parenthesized */ () => console.log("parenthesized comment"));
+// Reported through an alias and a namespace import.
+createEffect(() => {
+  cleanup(() => console.log("alias"));
+  Solid.onCleanup(() => console.log("namespace"));
+});
 
-cleanup(() => console.log("alias"));
-Solid.onCleanup(() => console.log("namespace"));
-Other.onCleanup(() => console.log("other package"));
-
-onCleanup();
-onCleanup(
-  () => console.log("first"),
-  () => console.log("second"),
-);
-declare const callbacks: [() => void];
-onCleanup(...callbacks);
-
-const indirect = onCleanup;
-indirect(() => console.log("indirect"));
-
-function shadowed(onCleanup: (callback: () => void) => void) {
-  onCleanup(() => console.log("local"));
+// Silent: still valid in a component body, a custom hook, and createRoot.
+export function Timer() {
+  const id = setInterval(() => undefined, 1000);
+  onCleanup(() => clearInterval(id));
+  return <span />;
 }
 
+export function useListener(target: EventTarget) {
+  target.addEventListener("x", onResize);
+  onCleanup(() => target.removeEventListener("x", onResize));
+}
+
+export const dispose = createRoot((dispose) => {
+  onCleanup(() => console.log("root"));
+  return dispose;
+});
+
+// Silent: a nested function inside the effect runs at another time.
+createEffect(() => {
+  setTimeout(() => onCleanup(() => undefined), 0);
+});
+
+// Silent: a two-argument effect is reported by the createEffect analyzer.
+createEffect(() => onCleanup(() => undefined), 0);
+
+// Silent: a shadowed onCleanup is not Solid's.
+function shadowed(onCleanup: (callback: () => void) => void) {
+  createEffect(() => {
+    onCleanup(() => console.log("local"));
+  });
+}
+
+function onResize() {}
 void shadowed;
