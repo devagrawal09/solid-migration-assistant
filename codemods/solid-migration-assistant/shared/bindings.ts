@@ -136,3 +136,13 @@ export function findBindings(
     (left, right) => left.range().start.index - right.range().start.index,
   );
 }
+
+/** Plain-identifier references to `name` in the file other than `exclude`. */
+export function identifierReferences(rootNode: SgNode<TSX>, name: string, exclude: SgNode<TSX>[]): SgNode<TSX>[] {
+  const excluded = new Set(exclude.map((node) => node.id()));
+  const pattern = `^${name.replace(/[$^\\.*+?()[\]{}|]/g, "\\$&")}$`;
+  const kinds = ["identifier", "shorthand_property_identifier", "shorthand_property_identifier_pattern"] as const;
+  return kinds
+    .flatMap((kind) => rootNode.findAll({ rule: { kind, regex: pattern } }))
+    .filter((node) => !excluded.has(node.id()));
+}

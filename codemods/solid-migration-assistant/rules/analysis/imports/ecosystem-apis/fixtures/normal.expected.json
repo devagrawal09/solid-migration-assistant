@@ -1,0 +1,172 @@
+{
+  "findings": [
+    {
+      "rule": "imports/ecosystem-apis",
+      "file": "analysis/imports/ecosystem-apis/fixtures/normal.fixture.tsx",
+      "line": 1,
+      "column": 10,
+      "severity": "build",
+      "headline": "Migrate this A import from @solidjs/router, which Solid 2 removes or moves.",
+      "why": "Solid 2's router (@solidjs/router 2.0.0-next.44) replaces this with a plain <a href> with replace, noscroll, and state attributes; active styling through [data-active] or [aria-current=\"page\"].",
+      "guidance": "Replace <A> with <a>, move activeClass, inactiveClass, and end to CSS attribute selectors, and check relative hrefs, which now resolve with browser URL semantics.",
+      "guide": "https://www.npmjs.com/package/@solidjs/router/v/2.0.0-next.44",
+      "lint": []
+    },
+    {
+      "rule": "imports/ecosystem-apis",
+      "file": "analysis/imports/ecosystem-apis/fixtures/normal.fixture.tsx",
+      "line": 1,
+      "column": 13,
+      "severity": "build",
+      "headline": "Migrate this Route import from @solidjs/router, which Solid 2 removes or moves.",
+      "why": "Solid 2's router (@solidjs/router 2.0.0-next.44) replaces this with route config objects { path, component, preload, matchFilters, info, children }.",
+      "guidance": "Convert each <Route> to a config object passed to createRouter({ routes }); nesting becomes children arrays, and defineRoutes keeps paths typed.",
+      "guide": "https://www.npmjs.com/package/@solidjs/router/v/2.0.0-next.44",
+      "lint": []
+    },
+    {
+      "rule": "imports/ecosystem-apis",
+      "file": "analysis/imports/ecosystem-apis/fixtures/normal.fixture.tsx",
+      "line": 1,
+      "column": 20,
+      "severity": "build",
+      "headline": "Migrate this Router import from @solidjs/router, which Solid 2 removes or moves.",
+      "why": "Solid 2's router (@solidjs/router 2.0.0-next.44) replaces this with a createRouter({ routes }) instance rendered as <Router>{(props) => ...}</Router>.",
+      "guidance": "Create the router outside JSX from route config objects; the root prop becomes the render-prop child and rootPreload becomes the config preload option.",
+      "guide": "https://www.npmjs.com/package/@solidjs/router/v/2.0.0-next.44",
+      "lint": []
+    },
+    {
+      "rule": "imports/ecosystem-apis",
+      "file": "analysis/imports/ecosystem-apis/fixtures/normal.fixture.tsx",
+      "line": 1,
+      "column": 28,
+      "severity": "deprecated",
+      "headline": "Replace this deprecated action import from @solidjs/router.",
+      "why": "Solid 2's router (@solidjs/router 2.0.0-next.44) replaces this with formAction (type FormAction).",
+      "guidance": "action remains a deprecated alias with a dev warning; rename it, and replace the removed onComplete option with .onSettled(hook).",
+      "guide": "https://www.npmjs.com/package/@solidjs/router/v/2.0.0-next.44",
+      "lint": []
+    },
+    {
+      "rule": "imports/ecosystem-apis",
+      "file": "analysis/imports/ecosystem-apis/fixtures/normal.fixture.tsx",
+      "line": 1,
+      "column": 36,
+      "severity": "build",
+      "headline": "Migrate this cache import from @solidjs/router, which Solid 2 removes or moves.",
+      "why": "Solid 2's router (@solidjs/router 2.0.0-next.44) replaces this with query.",
+      "guidance": "cache was a deprecated alias of query in 1.x and is gone in 2.x; import query instead.",
+      "guide": "https://www.npmjs.com/package/@solidjs/router/v/2.0.0-next.44",
+      "lint": []
+    },
+    {
+      "rule": "imports/ecosystem-apis",
+      "file": "analysis/imports/ecosystem-apis/fixtures/normal.fixture.tsx",
+      "line": 1,
+      "column": 43,
+      "severity": "build",
+      "headline": "Migrate this createAsync import from @solidjs/router, which Solid 2 removes or moves.",
+      "why": "Solid 2's router (@solidjs/router 2.0.0-next.44) replaces this with createMemo(() => queryFn(args)) from solid-js inside a Loading boundary.",
+      "guidance": "Read query results with an async createMemo; initialValue, deferStream, and .latest need manual mapping.",
+      "guide": "https://www.npmjs.com/package/@solidjs/router/v/2.0.0-next.44",
+      "lint": []
+    },
+    {
+      "rule": "imports/ecosystem-apis",
+      "file": "analysis/imports/ecosystem-apis/fixtures/normal.fixture.tsx",
+      "line": 1,
+      "column": 56,
+      "severity": "behavior",
+      "headline": "Review this revalidate import from @solidjs/router, whose Solid 2 behavior changed.",
+      "why": "Solid 2's router (@solidjs/router 2.0.0-next.44) replaces this with revalidate, which now returns void.",
+      "guidance": "Awaiting revalidate() no longer waits for the refetch to finish.",
+      "guide": "https://www.npmjs.com/package/@solidjs/router/v/2.0.0-next.44",
+      "lint": []
+    },
+    {
+      "rule": "imports/ecosystem-apis",
+      "file": "analysis/imports/ecosystem-apis/fixtures/normal.fixture.tsx",
+      "line": 2,
+      "column": 10,
+      "severity": "build",
+      "headline": "Migrate this MetaProvider import from @solidjs/meta, which Solid 2 removes or moves.",
+      "why": "Solid 2's head management (useHead in @solidjs/web; @solidjs/meta 1.0.0-next.2) replaces this with nothing: delete the provider.",
+      "guidance": "The head registry is ambient in Solid 2, so remove MetaProvider and any server tags plumbing.",
+      "guide": "https://www.npmjs.com/package/@solidjs/meta/v/1.0.0-next.2",
+      "lint": []
+    },
+    {
+      "rule": "imports/ecosystem-apis",
+      "file": "analysis/imports/ecosystem-apis/fixtures/normal.fixture.tsx",
+      "line": 2,
+      "column": 31,
+      "severity": "build",
+      "headline": "Migrate this useHead import from @solidjs/meta, which Solid 2 removes or moves.",
+      "why": "Solid 2's head management (useHead in @solidjs/web; @solidjs/meta 1.0.0-next.2) replaces this with useHead from @solidjs/web, taking { tag, props, key? }, an array, or a function.",
+      "guidance": "Move the import to @solidjs/web; the descriptor shape changed, and id, setting, and ref are gone.",
+      "guide": "https://www.npmjs.com/package/@solidjs/meta/v/1.0.0-next.2",
+      "lint": []
+    },
+    {
+      "rule": "imports/ecosystem-apis",
+      "file": "analysis/imports/ecosystem-apis/fixtures/normal.fixture.tsx",
+      "line": 3,
+      "column": 10,
+      "severity": "build",
+      "headline": "Migrate this clientOnly import from @solidjs/start, which Solid 2 removes or moves.",
+      "why": "Solid 2's application layer (@solidjs/vite-plugin start mode and core @solidjs/web) replaces this with clientOnly from @solidjs/web.",
+      "guidance": "Default-export loaders move directly; a loader resolving to a named component needs clientOnly(() => import(m), { export: \"Name\" }).",
+      "guide": "https://github.com/solidjs/solid/blob/2105ffb8ca2fced55f5fac0763177fc93f97c2c2/documentation/solid-2.0/12-ssr-http.md#migration--replacement",
+      "lint": []
+    },
+    {
+      "rule": "imports/ecosystem-apis",
+      "file": "analysis/imports/ecosystem-apis/fixtures/normal.fixture.tsx",
+      "line": 4,
+      "column": 10,
+      "severity": "build",
+      "headline": "Migrate this FileRoutes import from @solidjs/start/router, which Solid 2 removes or moves.",
+      "why": "Solid 2's application layer (@solidjs/vite-plugin start mode and core @solidjs/web) replaces this with fileRoutes(pageRoutes) from @solidjs/router/fs with pageRoutes from virtual:file-routes, passed to createRouter({ routes }).",
+      "guidance": "Also add the fileRoutes() Vite plugin from filesystem-routing/vite, a different function with the same name.",
+      "guide": "https://www.npmjs.com/package/@solidjs/vite-plugin/v/3.0.0-next.57",
+      "lint": []
+    },
+    {
+      "rule": "imports/ecosystem-apis",
+      "file": "analysis/imports/ecosystem-apis/fixtures/normal.fixture.tsx",
+      "line": 5,
+      "column": 33,
+      "severity": "build",
+      "headline": "Migrate this @solidjs/start/server import, which has no Solid 2 release.",
+      "why": "Neither @solidjs/start nor vinxi has a release that targets Solid 2; @solidjs/vite-plugin start mode and the core @solidjs/web runtime provide the application layer instead, and the names this import takes (someOtherHelper) have no audited one-to-one replacement.",
+      "guidance": "Find the Solid 2 equivalent of what this import provides in the @solidjs/vite-plugin start mode documentation or in @solidjs/web, and remove the import.",
+      "guide": "https://www.npmjs.com/package/@solidjs/vite-plugin/v/3.0.0-next.57",
+      "lint": []
+    },
+    {
+      "rule": "imports/ecosystem-apis",
+      "file": "analysis/imports/ecosystem-apis/fixtures/normal.fixture.tsx",
+      "line": 6,
+      "column": 10,
+      "severity": "build",
+      "headline": "Migrate this getCookie import from vinxi/http, which Solid 2 removes or moves.",
+      "why": "Solid 2's application layer (@solidjs/vite-plugin start mode and core @solidjs/web) replaces this with parseCookieHeader(getRequestEvent().request.headers.get(\"cookie\")) from @solidjs/web.",
+      "guidance": "Cookie access is a codec over native Headers; writes use serializeCookie appended to the response headers.",
+      "guide": "https://github.com/solidjs/solid/blob/2105ffb8ca2fced55f5fac0763177fc93f97c2c2/documentation/solid-2.0/12-ssr-http.md#migration--replacement",
+      "lint": []
+    },
+    {
+      "rule": "imports/ecosystem-apis",
+      "file": "analysis/imports/ecosystem-apis/fixtures/normal.fixture.tsx",
+      "line": 6,
+      "column": 38,
+      "severity": "build",
+      "headline": "Migrate this vinxi/http import, which has no Solid 2 release.",
+      "why": "Neither @solidjs/start nor vinxi has a release that targets Solid 2; @solidjs/vite-plugin start mode and the core @solidjs/web runtime provide the application layer instead, and the names this import takes (setCookie) have no audited one-to-one replacement.",
+      "guidance": "Find the Solid 2 equivalent of what this import provides in the @solidjs/vite-plugin start mode documentation or in @solidjs/web, and remove the import.",
+      "guide": "https://www.npmjs.com/package/@solidjs/vite-plugin/v/3.0.0-next.57",
+      "lint": []
+    }
+  ]
+}

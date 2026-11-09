@@ -8,6 +8,7 @@ import {
   type JsxAttribute,
 } from "../../../../shared/jsx.ts";
 import { MIGRATION_GUIDE_URL, SOLID_TARGET_VERSION } from "../../../../shared/target.ts";
+import { rewrite, type RuleRewrite } from "../../../../shared/finding.ts";
 
 export { SOLID_SOURCE_COMMIT } from "../../../../shared/target.ts";
 
@@ -63,7 +64,7 @@ const CAMEL_CASE_BY_LOWERCASE: ReadonlyMap<string, string> = new Map(
 
 export type EventHandlerRewrite = {
   edit: Edit;
-  report: string;
+  report: RuleRewrite;
 };
 
 /**
@@ -160,7 +161,7 @@ function rewriteElement(
       node: attribute.name,
       entry: {
         edit: attribute.name.replace(camelCase),
-        report: `${filename}:${start.line + 1}:${start.column + 1} Rewrite the ${attribute.name.text()} event handler attribute on <${elementName.text()}> to ${camelCase}, preserving its value expression. Official migration guide: ${EVENT_HANDLER_MIGRATION_GUIDE}`,
+        report: rewrite(filename, start, `Rewrite the ${attribute.name.text()} event handler attribute on <${elementName.text()}> to ${camelCase}, preserving its value expression.`, EVENT_HANDLER_MIGRATION_GUIDE),
       },
     });
   }

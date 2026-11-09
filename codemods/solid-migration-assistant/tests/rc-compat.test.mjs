@@ -5,7 +5,7 @@ import { tmpdir } from "node:os";
 import { dirname, join, resolve } from "node:path";
 import { test } from "node:test";
 import { fileURLToPath } from "node:url";
-import { output, treeSnapshot } from "./helpers.mjs";
+import { output, skipOrFail, treeSnapshot } from "./helpers.mjs";
 
 /**
  * Opt-in (`pnpm test:rc-compat`): proves the transform's output against the
@@ -70,7 +70,7 @@ test("the pinned Solid RC is still the newest published one and matches its sour
     });
   const tags = lookup("solid-js", "dist-tags");
   if (tags.status !== 0) {
-    t.skip(`npm registry unavailable: ${(tags.stderr || tags.stdout).trim().split("\n")[0]}`);
+    skipOrFail(t, `npm registry unavailable: ${(tags.stderr || tags.stdout).trim().split("\n")[0]}`);
     return;
   }
   // `latest` still resolves to Solid 1, so `next` is the Solid 2 line.
@@ -99,7 +99,7 @@ test(
       major < MINIMUM_NODE[0] ||
       (major === MINIMUM_NODE[0] && minor < MINIMUM_NODE[1])
     ) {
-      t.skip(`solid-js@2.0.0-rc.21 requires Node ${MINIMUM_NODE.join(".")} or newer; running ${process.versions.node}`);
+      skipOrFail(t, `solid-js@2.0.0-rc.21 requires Node ${MINIMUM_NODE.join(".")} or newer; running ${process.versions.node}`);
       return;
     }
 

@@ -1,0 +1,88 @@
+{
+  "findings": [
+    {
+      "rule": "reactivity/create-memo",
+      "file": "analysis/reactivity/create-memo/fixtures/direct-call.fixture.tsx",
+      "line": 6,
+      "column": 1,
+      "severity": "behavior",
+      "headline": "Migrate this createMemo initial value.",
+      "why": "Solid 1.x treats this call's second argument as its initial value, while Solid 2.0.0-rc.21 treats the second argument as options and has no initial-value argument.",
+      "guidance": "Read the complete callback, the initial-value expression, its consumers, and nearby reactive state. Establish what the callback must receive on its first run and how later updates use the previous value. Preserve that behavior explicitly in surrounding state or callback logic before removing the legacy initial-value argument. For a three-argument call, review the legacy options separately and move only options supported by Solid 2.0.0-rc.21 into the second-argument position; for a two-argument call, do not reinterpret an option-shaped initial value as options. Stop without proposing a rewrite when first-run or previous-value behavior is unclear, the initial-value expression has meaningful evaluation timing or side effects, options are dynamic or their compatibility is unknown, the callback writes to its inputs or may form a cycle, or ownership and consumers are unclear. Ask for the smallest focused test or runtime observation that exposes the first computed value and subsequent updates.",
+      "guide": "https://github.com/solidjs/solid/blob/2105ffb8ca2fced55f5fac0763177fc93f97c2c2/documentation/solid-2.0/MIGRATION.md#effects-lifecycle-and-cleanup",
+      "lint": []
+    },
+    {
+      "rule": "reactivity/create-memo",
+      "file": "analysis/reactivity/create-memo/fixtures/direct-call.fixture.tsx",
+      "line": 7,
+      "column": 1,
+      "severity": "behavior",
+      "headline": "Migrate this createMemo initial value.",
+      "why": "Solid 1.x treats this call's second argument as its initial value and its third argument as options, while Solid 2.0.0-rc.21 treats the second argument as options and has no initial-value argument.",
+      "guidance": "Read the complete callback, the initial-value expression, its consumers, and nearby reactive state. Establish what the callback must receive on its first run and how later updates use the previous value. Preserve that behavior explicitly in surrounding state or callback logic before removing the legacy initial-value argument. For a three-argument call, review the legacy options separately and move only options supported by Solid 2.0.0-rc.21 into the second-argument position; for a two-argument call, do not reinterpret an option-shaped initial value as options. Stop without proposing a rewrite when first-run or previous-value behavior is unclear, the initial-value expression has meaningful evaluation timing or side effects, options are dynamic or their compatibility is unknown, the callback writes to its inputs or may form a cycle, or ownership and consumers are unclear. Ask for the smallest focused test or runtime observation that exposes the first computed value and subsequent updates.",
+      "guide": "https://github.com/solidjs/solid/blob/2105ffb8ca2fced55f5fac0763177fc93f97c2c2/documentation/solid-2.0/MIGRATION.md#effects-lifecycle-and-cleanup",
+      "lint": []
+    },
+    {
+      "rule": "reactivity/create-memo",
+      "file": "analysis/reactivity/create-memo/fixtures/direct-call.fixture.tsx",
+      "line": 8,
+      "column": 1,
+      "severity": "behavior",
+      "headline": "Migrate this createMemo initial value.",
+      "why": "Solid 1.x treats this call's second argument as its initial value, while Solid 2.0.0-rc.21 treats the second argument as options and has no initial-value argument.",
+      "guidance": "Read the complete callback, the initial-value expression, its consumers, and nearby reactive state. Establish what the callback must receive on its first run and how later updates use the previous value. Preserve that behavior explicitly in surrounding state or callback logic before removing the legacy initial-value argument. For a three-argument call, review the legacy options separately and move only options supported by Solid 2.0.0-rc.21 into the second-argument position; for a two-argument call, do not reinterpret an option-shaped initial value as options. Stop without proposing a rewrite when first-run or previous-value behavior is unclear, the initial-value expression has meaningful evaluation timing or side effects, options are dynamic or their compatibility is unknown, the callback writes to its inputs or may form a cycle, or ownership and consumers are unclear. Ask for the smallest focused test or runtime observation that exposes the first computed value and subsequent updates.",
+      "guide": "https://github.com/solidjs/solid/blob/2105ffb8ca2fced55f5fac0763177fc93f97c2c2/documentation/solid-2.0/MIGRATION.md#effects-lifecycle-and-cleanup",
+      "lint": []
+    },
+    {
+      "rule": "reactivity/create-memo",
+      "file": "analysis/reactivity/create-memo/fixtures/direct-call.fixture.tsx",
+      "line": 9,
+      "column": 1,
+      "severity": "behavior",
+      "headline": "Migrate this createMemo initial value.",
+      "why": "Solid 1.x treats this call's second argument as its initial value, while Solid 2.0.0-rc.21 treats the second argument as options and has no initial-value argument.",
+      "guidance": "Read the complete callback, the initial-value expression, its consumers, and nearby reactive state. Establish what the callback must receive on its first run and how later updates use the previous value. Preserve that behavior explicitly in surrounding state or callback logic before removing the legacy initial-value argument. For a three-argument call, review the legacy options separately and move only options supported by Solid 2.0.0-rc.21 into the second-argument position; for a two-argument call, do not reinterpret an option-shaped initial value as options. Stop without proposing a rewrite when first-run or previous-value behavior is unclear, the initial-value expression has meaningful evaluation timing or side effects, options are dynamic or their compatibility is unknown, the callback writes to its inputs or may form a cycle, or ownership and consumers are unclear. Ask for the smallest focused test or runtime observation that exposes the first computed value and subsequent updates.",
+      "guide": "https://github.com/solidjs/solid/blob/2105ffb8ca2fced55f5fac0763177fc93f97c2c2/documentation/solid-2.0/MIGRATION.md#effects-lifecycle-and-cleanup",
+      "lint": []
+    },
+    {
+      "rule": "reactivity/create-memo",
+      "file": "analysis/reactivity/create-memo/fixtures/direct-call.fixture.tsx",
+      "line": 11,
+      "column": 1,
+      "severity": "behavior",
+      "headline": "Migrate this createMemo initial value.",
+      "why": "Solid 1.x treats this call's second argument as its initial value and its third argument as options, while Solid 2.0.0-rc.21 treats the second argument as options and has no initial-value argument.",
+      "guidance": "Read the complete callback, the initial-value expression, its consumers, and nearby reactive state. Establish what the callback must receive on its first run and how later updates use the previous value. Preserve that behavior explicitly in surrounding state or callback logic before removing the legacy initial-value argument. For a three-argument call, review the legacy options separately and move only options supported by Solid 2.0.0-rc.21 into the second-argument position; for a two-argument call, do not reinterpret an option-shaped initial value as options. Stop without proposing a rewrite when first-run or previous-value behavior is unclear, the initial-value expression has meaningful evaluation timing or side effects, options are dynamic or their compatibility is unknown, the callback writes to its inputs or may form a cycle, or ownership and consumers are unclear. Ask for the smallest focused test or runtime observation that exposes the first computed value and subsequent updates.",
+      "guide": "https://github.com/solidjs/solid/blob/2105ffb8ca2fced55f5fac0763177fc93f97c2c2/documentation/solid-2.0/MIGRATION.md#effects-lifecycle-and-cleanup",
+      "lint": []
+    },
+    {
+      "rule": "reactivity/create-memo",
+      "file": "analysis/reactivity/create-memo/fixtures/direct-call.fixture.tsx",
+      "line": 17,
+      "column": 1,
+      "severity": "behavior",
+      "headline": "Migrate this createMemo initial value.",
+      "why": "Solid 1.x treats this call's second argument as its initial value, while Solid 2.0.0-rc.21 treats the second argument as options and has no initial-value argument.",
+      "guidance": "Read the complete callback, the initial-value expression, its consumers, and nearby reactive state. Establish what the callback must receive on its first run and how later updates use the previous value. Preserve that behavior explicitly in surrounding state or callback logic before removing the legacy initial-value argument. For a three-argument call, review the legacy options separately and move only options supported by Solid 2.0.0-rc.21 into the second-argument position; for a two-argument call, do not reinterpret an option-shaped initial value as options. Stop without proposing a rewrite when first-run or previous-value behavior is unclear, the initial-value expression has meaningful evaluation timing or side effects, options are dynamic or their compatibility is unknown, the callback writes to its inputs or may form a cycle, or ownership and consumers are unclear. Ask for the smallest focused test or runtime observation that exposes the first computed value and subsequent updates.",
+      "guide": "https://github.com/solidjs/solid/blob/2105ffb8ca2fced55f5fac0763177fc93f97c2c2/documentation/solid-2.0/MIGRATION.md#effects-lifecycle-and-cleanup",
+      "lint": []
+    },
+    {
+      "rule": "reactivity/create-memo",
+      "file": "analysis/reactivity/create-memo/fixtures/direct-call.fixture.tsx",
+      "line": 18,
+      "column": 1,
+      "severity": "behavior",
+      "headline": "Migrate this createMemo initial value.",
+      "why": "Solid 1.x treats this call's second argument as its initial value, while Solid 2.0.0-rc.21 treats the second argument as options and has no initial-value argument.",
+      "guidance": "Read the complete callback, the initial-value expression, its consumers, and nearby reactive state. Establish what the callback must receive on its first run and how later updates use the previous value. Preserve that behavior explicitly in surrounding state or callback logic before removing the legacy initial-value argument. For a three-argument call, review the legacy options separately and move only options supported by Solid 2.0.0-rc.21 into the second-argument position; for a two-argument call, do not reinterpret an option-shaped initial value as options. Stop without proposing a rewrite when first-run or previous-value behavior is unclear, the initial-value expression has meaningful evaluation timing or side effects, options are dynamic or their compatibility is unknown, the callback writes to its inputs or may form a cycle, or ownership and consumers are unclear. Ask for the smallest focused test or runtime observation that exposes the first computed value and subsequent updates.",
+      "guide": "https://github.com/solidjs/solid/blob/2105ffb8ca2fced55f5fac0763177fc93f97c2c2/documentation/solid-2.0/MIGRATION.md#effects-lifecycle-and-cleanup",
+      "lint": []
+    }
+  ]
+}

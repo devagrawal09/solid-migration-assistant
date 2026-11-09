@@ -1,6 +1,7 @@
 import type { SgNode } from "codemod:ast-grep";
 import type TSX from "codemod:ast-grep/langs/tsx";
 import { migrationGuide } from "../../../../shared/target.ts";
+import { finding, type RuleFinding } from "../../../../shared/finding.ts";
 
 const MIGRATION_GUIDE = migrationGuide("attributes--events-closer-to-html-and-fewer-namespaces");
 
@@ -9,8 +10,8 @@ const NAMESPACE_PREFIXES = ["attr:", "bool:"] as const;
 export function analyzeDomAttrNamespaces(
   rootNode: SgNode<TSX>,
   context: { filename: string },
-): string[] {
-  const findings: string[] = [];
+): RuleFinding[] {
+  const findings: RuleFinding[] = [];
   for (const elementKind of ["jsx_opening_element", "jsx_self_closing_element"] as const) {
     for (const element of rootNode.findAll({ rule: { kind: elementKind } })) {
       for (const attribute of element
@@ -27,15 +28,23 @@ export function analyzeDomAttrNamespaces(
         const bareName = name.slice(prefix.length);
         if (prefix === "attr:") {
           findings.push(
-            `${context.filename}:${start.line + 1}:${start.column + 1} Manual review required: migrate this attr: namespace attribute to a standard HTML attribute.
-Why: Solid 2 removes the attr: namespace; attributes use standard HTML behavior. The bare attribute name (${bareName}) replaces the namespaced form.
-Guidance: Remove the attr: prefix from this attribute, keeping the attribute value unchanged. Make and validate that edit yourself; this analyzer never edits or runs the target project. Official migration guide: ${MIGRATION_GUIDE}`,
+            finding(context.filename, start, {
+        severity: "build",
+        headline: `Migrate this attr: namespace attribute to a standard HTML attribute.`,
+        why: `Solid 2 removes the attr: namespace; attributes use standard HTML behavior. The bare attribute name (${bareName}) replaces the namespaced form.`,
+        guidance: `Remove the attr: prefix from this attribute, keeping the attribute value unchanged.`,
+        guide: MIGRATION_GUIDE,
+      }),
           );
         } else {
           findings.push(
-            `${context.filename}:${start.line + 1}:${start.column + 1} Manual review required: migrate this bool: namespace attribute to a standard HTML boolean attribute.
-Why: Solid 2 removes the bool: namespace; boolean attributes use standard HTML behavior. The bare attribute name (${bareName}) replaces the namespaced form.
-Guidance: Remove the bool: prefix. A standard HTML boolean attribute is true when present and false when absent — replace explicit true/false values with attribute presence/absence. Make and validate that edit yourself; this analyzer never edits or runs the target project. Official migration guide: ${MIGRATION_GUIDE}`,
+            finding(context.filename, start, {
+        severity: "build",
+        headline: `Migrate this bool: namespace attribute to a standard HTML boolean attribute.`,
+        why: `Solid 2 removes the bool: namespace; boolean attributes use standard HTML behavior. The bare attribute name (${bareName}) replaces the namespaced form.`,
+        guidance: `Remove the bool: prefix. A standard HTML boolean attribute is true when present and false when absent — replace explicit true/false values with attribute presence/absence.`,
+        guide: MIGRATION_GUIDE,
+      }),
           );
         }
       }

@@ -164,12 +164,12 @@ export const DEPENDENCY_MAP = Object.freeze([
 export function dependencyHeadline(entry) {
   switch (entry.status) {
     case "upgrade":
-      return `Manual review required: move ${entry.name} to its Solid 2 line.`;
+      return `Move ${entry.name} to its Solid 2 line.`;
     case "replace":
-      return `Manual review required: replace ${entry.name} with its Solid 2 successor.`;
+      return `Replace ${entry.name} with its Solid 2 successor.`;
     case "use-core":
-      return `Manual review required: move ${entry.name} usage to Solid 2 core.`;
+      return `Move ${entry.name} usage to Solid 2 core.`;
     default:
-      return `Manual review required: resolve ${entry.name}, which has no Solid 2 release yet.`;
+      return `Resolve ${entry.name}, which has no Solid 2 release yet.`;
   }
 }

@@ -1,0 +1,198 @@
+[solid-migration-assistant] 63 rewrites applied. Review the diff and run the project's own checks.
+
+src/class-list.tsx:14:14 Rewrite the classList attribute on <section> to class, preserving its value expression.
+  Rule: jsx/class-list-to-class  Guide: https://github.com/solidjs/solid/blob/2105ffb8ca2fced55f5fac0763177fc93f97c2c2/documentation/solid-2.0/MIGRATION.md#classlist--class-objectarray-forms
+src/class-list.tsx:15:23 Rewrite the classList attribute on <div> to class, preserving its value expression.
+  Rule: jsx/class-list-to-class  Guide: https://github.com/solidjs/solid/blob/2105ffb8ca2fced55f5fac0763177fc93f97c2c2/documentation/solid-2.0/MIGRATION.md#classlist--class-objectarray-forms
+src/class-list.tsx:16:15 Rewrite the classList attribute on <span> to class, preserving its value expression.
+  Rule: jsx/class-list-to-class  Guide: https://github.com/solidjs/solid/blob/2105ffb8ca2fced55f5fac0763177fc93f97c2c2/documentation/solid-2.0/MIGRATION.md#classlist--class-objectarray-forms
+src/class-list.tsx:20:12 Merge the class and classList attributes on <div> into the class array form, preserving the static string and the object literal.
+  Rule: jsx/class-list-to-class  Guide: https://github.com/solidjs/solid/blob/2105ffb8ca2fced55f5fac0763177fc93f97c2c2/documentation/solid-2.0/MIGRATION.md#classlist--class-objectarray-forms
+src/combined.tsx:3:39 Rewrite the Index import from solid-js to For.
+  Rule: jsx/index-to-for  Guide: https://github.com/solidjs/solid/blob/2105ffb8ca2fced55f5fac0763177fc93f97c2c2/documentation/solid-2.0/MIGRATION.md#list-rendering-index-is-gone-and-for-handles-each-keying-mode
+src/combined.tsx:4:33 Relocate solid-js/web to @solidjs/web for proven bindings Dynamic, render. Note: Dynamic is deprecated in Solid 2 in favor of the dynamic(source) factory; it keeps working without a runtime warning.
+  Rule: imports/web-package-relocation  Guide: https://github.com/solidjs/solid/blob/2105ffb8ca2fced55f5fac0763177fc93f97c2c2/documentation/solid-2.0/MIGRATION.md#imports-where-things-live-now
+src/combined.tsx:5:32 Relocate solid-js/universal to @solidjs/universal.
+  Rule: imports/legacy-subpath-relocation  Guide: https://github.com/solidjs/solid/blob/2105ffb8ca2fced55f5fac0763177fc93f97c2c2/documentation/solid-2.0/MIGRATION.md#imports-where-things-live-now
+src/combined.tsx:17:5 Rewrite <ThemeContext.Provider> to <ThemeContext>, keeping its value attribute and children unchanged.
+  Rule: jsx/context-provider-to-context  Guide: https://github.com/solidjs/solid/blob/2105ffb8ca2fced55f5fac0763177fc93f97c2c2/documentation/solid-2.0/MIGRATION.md#context-providers-contextprovider--context-is-the-provider
+src/combined.tsx:18:11 Rewrite the classList attribute on <ul> to class, preserving its value expression.
+  Rule: jsx/class-list-to-class  Guide: https://github.com/solidjs/solid/blob/2105ffb8ca2fced55f5fac0763177fc93f97c2c2/documentation/solid-2.0/MIGRATION.md#classlist--class-objectarray-forms
+src/combined.tsx:18:46 Rewrite the onclick event handler attribute on <ul> to onClick, preserving its value expression.
+  Rule: jsx/lowercase-event-handlers  Guide: https://github.com/solidjs/solid/blob/2105ffb8ca2fced55f5fac0763177fc93f97c2c2/documentation/solid-2.0/MIGRATION.md#attributes--events-closer-to-html-and-fewer-namespaces
+src/combined.tsx:19:9 Rewrite <Index> to <For keyed={false}>, keeping its each, fallback, and child callback unchanged.
+  Rule: jsx/index-to-for  Guide: https://github.com/solidjs/solid/blob/2105ffb8ca2fced55f5fac0763177fc93f97c2c2/documentation/solid-2.0/MIGRATION.md#list-rendering-index-is-gone-and-for-handles-each-keying-mode
+src/context.tsx:11:5 Rewrite <ThemeContext.Provider> to <ThemeContext>, keeping its value attribute and children unchanged.
+  Rule: jsx/context-provider-to-context  Guide: https://github.com/solidjs/solid/blob/2105ffb8ca2fced55f5fac0763177fc93f97c2c2/documentation/solid-2.0/MIGRATION.md#context-providers-contextprovider--context-is-the-provider
+src/effects.ts:2:38 Remove the on import from solid-js; every use is now a split createEffect.
+  Rule: reactivity/on-helper-split  Guide: https://github.com/solidjs/solid/blob/2105ffb8ca2fced55f5fac0763177fc93f97c2c2/documentation/solid-2.0/MIGRATION.md#on-helper--split-effects
+src/effects.ts:5:1 Rewrite createEffect(on(dep, fn)) as createEffect(compute, apply), keeping the callback unchanged.
+  Rule: reactivity/on-helper-split  Guide: https://github.com/solidjs/solid/blob/2105ffb8ca2fced55f5fac0763177fc93f97c2c2/documentation/solid-2.0/MIGRATION.md#on-helper--split-effects
+src/events.tsx:12:15 Rewrite the onclick event handler attribute on <button> to onClick, preserving its value expression.
+  Rule: jsx/lowercase-event-handlers  Guide: https://github.com/solidjs/solid/blob/2105ffb8ca2fced55f5fac0763177fc93f97c2c2/documentation/solid-2.0/MIGRATION.md#attributes--events-closer-to-html-and-fewer-namespaces
+src/events.tsx:12:33 Rewrite the oninput event handler attribute on <button> to onInput, preserving its value expression.
+  Rule: jsx/lowercase-event-handlers  Guide: https://github.com/solidjs/solid/blob/2105ffb8ca2fced55f5fac0763177fc93f97c2c2/documentation/solid-2.0/MIGRATION.md#attributes--events-closer-to-html-and-fewer-namespaces
+src/events.tsx:15:19 Rewrite the onpointerdown event handler attribute on <my-element> to onPointerDown, preserving its value expression.
+  Rule: jsx/lowercase-event-handlers  Guide: https://github.com/solidjs/solid/blob/2105ffb8ca2fced55f5fac0763177fc93f97c2c2/documentation/solid-2.0/MIGRATION.md#attributes--events-closer-to-html-and-fewer-namespaces
+src/legacy/locale-provider.jsx:4:3 Rewrite <LocaleContext.Provider> to <LocaleContext>, keeping its value attribute and children unchanged.
+  Rule: jsx/context-provider-to-context  Guide: https://github.com/solidjs/solid/blob/2105ffb8ca2fced55f5fac0763177fc93f97c2c2/documentation/solid-2.0/MIGRATION.md#context-providers-contextprovider--context-is-the-provider
+src/lists.tsx:2:24 Rewrite the Index import from solid-js to For.
+  Rule: jsx/index-to-for  Guide: https://github.com/solidjs/solid/blob/2105ffb8ca2fced55f5fac0763177fc93f97c2c2/documentation/solid-2.0/MIGRATION.md#list-rendering-index-is-gone-and-for-handles-each-keying-mode
+src/lists.tsx:9:7 Rewrite <Index> to <For keyed={false}>, keeping its each, fallback, and child callback unchanged.
+  Rule: jsx/index-to-for  Guide: https://github.com/solidjs/solid/blob/2105ffb8ca2fced55f5fac0763177fc93f97c2c2/documentation/solid-2.0/MIGRATION.md#list-rendering-index-is-gone-and-for-handles-each-keying-mode
+src/lists.tsx:13:13 Rewrite <Index> to <For keyed={false}>, keeping its each, fallback, and child callback unchanged.
+  Rule: jsx/index-to-for  Guide: https://github.com/solidjs/solid/blob/2105ffb8ca2fced55f5fac0763177fc93f97c2c2/documentation/solid-2.0/MIGRATION.md#list-rendering-index-is-gone-and-for-handles-each-keying-mode
+src/lists.tsx:17:7 Rewrite <Index> to <For keyed={false}>, keeping its each, fallback, and child callback unchanged.
+  Rule: jsx/index-to-for  Guide: https://github.com/solidjs/solid/blob/2105ffb8ca2fced55f5fac0763177fc93f97c2c2/documentation/solid-2.0/MIGRATION.md#list-rendering-index-is-gone-and-for-handles-each-keying-mode
+src/nested/deep.jsx:4:32 Relocate solid-js/universal to @solidjs/universal.
+  Rule: imports/legacy-subpath-relocation  Guide: https://github.com/solidjs/solid/blob/2105ffb8ca2fced55f5fac0763177fc93f97c2c2/documentation/solid-2.0/MIGRATION.md#imports-where-things-live-now
+src/nested/deep.jsx:5:21 Relocate solid-js/jsx-runtime to @solidjs/web/jsx-runtime.
+  Rule: imports/legacy-subpath-relocation  Guide: https://github.com/solidjs/solid/blob/2105ffb8ca2fced55f5fac0763177fc93f97c2c2/documentation/solid-2.0/MIGRATION.md#imports-where-things-live-now
+src/nested/deep.jsx:6:34 Relocate solid-js/web to @solidjs/web for proven bindings render, isServer.
+  Rule: imports/web-package-relocation  Guide: https://github.com/solidjs/solid/blob/2105ffb8ca2fced55f5fac0763177fc93f97c2c2/documentation/solid-2.0/MIGRATION.md#imports-where-things-live-now
+src/nested/deep.jsx:11:41 Rewrite the classList attribute on <div> to class, preserving its value expression.
+  Rule: jsx/class-list-to-class  Guide: https://github.com/solidjs/solid/blob/2105ffb8ca2fced55f5fac0763177fc93f97c2c2/documentation/solid-2.0/MIGRATION.md#classlist--class-objectarray-forms
+src/nested/deep.jsx:17:24 Relocate solid-js/html to @solidjs/html.
+  Rule: imports/legacy-subpath-relocation  Guide: https://github.com/solidjs/solid/blob/2105ffb8ca2fced55f5fac0763177fc93f97c2c2/documentation/solid-2.0/MIGRATION.md#imports-where-things-live-now
+src/plain.js:2:19 Relocate solid-js/h to @solidjs/h.
+  Rule: imports/legacy-subpath-relocation  Guide: https://github.com/solidjs/solid/blob/2105ffb8ca2fced55f5fac0763177fc93f97c2c2/documentation/solid-2.0/MIGRATION.md#imports-where-things-live-now
+src/plain.js:3:22 Relocate solid-js/html to @solidjs/html.
+  Rule: imports/legacy-subpath-relocation  Guide: https://github.com/solidjs/solid/blob/2105ffb8ca2fced55f5fac0763177fc93f97c2c2/documentation/solid-2.0/MIGRATION.md#imports-where-things-live-now
+src/real-world/active-element.tsx:9:40 Rewrite the Index import from solid-js to For.
+  Rule: jsx/index-to-for  Guide: https://github.com/solidjs/solid/blob/2105ffb8ca2fced55f5fac0763177fc93f97c2c2/documentation/solid-2.0/MIGRATION.md#list-rendering-index-is-gone-and-for-handles-each-keying-mode
+src/real-world/active-element.tsx:21:7 Merge the class and classList attributes on <button> into the class array form, preserving the static string and the object literal.
+  Rule: jsx/class-list-to-class  Guide: https://github.com/solidjs/solid/blob/2105ffb8ca2fced55f5fac0763177fc93f97c2c2/documentation/solid-2.0/MIGRATION.md#classlist--class-objectarray-forms
+src/real-world/active-element.tsx:40:7 Rewrite <Index> to <For keyed={false}>, keeping its each, fallback, and child callback unchanged.
+  Rule: jsx/index-to-for  Guide: https://github.com/solidjs/solid/blob/2105ffb8ca2fced55f5fac0763177fc93f97c2c2/documentation/solid-2.0/MIGRATION.md#list-rendering-index-is-gone-and-for-handles-each-keying-mode
+src/real-world/active-element.tsx:49:9 Rewrite the onclick event handler attribute on <button> to onClick, preserving its value expression.
+  Rule: jsx/lowercase-event-handlers  Guide: https://github.com/solidjs/solid/blob/2105ffb8ca2fced55f5fac0763177fc93f97c2c2/documentation/solid-2.0/MIGRATION.md#attributes--events-closer-to-html-and-fewer-namespaces
+src/relocations.tsx:1:15 Relocate solid-js/h to @solidjs/h.
+  Rule: imports/legacy-subpath-relocation  Guide: https://github.com/solidjs/solid/blob/2105ffb8ca2fced55f5fac0763177fc93f97c2c2/documentation/solid-2.0/MIGRATION.md#imports-where-things-live-now
+src/relocations.tsx:2:18 Relocate solid-js/html to @solidjs/html.
+  Rule: imports/legacy-subpath-relocation  Guide: https://github.com/solidjs/solid/blob/2105ffb8ca2fced55f5fac0763177fc93f97c2c2/documentation/solid-2.0/MIGRATION.md#imports-where-things-live-now
+src/relocations.tsx:3:32 Relocate solid-js/universal to @solidjs/universal.
+  Rule: imports/legacy-subpath-relocation  Guide: https://github.com/solidjs/solid/blob/2105ffb8ca2fced55f5fac0763177fc93f97c2c2/documentation/solid-2.0/MIGRATION.md#imports-where-things-live-now
+src/relocations.tsx:4:21 Relocate solid-js/jsx-runtime to @solidjs/web/jsx-runtime.
+  Rule: imports/legacy-subpath-relocation  Guide: https://github.com/solidjs/solid/blob/2105ffb8ca2fced55f5fac0763177fc93f97c2c2/documentation/solid-2.0/MIGRATION.md#imports-where-things-live-now
+src/relocations.tsx:5:24 Relocate solid-js/jsx-dev-runtime to @solidjs/web/jsx-dev-runtime.
+  Rule: imports/legacy-subpath-relocation  Guide: https://github.com/solidjs/solid/blob/2105ffb8ca2fced55f5fac0763177fc93f97c2c2/documentation/solid-2.0/MIGRATION.md#imports-where-things-live-now
+src/relocations.tsx:7:36 Relocate solid-js/html to @solidjs/html.
+  Rule: imports/legacy-subpath-relocation  Guide: https://github.com/solidjs/solid/blob/2105ffb8ca2fced55f5fac0763177fc93f97c2c2/documentation/solid-2.0/MIGRATION.md#imports-where-things-live-now
+src/relocations.tsx:9:50 Relocate solid-js/universal to @solidjs/universal.
+  Rule: imports/legacy-subpath-relocation  Guide: https://github.com/solidjs/solid/blob/2105ffb8ca2fced55f5fac0763177fc93f97c2c2/documentation/solid-2.0/MIGRATION.md#imports-where-things-live-now
+src/relocations.tsx:10:36 Relocate solid-js/html to @solidjs/html.
+  Rule: imports/legacy-subpath-relocation  Guide: https://github.com/solidjs/solid/blob/2105ffb8ca2fced55f5fac0763177fc93f97c2c2/documentation/solid-2.0/MIGRATION.md#imports-where-things-live-now
+src/relocations.tsx:11:50 Relocate solid-js/universal to @solidjs/universal.
+  Rule: imports/legacy-subpath-relocation  Guide: https://github.com/solidjs/solid/blob/2105ffb8ca2fced55f5fac0763177fc93f97c2c2/documentation/solid-2.0/MIGRATION.md#imports-where-things-live-now
+src/relocations.tsx:12:41 Relocate solid-js/jsx-runtime to @solidjs/web/jsx-runtime.
+  Rule: imports/legacy-subpath-relocation  Guide: https://github.com/solidjs/solid/blob/2105ffb8ca2fced55f5fac0763177fc93f97c2c2/documentation/solid-2.0/MIGRATION.md#imports-where-things-live-now
+src/relocations.tsx:13:37 Relocate solid-js/jsx-dev-runtime to @solidjs/web/jsx-dev-runtime.
+  Rule: imports/legacy-subpath-relocation  Guide: https://github.com/solidjs/solid/blob/2105ffb8ca2fced55f5fac0763177fc93f97c2c2/documentation/solid-2.0/MIGRATION.md#imports-where-things-live-now
+src/relocations.tsx:16:34 Relocate solid-js/h to @solidjs/h.
+  Rule: imports/legacy-subpath-relocation  Guide: https://github.com/solidjs/solid/blob/2105ffb8ca2fced55f5fac0763177fc93f97c2c2/documentation/solid-2.0/MIGRATION.md#imports-where-things-live-now
+src/relocations.tsx:17:15 Relocate solid-js/html to @solidjs/html.
+  Rule: imports/legacy-subpath-relocation  Guide: https://github.com/solidjs/solid/blob/2105ffb8ca2fced55f5fac0763177fc93f97c2c2/documentation/solid-2.0/MIGRATION.md#imports-where-things-live-now
+src/relocations.tsx:19:28 Relocate solid-js/html to @solidjs/html.
+  Rule: imports/legacy-subpath-relocation  Guide: https://github.com/solidjs/solid/blob/2105ffb8ca2fced55f5fac0763177fc93f97c2c2/documentation/solid-2.0/MIGRATION.md#imports-where-things-live-now
+src/relocations.tsx:21:35 Relocate solid-js/universal to @solidjs/universal.
+  Rule: imports/legacy-subpath-relocation  Guide: https://github.com/solidjs/solid/blob/2105ffb8ca2fced55f5fac0763177fc93f97c2c2/documentation/solid-2.0/MIGRATION.md#imports-where-things-live-now
+src/relocations.tsx:22:28 Relocate solid-js/jsx-runtime to @solidjs/web/jsx-runtime.
+  Rule: imports/legacy-subpath-relocation  Guide: https://github.com/solidjs/solid/blob/2105ffb8ca2fced55f5fac0763177fc93f97c2c2/documentation/solid-2.0/MIGRATION.md#imports-where-things-live-now
+src/relocations.tsx:25:60 Relocate solid-js/web to @solidjs/web for proven bindings render, hydrate.
+  Rule: imports/web-package-relocation  Guide: https://github.com/solidjs/solid/blob/2105ffb8ca2fced55f5fac0763177fc93f97c2c2/documentation/solid-2.0/MIGRATION.md#imports-where-things-live-now
+src/relocations.tsx:26:41 Relocate solid-js/web to @solidjs/web for proven bindings isServer.
+  Rule: imports/web-package-relocation  Guide: https://github.com/solidjs/solid/blob/2105ffb8ca2fced55f5fac0763177fc93f97c2c2/documentation/solid-2.0/MIGRATION.md#imports-where-things-live-now
+src/relocations.tsx:27:46 Relocate solid-js/web to @solidjs/web for proven bindings hydrate.
+  Rule: imports/web-package-relocation  Guide: https://github.com/solidjs/solid/blob/2105ffb8ca2fced55f5fac0763177fc93f97c2c2/documentation/solid-2.0/MIGRATION.md#imports-where-things-live-now
+src/relocations.tsx:28:45 Relocate solid-js/web to @solidjs/web for proven bindings Dynamic. Note: Dynamic is deprecated in Solid 2 in favor of the dynamic(source) factory; it keeps working without a runtime warning.
+  Rule: imports/web-package-relocation  Guide: https://github.com/solidjs/solid/blob/2105ffb8ca2fced55f5fac0763177fc93f97c2c2/documentation/solid-2.0/MIGRATION.md#imports-where-things-live-now
+src/relocations.tsx:30:47 Relocate solid-js/web to @solidjs/web for proven bindings render.
+  Rule: imports/web-package-relocation  Guide: https://github.com/solidjs/solid/blob/2105ffb8ca2fced55f5fac0763177fc93f97c2c2/documentation/solid-2.0/MIGRATION.md#imports-where-things-live-now
+src/store-merge.ts:6:1 Rewrite this path-style store setter call with a literal value as a draft write.
+  Rule: store/setter-literal-paths  Guide: https://github.com/solidjs/solid/blob/2105ffb8ca2fced55f5fac0763177fc93f97c2c2/documentation/solid-2.0/MIGRATION.md#draft-first-setters
+src/store.ts:3:29 Relocate solid-js/store to solid-js for createStore: every setter call in this file is now a draft write.
+  Rule: store/setter-literal-paths  Guide: https://github.com/solidjs/solid/blob/2105ffb8ca2fced55f5fac0763177fc93f97c2c2/documentation/solid-2.0/MIGRATION.md#draft-first-setters
+src/store.ts:6:1 Rewrite this path-style store setter call with a literal value as a draft write.
+  Rule: store/setter-literal-paths  Guide: https://github.com/solidjs/solid/blob/2105ffb8ca2fced55f5fac0763177fc93f97c2c2/documentation/solid-2.0/MIGRATION.md#draft-first-setters
+src/store.ts:7:1 Rewrite this path-style store setter call with a literal value as a draft write.
+  Rule: store/setter-literal-paths  Guide: https://github.com/solidjs/solid/blob/2105ffb8ca2fced55f5fac0763177fc93f97c2c2/documentation/solid-2.0/MIGRATION.md#draft-first-setters
+src/theme-provider.tsx:7:10 Rewrite <ThemeContext.Provider> to <ThemeContext>, keeping its value attribute and children unchanged.
+  Rule: jsx/context-provider-to-context  Guide: https://github.com/solidjs/solid/blob/2105ffb8ca2fced55f5fac0763177fc93f97c2c2/documentation/solid-2.0/MIGRATION.md#context-providers-contextprovider--context-is-the-provider
+src/types-element.tsx:3:10 Replace the JSXElement type import from solid-js with JSX from @solidjs/web and rewrite its 3 type reference(s) to JSX.Element.
+  Rule: imports/jsx-type-relocation  Guide: https://github.com/solidjs/solid/blob/2105ffb8ca2fced55f5fac0763177fc93f97c2c2/documentation/solid-2.0/MIGRATION.md#typescript-jsx-solid-js--renderer-package
+src/types.tsx:1:1 Rewrite the @jsxImportSource pragma from solid-js to @solidjs/web.
+  Rule: imports/jsx-type-relocation  Guide: https://github.com/solidjs/solid/blob/2105ffb8ca2fced55f5fac0763177fc93f97c2c2/documentation/solid-2.0/MIGRATION.md#typescript-jsx-solid-js--renderer-package
+src/types.tsx:4:26 Relocate the JSX type import from solid-js to @solidjs/web.
+  Rule: imports/jsx-type-relocation  Guide: https://github.com/solidjs/solid/blob/2105ffb8ca2fced55f5fac0763177fc93f97c2c2/documentation/solid-2.0/MIGRATION.md#typescript-jsx-solid-js--renderer-package
+src/types.tsx:5:15 Move the JSX type specifier out of this solid-js import into a separate @solidjs/web type import.
+  Rule: imports/jsx-type-relocation  Guide: https://github.com/solidjs/solid/blob/2105ffb8ca2fced55f5fac0763177fc93f97c2c2/documentation/solid-2.0/MIGRATION.md#typescript-jsx-solid-js--renderer-package
+
+[solid-migration-assistant] Summary: 63 rewrites in 16 files
+   7  Relocate solid-js/html to @solidjs/html.
+      sites: src/nested/deep.jsx:17:24, src/plain.js:3:22, src/relocations.tsx:2:18, src/relocations.tsx:7:36, src/relocations.tsx:10:36, src/relocations.tsx:17:15, src/relocations.tsx:19:28
+   6  Relocate solid-js/universal to @solidjs/universal.
+      sites: src/combined.tsx:5:32, src/nested/deep.jsx:4:32, src/relocations.tsx:3:32, src/relocations.tsx:9:50, src/relocations.tsx:11:50, src/relocations.tsx:21:35
+   5  Rewrite <Index> to <For keyed={false}>, keeping its each, fallback, and child callback unchanged.
+      sites: src/combined.tsx:19:9, src/lists.tsx:9:7, src/lists.tsx:13:13, src/lists.tsx:17:7, src/real-world/active-element.tsx:40:7
+   4  Relocate solid-js/jsx-runtime to @solidjs/web/jsx-runtime.
+      sites: src/nested/deep.jsx:5:21, src/relocations.tsx:4:21, src/relocations.tsx:12:41, src/relocations.tsx:22:28
+   3  Relocate solid-js/h to @solidjs/h.
+      sites: src/plain.js:2:19, src/relocations.tsx:1:15, src/relocations.tsx:16:34
+   3  Rewrite <ThemeContext.Provider> to <ThemeContext>, keeping its value attribute and children unchanged.
+      sites: src/combined.tsx:17:5, src/context.tsx:11:5, src/theme-provider.tsx:7:10
+   3  Rewrite the Index import from solid-js to For.
+      sites: src/combined.tsx:3:39, src/lists.tsx:2:24, src/real-world/active-element.tsx:9:40
+   3  Rewrite this path-style store setter call with a literal value as a draft write.
+      sites: src/store-merge.ts:6:1, src/store.ts:6:1, src/store.ts:7:1
+   2  Relocate solid-js/jsx-dev-runtime to @solidjs/web/jsx-dev-runtime.
+      sites: src/relocations.tsx:5:24, src/relocations.tsx:13:37
+   2  Rewrite the classList attribute on <div> to class, preserving its value expression.
+      sites: src/class-list.tsx:15:23, src/nested/deep.jsx:11:41
+   2  Rewrite the onclick event handler attribute on <button> to onClick, preserving its value expression.
+      sites: src/events.tsx:12:15, src/real-world/active-element.tsx:49:9
+   1  Merge the class and classList attributes on <button> into the class array form, preserving the static string and the object literal.
+      sites: src/real-world/active-element.tsx:21:7
+   1  Merge the class and classList attributes on <div> into the class array form, preserving the static string and the object literal.
+      sites: src/class-list.tsx:20:12
+   1  Move the JSX type specifier out of this solid-js import into a separate @solidjs/web type import.
+      sites: src/types.tsx:5:15
+   1  Relocate solid-js/store to solid-js for createStore: every setter call in this file is now a draft write.
+      sites: src/store.ts:3:29
+   1  Relocate solid-js/web to @solidjs/web for proven bindings Dynamic, render. Note: Dynamic is deprecated in Solid 2 in favor of the dynamic(source) factory; it keeps working without a runtime warning.
+      sites: src/combined.tsx:4:33
+   1  Relocate solid-js/web to @solidjs/web for proven bindings Dynamic. Note: Dynamic is deprecated in Solid 2 in favor of the dynamic(source) factory; it keeps working without a runtime warning.
+      sites: src/relocations.tsx:28:45
+   1  Relocate solid-js/web to @solidjs/web for proven bindings hydrate.
+      sites: src/relocations.tsx:27:46
+   1  Relocate solid-js/web to @solidjs/web for proven bindings isServer.
+      sites: src/relocations.tsx:26:41
+   1  Relocate solid-js/web to @solidjs/web for proven bindings render, hydrate.
+      sites: src/relocations.tsx:25:60
+   1  Relocate solid-js/web to @solidjs/web for proven bindings render, isServer.
+      sites: src/nested/deep.jsx:6:34
+   1  Relocate solid-js/web to @solidjs/web for proven bindings render.
+      sites: src/relocations.tsx:30:47
+   1  Relocate the JSX type import from solid-js to @solidjs/web.
+      sites: src/types.tsx:4:26
+   1  Remove the on import from solid-js; every use is now a split createEffect.
+      sites: src/effects.ts:2:38
+   1  Replace the JSXElement type import from solid-js with JSX from @solidjs/web and rewrite its 3 type reference(s) to JSX.Element.
+      sites: src/types-element.tsx:3:10
+   1  Rewrite <LocaleContext.Provider> to <LocaleContext>, keeping its value attribute and children unchanged.
+      sites: src/legacy/locale-provider.jsx:4:3
+   1  Rewrite createEffect(on(dep, fn)) as createEffect(compute, apply), keeping the callback unchanged.
+      sites: src/effects.ts:5:1
+   1  Rewrite the @jsxImportSource pragma from solid-js to @solidjs/web.
+      sites: src/types.tsx:1:1
+   1  Rewrite the classList attribute on <section> to class, preserving its value expression.
+      sites: src/class-list.tsx:14:14
+   1  Rewrite the classList attribute on <span> to class, preserving its value expression.
+      sites: src/class-list.tsx:16:15
+   1  Rewrite the classList attribute on <ul> to class, preserving its value expression.
+      sites: src/combined.tsx:18:11
+   1  Rewrite the onclick event handler attribute on <ul> to onClick, preserving its value expression.
+      sites: src/combined.tsx:18:46
+   1  Rewrite the oninput event handler attribute on <button> to onInput, preserving its value expression.
+      sites: src/events.tsx:12:33
+   1  Rewrite the onpointerdown event handler attribute on <my-element> to onPointerDown, preserving its value expression.
+      sites: src/events.tsx:15:19

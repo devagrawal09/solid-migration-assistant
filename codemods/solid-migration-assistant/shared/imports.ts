@@ -3,6 +3,8 @@ import type TSX from "codemod:ast-grep/langs/tsx";
 import { stringLiteralValue } from "./analysis.ts";
 import { findBindings } from "./bindings.ts";
 
+export { identifierReferences } from "./bindings.ts";
+
 /** One named import specifier and the statement that holds it. */
 export type NamedImport = {
   statement: SgNode<TSX>;
@@ -82,14 +84,4 @@ export function removeImportedSpecifier(statement: SgNode<TSX>, specifier: SgNod
     return { startPos: beforePrevious.range().end.index, endPos: specifier.range().end.index, insertedText: "" };
   }
   return null;
-}
-
-/** Plain-identifier references to `name` in the file other than `exclude`. */
-export function identifierReferences(rootNode: SgNode<TSX>, name: string, exclude: SgNode<TSX>[]): SgNode<TSX>[] {
-  const excluded = new Set(exclude.map((node) => node.id()));
-  const pattern = `^${name.replace(/[$^\\.*+?()[\]{}|]/g, "\\$&")}$`;
-  const kinds = ["identifier", "shorthand_property_identifier", "shorthand_property_identifier_pattern"] as const;
-  return kinds
-    .flatMap((kind) => rootNode.findAll({ rule: { kind, regex: pattern } }))
-    .filter((node) => !excluded.has(node.id()));
 }

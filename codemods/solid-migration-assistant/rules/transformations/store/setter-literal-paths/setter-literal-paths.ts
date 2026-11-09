@@ -4,6 +4,7 @@ import { stringLiteralValue } from "../../../../shared/analysis.ts";
 import { findBindings } from "../../../../shared/bindings.ts";
 import { identifierReferences, provenImport } from "../../../../shared/imports.ts";
 import { MIGRATION_GUIDE_URL } from "../../../../shared/target.ts";
+import { rewrite, type RuleRewrite } from "../../../../shared/finding.ts";
 
 export const STORE_SETTER_MIGRATION_GUIDE = `${MIGRATION_GUIDE_URL}#draft-first-setters`;
 
@@ -13,7 +14,7 @@ const UNSAFE_KEYS = new Set(["__proto__", "constructor", "prototype"]);
 
 export type StoreSetterRewrite = {
   edit: Edit;
-  report: string;
+  report: RuleRewrite;
 };
 
 /**
@@ -51,7 +52,8 @@ export type StoreSetterRewrite = {
  *
  * When the file calls `createStore` at least once, every reference to it is
  * such a call (never a value passed on or re-exported), every use of every
- * setter it creates is a rewritten call, and every `createStore` call starts
+ * setter it creates is a rewritten call (an exported setter has uses this
+ * file cannot see, so it never qualifies), and every `createStore` call starts
  * from an object or array literal with no options, the `solid-js/store`
  * import itself moves to `solid-js`, provided the statement imports only `createStore` (and
  * optionally the `Store` type). Everything else, including object, array,
@@ -103,6 +105,10 @@ export function rewriteStoreSetterLiteralPaths(
       everyUseRewritten = false;
       continue;
     }
+    // An exported setter may be called from files this rule never sees (the
+    // semantic provider does not follow destructured exports), so its calls
+    // here are still rewritten but the import cannot move.
+    if (declaration?.parent()?.kind() === "export_statement") everyUseRewritten = false;
     for (const use of identifierReferences(rootNode, setter.text(), [setter])) {
       const entry = rewriteUse(use, filename);
       if (entry === null) everyUseRewritten = false;
@@ -160,7 +166,7 @@ function rewriteUse(use: SgNode<TSX>, filename: string): StoreSetterRewrite | nu
   const start = call.range().start;
   return {
     edit: call.field("arguments")!.replace(`((draft) => { ${statement} })`),
-    report: `${filename}:${start.line + 1}:${start.column + 1} Rewrite this path-style store setter call with a literal value as a draft write. Official migration guide: ${STORE_SETTER_MIGRATION_GUIDE}`,
+    report: rewrite(filename, start, `Rewrite this path-style store setter call with a literal value as a draft write.`, STORE_SETTER_MIGRATION_GUIDE),
   };
 }
 
@@ -219,6 +225,6 @@ function relocateImport(statement: SgNode<TSX>, filename: string): StoreSetterRe
   const start = source.range().start;
   return {
     edit: source.replace(`${quote}${CORE_MODULE}${quote}`),
-    report: `${filename}:${start.line + 1}:${start.column + 1} Relocate solid-js/store to solid-js for createStore: every setter call in this file is now a draft write. Official migration guide: ${STORE_SETTER_MIGRATION_GUIDE}`,
+    report: rewrite(filename, start, `Relocate solid-js/store to solid-js for createStore: every setter call in this file is now a draft write.`, STORE_SETTER_MIGRATION_GUIDE),
   };
 }

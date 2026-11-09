@@ -2,7 +2,8 @@ import type { SgNode } from "codemod:ast-grep";
 import type TSX from "codemod:ast-grep/langs/tsx";
 import { findModuleReferences } from "../../../../shared/analysis.ts";
 import type { ModuleReference } from "../../../../shared/analysis.ts";
-import { lintHint, migrationGuide } from "../../../../shared/target.ts";
+import { finding, type RuleFinding } from "../../../../shared/finding.ts";
+import { migrationGuide } from "../../../../shared/target.ts";
 
 const BETA32_SUBPATH_REPLACEMENTS: Readonly<Record<string, string>> = {
   "solid-js/store": "solid-js",
@@ -26,19 +27,19 @@ const FORM_LABELS: Record<ModuleReference["form"], string> = {
 
 const FORM_GUIDANCE: Record<ModuleReference["form"], string> = {
   import:
-    " Change only this static import's module source and preserve its import form and quote style.",
+    "Change only this static import's module source and preserve its import form and quote style.",
   "re-export":
-    " Change only this re-export's module source and preserve its export form and quote style.",
+    "Change only this re-export's module source and preserve its export form and quote style.",
   "dynamic-import":
-    " Change only this dynamic import's module source and preserve its quote style.",
+    "Change only this dynamic import's module source and preserve its quote style.",
   require:
-    " Change only this require call's module source and preserve its quote style.",
+    "Change only this require call's module source and preserve its quote style.",
 };
 
 export function analyzeBeta32SubpathImports(
   rootNode: SgNode<TSX>,
   context: { filename: string },
-): string[] {
+): RuleFinding[] {
   return findModuleReferences(rootNode)
     .map((ref) => {
       const replacementModule = BETA32_SUBPATH_REPLACEMENTS[ref.moduleName];
@@ -54,8 +55,14 @@ export function analyzeBeta32SubpathImports(
     )
     .map(({ source, moduleName, replacementModule, form }) => {
       const start = source.range().start;
-      return `${context.filename}:${start.line + 1}:${start.column + 1} Move this Solid 2 legacy subpath ${FORM_LABELS[form]}.
-Why: Solid 2 publishes ${moduleName} from ${replacementModule}.
-Guidance:${FORM_GUIDANCE[form]} Make and validate that edit yourself; this analyzer never edits or runs the target project.${moduleName === "solid-js/store" ? ` ${STORE_STOP_CONDITION}${lintHint("removed-api")}` : ""} Official migration guide: ${MIGRATION_GUIDE}`;
+      const store = moduleName === "solid-js/store";
+      return finding(context.filename, start, {
+        severity: "build",
+        headline: `Move this Solid 2 legacy subpath ${FORM_LABELS[form]}.`,
+        why: `Solid 2 publishes ${moduleName} from ${replacementModule}.`,
+        guidance: `${FORM_GUIDANCE[form]}${store ? ` ${STORE_STOP_CONDITION}` : ""}`,
+        lint: store ? ["removed-api"] : [],
+        guide: MIGRATION_GUIDE,
+      });
     });
 }

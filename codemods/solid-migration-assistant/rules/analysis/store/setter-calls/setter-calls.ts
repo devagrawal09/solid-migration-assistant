@@ -1,7 +1,9 @@
 import type { SgNode } from "codemod:ast-grep";
 import type TSX from "codemod:ast-grep/langs/tsx";
 import { stringLiteralValue } from "../../../../shared/analysis.ts";
-import { lintHint, migrationGuide, SOLID_TARGET_VERSION } from "../../../../shared/target.ts";
+import { finding, type RuleFinding } from "../../../../shared/finding.ts";
+import { migrationGuide, SOLID_TARGET_VERSION } from "../../../../shared/target.ts";
+import { referencesOf } from "../../../../shared/semantic.ts";
 
 const MIGRATION_GUIDE = migrationGuide("draft-first-setters");
 
@@ -42,7 +44,7 @@ type SetterSite = {
 export function analyzeStoreSetterCalls(
   rootNode: SgNode<TSX>,
   context: { filename: string },
-): string[] {
+): RuleFinding[] {
   const sites = new Map<string, SetterSite>();
 
   for (const statement of rootNode.findAll({ rule: { kind: "import_statement" } })) {
@@ -53,11 +55,11 @@ export function analyzeStoreSetterCalls(
       const name = specifier.field("name");
       if (name === null || name.text() !== "createStore") continue;
       const local = specifier.field("alias") ?? name;
-      for (const fileReferences of local.references()) {
+      for (const fileReferences of referencesOf(local)) {
         for (const reference of fileReferences.nodes) {
           const setter = setterBindingOf(reference);
           if (setter === null) continue;
-          for (const setterReferences of setter.references()) {
+          for (const setterReferences of referencesOf(setter)) {
             const filename = setterReferences.root.relativeFilename().replaceAll("\\", "/");
             for (const use of setterReferences.nodes) {
               const site = classify(use, filename);
@@ -144,27 +146,45 @@ function returnsValue(fn: SgNode<TSX>): boolean {
   return false;
 }
 
-function guidance({ node, filename, shape, detail }: SetterSite): string {
-  const start = node.range().start;
-  const location = `${filename}:${start.line + 1}:${start.column + 1}`;
-  const why = `Why: Solid ${SOLID_TARGET_VERSION}'s plain store setter accepts only a draft callback, setStore(state => { ... }); Solid 1.x also accepted a path followed by a value, an object to merge, and a function whose returned object was merged into the store, while a value returned from the 2.0 draft callback is adopted as the whole new state instead.`;
-  const shared = ` Make and validate that edit yourself; this analyzer never edits or runs the target project.${lintHint("no-store-mutation-outside-setter")} Official migration guide: ${MIGRATION_GUIDE}`;
+const WHY = `Solid ${SOLID_TARGET_VERSION}'s plain store setter accepts only a draft callback, setStore(state => { ... }); Solid 1.x also accepted a path followed by a value, an object to merge, and a function whose returned object was merged into the store, while a value returned from the 2.0 draft callback is adopted as the whole new state instead.`;
+
+function guidance({ node, filename, shape, detail }: SetterSite): RuleFinding {
   switch (shape) {
     case "path":
-      return `${location} Manual review required: rewrite this path-style store setter call as a draft write.${detail}
-${why}
-Guidance: Read the path segments and the final value. Replace the call with setStore(state => { ... }) that walks the same path on the draft: a string or number segment becomes a property access, an array of keys becomes a loop over those keys, a range becomes a loop over its indices, a filter function becomes a loop with an if, and a final function value becomes a read-modify-write of the draft property: in 1.x an object it returned was merged into the existing node, so on the draft assign only the properties it changed (assigning a whole object replaces the node). Setting undefined to remove a key becomes delete.${shared}`;
+      return finding(filename, node, {
+        severity: "build",
+        headline: "Rewrite this path-style store setter call as a draft write.",
+        why: `${detail.trim()} ${WHY}`,
+        guidance: `Read the path segments and the final value. Replace the call with setStore(state => { ... }) that walks the same path on the draft: a string or number segment becomes a property access, an array of keys becomes a loop over those keys, a range becomes a loop over its indices, a filter function becomes a loop with an if, and a final function value becomes a read-modify-write of the draft property: in 1.x an object it returned was merged into the existing node, so on the draft assign only the properties it changed (assigning a whole object replaces the node). Setting undefined to remove a key becomes delete.`,
+        lint: ["no-store-mutation-outside-setter"],
+        guide: MIGRATION_GUIDE,
+      });
     case "merge":
-      return `${location} Manual review required: rewrite this object-merge store setter call as draft assignments.${detail}
-${why}
-Guidance: Read the argument and the store shape. Replace the call with setStore(state => { ... }) that assigns each top-level key of the argument onto the draft; nested objects that 1.x merged shallowly must be assigned per key too if other keys at that level must survive.${shared}`;
+      return finding(filename, node, {
+        severity: "build",
+        headline: "Rewrite this object-merge store setter call as draft assignments.",
+        why: `${detail.trim()} ${WHY}`,
+        guidance: `Read the argument and the store shape. Replace the call with setStore(state => { ... }) that assigns each top-level key of the argument onto the draft; nested objects that 1.x merged shallowly must be assigned per key too if other keys at that level must survive.`,
+        lint: ["no-store-mutation-outside-setter"],
+        guide: MIGRATION_GUIDE,
+      });
     case "returns":
-      return `${location} Manual review required: review the value this store setter callback returns.
-${why}
-Guidance: Read the callback's return value and every key it omits. If it was spreading the previous state to produce a merged object, mutate the draft in place and return nothing. If it intentionally replaces the whole store, keep the return but confirm every consumer accepts the replacement, since keys missing from the returned object no longer survive.${shared}`;
+      return finding(filename, node, {
+        severity: "behavior",
+        headline: `Review the value this store setter callback returns.`,
+        why: WHY,
+        guidance: `Read the callback's return value and every key it omits. If it was spreading the previous state to produce a merged object, mutate the draft in place and return nothing. If it intentionally replaces the whole store, keep the return but confirm every consumer accepts the replacement, since keys missing from the returned object no longer survive.`,
+        lint: ["no-store-mutation-outside-setter"],
+        guide: MIGRATION_GUIDE,
+      });
     default:
-      return `${location} Manual review required: trace this store setter that is passed as a value.
-${why}
-Guidance: Find every call made through this reference (an event handler, a helper, a child component prop) and classify its arguments as above: paths and object merges become draft callbacks, and returned objects replace instead of merge. Stop and ask for the call sites when the reference escapes to code outside this project.${shared}`;
+      return finding(filename, node, {
+        severity: "behavior",
+        headline: `Trace this store setter that is passed as a value.`,
+        why: WHY,
+        guidance: `Find every call made through this reference (an event handler, a helper, a child component prop) and classify its arguments as above: paths and object merges become draft callbacks, and returned objects replace instead of merge. Stop and ask for the call sites when the reference escapes to code outside this project.`,
+        lint: ["no-store-mutation-outside-setter"],
+        guide: MIGRATION_GUIDE,
+      });
   }
 }

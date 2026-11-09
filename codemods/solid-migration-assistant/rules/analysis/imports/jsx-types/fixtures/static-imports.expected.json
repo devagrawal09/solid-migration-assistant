@@ -1,0 +1,52 @@
+{
+  "findings": [
+    {
+      "rule": "imports/jsx-types",
+      "file": "analysis/imports/jsx-types/fixtures/static-imports.fixture.tsx",
+      "line": 2,
+      "column": 15,
+      "severity": "build",
+      "headline": "Move this JSX type import off solid-js.",
+      "why": "Solid 2.0.0-rc.21 no longer exports the JSX namespace or the JSXElement alias from solid-js; renderer packages own JSX types, and web projects import JSX from @solidjs/web.",
+      "guidance": "Move this specifier to a separate import type { JSX } from \"@solidjs/web\" statement (or set jsxImportSource to @solidjs/web and use the global JSX namespace), leaving every other solid-js binding in place. Also set compilerOptions.jsxImportSource to @solidjs/web in tsconfig.json, which this analyzer does not scan.",
+      "guide": "https://github.com/solidjs/solid/blob/2105ffb8ca2fced55f5fac0763177fc93f97c2c2/documentation/solid-2.0/MIGRATION.md#typescript-jsx-solid-js--renderer-package",
+      "lint": []
+    },
+    {
+      "rule": "imports/jsx-types",
+      "file": "analysis/imports/jsx-types/fixtures/static-imports.fixture.tsx",
+      "line": 2,
+      "column": 20,
+      "severity": "build",
+      "headline": "Move this JSXElement type import off solid-js.",
+      "why": "Solid 2.0.0-rc.21 no longer exports the JSX namespace or the JSXElement alias from solid-js; renderer packages own JSX types, and web projects import JSX from @solidjs/web.",
+      "guidance": "Replace JSXElement with JSX.Element from @solidjs/web, or with Element from solid-js for renderer-neutral component code. Also set compilerOptions.jsxImportSource to @solidjs/web in tsconfig.json, which this analyzer does not scan.",
+      "guide": "https://github.com/solidjs/solid/blob/2105ffb8ca2fced55f5fac0763177fc93f97c2c2/documentation/solid-2.0/MIGRATION.md#typescript-jsx-solid-js--renderer-package",
+      "lint": []
+    },
+    {
+      "rule": "imports/jsx-types",
+      "file": "analysis/imports/jsx-types/fixtures/static-imports.fixture.tsx",
+      "line": 3,
+      "column": 10,
+      "severity": "build",
+      "headline": "Move this JSX type import off solid-js.",
+      "why": "Solid 2.0.0-rc.21 no longer exports the JSX namespace or the JSXElement alias from solid-js; renderer packages own JSX types, and web projects import JSX from @solidjs/web.",
+      "guidance": "Move this specifier to a separate import type { JSX } from \"@solidjs/web\" statement (or set jsxImportSource to @solidjs/web and use the global JSX namespace), leaving every other solid-js binding in place. Also set compilerOptions.jsxImportSource to @solidjs/web in tsconfig.json, which this analyzer does not scan.",
+      "guide": "https://github.com/solidjs/solid/blob/2105ffb8ca2fced55f5fac0763177fc93f97c2c2/documentation/solid-2.0/MIGRATION.md#typescript-jsx-solid-js--renderer-package",
+      "lint": []
+    },
+    {
+      "rule": "imports/jsx-types",
+      "file": "analysis/imports/jsx-types/fixtures/static-imports.fixture.tsx",
+      "line": 1,
+      "column": 1,
+      "severity": "build",
+      "headline": "Point this @jsxImportSource pragma at the renderer package.",
+      "why": "Solid 2.0.0-rc.21 does not ship jsx-runtime type entries from solid-js; web JSX types come from @solidjs/web (hyperscript from @solidjs/h).",
+      "guidance": "Change the pragma to @jsxImportSource @solidjs/web for web components, and mirror the change in tsconfig.json's compilerOptions.jsxImportSource, which this analyzer does not scan.",
+      "guide": "https://github.com/solidjs/solid/blob/2105ffb8ca2fced55f5fac0763177fc93f97c2c2/documentation/solid-2.0/MIGRATION.md#typescript-jsx-solid-js--renderer-package",
+      "lint": []
+    }
+  ]
+}

@@ -1,5 +1,6 @@
 import type { SgNode } from "codemod:ast-grep";
 import type TSX from "codemod:ast-grep/langs/tsx";
+import { referencesOf } from "./semantic.ts";
 
 export const ANALYSIS_STATE_KEY = "solid-migration-assistant-guidance";
 
@@ -34,7 +35,7 @@ export function findImportedCalls(
       if (identifiers[0]!.text().trim() !== importedName) continue;
       const binding = identifiers[identifiers.length - 1]!;
 
-      for (const fileReferences of binding.references()) {
+      for (const fileReferences of referencesOf(binding)) {
         const filename = fileReferences.root
           .relativeFilename()
           .replaceAll("\\", "/");
@@ -61,7 +62,7 @@ export function findImportedCalls(
       const binding = ns.findAll({ rule: { kind: "identifier" } })[0];
       if (!binding) continue;
 
-      for (const fileReferences of binding.references()) {
+      for (const fileReferences of referencesOf(binding)) {
         const filename = fileReferences.root
           .relativeFilename()
           .replaceAll("\\", "/");

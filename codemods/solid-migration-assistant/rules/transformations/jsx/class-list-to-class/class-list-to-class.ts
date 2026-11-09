@@ -1,6 +1,7 @@
 import type { Edit, SgNode } from "codemod:ast-grep";
 import type TSX from "codemod:ast-grep/langs/tsx";
 import { MIGRATION_GUIDE_URL } from "../../../../shared/target.ts";
+import { rewrite, type RuleRewrite } from "../../../../shared/finding.ts";
 
 export { SOLID_SOURCE_COMMIT } from "../../../../shared/target.ts";
 
@@ -14,7 +15,7 @@ export const CLASS_LIST_MIGRATION_GUIDE = `${MIGRATION_GUIDE_URL}#classlist--cla
  */
 export type ClassListRewrite = {
   edit: Edit;
-  report: string;
+  report: RuleRewrite;
 };
 
 /**
@@ -143,7 +144,7 @@ function rewriteElement(
   return [
     {
       edit: target.name.replace("class"),
-      report: `${filename}:${start.line + 1}:${start.column + 1} Rewrite the classList attribute on <${elementName.text()}> to class, preserving its value expression. Official migration guide: ${CLASS_LIST_MIGRATION_GUIDE}`,
+      report: rewrite(filename, start, `Rewrite the classList attribute on <${elementName.text()}> to class, preserving its value expression.`, CLASS_LIST_MIGRATION_GUIDE),
     },
   ];
 }
@@ -187,7 +188,7 @@ function mergeElement(
 
   const start = classAttribute.name.range().start;
   const elementName = element.field("name")!;
-  const report = `${filename}:${start.line + 1}:${start.column + 1} Merge the class and classList attributes on <${elementName.text()}> into the class array form, preserving the static string and the object literal. Official migration guide: ${CLASS_LIST_MIGRATION_GUIDE}`;
+  const report = rewrite(filename, start, `Merge the class and classList attributes on <${elementName.text()}> into the class array form, preserving the static string and the object literal.`, CLASS_LIST_MIGRATION_GUIDE);
   return [
     {
       edit: classAttribute.node.replace(`class={["${staticClass}", ${object.text()}]}`),

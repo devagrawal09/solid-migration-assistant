@@ -15,7 +15,7 @@ import { basename, dirname, join, resolve } from "node:path";
 import { test } from "node:test";
 import { fileURLToPath } from "node:url";
 import ts from "typescript";
-import { output, treeSnapshot } from "./helpers.mjs";
+import { output, skipOrFail, treeSnapshot } from "./helpers.mjs";
 
 /**
  * Opt-in (`pnpm test:corpus`): proves the assistant behaves safely on real,
@@ -75,17 +75,7 @@ const corpus = JSON.parse(
 const baselinePath = resolve(packageDirectory, "tests/corpus/baseline.json");
 const updateBaseline = process.argv.includes("--update-baseline");
 
-/**
- * One finding or rewrite report line: two-space indent, `file:line:column`,
- * then the headline (analyzer) or the message (transform). The launcher's
- * own `package.json` / `tsconfig.json` findings are printed unindented and
- * always at `1:1`.
- */
-const REPORT_LINE = /^ {2}(\S+):(\d+):(\d+) (.*)$/;
-const LAUNCHER_FINDING = /^(package\.json|tsconfig\.json):\d+:\d+ (.*)$/;
-/** The per-headline summary repeats every headline, so parsing stops here. */
-const SUMMARY_LINE = /^ {2}\[solid-migration-assistant\] Summary: (\d+) (?:findings|rewrites)/;
-const CRASH_SIGNATURE = /panic|RuntimeError|Cannot read|TypeError|ReferenceError/;
+const CRASH_SIGNATURE = /panic|RuntimeError|Cannot read|TypeError|ReferenceError|codemod::runtime|Failed to find references/;
 /** Only a clone that fails for lack of network is a skip; anything else fails. */
 const NETWORK_FAILURE =
   /Could not resolve host|unable to access|Failed to connect|Connection (?:refused|reset|timed out)|Network is unreachable|Temporary failure in name resolution|Operation timed out/i;
@@ -125,7 +115,7 @@ for (const entry of corpus) {
         const clone = cloneAtCommit(repository, entry);
         elapsedMs.clone = Math.round(performance.now() - started);
         if (clone.networkFailure) {
-          t.skip(`network unavailable while cloning ${entry.url}: ${clone.networkFailure}`);
+          skipOrFail(t, `network unavailable while cloning ${entry.url}: ${clone.networkFailure}`);
           return;
         }
         assert.equal(
@@ -147,7 +137,7 @@ for (const entry of corpus) {
         //    queries status; everything else is compared by content hash.
         const before = snapshotWithoutGit(target);
         started = performance.now();
-        const analyze = runLauncher(["--target", target]);
+        const analyze = runLauncher(["--target", target, "--format", "json"]);
         elapsedMs.analyze = Math.round(performance.now() - started);
         assert.equal(analyze.status, 0, output(analyze));
         assertNoCrash(analyze, "analyzer");
@@ -156,7 +146,7 @@ for (const entry of corpus) {
           before,
           "the analyzer changed the target",
         );
-        const findings = parseAnalyzerOutput(analyze.stdout);
+        const findings = countFindings(analyze.stdout);
 
         // 3. The transform runs on a `.git`-free copy so the clone itself is
         //    never written to, and so `--allow-dirty` is the only way in.
@@ -168,14 +158,11 @@ for (const entry of corpus) {
         const original = treeSnapshot(copy);
         assert.deepEqual(original, before, "the copy does not match the clone");
         started = performance.now();
-        const transform = runLauncher(["transform", "--allow-dirty", "--target", copy]);
+        const transform = runLauncher(["transform", "--allow-dirty", "--target", copy, "--format", "json"]);
         elapsedMs.transform = Math.round(performance.now() - started);
         assert.equal(transform.status, 0, output(transform));
         assertNoCrash(transform, "transform");
-        // The launcher swaps the Codemod child's stdio so that workflow step
-        // output (the report lines) reaches our stdout, while Codemod's
-        // progress envelope goes to our stderr; so the report is on stdout.
-        const report = parseReportLines(transform.stdout);
+        const report = JSON.parse(transform.stdout).rewrites;
         const after = treeSnapshot(copy);
         const { changed, added, deleted } = diffSnapshots(original, after);
         assert.deepEqual(added, [], "the transform added entries to the target");
@@ -202,12 +189,12 @@ for (const entry of corpus) {
 
         // 5. Idempotency: a second run reports nothing and changes nothing.
         started = performance.now();
-        const second = runLauncher(["transform", "--allow-dirty", "--target", copy]);
+        const second = runLauncher(["transform", "--allow-dirty", "--target", copy, "--format", "json"]);
         elapsedMs.idempotency = Math.round(performance.now() - started);
         assert.equal(second.status, 0, output(second));
         assertNoCrash(second, "second transform");
         assert.deepEqual(
-          parseReportLines(second.stdout),
+          JSON.parse(second.stdout).rewrites,
           [],
           "a second transform run re-reported rewrites (not idempotent)",
         );
@@ -221,15 +208,15 @@ for (const entry of corpus) {
         //    findings legitimately differ (the rewritten sites are gone), so
         //    only the exit status is asserted and the total is recorded.
         started = performance.now();
-        const transformedAnalyze = runLauncher(["--target", copy]);
+        const transformedAnalyze = runLauncher(["--target", copy, "--format", "json"]);
         elapsedMs.analyzeTransformed = Math.round(performance.now() - started);
         assert.equal(transformedAnalyze.status, 0, output(transformedAnalyze));
         assertNoCrash(transformedAnalyze, "analyzer on the transformed copy");
-        const transformedFindings = parseAnalyzerOutput(transformedAnalyze.stdout);
+        const transformedFindings = countFindings(transformedAnalyze.stdout);
 
         // 7. One machine-readable line per entry for the run log.
         const rewrites = new Map();
-        for (const line of report) increment(rewrites, stripGuide(line.message));
+        for (const rewrite of report) increment(rewrites, `${rewrite.rule}: ${rewrite.message}`);
         const counts = {
           commit: entry.commit,
           analyzerFindings: sortedObject(findings.counts),
@@ -371,53 +358,15 @@ function assertNoCrash(result, phase) {
 }
 
 /**
- * Counts analyzer findings per headline: the indented `file:line:column`
- * lines up to the Summary line plus the launcher's unindented manifest
- * findings. The Summary line's own total must agree with the indented
- * count, which guards the parser against a format drift; with zero
- * findings the workflow prints no Summary line at all.
+ * Analyzer findings per `rule: headline` from a `--format json` report,
+ * whose summary total must agree with the findings it lists.
  */
-function parseAnalyzerOutput(stdout) {
+function countFindings(stdout) {
+  const report = JSON.parse(stdout);
+  assert.equal(report.summary.findings, report.findings.length);
   const counts = new Map();
-  let indented = 0;
-  let summaryTotal = null;
-  for (const line of stdout.split("\n")) {
-    const summary = SUMMARY_LINE.exec(line);
-    if (summary) {
-      summaryTotal = Number(summary[1]);
-      break;
-    }
-    const finding = REPORT_LINE.exec(line);
-    if (finding) {
-      increment(counts, finding[4]);
-      indented += 1;
-      continue;
-    }
-    const launcherFinding = LAUNCHER_FINDING.exec(line);
-    if (launcherFinding) increment(counts, launcherFinding[2]);
-  }
-  assert.equal(
-    indented,
-    summaryTotal ?? 0,
-    "the parsed finding count disagrees with the analyzer's own Summary line",
-  );
-  return { counts, summaryTotal };
-}
-
-/** The transform's report lines (file, message) up to its Summary line. */
-function parseReportLines(stdout) {
-  const lines = [];
-  for (const line of stdout.split("\n")) {
-    if (SUMMARY_LINE.test(line)) break;
-    const match = REPORT_LINE.exec(line);
-    if (match) lines.push({ file: match[1], message: match[4] });
-  }
-  return lines;
-}
-
-/** The transform message without its trailing migration-guide link. */
-function stripGuide(message) {
-  return message.replace(/ Official migration guide: \S+$/, "");
+  for (const finding of report.findings) increment(counts, `${finding.rule}: ${finding.headline}`);
+  return { counts };
 }
 
 /**

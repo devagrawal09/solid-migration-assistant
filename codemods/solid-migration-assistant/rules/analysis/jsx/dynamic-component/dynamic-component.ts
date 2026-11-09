@@ -2,6 +2,8 @@ import type { SgNode } from "codemod:ast-grep";
 import type TSX from "codemod:ast-grep/langs/tsx";
 import { stringLiteralValue } from "../../../../shared/analysis.ts";
 import { migrationGuide, SOLID_TARGET_VERSION } from "../../../../shared/target.ts";
+import { finding, type RuleFinding } from "../../../../shared/finding.ts";
+import { referencesOf } from "../../../../shared/semantic.ts";
 
 const MIGRATION_GUIDE = migrationGuide("dynamic-components-createdynamic--dynamic--dynamic-factory");
 const WEB_MODULES = new Set(["solid-js/web", "@solidjs/web"]);
@@ -16,7 +18,7 @@ const WEB_MODULES = new Set(["solid-js/web", "@solidjs/web"]);
 export function analyzeDynamicComponent(
   rootNode: SgNode<TSX>,
   context: { filename: string },
-): string[] {
+): RuleFinding[] {
   const sites = new Map<string, { element: SgNode<TSX>; filename: string }>();
   for (const statement of rootNode.findAll({ rule: { kind: "import_statement" } })) {
     const source = statement.children().find((child) => child.is("string"));
@@ -25,7 +27,7 @@ export function analyzeDynamicComponent(
     for (const specifier of statement.findAll({ rule: { kind: "import_specifier" } })) {
       const name = specifier.field("name");
       if (name === null || name.text() !== "Dynamic" || specifier.field("alias") !== null) continue;
-      for (const fileReferences of name.references()) {
+      for (const fileReferences of referencesOf(name)) {
         const filename = fileReferences.root.relativeFilename().replaceAll("\\", "/");
         for (const reference of fileReferences.nodes) {
           const element = reference.parent();
@@ -49,8 +51,12 @@ export function analyzeDynamicComponent(
     })
     .map(({ element, filename }) => {
       const start = element.range().start;
-      return `${filename}:${start.line + 1}:${start.column + 1} Manual review required: replace this deprecated Dynamic element with a dynamic() factory.
-Why: Solid ${SOLID_TARGET_VERSION} keeps <Dynamic component={...}> working but deprecates it (no runtime warning): the tag travels in the props bag, so every instance pays a merge at the call site, an omit inside, and a fresh factory memo that a JSX wrapper cannot hoist.
-Guidance: Hoist const Tag = dynamic(() => <the component expression>) to the component body, or to the module for a constant tag, and render <Tag {...the remaining props} />; inside a For callback the callback body is the place to hoist. Keep Dynamic as is when the migration is staged and the deprecation is acceptable for now. Make and validate that edit yourself; this analyzer never edits or runs the target project. Official migration guide: ${MIGRATION_GUIDE}`;
+      return finding(filename, start, {
+        severity: "deprecated",
+        headline: `Replace this deprecated Dynamic element with a dynamic() factory.`,
+        why: `Solid ${SOLID_TARGET_VERSION} keeps <Dynamic component={...}> working but deprecates it (no runtime warning): the tag travels in the props bag, so every instance pays a merge at the call site, an omit inside, and a fresh factory memo that a JSX wrapper cannot hoist.`,
+        guidance: `Hoist const Tag = dynamic(() => <the component expression>) to the component body, or to the module for a constant tag, and render <Tag {...the remaining props} />; inside a For callback the callback body is the place to hoist. Keep Dynamic as is when the migration is staged and the deprecation is acceptable for now.`,
+        guide: MIGRATION_GUIDE,
+      });
     });
 }

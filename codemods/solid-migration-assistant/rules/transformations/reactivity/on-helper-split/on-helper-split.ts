@@ -2,8 +2,10 @@ import type { Edit, SgNode } from "codemod:ast-grep";
 import type TSX from "codemod:ast-grep/langs/tsx";
 import { directCalleeNames, enclosingFunction } from "../../../../shared/analysis.ts";
 import { findBindings } from "../../../../shared/bindings.ts";
+import { importedConstDeclaration } from "../../../../shared/provenance.ts";
 import { identifierReferences, provenImport, removeImportedSpecifier } from "../../../../shared/imports.ts";
 import { MIGRATION_GUIDE_URL } from "../../../../shared/target.ts";
+import { rewrite, type RuleRewrite } from "../../../../shared/finding.ts";
 
 export const ON_HELPER_MIGRATION_GUIDE = `${MIGRATION_GUIDE_URL}#on-helper--split-effects`;
 
@@ -30,7 +32,7 @@ const OWNER_DEPENDENT = new Set([
 
 export type OnHelperRewrite = {
   edit: Edit;
-  report: string;
+  report: RuleRewrite;
 };
 
 /**
@@ -56,7 +58,10 @@ export type OnHelperRewrite = {
  *   effect initial value, no `on` options such as `defer`, and no comments;
  * - `dep` is a zero-parameter arrow function, or an identifier the file binds
  *   exactly once as the getter of `createSignal(...)` (first element of the
- *   tuple) or as `const x = createMemo(...)`; an identifier is wrapped as
+ *   tuple) or as `const x = createMemo(...)`, or imports from another
+ *   project file whose own `const x = createMemo(...)` is proven there
+ *   (`shared/provenance.ts`; a destructured signal export cannot be
+ *   resolved and is refused); an identifier is wrapped as
  *   `() => x()` so the compute callback never passes its previous value into
  *   `x`, and arrays of dependencies are refused;
  * - `fn` is an inline arrow or function expression with at most two
@@ -100,7 +105,7 @@ export function rewriteOnHelper(rootNode: SgNode<TSX>, filename: string): OnHelp
       node: call,
       entry: {
         edit: call.field("arguments")!.replace(`(${compute}, ${fn.text()})`),
-        report: `${filename}:${start.line + 1}:${start.column + 1} Rewrite createEffect(on(dep, fn)) as createEffect(compute, apply), keeping the callback unchanged. Official migration guide: ${ON_HELPER_MIGRATION_GUIDE}`,
+        report: rewrite(filename, start, `Rewrite createEffect(on(dep, fn)) as createEffect(compute, apply), keeping the callback unchanged.`, ON_HELPER_MIGRATION_GUIDE),
       },
     });
   }
@@ -117,7 +122,7 @@ export function rewriteOnHelper(rootNode: SgNode<TSX>, filename: string): OnHelp
         node: on.specifier,
         entry: {
           edit: removal,
-          report: `${filename}:${start.line + 1}:${start.column + 1} Remove the on import from solid-js; every use is now a split createEffect. Official migration guide: ${ON_HELPER_MIGRATION_GUIDE}`,
+          report: rewrite(filename, start, `Remove the on import from solid-js; every use is now a split createEffect.`, ON_HELPER_MIGRATION_GUIDE),
         },
       });
     }
@@ -158,7 +163,15 @@ function computeFor(
   if (dep.kind() !== "identifier") return null;
   const bindings = findBindings(rootNode, dep.text());
   if (bindings.length !== 1) return null;
-  return isGetterBinding(bindings[0]!, factories) ? `() => ${dep.text()}()` : null;
+  if (isGetterBinding(bindings[0]!, factories)) return `() => ${dep.text()}()`;
+  // A memo imported from another project file, proven there.
+  const imported = importedConstDeclaration(rootNode, dep.text());
+  if (imported === null) return null;
+  const memo = getterFactories(imported.rootNode).memo;
+  const value = imported.declarator.field("value");
+  return memo !== null && value?.kind() === "call_expression" && value.field("function")?.text() === memo
+    ? `() => ${dep.text()}()`
+    : null;
 }
 
 /**

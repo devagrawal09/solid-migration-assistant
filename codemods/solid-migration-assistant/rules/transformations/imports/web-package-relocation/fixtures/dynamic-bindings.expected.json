@@ -1,0 +1,44 @@
+{
+  "rewrites": [
+    {
+      "rule": "imports/web-package-relocation",
+      "file": "transformations/imports/web-package-relocation/fixtures/dynamic-bindings.fixture.tsx",
+      "line": 5,
+      "column": 25,
+      "message": "Relocate solid-js/web to @solidjs/web for proven bindings Dynamic. Note: Dynamic is deprecated in Solid 2 in favor of the dynamic(source) factory; it keeps working without a runtime warning.",
+      "guide": "https://github.com/solidjs/solid/blob/2105ffb8ca2fced55f5fac0763177fc93f97c2c2/documentation/solid-2.0/MIGRATION.md#imports-where-things-live-now"
+    },
+    {
+      "rule": "imports/web-package-relocation",
+      "file": "transformations/imports/web-package-relocation/fixtures/dynamic-bindings.fixture.tsx",
+      "line": 6,
+      "column": 43,
+      "message": "Relocate solid-js/web to @solidjs/web for proven bindings Dynamic. Note: Dynamic is deprecated in Solid 2 in favor of the dynamic(source) factory; it keeps working without a runtime warning.",
+      "guide": "https://github.com/solidjs/solid/blob/2105ffb8ca2fced55f5fac0763177fc93f97c2c2/documentation/solid-2.0/MIGRATION.md#imports-where-things-live-now"
+    },
+    {
+      "rule": "imports/web-package-relocation",
+      "file": "transformations/imports/web-package-relocation/fixtures/dynamic-bindings.fixture.tsx",
+      "line": 7,
+      "column": 75,
+      "message": "Relocate solid-js/web to @solidjs/web for proven bindings Dynamic, render. Note: Dynamic is deprecated in Solid 2 in favor of the dynamic(source) factory; it keeps working without a runtime warning.",
+      "guide": "https://github.com/solidjs/solid/blob/2105ffb8ca2fced55f5fac0763177fc93f97c2c2/documentation/solid-2.0/MIGRATION.md#imports-where-things-live-now"
+    },
+    {
+      "rule": "imports/web-package-relocation",
+      "file": "transformations/imports/web-package-relocation/fixtures/dynamic-bindings.fixture.tsx",
+      "line": 8,
+      "column": 39,
+      "message": "Relocate solid-js/web to @solidjs/web for proven bindings Dynamic. Note: Dynamic is deprecated in Solid 2 in favor of the dynamic(source) factory; it keeps working without a runtime warning.",
+      "guide": "https://github.com/solidjs/solid/blob/2105ffb8ca2fced55f5fac0763177fc93f97c2c2/documentation/solid-2.0/MIGRATION.md#imports-where-things-live-now"
+    },
+    {
+      "rule": "imports/web-package-relocation",
+      "file": "transformations/imports/web-package-relocation/fixtures/dynamic-bindings.fixture.tsx",
+      "line": 9,
+      "column": 79,
+      "message": "Relocate solid-js/web to @solidjs/web for proven bindings Dynamic, isServer. Note: Dynamic is deprecated in Solid 2 in favor of the dynamic(source) factory; it keeps working without a runtime warning.",
+      "guide": "https://github.com/solidjs/solid/blob/2105ffb8ca2fced55f5fac0763177fc93f97c2c2/documentation/solid-2.0/MIGRATION.md#imports-where-things-live-now"
+    }
+  ]
+}

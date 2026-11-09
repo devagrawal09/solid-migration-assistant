@@ -2,6 +2,7 @@ import type { SgNode } from "codemod:ast-grep";
 import type TSX from "codemod:ast-grep/langs/tsx";
 import { stringLiteralValue } from "../../../../shared/analysis.ts";
 import { SOLID_SOURCE_COMMIT } from "../../../../shared/target.ts";
+import { finding, type RuleFinding, type Severity } from "../../../../shared/finding.ts";
 
 /**
  * Import-level findings for the Solid 1 ecosystem packages that change most
@@ -20,7 +21,7 @@ import { SOLID_SOURCE_COMMIT } from "../../../../shared/target.ts";
  * covers them. Every other import from `@solidjs/start` or `vinxi` gets one
  * generic finding, because neither package has a Solid 2 release.
  */
-type Tier = "build" | "behavior" | "deprecated";
+type Tier = Severity;
 type Entry = { tier: Tier; replacement: string; guidance: string };
 
 const ROUTER_GUIDE = "https://www.npmjs.com/package/@solidjs/router/v/2.0.0-next.44";
@@ -126,8 +127,8 @@ const NO_SOLID_2_RELEASE = /^(?:@solidjs\/start(?:\/.*)?|vinxi(?:\/.*)?)$/;
 export function analyzeEcosystemImports(
   rootNode: SgNode<TSX>,
   context: { filename: string },
-): string[] {
-  const findings: { index: number; text: string }[] = [];
+): RuleFinding[] {
+  const findings: { index: number; text: RuleFinding }[] = [];
   for (const statement of rootNode.findAll({ rule: { kind: "import_statement" } })) {
     const source = statement.children().find((child) => child.is("string"));
     const module = source ? stringLiteralValue(source) : null;
@@ -146,9 +147,13 @@ export function analyzeEcosystemImports(
       const start = specifier.range().start;
       findings.push({
         index: start.index,
-        text: `${context.filename}:${start.line + 1}:${start.column + 1} ${headline(found.entry.tier, name, module)}
-Why: Solid 2's ${module.startsWith("@solidjs/router") ? "router (@solidjs/router 2.0.0-next.44)" : module.startsWith("@solidjs/meta") ? "head management (useHead in @solidjs/web; @solidjs/meta 1.0.0-next.2)" : "application layer (@solidjs/vite-plugin start mode and core @solidjs/web)"} replaces this with ${found.entry.replacement}.
-Guidance: ${found.entry.guidance} Make and validate that edit yourself; this analyzer never edits or runs the target project. Official migration guide: ${found.guide}`,
+        text: finding(context.filename, start, {
+        severity: found.entry.tier,
+        headline: headline(found.entry.tier, name, module),
+        why: `Solid 2's ${module.startsWith("@solidjs/router") ? "router (@solidjs/router 2.0.0-next.44)" : module.startsWith("@solidjs/meta") ? "head management (useHead in @solidjs/web; @solidjs/meta 1.0.0-next.2)" : "application layer (@solidjs/vite-plugin start mode and core @solidjs/web)"} replaces this with ${found.entry.replacement}.`,
+        guidance: `${found.entry.guidance}`,
+        guide: found.guide,
+      }),
       });
     }
     // Every import from a package with no Solid 2 release needs a finding:
@@ -159,9 +164,13 @@ Guidance: ${found.entry.guidance} Make and validate that edit yourself; this ana
       const names = unlisted.length > 0 ? ` (${unlisted.join(", ")})` : "";
       findings.push({
         index: start.index,
-        text: `${context.filename}:${start.line + 1}:${start.column + 1} Manual review required: migrate this ${module} import, which has no Solid 2 release.
-Why: Neither @solidjs/start nor vinxi has a release that targets Solid 2; @solidjs/vite-plugin start mode and the core @solidjs/web runtime provide the application layer instead${names ? `, and the names this import takes${names} have no audited one-to-one replacement` : ""}.
-Guidance: Find the Solid 2 equivalent of what this import provides in the @solidjs/vite-plugin start mode documentation or in @solidjs/web, and remove the import. Make and validate that edit yourself; this analyzer never edits or runs the target project. Official migration guide: ${START_GUIDE}`,
+        text: finding(context.filename, start, {
+          severity: "build",
+          headline: `Migrate this ${module} import, which has no Solid 2 release.`,
+          why: `Neither @solidjs/start nor vinxi has a release that targets Solid 2; @solidjs/vite-plugin start mode and the core @solidjs/web runtime provide the application layer instead${names ? `, and the names this import takes${names} have no audited one-to-one replacement` : ""}.`,
+          guidance: "Find the Solid 2 equivalent of what this import provides in the @solidjs/vite-plugin start mode documentation or in @solidjs/web, and remove the import.",
+          guide: START_GUIDE,
+        }),
       });
     }
   }
@@ -169,7 +178,7 @@ Guidance: Find the Solid 2 equivalent of what this import provides in the @solid
 }
 
 function headline(tier: Tier, name: string, module: string): string {
-  if (tier === "build") return `Manual review required: migrate this ${name} import from ${module}, which Solid 2 removes or moves.`;
-  if (tier === "behavior") return `Manual review required: review this ${name} import from ${module}, whose Solid 2 behavior changed.`;
-  return `Manual review required: replace this deprecated ${name} import from ${module}.`;
+  if (tier === "build") return `Migrate this ${name} import from ${module}, which Solid 2 removes or moves.`;
+  if (tier === "behavior") return `Review this ${name} import from ${module}, whose Solid 2 behavior changed.`;
+  return `Replace this deprecated ${name} import from ${module}.`;
 }

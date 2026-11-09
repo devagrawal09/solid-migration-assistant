@@ -1,0 +1,18 @@
+{
+  "findings": [
+    {
+      "rule": "reactivity/on-helper",
+      "file": "analysis/reactivity/on-helper/fixtures/direct-call.fixture.tsx",
+      "line": 6,
+      "column": 1,
+      "severity": "build",
+      "headline": "Migrate this on tracking wrapper to Solid 2 split effects.",
+      "why": "Solid 2 removes the on helper; explicit dependency tracking is unnecessary with split effects.",
+      "guidance": "Read the complete dependency list and callback. Separate the callback into compute (reactive reads) and apply (side effects) callbacks, then replace the on() call with createEffect passing both callbacks. Defer each rewrite until every direct createEffect caller is reviewed; verify that the effect fires when intended and that cleanup timing is preserved.",
+      "lint": [
+        "removed-api"
+      ],
+      "guide": "https://github.com/solidjs/solid/blob/2105ffb8ca2fced55f5fac0763177fc93f97c2c2/documentation/solid-2.0/MIGRATION.md#on-helper--split-effects"
+    }
+  ]
+}

@@ -1,0 +1,36 @@
+{
+  "rewrites": [
+    {
+      "rule": "imports/web-package-relocation",
+      "file": "transformations/imports/web-package-relocation/fixtures/escaped-specifiers.fixture.tsx",
+      "line": 2,
+      "column": 38,
+      "message": "Relocate solid-js/web to @solidjs/web for proven bindings render.",
+      "guide": "https://github.com/solidjs/solid/blob/2105ffb8ca2fced55f5fac0763177fc93f97c2c2/documentation/solid-2.0/MIGRATION.md#imports-where-things-live-now"
+    },
+    {
+      "rule": "imports/web-package-relocation",
+      "file": "transformations/imports/web-package-relocation/fixtures/escaped-specifiers.fixture.tsx",
+      "line": 3,
+      "column": 43,
+      "message": "Relocate solid-js/web to @solidjs/web for proven bindings hydrate.",
+      "guide": "https://github.com/solidjs/solid/blob/2105ffb8ca2fced55f5fac0763177fc93f97c2c2/documentation/solid-2.0/MIGRATION.md#imports-where-things-live-now"
+    },
+    {
+      "rule": "imports/web-package-relocation",
+      "file": "transformations/imports/web-package-relocation/fixtures/escaped-specifiers.fixture.tsx",
+      "line": 4,
+      "column": 46,
+      "message": "Relocate solid-js/web to @solidjs/web for proven bindings isServer.",
+      "guide": "https://github.com/solidjs/solid/blob/2105ffb8ca2fced55f5fac0763177fc93f97c2c2/documentation/solid-2.0/MIGRATION.md#imports-where-things-live-now"
+    },
+    {
+      "rule": "imports/web-package-relocation",
+      "file": "transformations/imports/web-package-relocation/fixtures/escaped-specifiers.fixture.tsx",
+      "line": 5,
+      "column": 46,
+      "message": "Relocate solid-js/web to @solidjs/web for proven bindings isServer.",
+      "guide": "https://github.com/solidjs/solid/blob/2105ffb8ca2fced55f5fac0763177fc93f97c2c2/documentation/solid-2.0/MIGRATION.md#imports-where-things-live-now"
+    }
+  ]
+}

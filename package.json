@@ -7,6 +7,7 @@
     "analyze": "node ./codemods/solid-migration-assistant/bin/solid-migration-assistant.mjs",
     "test": "pnpm --dir ./codemods/solid-migration-assistant test",
     "check-types": "pnpm --dir ./codemods/solid-migration-assistant check-types",
-    "verify": "pnpm --dir ./codemods/solid-migration-assistant verify"
+    "verify": "pnpm --dir ./codemods/solid-migration-assistant verify",
+    "test:release": "pnpm --dir ./codemods/solid-migration-assistant test:release"
   }
 }

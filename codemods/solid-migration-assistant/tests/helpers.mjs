@@ -1,3 +1,4 @@
+import assert from "node:assert/strict";
 import { createHash } from "node:crypto";
 import { readFileSync, readdirSync } from "node:fs";
 import { join, relative } from "node:path";
@@ -36,4 +37,16 @@ function visit(root, directory, snapshot) {
       .update(readFileSync(path))
       .digest("hex");
   }
+}
+
+/**
+ * Skips a release-tier test whose environment is missing (network, Node
+ * version), unless `SOLID_MIGRATION_REQUIRE_RELEASE_TIER=1` is set. CI sets it
+ * so a scheduled run can never pass by skipping every check.
+ */
+export function skipOrFail(t, reason) {
+  if (process.env.SOLID_MIGRATION_REQUIRE_RELEASE_TIER === "1") {
+    assert.fail(`release tier required but skipped: ${reason}`);
+  }
+  t.skip(reason);
 }

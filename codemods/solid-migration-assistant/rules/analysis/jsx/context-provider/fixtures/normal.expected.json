@@ -1,0 +1,28 @@
+{
+  "findings": [
+    {
+      "rule": "jsx/context-provider",
+      "file": "analysis/jsx/context-provider/fixtures/normal.fixture.tsx",
+      "line": 8,
+      "column": 5,
+      "severity": "build",
+      "headline": "Migrate this Context.Provider JSX site to direct context provider syntax.",
+      "why": "Solid 2.0.0-rc.21 removes the Context.Provider pattern (createContext now returns the provider component itself, and .Provider is undefined); use the context value directly as a JSX component: <ThemeContext value={...}>.",
+      "guidance": "Replace <ThemeContext.Provider value={...}> with <ThemeContext value={...}>. Remove the .Provider suffix — the context itself is now the provider component. The value prop and children remain unchanged, but confirm the value is never undefined: Solid 2 treats value={undefined} as no provider, so a default-less context then throws ContextNotFoundError instead of falling back as 1.x did; use null as an explicit empty value.",
+      "guide": "https://github.com/solidjs/solid/blob/2105ffb8ca2fced55f5fac0763177fc93f97c2c2/documentation/solid-2.0/MIGRATION.md#context-providers-contextprovider--context-is-the-provider",
+      "lint": []
+    },
+    {
+      "rule": "jsx/context-provider",
+      "file": "analysis/jsx/context-provider/fixtures/normal.fixture.tsx",
+      "line": 9,
+      "column": 7,
+      "severity": "build",
+      "headline": "Migrate this Context.Provider JSX site to direct context provider syntax.",
+      "why": "Solid 2.0.0-rc.21 removes the Context.Provider pattern (createContext now returns the provider component itself, and .Provider is undefined); use the context value directly as a JSX component: <UserContext value={...}>.",
+      "guidance": "Replace <UserContext.Provider value={...}> with <UserContext value={...}>. Remove the .Provider suffix — the context itself is now the provider component. The value prop and children remain unchanged, but confirm the value is never undefined: Solid 2 treats value={undefined} as no provider, so a default-less context then throws ContextNotFoundError instead of falling back as 1.x did; use null as an explicit empty value.",
+      "guide": "https://github.com/solidjs/solid/blob/2105ffb8ca2fced55f5fac0763177fc93f97c2c2/documentation/solid-2.0/MIGRATION.md#context-providers-contextprovider--context-is-the-provider",
+      "lint": []
+    }
+  ]
+}

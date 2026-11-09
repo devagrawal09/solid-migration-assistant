@@ -1,0 +1,28 @@
+{
+  "findings": [
+    {
+      "rule": "jsx/dynamic-component",
+      "file": "analysis/jsx/dynamic-component/fixtures/normal.fixture.tsx",
+      "line": 9,
+      "column": 5,
+      "severity": "deprecated",
+      "headline": "Replace this deprecated Dynamic element with a dynamic() factory.",
+      "why": "Solid 2.0.0-rc.21 keeps <Dynamic component={...}> working but deprecates it (no runtime warning): the tag travels in the props bag, so every instance pays a merge at the call site, an omit inside, and a fresh factory memo that a JSX wrapper cannot hoist.",
+      "guidance": "Hoist const Tag = dynamic(() => <the component expression>) to the component body, or to the module for a constant tag, and render <Tag {...the remaining props} />; inside a For callback the callback body is the place to hoist. Keep Dynamic as is when the migration is staged and the deprecation is acceptable for now.",
+      "guide": "https://github.com/solidjs/solid/blob/2105ffb8ca2fced55f5fac0763177fc93f97c2c2/documentation/solid-2.0/MIGRATION.md#dynamic-components-createdynamic--dynamic--dynamic-factory",
+      "lint": []
+    },
+    {
+      "rule": "jsx/dynamic-component",
+      "file": "analysis/jsx/dynamic-component/fixtures/normal.fixture.tsx",
+      "line": 10,
+      "column": 5,
+      "severity": "deprecated",
+      "headline": "Replace this deprecated Dynamic element with a dynamic() factory.",
+      "why": "Solid 2.0.0-rc.21 keeps <Dynamic component={...}> working but deprecates it (no runtime warning): the tag travels in the props bag, so every instance pays a merge at the call site, an omit inside, and a fresh factory memo that a JSX wrapper cannot hoist.",
+      "guidance": "Hoist const Tag = dynamic(() => <the component expression>) to the component body, or to the module for a constant tag, and render <Tag {...the remaining props} />; inside a For callback the callback body is the place to hoist. Keep Dynamic as is when the migration is staged and the deprecation is acceptable for now.",
+      "guide": "https://github.com/solidjs/solid/blob/2105ffb8ca2fced55f5fac0763177fc93f97c2c2/documentation/solid-2.0/MIGRATION.md#dynamic-components-createdynamic--dynamic--dynamic-factory",
+      "lint": []
+    }
+  ]
+}

@@ -7,6 +7,7 @@ import {
   hasSingleExpressionValue,
 } from "../../../../shared/jsx.ts";
 import { MIGRATION_GUIDE_URL } from "../../../../shared/target.ts";
+import { rewrite, type RuleRewrite } from "../../../../shared/finding.ts";
 
 export { SOLID_SOURCE_COMMIT } from "../../../../shared/target.ts";
 
@@ -20,7 +21,7 @@ const KEYED_ATTRIBUTE = "keyed={false}";
 
 export type IndexRewrite = {
   edit: Edit;
-  report: string;
+  report: RuleRewrite;
 };
 
 /**
@@ -224,7 +225,7 @@ function rewriteElement(
 
   const name = element.field("name")!;
   const start = element.range().start;
-  const report = `${filename}:${start.line + 1}:${start.column + 1} Rewrite <${LEGACY_COMPONENT}> to <${REPLACEMENT_COMPONENT} ${KEYED_ATTRIBUTE}>, keeping its each, fallback, and child callback unchanged. Official migration guide: ${INDEX_MIGRATION_GUIDE}`;
+  const report = rewrite(filename, start, `Rewrite <${LEGACY_COMPONENT}> to <${REPLACEMENT_COMPONENT} ${KEYED_ATTRIBUTE}>, keeping its each, fallback, and child callback unchanged.`, INDEX_MIGRATION_GUIDE);
   const entries = [
     {
       node: element,
@@ -267,14 +268,13 @@ function rewriteImport(
   filename: string,
 ): { node: SgNode<TSX>; entry: IndexRewrite } | null {
   const start = indexSpecifier.range().start;
-  const location = `${filename}:${start.line + 1}:${start.column + 1}`;
-
+  
   if (forSpecifier === null) {
     return {
       node: indexSpecifier,
       entry: {
         edit: indexSpecifier.field("name")!.replace(REPLACEMENT_COMPONENT),
-        report: `${location} Rewrite the ${LEGACY_COMPONENT} import from ${SOLID_CORE_MODULE} to ${REPLACEMENT_COMPONENT}. Official migration guide: ${INDEX_MIGRATION_GUIDE}`,
+        report: rewrite(filename, start, `Rewrite the ${LEGACY_COMPONENT} import from ${SOLID_CORE_MODULE} to ${REPLACEMENT_COMPONENT}.`, INDEX_MIGRATION_GUIDE),
       },
     };
   }
@@ -315,7 +315,7 @@ function rewriteImport(
     node: indexSpecifier,
     entry: {
       edit: { startPos, endPos, insertedText: "" },
-      report: `${location} Remove the ${LEGACY_COMPONENT} import from ${SOLID_CORE_MODULE}; ${REPLACEMENT_COMPONENT} is already imported. Official migration guide: ${INDEX_MIGRATION_GUIDE}`,
+      report: rewrite(filename, start, `Remove the ${LEGACY_COMPONENT} import from ${SOLID_CORE_MODULE}; ${REPLACEMENT_COMPONENT} is already imported.`, INDEX_MIGRATION_GUIDE),
     },
   };
 }

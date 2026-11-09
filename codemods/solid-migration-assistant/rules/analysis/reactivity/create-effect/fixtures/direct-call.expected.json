@@ -1,0 +1,232 @@
+{
+  "findings": [
+    {
+      "rule": "reactivity/create-effect",
+      "file": "analysis/reactivity/create-effect/fixtures/direct-call.fixture.tsx",
+      "line": 6,
+      "column": 1,
+      "severity": "build",
+      "headline": "Split this one-argument createEffect into compute and apply callbacks (simple shape).",
+      "why": "Solid 2 requires separate compute and apply callbacks. This callback takes no previous value, registers no cleanup, creates no reactive primitives, and is not async, so the split is usually mechanical.",
+      "guidance": "Move the reactive reads into the compute callback and return what the side effect needs, then perform the imperative work in the apply callback: createEffect(() => [a(), b()], ([a, b]) => { ... }). Reads left in the apply callback are no longer tracked. createTrackedEffect keeps the one-function shape as an escape hatch, but it may run more than once per change, cannot create primitives, and throws on a pending async read, so prefer the split.",
+      "lint": [
+        "no-single-arg-create-effect"
+      ],
+      "guide": "https://github.com/solidjs/solid/blob/2105ffb8ca2fced55f5fac0763177fc93f97c2c2/documentation/solid-2.0/MIGRATION.md#effects-lifecycle-and-cleanup"
+    },
+    {
+      "rule": "reactivity/create-effect",
+      "file": "analysis/reactivity/create-effect/fixtures/direct-call.fixture.tsx",
+      "line": 11,
+      "column": 1,
+      "severity": "build",
+      "headline": "Split this one-argument createEffect into compute and apply callbacks (simple shape).",
+      "why": "Solid 2 requires separate compute and apply callbacks. This callback takes no previous value, registers no cleanup, creates no reactive primitives, and is not async, so the split is usually mechanical.",
+      "guidance": "Move the reactive reads into the compute callback and return what the side effect needs, then perform the imperative work in the apply callback: createEffect(() => [a(), b()], ([a, b]) => { ... }). Reads left in the apply callback are no longer tracked. createTrackedEffect keeps the one-function shape as an escape hatch, but it may run more than once per change, cannot create primitives, and throws on a pending async read, so prefer the split.",
+      "lint": [
+        "no-single-arg-create-effect"
+      ],
+      "guide": "https://github.com/solidjs/solid/blob/2105ffb8ca2fced55f5fac0763177fc93f97c2c2/documentation/solid-2.0/MIGRATION.md#effects-lifecycle-and-cleanup"
+    },
+    {
+      "rule": "reactivity/create-effect",
+      "file": "analysis/reactivity/create-effect/fixtures/direct-call.fixture.tsx",
+      "line": 15,
+      "column": 1,
+      "severity": "build",
+      "headline": "Migrate this zero-argument createEffect call.",
+      "why": "Solid 2 requires separate compute and apply callbacks; a zero-argument call is likely a stub or placeholder.",
+      "guidance": "Add explicit compute and apply callbacks, or remove the empty call if it is dead code.",
+      "guide": "https://github.com/solidjs/solid/blob/2105ffb8ca2fced55f5fac0763177fc93f97c2c2/documentation/solid-2.0/MIGRATION.md#effects-lifecycle-and-cleanup",
+      "lint": []
+    },
+    {
+      "rule": "reactivity/create-effect",
+      "file": "analysis/reactivity/create-effect/fixtures/direct-call.fixture.tsx",
+      "line": 16,
+      "column": 1,
+      "severity": "build",
+      "headline": "Split this one-argument createEffect into compute and apply callbacks (simple shape).",
+      "why": "Solid 2 requires separate compute and apply callbacks. This callback takes no previous value, registers no cleanup, creates no reactive primitives, and is not async, so the split is usually mechanical.",
+      "guidance": "Move the reactive reads into the compute callback and return what the side effect needs, then perform the imperative work in the apply callback: createEffect(() => [a(), b()], ([a, b]) => { ... }). Reads left in the apply callback are no longer tracked. createTrackedEffect keeps the one-function shape as an escape hatch, but it may run more than once per change, cannot create primitives, and throws on a pending async read, so prefer the split.",
+      "lint": [
+        "no-single-arg-create-effect"
+      ],
+      "guide": "https://github.com/solidjs/solid/blob/2105ffb8ca2fced55f5fac0763177fc93f97c2c2/documentation/solid-2.0/MIGRATION.md#effects-lifecycle-and-cleanup"
+    },
+    {
+      "rule": "reactivity/create-effect",
+      "file": "analysis/reactivity/create-effect/fixtures/direct-call.fixture.tsx",
+      "line": 17,
+      "column": 1,
+      "severity": "build",
+      "headline": "Split this one-argument createEffect into compute and apply callbacks (simple shape).",
+      "why": "Solid 2 requires separate compute and apply callbacks. This callback takes no previous value, registers no cleanup, creates no reactive primitives, and is not async, so the split is usually mechanical.",
+      "guidance": "Move the reactive reads into the compute callback and return what the side effect needs, then perform the imperative work in the apply callback: createEffect(() => [a(), b()], ([a, b]) => { ... }). Reads left in the apply callback are no longer tracked. createTrackedEffect keeps the one-function shape as an escape hatch, but it may run more than once per change, cannot create primitives, and throws on a pending async read, so prefer the split.",
+      "lint": [
+        "no-single-arg-create-effect"
+      ],
+      "guide": "https://github.com/solidjs/solid/blob/2105ffb8ca2fced55f5fac0763177fc93f97c2c2/documentation/solid-2.0/MIGRATION.md#effects-lifecycle-and-cleanup"
+    },
+    {
+      "rule": "reactivity/create-effect",
+      "file": "analysis/reactivity/create-effect/fixtures/direct-call.fixture.tsx",
+      "line": 19,
+      "column": 1,
+      "severity": "build",
+      "headline": "Split this one-argument createEffect into compute and apply callbacks (simple shape).",
+      "why": "Solid 2 requires separate compute and apply callbacks. This callback takes no previous value, registers no cleanup, creates no reactive primitives, and is not async, so the split is usually mechanical.",
+      "guidance": "Move the reactive reads into the compute callback and return what the side effect needs, then perform the imperative work in the apply callback: createEffect(() => [a(), b()], ([a, b]) => { ... }). Reads left in the apply callback are no longer tracked. createTrackedEffect keeps the one-function shape as an escape hatch, but it may run more than once per change, cannot create primitives, and throws on a pending async read, so prefer the split.",
+      "lint": [
+        "no-single-arg-create-effect"
+      ],
+      "guide": "https://github.com/solidjs/solid/blob/2105ffb8ca2fced55f5fac0763177fc93f97c2c2/documentation/solid-2.0/MIGRATION.md#effects-lifecycle-and-cleanup"
+    },
+    {
+      "rule": "reactivity/create-effect",
+      "file": "analysis/reactivity/create-effect/fixtures/direct-call.fixture.tsx",
+      "line": 21,
+      "column": 1,
+      "severity": "build",
+      "headline": "Migrate this two-argument createEffect call.",
+      "why": "Solid 2 treats the second argument as options, not an initial value. If this call's second argument is an initial value, it must move to a default parameter of the compute callback. If it is already an apply callback for the split-effect pattern, confirm compatibility with Solid 2 option handling.",
+      "guidance": "Read both arguments. If the second argument is a non-function initial value or a function that represents the legacy initialValue parameter, move it to a default parameter on the compute callback: createEffect((prev = INITIAL_VALUE) => compute(prev), applyFn). If the second argument is already the apply function for a manually split effect, verify that no Solid 1.x initialValue semantic is accidentally carried forward and that the call expects the second argument to be options in Solid 2. Stop without proposing a rewrite when the intent of the second argument is unclear, the callback contains cleanup or async work, or the distinction between initialValue and apply callback cannot be resolved from static context. Ask for the smallest focused test or runtime observation that makes the second-argument intent observable.",
+      "guide": "https://github.com/solidjs/solid/blob/2105ffb8ca2fced55f5fac0763177fc93f97c2c2/documentation/solid-2.0/MIGRATION.md#effects-lifecycle-and-cleanup",
+      "lint": []
+    },
+    {
+      "rule": "reactivity/create-effect",
+      "file": "analysis/reactivity/create-effect/fixtures/direct-call.fixture.tsx",
+      "line": 26,
+      "column": 1,
+      "severity": "build",
+      "headline": "Migrate this two-argument createEffect call.",
+      "why": "Solid 2 treats the second argument as options, not an initial value. If this call's second argument is an initial value, it must move to a default parameter of the compute callback. If it is already an apply callback for the split-effect pattern, confirm compatibility with Solid 2 option handling.",
+      "guidance": "Read both arguments. If the second argument is a non-function initial value or a function that represents the legacy initialValue parameter, move it to a default parameter on the compute callback: createEffect((prev = INITIAL_VALUE) => compute(prev), applyFn). If the second argument is already the apply function for a manually split effect, verify that no Solid 1.x initialValue semantic is accidentally carried forward and that the call expects the second argument to be options in Solid 2. Stop without proposing a rewrite when the intent of the second argument is unclear, the callback contains cleanup or async work, or the distinction between initialValue and apply callback cannot be resolved from static context. Ask for the smallest focused test or runtime observation that makes the second-argument intent observable.",
+      "guide": "https://github.com/solidjs/solid/blob/2105ffb8ca2fced55f5fac0763177fc93f97c2c2/documentation/solid-2.0/MIGRATION.md#effects-lifecycle-and-cleanup",
+      "lint": []
+    },
+    {
+      "rule": "reactivity/create-effect",
+      "file": "analysis/reactivity/create-effect/fixtures/direct-call.fixture.tsx",
+      "line": 34,
+      "column": 1,
+      "severity": "build",
+      "headline": "Migrate this 3-argument createEffect call.",
+      "why": "Solid 2 treats the second argument as options, not an initial value, and does not support a third positional argument. Legacy three-argument calls (callback, initialValue, options) must be restructured.",
+      "guidance": "Move the initial value to a default parameter on the compute callback, and move any legacy options that have Solid 2 equivalents into the second-argument options object. Verify that every legacy option is either mapped to a Solid 2 equivalent or intentionally dropped. Stop without proposing a rewrite when the intent of each argument is unclear. Ask for the smallest focused test or runtime observation that makes the argument roles observable.",
+      "guide": "https://github.com/solidjs/solid/blob/2105ffb8ca2fced55f5fac0763177fc93f97c2c2/documentation/solid-2.0/MIGRATION.md#effects-lifecycle-and-cleanup",
+      "lint": []
+    },
+    {
+      "rule": "reactivity/create-effect",
+      "file": "analysis/reactivity/create-effect/fixtures/direct-call.fixture.tsx",
+      "line": 43,
+      "column": 1,
+      "severity": "build",
+      "headline": "Migrate this zero-argument createEffect call.",
+      "why": "Solid 2 requires separate compute and apply callbacks; a zero-argument call is likely a stub or placeholder.",
+      "guidance": "Add explicit compute and apply callbacks, or remove the empty call if it is dead code.",
+      "guide": "https://github.com/solidjs/solid/blob/2105ffb8ca2fced55f5fac0763177fc93f97c2c2/documentation/solid-2.0/MIGRATION.md#effects-lifecycle-and-cleanup",
+      "lint": []
+    },
+    {
+      "rule": "reactivity/create-effect",
+      "file": "analysis/reactivity/create-effect/fixtures/direct-call.fixture.tsx",
+      "line": 62,
+      "column": 1,
+      "severity": "build",
+      "headline": "Restructure this one-argument createEffect before splitting it.",
+      "why": "Solid 2 requires separate compute and apply callbacks, and this callback reads its previous value, so it cannot be split by moving reads alone.",
+      "guidance": "Move the previous value to a default parameter of the compute callback, (prev = initial) => ..., or compare in the apply callback, which receives (value, previousValue). Then move the reactive reads into the compute callback and the imperative work into the apply callback.",
+      "lint": [
+        "no-single-arg-create-effect"
+      ],
+      "guide": "https://github.com/solidjs/solid/blob/2105ffb8ca2fced55f5fac0763177fc93f97c2c2/documentation/solid-2.0/MIGRATION.md#effects-lifecycle-and-cleanup"
+    },
+    {
+      "rule": "reactivity/create-effect",
+      "file": "analysis/reactivity/create-effect/fixtures/direct-call.fixture.tsx",
+      "line": 66,
+      "column": 1,
+      "severity": "build",
+      "headline": "Restructure this one-argument createEffect before splitting it.",
+      "why": "Solid 2 requires separate compute and apply callbacks, and this callback registers onCleanup, so it cannot be split by moving reads alone.",
+      "guidance": "Return the cleanup function from the apply callback instead of calling onCleanup. Then move the reactive reads into the compute callback and the imperative work into the apply callback.",
+      "lint": [
+        "no-single-arg-create-effect"
+      ],
+      "guide": "https://github.com/solidjs/solid/blob/2105ffb8ca2fced55f5fac0763177fc93f97c2c2/documentation/solid-2.0/MIGRATION.md#effects-lifecycle-and-cleanup"
+    },
+    {
+      "rule": "reactivity/create-effect",
+      "file": "analysis/reactivity/create-effect/fixtures/direct-call.fixture.tsx",
+      "line": 70,
+      "column": 1,
+      "severity": "build",
+      "headline": "Restructure this one-argument createEffect before splitting it.",
+      "why": "Solid 2 requires separate compute and apply callbacks, and this callback creates reactive primitives or nested effects, so it cannot be split by moving reads alone.",
+      "guidance": "Hoist the primitives it creates out of the effect into the owning scope; the apply callback is not an owner for new computations. Then move the reactive reads into the compute callback and the imperative work into the apply callback.",
+      "lint": [
+        "no-single-arg-create-effect"
+      ],
+      "guide": "https://github.com/solidjs/solid/blob/2105ffb8ca2fced55f5fac0763177fc93f97c2c2/documentation/solid-2.0/MIGRATION.md#effects-lifecycle-and-cleanup"
+    },
+    {
+      "rule": "reactivity/create-effect",
+      "file": "analysis/reactivity/create-effect/fixtures/direct-call.fixture.tsx",
+      "line": 74,
+      "column": 1,
+      "severity": "build",
+      "headline": "Restructure this one-argument createEffect before splitting it.",
+      "why": "Solid 2 requires separate compute and apply callbacks, and this callback is async, so it cannot be split by moving reads alone.",
+      "guidance": "Make the async work the compute callback's result (an async compute is tracked and pending-aware) and keep the apply callback synchronous. Then move the reactive reads into the compute callback and the imperative work into the apply callback.",
+      "lint": [
+        "no-single-arg-create-effect"
+      ],
+      "guide": "https://github.com/solidjs/solid/blob/2105ffb8ca2fced55f5fac0763177fc93f97c2c2/documentation/solid-2.0/MIGRATION.md#effects-lifecycle-and-cleanup"
+    },
+    {
+      "rule": "reactivity/create-effect",
+      "file": "analysis/reactivity/create-effect/fixtures/direct-call.fixture.tsx",
+      "line": 78,
+      "column": 1,
+      "severity": "build",
+      "headline": "Restructure this one-argument createEffect before splitting it.",
+      "why": "Solid 2 requires separate compute and apply callbacks, and this callback is defined elsewhere, so it cannot be split by moving reads alone.",
+      "guidance": "Open the referenced callback; the split depends on its body. Then move the reactive reads into the compute callback and the imperative work into the apply callback.",
+      "lint": [
+        "no-single-arg-create-effect"
+      ],
+      "guide": "https://github.com/solidjs/solid/blob/2105ffb8ca2fced55f5fac0763177fc93f97c2c2/documentation/solid-2.0/MIGRATION.md#effects-lifecycle-and-cleanup"
+    },
+    {
+      "rule": "reactivity/create-effect",
+      "file": "analysis/reactivity/create-effect/fixtures/direct-call.fixture.tsx",
+      "line": 48,
+      "column": 1,
+      "severity": "build",
+      "headline": "Split this one-argument createEffect into compute and apply callbacks (simple shape).",
+      "why": "Solid 2 requires separate compute and apply callbacks. This callback takes no previous value, registers no cleanup, creates no reactive primitives, and is not async, so the split is usually mechanical.",
+      "guidance": "Move the reactive reads into the compute callback and return what the side effect needs, then perform the imperative work in the apply callback: createEffect(() => [a(), b()], ([a, b]) => { ... }). Reads left in the apply callback are no longer tracked. createTrackedEffect keeps the one-function shape as an escape hatch, but it may run more than once per change, cannot create primitives, and throws on a pending async read, so prefer the split.",
+      "lint": [
+        "no-single-arg-create-effect"
+      ],
+      "guide": "https://github.com/solidjs/solid/blob/2105ffb8ca2fced55f5fac0763177fc93f97c2c2/documentation/solid-2.0/MIGRATION.md#effects-lifecycle-and-cleanup"
+    },
+    {
+      "rule": "reactivity/create-effect",
+      "file": "analysis/reactivity/create-effect/fixtures/direct-call.fixture.tsx",
+      "line": 49,
+      "column": 1,
+      "severity": "build",
+      "headline": "Split this one-argument createEffect into compute and apply callbacks (simple shape).",
+      "why": "Solid 2 requires separate compute and apply callbacks. This callback takes no previous value, registers no cleanup, creates no reactive primitives, and is not async, so the split is usually mechanical.",
+      "guidance": "Move the reactive reads into the compute callback and return what the side effect needs, then perform the imperative work in the apply callback: createEffect(() => [a(), b()], ([a, b]) => { ... }). Reads left in the apply callback are no longer tracked. createTrackedEffect keeps the one-function shape as an escape hatch, but it may run more than once per change, cannot create primitives, and throws on a pending async read, so prefer the split.",
+      "lint": [
+        "no-single-arg-create-effect"
+      ],
+      "guide": "https://github.com/solidjs/solid/blob/2105ffb8ca2fced55f5fac0763177fc93f97c2c2/documentation/solid-2.0/MIGRATION.md#effects-lifecycle-and-cleanup"
+    }
+  ]
+}

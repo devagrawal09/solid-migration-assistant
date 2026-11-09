@@ -1,0 +1,40 @@
+{
+  "findings": [
+    {
+      "rule": "reactivity/create-dynamic",
+      "file": "analysis/reactivity/create-dynamic/fixtures/direct-call.fixture.tsx",
+      "line": 6,
+      "column": 1,
+      "severity": "build",
+      "headline": "Migrate this createDynamic call to the dynamic(source) factory.",
+      "why": "Solid 2.0.0-rc.21 removes createDynamic(component, props) in favor of the dynamic(source) factory, which returns a stable component driven by a reactive (optionally async) source; the <Dynamic component={...}> JSX wrapper still exists but is deprecated without a runtime warning.",
+      "guidance": "Read the complete component and props arguments. Compose the call as createComponent(dynamic(() => Component), props), or hoist const Active = dynamic(() => Component) to the component body (or the module, for a constant source) and render <Active {...props} />.",
+      "guide": "https://github.com/solidjs/solid/blob/2105ffb8ca2fced55f5fac0763177fc93f97c2c2/documentation/solid-2.0/MIGRATION.md#dynamic-components-createdynamic--dynamic--dynamic-factory",
+      "lint": []
+    },
+    {
+      "rule": "reactivity/create-dynamic",
+      "file": "analysis/reactivity/create-dynamic/fixtures/direct-call.fixture.tsx",
+      "line": 9,
+      "column": 1,
+      "severity": "build",
+      "headline": "Migrate this createDynamic call to the dynamic(source) factory.",
+      "why": "Solid 2.0.0-rc.21 removes createDynamic(component, props) in favor of the dynamic(source) factory, which returns a stable component driven by a reactive (optionally async) source; the <Dynamic component={...}> JSX wrapper still exists but is deprecated without a runtime warning.",
+      "guidance": "Read the complete component and props arguments. Compose the call as createComponent(dynamic(() => Component), props), or hoist const Active = dynamic(() => Component) to the component body (or the module, for a constant source) and render <Active {...props} />.",
+      "guide": "https://github.com/solidjs/solid/blob/2105ffb8ca2fced55f5fac0763177fc93f97c2c2/documentation/solid-2.0/MIGRATION.md#dynamic-components-createdynamic--dynamic--dynamic-factory",
+      "lint": []
+    },
+    {
+      "rule": "reactivity/create-dynamic",
+      "file": "analysis/reactivity/create-dynamic/fixtures/direct-call.fixture.tsx",
+      "line": 10,
+      "column": 1,
+      "severity": "build",
+      "headline": "Migrate this createDynamic call to the dynamic(source) factory.",
+      "why": "Solid 2.0.0-rc.21 removes createDynamic(component, props) in favor of the dynamic(source) factory, which returns a stable component driven by a reactive (optionally async) source; the <Dynamic component={...}> JSX wrapper still exists but is deprecated without a runtime warning.",
+      "guidance": "Read the complete component and props arguments. Compose the call as createComponent(dynamic(() => Component), props), or hoist const Active = dynamic(() => Component) to the component body (or the module, for a constant source) and render <Active {...props} />.",
+      "guide": "https://github.com/solidjs/solid/blob/2105ffb8ca2fced55f5fac0763177fc93f97c2c2/documentation/solid-2.0/MIGRATION.md#dynamic-components-createdynamic--dynamic--dynamic-factory",
+      "lint": []
+    }
+  ]
+}

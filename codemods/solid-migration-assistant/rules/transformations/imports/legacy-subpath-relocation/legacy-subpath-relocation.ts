@@ -3,6 +3,7 @@ import type TSX from "codemod:ast-grep/langs/tsx";
 import { findModuleReferences } from "../../../../shared/analysis.ts";
 import { findBindings } from "../../../../shared/bindings.ts";
 import { MIGRATION_GUIDE_URL } from "../../../../shared/target.ts";
+import { rewrite, type RuleRewrite } from "../../../../shared/finding.ts";
 
 export { SOLID_SOURCE_COMMIT } from "../../../../shared/target.ts";
 
@@ -25,7 +26,7 @@ export const LEGACY_SUBPATH_RELOCATIONS: Readonly<Record<string, string>> = {
 
 export type SubpathRelocation = {
   edit: Edit;
-  report: string;
+  report: RuleRewrite;
 };
 
 /**
@@ -88,7 +89,7 @@ export function relocateLegacySubpaths(
       const quote = source.text()[0];
       return {
         edit: source.replace(`${quote}${replacement}${quote}`),
-        report: `${filename}:${start.line + 1}:${start.column + 1} Relocate ${moduleName} to ${replacement}. Official migration guide: ${TRANSFORM_MIGRATION_GUIDE}`,
+        report: rewrite(filename, start, `Relocate ${moduleName} to ${replacement}.`, TRANSFORM_MIGRATION_GUIDE),
       };
     })
     .filter(

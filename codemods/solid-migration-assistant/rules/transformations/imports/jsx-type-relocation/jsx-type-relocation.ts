@@ -3,6 +3,7 @@ import type TSX from "codemod:ast-grep/langs/tsx";
 import { stringLiteralValue } from "../../../../shared/analysis.ts";
 import { findBindings } from "../../../../shared/bindings.ts";
 import { MIGRATION_GUIDE_URL } from "../../../../shared/target.ts";
+import { rewrite, type RuleRewrite } from "../../../../shared/finding.ts";
 
 export const JSX_TYPE_MIGRATION_GUIDE = `${MIGRATION_GUIDE_URL}#typescript-jsx-solid-js--renderer-package`;
 
@@ -14,7 +15,7 @@ const PRAGMA = /^(\/\*\*?[\s\S]*?@jsxImportSource\s+)solid-js(\s[\s\S]*?\*\/|\*\
 
 export type JsxTypeRelocation = {
   edit: Edit;
-  report: string;
+  report: RuleRewrite;
 };
 
 /**
@@ -85,7 +86,7 @@ export function relocateJsxTypes(
       node: source,
       entry: {
         edit: source.replace(`${quote}${WEB_RENDERER_MODULE}${quote}`),
-        report: `${filename}:${start.line + 1}:${start.column + 1} Relocate the JSX type import from ${SOLID_CORE_MODULE} to ${WEB_RENDERER_MODULE}. Official migration guide: ${JSX_TYPE_MIGRATION_GUIDE}`,
+        report: rewrite(filename, start, `Relocate the JSX type import from ${SOLID_CORE_MODULE} to ${WEB_RENDERER_MODULE}.`, JSX_TYPE_MIGRATION_GUIDE),
       },
     });
   }
@@ -98,7 +99,7 @@ export function relocateJsxTypes(
       node: comment,
       entry: {
         edit: comment.replace(`${match[1]}${WEB_RENDERER_MODULE}${match[2]}`),
-        report: `${filename}:${start.line + 1}:${start.column + 1} Rewrite the @jsxImportSource pragma from ${SOLID_CORE_MODULE} to ${WEB_RENDERER_MODULE}. Official migration guide: ${JSX_TYPE_MIGRATION_GUIDE}`,
+        report: rewrite(filename, start, `Rewrite the @jsxImportSource pragma from ${SOLID_CORE_MODULE} to ${WEB_RENDERER_MODULE}.`, JSX_TYPE_MIGRATION_GUIDE),
       },
     });
   }
@@ -195,7 +196,7 @@ function splitStatement(
       const alias = jsx.field("alias");
       const imported = alias === null ? JSX_TYPE_NAME : `${JSX_TYPE_NAME} as ${alias.text()}`;
       const start = jsx.range().start;
-      const report = `${filename}:${start.line + 1}:${start.column + 1} Move the JSX type specifier out of this ${SOLID_CORE_MODULE} import into a separate ${WEB_RENDERER_MODULE} type import. Official migration guide: ${JSX_TYPE_MIGRATION_GUIDE}`;
+      const report = rewrite(filename, start, `Move the JSX type specifier out of this ${SOLID_CORE_MODULE} import into a separate ${WEB_RENDERER_MODULE} type import.`, JSX_TYPE_MIGRATION_GUIDE);
       entries.push(
         { node: jsx, entry: { edit: removal, report } },
         {
@@ -229,7 +230,7 @@ function splitStatement(
     const references = rootNode.findAll({ rule: { kind: "type_identifier", regex: `^${LEGACY_ELEMENT_ALIAS}$` } });
     if (values.length === 0 && shorthand.length === 0) {
       const start = element.range().start;
-      const report = `${filename}:${start.line + 1}:${start.column + 1} Replace the JSXElement type import from ${SOLID_CORE_MODULE} with JSX from ${WEB_RENDERER_MODULE} and rewrite its ${references.length} type reference(s) to JSX.Element. Official migration guide: ${JSX_TYPE_MIGRATION_GUIDE}`;
+      const report = rewrite(filename, start, `Replace the JSXElement type import from ${SOLID_CORE_MODULE} with JSX from ${WEB_RENDERER_MODULE} and rewrite its ${references.length} type reference(s) to JSX.Element.`, JSX_TYPE_MIGRATION_GUIDE);
       const edits: Edit[] = [];
       if (specifiers.length === 1) {
         edits.push(elementName.replace(JSX_TYPE_NAME), source.replace(`${quote}${WEB_RENDERER_MODULE}${quote}`));
