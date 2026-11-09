@@ -31,15 +31,6 @@ createEffect(
   0,
 );
 
-createEffect(
-  (prev) => {
-    console.log("changed from", prev, "to", count());
-    return count();
-  },
-  0,
-  { name: "myEffect" },
-);
-
 createEffect();
 
 declare const callbacks: [() => void];

@@ -56,8 +56,8 @@ export function analyzeCreateEffect(
         return finding(filename, start, {
         severity: "build",
         headline: `Migrate this two-argument createEffect call.`,
-        why: `Solid 2 treats the second argument as options, not an initial value. If this call's second argument is an initial value, it must move to a default parameter of the compute callback. If it is already an apply callback for the split-effect pattern, confirm compatibility with Solid 2 option handling.`,
-        guidance: `Read both arguments. If the second argument is a non-function initial value or a function that represents the legacy initialValue parameter, move it to a default parameter on the compute callback: createEffect((prev = INITIAL_VALUE) => compute(prev), applyFn). If the second argument is already the apply function for a manually split effect, verify that no Solid 1.x initialValue semantic is accidentally carried forward and that the call expects the second argument to be options in Solid 2. Stop without proposing a rewrite when the intent of the second argument is unclear, the callback contains cleanup or async work, or the distinction between initialValue and apply callback cannot be resolved from static context. Ask for the smallest focused test or runtime observation that makes the second-argument intent observable.`,
+        why: `Solid 1 reads the second argument as the initial value, but Solid 2's signature is createEffect(compute, effectFn, options), so the second argument is the apply callback that receives each computed value.`,
+        guidance: `If the second argument is a Solid 1 initial value, move it to a default parameter of the compute callback and pass the side effect as the second argument: createEffect((prev = INITIAL_VALUE) => compute(prev), (value) => { ... }). If the second argument is already the apply callback, the call is split and needs no change. Stop and ask when you cannot tell which of the two it is.`,
         guide: MIGRATION_GUIDE,
       });
       }
@@ -66,8 +66,8 @@ export function analyzeCreateEffect(
       return finding(filename, start, {
         severity: "build",
         headline: `Migrate this ${argCount}-argument createEffect call.`,
-        why: `Solid 2 treats the second argument as options, not an initial value, and does not support a third positional argument. Legacy three-argument calls (callback, initialValue, options) must be restructured.`,
-        guidance: `Move the initial value to a default parameter on the compute callback, and move any legacy options that have Solid 2 equivalents into the second-argument options object. Verify that every legacy option is either mapped to a Solid 2 equivalent or intentionally dropped. Stop without proposing a rewrite when the intent of each argument is unclear. Ask for the smallest focused test or runtime observation that makes the argument roles observable.`,
+        why: `Solid 1's signature is createEffect(fn, initialValue, options), but Solid 2's is createEffect(compute, effectFn, options): the second argument is the apply callback and options stay third.`,
+        guidance: `Move the initial value to a default parameter of the compute callback, pass the side effect as the second argument, and keep the options object third, dropping any option Solid 2 does not support: createEffect((prev = INITIAL_VALUE) => compute(prev), (value) => { ... }, options). If the second argument is already the apply callback, only the options need checking. Stop and ask when you cannot tell the role of each argument.`,
         guide: MIGRATION_GUIDE,
       });
     });

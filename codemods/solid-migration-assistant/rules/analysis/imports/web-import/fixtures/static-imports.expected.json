@@ -32,34 +32,6 @@
       "rule": "imports/web-import",
       "file": "analysis/imports/web-import/fixtures/static-imports.fixture.tsx",
       "line": 3,
-      "column": 41,
-      "severity": "build",
-      "headline": "Move this Solid web renderer static import.",
-      "why": "Solid 2 publishes the web renderer from @solidjs/web instead of the solid-js/web subpath.",
-      "guidance": "Change only this static import's module source to @solidjs/web and preserve its import form and quote style.",
-      "lint": [
-        "removed-api"
-      ],
-      "guide": "https://github.com/solidjs/solid/blob/2105ffb8ca2fced55f5fac0763177fc93f97c2c2/documentation/solid-2.0/MIGRATION.md#imports-where-things-live-now"
-    },
-    {
-      "rule": "imports/web-import",
-      "file": "analysis/imports/web-import/fixtures/static-imports.fixture.tsx",
-      "line": 5,
-      "column": 41,
-      "severity": "build",
-      "headline": "Move this Solid web renderer static import.",
-      "why": "Solid 2 publishes the web renderer from @solidjs/web instead of the solid-js/web subpath.",
-      "guidance": "Change only this static import's module source to @solidjs/web and preserve its import form and quote style.",
-      "lint": [
-        "removed-api"
-      ],
-      "guide": "https://github.com/solidjs/solid/blob/2105ffb8ca2fced55f5fac0763177fc93f97c2c2/documentation/solid-2.0/MIGRATION.md#imports-where-things-live-now"
-    },
-    {
-      "rule": "imports/web-import",
-      "file": "analysis/imports/web-import/fixtures/static-imports.fixture.tsx",
-      "line": 6,
       "column": 38,
       "severity": "build",
       "headline": "Move this Solid web renderer static import.",
@@ -73,49 +45,7 @@
     {
       "rule": "imports/web-import",
       "file": "analysis/imports/web-import/fixtures/static-imports.fixture.tsx",
-      "line": 7,
-      "column": 42,
-      "severity": "build",
-      "headline": "Move this Solid web renderer static import.",
-      "why": "Solid 2 publishes the web renderer from @solidjs/web instead of the solid-js/web subpath.",
-      "guidance": "Change only this static import's module source to @solidjs/web and preserve its import form and quote style.",
-      "lint": [
-        "removed-api"
-      ],
-      "guide": "https://github.com/solidjs/solid/blob/2105ffb8ca2fced55f5fac0763177fc93f97c2c2/documentation/solid-2.0/MIGRATION.md#imports-where-things-live-now"
-    },
-    {
-      "rule": "imports/web-import",
-      "file": "analysis/imports/web-import/fixtures/static-imports.fixture.tsx",
-      "line": 8,
-      "column": 44,
-      "severity": "build",
-      "headline": "Move this Solid web renderer static import.",
-      "why": "Solid 2 publishes the web renderer from @solidjs/web instead of the solid-js/web subpath.",
-      "guidance": "Change only this static import's module source to @solidjs/web and preserve its import form and quote style.",
-      "lint": [
-        "removed-api"
-      ],
-      "guide": "https://github.com/solidjs/solid/blob/2105ffb8ca2fced55f5fac0763177fc93f97c2c2/documentation/solid-2.0/MIGRATION.md#imports-where-things-live-now"
-    },
-    {
-      "rule": "imports/web-import",
-      "file": "analysis/imports/web-import/fixtures/static-imports.fixture.tsx",
-      "line": 9,
-      "column": 37,
-      "severity": "build",
-      "headline": "Move this Solid web renderer static import.",
-      "why": "Solid 2 publishes the web renderer from @solidjs/web instead of the solid-js/web subpath.",
-      "guidance": "Change only this static import's module source to @solidjs/web and preserve its import form and quote style.",
-      "lint": [
-        "removed-api"
-      ],
-      "guide": "https://github.com/solidjs/solid/blob/2105ffb8ca2fced55f5fac0763177fc93f97c2c2/documentation/solid-2.0/MIGRATION.md#imports-where-things-live-now"
-    },
-    {
-      "rule": "imports/web-import",
-      "file": "analysis/imports/web-import/fixtures/static-imports.fixture.tsx",
-      "line": 13,
+      "line": 6,
       "column": 25,
       "severity": "build",
       "headline": "Move this Solid web renderer re-export.",
@@ -129,12 +59,12 @@
     {
       "rule": "imports/web-import",
       "file": "analysis/imports/web-import/fixtures/static-imports.fixture.tsx",
-      "line": 15,
+      "line": 8,
       "column": 30,
       "severity": "build",
       "headline": "Move this Solid web renderer dynamic import().",
       "why": "Solid 2 publishes the web renderer from @solidjs/web instead of the solid-js/web subpath.",
-      "guidance": "Change only this dynamic import's module source to @solidjs/web and preserve its quote style.",
+      "guidance": "Change only this dynamic import's module source to @solidjs/web and preserve its quote style. If this code reads Suspense, ErrorBoundary, SuspenseList, mergeProps, Index, createDynamic or renderToStringAsync from the module, replace those first; @solidjs/web does not export them.",
       "lint": [
         "removed-api"
       ],
@@ -143,12 +73,12 @@
     {
       "rule": "imports/web-import",
       "file": "analysis/imports/web-import/fixtures/static-imports.fixture.tsx",
-      "line": 17,
+      "line": 10,
       "column": 32,
       "severity": "build",
       "headline": "Move this Solid web renderer require() call.",
       "why": "Solid 2 publishes the web renderer from @solidjs/web instead of the solid-js/web subpath.",
-      "guidance": "Change only this require call's module source to @solidjs/web and preserve its quote style.",
+      "guidance": "Change only this require call's module source to @solidjs/web and preserve its quote style. If this code reads Suspense, ErrorBoundary, SuspenseList, mergeProps, Index, createDynamic or renderToStringAsync from the module, replace those first; @solidjs/web does not export them.",
       "lint": [
         "removed-api"
       ],
@@ -157,12 +87,12 @@
     {
       "rule": "imports/web-import",
       "file": "analysis/imports/web-import/fixtures/static-imports.fixture.tsx",
-      "line": 18,
+      "line": 11,
       "column": 24,
       "severity": "build",
       "headline": "Move this Solid web renderer dynamic import().",
       "why": "Solid 2 publishes the web renderer from @solidjs/web instead of the solid-js/web subpath.",
-      "guidance": "Change only this dynamic import's module source to @solidjs/web and preserve its quote style.",
+      "guidance": "Change only this dynamic import's module source to @solidjs/web and preserve its quote style. If this code reads Suspense, ErrorBoundary, SuspenseList, mergeProps, Index, createDynamic or renderToStringAsync from the module, replace those first; @solidjs/web does not export them.",
       "lint": [
         "removed-api"
       ],

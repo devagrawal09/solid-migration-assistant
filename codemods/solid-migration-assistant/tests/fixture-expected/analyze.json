@@ -400,7 +400,7 @@
       "severity": "build",
       "headline": "Move this Solid web renderer dynamic import().",
       "why": "Solid 2 publishes the web renderer from @solidjs/web instead of the solid-js/web subpath.",
-      "guidance": "Change only this dynamic import's module source to @solidjs/web and preserve its quote style.",
+      "guidance": "Change only this dynamic import's module source to @solidjs/web and preserve its quote style. If this code reads Suspense, ErrorBoundary, SuspenseList, mergeProps, Index, createDynamic or renderToStringAsync from the module, replace those first; @solidjs/web does not export them.",
       "lint": [
         "removed-api"
       ],
@@ -414,7 +414,7 @@
       "severity": "build",
       "headline": "Move this Solid web renderer require() call.",
       "why": "Solid 2 publishes the web renderer from @solidjs/web instead of the solid-js/web subpath.",
-      "guidance": "Change only this require call's module source to @solidjs/web and preserve its quote style.",
+      "guidance": "Change only this require call's module source to @solidjs/web and preserve its quote style. If this code reads Suspense, ErrorBoundary, SuspenseList, mergeProps, Index, createDynamic or renderToStringAsync from the module, replace those first; @solidjs/web does not export them.",
       "lint": [
         "removed-api"
       ],
@@ -428,7 +428,7 @@
       "severity": "build",
       "headline": "Move this Solid web renderer dynamic import().",
       "why": "Solid 2 publishes the web renderer from @solidjs/web instead of the solid-js/web subpath.",
-      "guidance": "Change only this dynamic import's module source to @solidjs/web and preserve its quote style.",
+      "guidance": "Change only this dynamic import's module source to @solidjs/web and preserve its quote style. If this code reads Suspense, ErrorBoundary, SuspenseList, mergeProps, Index, createDynamic or renderToStringAsync from the module, replace those first; @solidjs/web does not export them.",
       "lint": [
         "removed-api"
       ],
