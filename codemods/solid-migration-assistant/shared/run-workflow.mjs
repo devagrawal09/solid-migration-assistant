@@ -3,7 +3,8 @@ import { existsSync, readFileSync, statSync } from "node:fs";
 import { createRequire } from "node:module";
 import { dirname, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
-import { SEVERITY_TIERS, severityOf } from "./severity.mjs";
+import { REPORT_MARKER, byLocation, renderAgentReport, renderText, summaryOf } from "./format.mjs";
+import { DEPENDENCY_MAP, DEPENDENCY_VERIFIED_ON, dependencyHeadline } from "./dependencies.mjs";
 
 const packageDirectory = resolve(dirname(fileURLToPath(import.meta.url)), "..");
 const require = createRequire(import.meta.url);
@@ -11,7 +12,8 @@ const packageMetadata = JSON.parse(
   readFileSync(resolve(packageDirectory, "package.json"), "utf8"),
 );
 
-const SOLID_TARGET = "solid-js@2.0.0-rc.21";
+const SOLID_VERSION = "2.0.0-rc.21";
+const SOLID_TARGET = `solid-js@${SOLID_VERSION}`;
 const SOLID_SOURCE_COMMIT = "2105ffb8ca2fced55f5fac0763177fc93f97c2c2";
 const MIGRATION_GUIDE = `https://github.com/solidjs/solid/blob/${SOLID_SOURCE_COMMIT}/documentation/solid-2.0/MIGRATION.md`;
 const FEEDBACK_URL =
@@ -47,9 +49,6 @@ export function projectFindings(target) {
     };
     const solid = declared["solid-js"];
     const web = declared["@solidjs/web"];
-    const legacyTooling = ["babel-preset-solid", "vite-plugin-solid"].filter(
-      (name) => declared[name] !== undefined,
-    );
     const onSolid2 = typeof solid === "string" && /(^|[^0-9.])2\.0\.0/.test(solid);
     const problems = [];
     if (typeof solid === "string" && !onSolid2) {
@@ -58,25 +57,75 @@ export function projectFindings(target) {
     if (typeof solid === "string" && web === undefined) {
       problems.push("@solidjs/web, the Solid 2 web renderer package, is not declared");
     }
-    if (legacyTooling.length > 0) {
-      problems.push(`${legacyTooling.join(" and ")} compile Solid 1 JSX only`);
-    }
     if (problems.length > 0) {
-      findings.push(`package.json:1:1 Manual review required: move this project's Solid dependencies to ${SOLID_TARGET}.
-Why: ${problems.join("; ")}. Solid 2 splits the web renderer into @solidjs/web, versions it in lockstep with solid-js, and compiles JSX through @solidjs/vite-plugin (or @solidjs/babel-plugin), which is what the official solid-v2 templates use.
-Guidance: Pin solid-js and @solidjs/web to the exact same RC version (${SOLID_TARGET.split("@")[1]}), replace babel-preset-solid or vite-plugin-solid with @solidjs/vite-plugin, and re-run this analyzer after installing, since Solid 1 source is the input this version understands. Make and validate that edit yourself; this analyzer never edits or runs the target project. Official migration guide: ${MIGRATION_GUIDE}#imports-where-things-live-now`);
+      findings.push({
+        rule: "project/solid-version",
+        file: "package.json",
+        line: 1,
+        column: 1,
+        severity: "build",
+        headline: `Move this project's Solid dependencies to ${SOLID_TARGET}.`,
+        why: `${problems.join("; ")}. Solid 2 splits the web renderer into @solidjs/web, versions it in lockstep with solid-js, and compiles JSX through @solidjs/vite-plugin (or @solidjs/babel-plugin), which is what the official solid-v2 templates use.`,
+        guidance: `Pin solid-js and @solidjs/web to the exact same RC version (${SOLID_VERSION}), move the other Solid dependencies as the per-package findings describe, and run this analyzer before installing, since Solid 1 source is the input this version understands.`,
+        lint: [],
+        guide: `${MIGRATION_GUIDE}#imports-where-things-live-now`,
+      });
     }
+    findings.push(...dependencyFindings(manifest, readFileSync(resolve(target, "package.json"), "utf8")));
   }
 
   const tsconfig = readJsonLike(resolve(target, "tsconfig.json"));
   const jsxImportSource = tsconfig?.compilerOptions?.jsxImportSource;
   if (jsxImportSource === "solid-js") {
-    findings.push(`tsconfig.json:1:1 Manual review required: point jsxImportSource at the Solid 2 renderer package.
-Why: compilerOptions.jsxImportSource is "solid-js", but Solid 2 no longer ships JSX runtime type entries from solid-js; web projects take them from @solidjs/web (hyperscript projects from @solidjs/h).
-Guidance: Set compilerOptions.jsxImportSource to "@solidjs/web" (keep "jsx": "preserve"), and move any import type { JSX } from "solid-js" to @solidjs/web; the transform workflow rewrites the sole-specifier form of that import and @jsxImportSource pragmas, but not this file. Make and validate that edit yourself; this analyzer never edits or runs the target project. Official migration guide: ${MIGRATION_GUIDE}#typescript-jsx-solid-js--renderer-package`);
+    findings.push({
+      rule: "project/jsx-import-source",
+      file: "tsconfig.json",
+      line: 1,
+      column: 1,
+      severity: "build",
+      headline: "Point jsxImportSource at the Solid 2 renderer package.",
+      why: 'compilerOptions.jsxImportSource is "solid-js", but Solid 2 no longer ships JSX runtime type entries from solid-js; web projects take them from @solidjs/web (hyperscript projects from @solidjs/h).',
+      guidance: 'Set compilerOptions.jsxImportSource to "@solidjs/web" (keep "jsx": "preserve"), and move any import type { JSX } from "solid-js" to @solidjs/web; the transform workflow rewrites the sole-specifier form of that import and @jsxImportSource pragmas, but not this file.',
+      lint: [],
+      guide: `${MIGRATION_GUIDE}#typescript-jsx-solid-js--renderer-package`,
+    });
   }
 
   return findings;
+}
+
+/**
+ * One finding per dependency in `shared/dependencies.mjs` that the manifest
+ * declares on its Solid 1 line (or at all, for packages with no Solid 2
+ * line), located at the dependency's line so editors can jump to it. A
+ * workspace, catalog, or git range cannot be compared and is reported with a
+ * note to check it.
+ */
+function dependencyFindings(manifest, text) {
+  const findings = [];
+  const sections = [manifest.dependencies, manifest.devDependencies, manifest.peerDependencies];
+  const lines = text.split("\n");
+  for (const entry of DEPENDENCY_MAP) {
+    const range = sections.map((section) => section?.[entry.name]).find((value) => typeof value === "string");
+    if (range === undefined) continue;
+    const comparable = /^[\s^~<>=v]*\d/.test(range);
+    if (entry.legacy !== null && comparable && !entry.legacy(range)) continue;
+    const lineIndex = lines.findIndex((line) => line.includes(`"${entry.name}"`));
+    const note = comparable ? "" : ` The declared range ${JSON.stringify(range)} could not be compared, so check which line it resolves to.`;
+    findings.push({
+      rule: "project/dependencies",
+      file: "package.json",
+      line: lineIndex === -1 ? 1 : lineIndex + 1,
+      column: lineIndex === -1 ? 1 : lines[lineIndex].indexOf(`"${entry.name}"`) + 1,
+      severity: "build",
+      headline: dependencyHeadline(entry),
+      why: `package.json declares ${entry.name} ${JSON.stringify(range)}. Checked against the npm registry on ${DEPENDENCY_VERIFIED_ON}: ${entry.replacement === null ? "no Solid 2 release exists" : `the Solid 2 counterpart is ${entry.replacement}`}.${note}`,
+      guidance: entry.guidance,
+      lint: [],
+      guide: `${MIGRATION_GUIDE}#imports-where-things-live-now`,
+    });
+  }
+  return byLocation(findings);
 }
 
 /**
@@ -111,10 +160,10 @@ export const WORKFLOWS = Object.freeze({
   transform: "transform.yaml",
 });
 
-export const FORMATS = Object.freeze(["text", "json"]);
+export const FORMATS = Object.freeze(["text", "json", "agent"]);
 
 /**
- * `[workflow] [--target <dir>] [--allow-dirty] [--format text|json]`. The
+ * `[workflow] [--target <dir>] [--allow-dirty] [--format text|json|agent]`. The
  * workflow defaults to `analyze` and the format to `text`, so every
  * pre-existing invocation keeps its meaning; `--allow-dirty` is accepted only
  * with `transform`, the one workflow that writes to the target.
@@ -171,6 +220,9 @@ export function parseArguments(argumentsList) {
     index += 1;
   }
 
+  if (format === "agent" && workflow !== "analyze") {
+    throw new CliUsageError("--format agent is only accepted with the analyze workflow");
+  }
   return { workflow, target, allowDirty, format };
 }
 
@@ -219,81 +271,56 @@ export function buildCodemodArguments(target, workflow = "analyze") {
     // writes to the target.
     "--allow-dirty",
     "--no-interactive",
+    // The report step prints one machine-readable line instead of text; the
+    // launcher renders every format from it (`shared/format.mjs`).
+    "--param",
+    "format=json",
   ];
 }
 
-export function runCodemod(
-  target,
-  { spawnImpl = spawnSync, workflow = "analyze", capture = false } = {},
-) {
+export function runCodemod(target, { spawnImpl = spawnSync, workflow = "analyze" } = {}) {
   return spawnImpl(
     process.execPath,
     [resolveCodemodLauncher(), ...buildCodemodArguments(target, workflow)],
     {
       cwd: packageDirectory,
-      // Codemod routes all workflow step console output to its stderr and its
-      // progress envelope to stdout. Swap the child's fds so the guidance (the
-      // product) reaches our stdout while progress stays on our stderr. With
-      // `capture`, the step output is collected instead so the launcher can
-      // re-emit it as JSON; progress still streams to our stderr.
-      stdio: capture ? [0, 2, "pipe"] : [0, 2, 1],
-      ...(capture ? { encoding: "utf8", maxBuffer: 256 * 1024 * 1024 } : {}),
+      // Codemod prints its progress envelope to stdout and every workflow
+      // step's console output to stderr. Progress goes straight to our
+      // stderr; step output is captured so the report line can be parsed and
+      // everything else (diagnostics) re-emitted on our stderr.
+      stdio: [0, 2, "pipe"],
+      encoding: "utf8",
+      maxBuffer: 256 * 1024 * 1024,
     },
   );
 }
 
-const STEP_OUTPUT_SUMMARY = "[solid-migration-assistant] Summary: ";
-const LOCATED = /^(\S+):(\d+):(\d+) (.*)$/;
-const GUIDE_LINK = / Official migration guide: (\S+)$/;
-
 /**
- * The located entries in captured workflow step output. Codemod prefixes
- * every console line from a step with two spaces; the guidance block is that
- * text up to the summary tail, with one blank line between findings, while
- * transform report lines are one per line. Unindented lines are Codemod's
- * own and are ignored.
+ * The report the workflow's report step printed (`{ findings, rewrites }`)
+ * and every other line of captured step output, which the launcher passes
+ * through to stderr so a rule's runtime error is never swallowed. A run that
+ * printed no report line (no matching file, or a failure) reports nothing.
  */
-export function parseStepOutput(text, workflow) {
-  const lines = String(text ?? "")
-    .split("\n")
-    .map((line) => line.replace(/\r$/, ""))
-    .filter((line) => line.startsWith("  "))
-    .map((line) => line.slice(2));
-  const summary = lines.findIndex((line) => line.startsWith(STEP_OUTPUT_SUMMARY));
-  const body = (summary === -1 ? lines : lines.slice(0, summary)).join("\n").trim();
-  if (body === "") return [];
-  const entries = workflow === "transform" ? body.split("\n").filter((line) => line.trim() !== "") : body.split("\n\n");
-  return entries.map(toEntry).filter((entry) => entry !== null);
-}
-
-function toEntry(text) {
-  const [first = ""] = text.split("\n");
-  const located = LOCATED.exec(first);
-  if (located === null) return null;
-  const guide = GUIDE_LINK.exec(text)?.[1] ?? null;
-  return {
-    file: located[1],
-    line: Number(located[2]),
-    column: Number(located[3]),
-    headline: located[4].replace(GUIDE_LINK, ""),
-    guide,
-    text,
-  };
+export function parseStepOutput(text) {
+  let report = { findings: [], rewrites: [] };
+  const diagnostics = [];
+  for (const line of String(text ?? "").split("\n")) {
+    const marker = line.indexOf(REPORT_MARKER);
+    if (marker !== -1 && line.slice(0, marker).trim() === "") {
+      report = JSON.parse(line.slice(marker + REPORT_MARKER.length));
+    } else if (line.trim() !== "") {
+      diagnostics.push(line);
+    }
+  }
+  return { ...report, diagnostics };
 }
 
 /**
  * One JSON document for a run: the pinned target, totals (by severity tier
- * for findings), and every finding or rewrite with its location, headline,
- * guide link, and full text. Entries are sorted by file, line, and column.
+ * for findings), and every finding or rewrite, sorted by file, line, and
+ * column.
  */
-export function buildJsonReport({ workflow, target, entries, status }) {
-  const sorted = [...entries].sort(
-    (left, right) =>
-      (left.file < right.file ? -1 : left.file > right.file ? 1 : 0) ||
-      left.line - right.line ||
-      left.column - right.column,
-  );
-  const files = new Set(sorted.map((entry) => entry.file));
+export function buildJsonReport({ workflow, target, findings = [], rewrites = [], status }) {
   const report = {
     tool: packageMetadata.name,
     version: packageMetadata.version,
@@ -303,24 +330,18 @@ export function buildJsonReport({ workflow, target, entries, status }) {
     status,
   };
   if (workflow === "analyze") {
-    const findings = sorted.map((entry) => ({ ...entry, severity: severityOf(entry.headline) }));
-    const bySeverity = Object.fromEntries(SEVERITY_TIERS.map((tier) => [tier.id, 0]));
-    for (const finding of findings) bySeverity[finding.severity] += 1;
-    return { ...report, summary: { findings: findings.length, files: files.size, bySeverity }, findings };
+    const sorted = byLocation(findings);
+    return { ...report, summary: summaryOf({ findings: sorted }), findings: sorted };
   }
-  return {
-    ...report,
-    summary: { rewrites: sorted.length, files: files.size },
-    rewrites: sorted.map(({ file, line, column, headline, guide }) => ({ file, line, column, message: headline, guide })),
-  };
+  const sorted = byLocation(rewrites);
+  return { ...report, summary: summaryOf({ rewrites: sorted }), rewrites: sorted };
 }
 
 export function main(
   argumentsList = process.argv.slice(2),
   {
     cwd,
-    runImpl = (target, workflow, { capture = false } = {}) =>
-      runCodemod(target, { workflow, capture }),
+    runImpl = (target, workflow) => runCodemod(target, { workflow }),
     dirtyImpl = dirtyTreeReason,
     projectImpl = projectFindings,
   } = {},
@@ -371,24 +392,35 @@ function run(argumentsList, invocationDirectory, runImpl, dirtyImpl, projectImpl
     if (reason !== null) return fail(reason);
   }
 
-  const projectEntries = parsed.workflow === "analyze" ? projectImpl(target) : [];
-  if (parsed.format === "text") {
-    if (projectEntries.length > 0) console.log(projectEntries.join("\n\n"));
-    const result = runImpl(target, parsed.workflow, { capture: false });
-    if (result.error) throw result.error;
-    return result.status ?? 1;
-  }
-
-  const result = runImpl(target, parsed.workflow, { capture: true });
+  const project = parsed.workflow === "analyze" ? projectImpl(target) : [];
+  const result = runImpl(target, parsed.workflow);
   if (result.error) throw result.error;
   const status = result.status ?? 1;
-  const entries = [
-    ...projectEntries.map(toEntry).filter((entry) => entry !== null),
-    ...parseStepOutput(result.stderr, parsed.workflow),
-  ];
-  console.log(JSON.stringify(buildJsonReport({ workflow: parsed.workflow, target, entries, status }), null, 2));
+  const { findings, rewrites, diagnostics } = parseStepOutput(result.stderr);
+  if (diagnostics.length > 0) console.error(diagnostics.join("\n"));
+  const report = buildJsonReport({
+    workflow: parsed.workflow,
+    target,
+    findings: [...project, ...findings],
+    rewrites,
+    status,
+  });
+  if (parsed.format === "json") {
+    console.log(JSON.stringify(report, null, 2));
+  } else if (parsed.format === "agent") {
+    console.log(renderAgentReport(report));
+  } else {
+    const text = renderText({ findings: report.findings ?? [], rewrites: report.rewrites ?? [], solidVersion: SOLID_VERSION });
+    console.log(
+      text !== ""
+        ? text
+        : `[solid-migration-assistant] ${parsed.workflow === "analyze" ? "No supported migration sites found. This is not proof that the project is ready for Solid 2; run its own type, build, and test checks." : "Nothing to rewrite."}`,
+    );
+  }
   return status;
 }
+
+export { renderAgentReport as buildAgentReport };
 
 function fail(message) {
   console.error(`[solid-migration-assistant] ${message}`);

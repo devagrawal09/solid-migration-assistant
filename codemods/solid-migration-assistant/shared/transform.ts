@@ -1,4 +1,5 @@
 import type { Edit } from "codemod:ast-grep";
+import type { RuleRewrite } from "./finding.ts";
 
 /**
  * Workflow-level report state key for the transform workflow. Transform
@@ -8,8 +9,8 @@ import type { Edit } from "codemod:ast-grep";
 export const TRANSFORM_REPORT_STATE_KEY =
   "solid-migration-assistant-transform-report";
 
-/** One rule-owned edit plus the report line that documents it. */
+/** One rule-owned edit plus the rewrite it reports. */
 export type TransformChange = {
   edit: Edit;
-  report: string;
+  report: RuleRewrite;
 };

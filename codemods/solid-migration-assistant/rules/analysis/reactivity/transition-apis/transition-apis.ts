@@ -1,7 +1,8 @@
 import type { SgNode } from "codemod:ast-grep";
 import type TSX from "codemod:ast-grep/langs/tsx";
 import { findImportedCalls } from "../../../../shared/analysis.ts";
-import { lintHint, MIGRATION_GUIDE_URL, SOLID_TARGET_VERSION } from "../../../../shared/target.ts";
+import { MIGRATION_GUIDE_URL, SOLID_TARGET_VERSION } from "../../../../shared/target.ts";
+import { finding, type RuleFinding } from "../../../../shared/finding.ts";
 
 const GUIDE =
   MIGRATION_GUIDE_URL;
@@ -10,7 +11,7 @@ function transitionGuidance(
   name: string,
   call: SgNode<TSX>,
   filename: string,
-): string {
+): RuleFinding {
   const start = call.range().start;
   const reasons: Record<string, string> = {
     startTransition:
@@ -30,17 +31,22 @@ function transitionGuidance(
   };
   const headline =
     name === "createDeferred"
-      ? "review this createDeferred call against its Solid 2 meaning"
-      : `migrate this ${name} call to Solid 2 built-in transitions`;
-  return `${filename}:${start.line + 1}:${start.column + 1} Manual review required: ${headline}.
-Why: ${reasons[name]}
-Guidance: ${steps[name]} Make and validate that edit yourself; this analyzer never edits or runs the target project.${lintHint("removed-api")} Official migration guide: ${GUIDE}#async-data--transitions`;
+      ? "Review this createDeferred call against its Solid 2 meaning."
+      : `Migrate this ${name} call to Solid 2 built-in transitions.`;
+  return finding(filename, start, {
+        severity: name === "createDeferred" ? "behavior" : "build",
+        headline,
+        why: `${reasons[name]}`,
+        guidance: `${steps[name]}`,
+        lint: ["removed-api"],
+        guide: `${GUIDE}#async-data--transitions`,
+      });
 }
 
 export function analyzeStartTransition(
   rootNode: SgNode<TSX>,
   context: { filename: string },
-): string[] {
+): RuleFinding[] {
   return findImportedCalls(rootNode, ["solid-js", "solid-js/web"], "startTransition")
     .filter(
       ({ argumentNodes }) =>
@@ -55,7 +61,7 @@ export function analyzeStartTransition(
 export function analyzeUseTransition(
   rootNode: SgNode<TSX>,
   context: { filename: string },
-): string[] {
+): RuleFinding[] {
   return findImportedCalls(rootNode, ["solid-js", "solid-js/web"], "useTransition")
     .filter(({ argumentNodes }) => argumentNodes.length === 0)
     .map(({ call, filename }) =>
@@ -66,7 +72,7 @@ export function analyzeUseTransition(
 export function analyzeCreateDeferred(
   rootNode: SgNode<TSX>,
   context: { filename: string },
-): string[] {
+): RuleFinding[] {
   return findImportedCalls(rootNode, ["solid-js", "solid-js/web"], "createDeferred")
     .filter(
       ({ argumentNodes }) =>

@@ -1,0 +1,20 @@
+{
+  "rewrites": [
+    {
+      "rule": "jsx/index-to-for",
+      "file": "transformations/jsx/index-to-for/fixtures/for-imported-after.fixture.tsx",
+      "line": 2,
+      "column": 24,
+      "message": "Remove the Index import from solid-js; For is already imported.",
+      "guide": "https://github.com/solidjs/solid/blob/2105ffb8ca2fced55f5fac0763177fc93f97c2c2/documentation/solid-2.0/MIGRATION.md#list-rendering-index-is-gone-and-for-handles-each-keying-mode"
+    },
+    {
+      "rule": "jsx/index-to-for",
+      "file": "transformations/jsx/index-to-for/fixtures/for-imported-after.fixture.tsx",
+      "line": 9,
+      "column": 7,
+      "message": "Rewrite <Index> to <For keyed={false}>, keeping its each, fallback, and child callback unchanged.",
+      "guide": "https://github.com/solidjs/solid/blob/2105ffb8ca2fced55f5fac0763177fc93f97c2c2/documentation/solid-2.0/MIGRATION.md#list-rendering-index-is-gone-and-for-handles-each-keying-mode"
+    }
+  ]
+}

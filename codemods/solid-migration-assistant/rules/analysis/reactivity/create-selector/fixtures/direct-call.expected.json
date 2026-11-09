@@ -1,0 +1,18 @@
+{
+  "findings": [
+    {
+      "rule": "reactivity/create-selector",
+      "file": "analysis/reactivity/create-selector/fixtures/direct-call.fixture.tsx",
+      "line": 6,
+      "column": 1,
+      "severity": "build",
+      "headline": "Migrate this createSelector call to createProjection or function-form createStore.",
+      "why": "Solid 2 replaces createSelector with createProjection(fn, seed) for derived stores with reactive reconciliation.",
+      "guidance": "Read the source and optional equality function. Replace with createProjection for derived store projections or function-form createStore(fn) for writable derived stores. Review all consumers of the returned signal to confirm the replacement preserves equality semantics.",
+      "lint": [
+        "removed-api"
+      ],
+      "guide": "https://github.com/solidjs/solid/blob/2105ffb8ca2fced55f5fac0763177fc93f97c2c2/documentation/solid-2.0/MIGRATION.md#quick-rename--removal-map"
+    }
+  ]
+}

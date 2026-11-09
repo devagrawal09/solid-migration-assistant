@@ -1,0 +1,28 @@
+{
+  "rewrites": [
+    {
+      "rule": "jsx/lowercase-event-handlers",
+      "file": "transformations/jsx/lowercase-event-handlers/fixtures/real-world-solid-primitives-memo-lazy.fixture.tsx",
+      "line": 15,
+      "column": 27,
+      "message": "Rewrite the onclick event handler attribute on <button> to onClick, preserving its value expression.",
+      "guide": "https://github.com/solidjs/solid/blob/2105ffb8ca2fced55f5fac0763177fc93f97c2c2/documentation/solid-2.0/MIGRATION.md#attributes--events-closer-to-html-and-fewer-namespaces"
+    },
+    {
+      "rule": "jsx/lowercase-event-handlers",
+      "file": "transformations/jsx/lowercase-event-handlers/fixtures/real-world-solid-primitives-memo-lazy.fixture.tsx",
+      "line": 18,
+      "column": 27,
+      "message": "Rewrite the onclick event handler attribute on <button> to onClick, preserving its value expression.",
+      "guide": "https://github.com/solidjs/solid/blob/2105ffb8ca2fced55f5fac0763177fc93f97c2c2/documentation/solid-2.0/MIGRATION.md#attributes--events-closer-to-html-and-fewer-namespaces"
+    },
+    {
+      "rule": "jsx/lowercase-event-handlers",
+      "file": "transformations/jsx/lowercase-event-handlers/fixtures/real-world-solid-primitives-memo-lazy.fixture.tsx",
+      "line": 21,
+      "column": 27,
+      "message": "Rewrite the onclick event handler attribute on <button> to onClick, preserving its value expression.",
+      "guide": "https://github.com/solidjs/solid/blob/2105ffb8ca2fced55f5fac0763177fc93f97c2c2/documentation/solid-2.0/MIGRATION.md#attributes--events-closer-to-html-and-fewer-namespaces"
+    }
+  ]
+}

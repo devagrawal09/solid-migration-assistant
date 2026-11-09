@@ -1,0 +1,100 @@
+{
+  "rewrites": [
+    {
+      "rule": "jsx/class-list-to-class",
+      "file": "transformations/jsx/class-list-to-class/fixtures/rewrites.fixture.tsx",
+      "line": 9,
+      "column": 14,
+      "message": "Rewrite the classList attribute on <section> to class, preserving its value expression.",
+      "guide": "https://github.com/solidjs/solid/blob/2105ffb8ca2fced55f5fac0763177fc93f97c2c2/documentation/solid-2.0/MIGRATION.md#classlist--class-objectarray-forms"
+    },
+    {
+      "rule": "jsx/class-list-to-class",
+      "file": "transformations/jsx/class-list-to-class/fixtures/rewrites.fixture.tsx",
+      "line": 10,
+      "column": 23,
+      "message": "Rewrite the classList attribute on <div> to class, preserving its value expression.",
+      "guide": "https://github.com/solidjs/solid/blob/2105ffb8ca2fced55f5fac0763177fc93f97c2c2/documentation/solid-2.0/MIGRATION.md#classlist--class-objectarray-forms"
+    },
+    {
+      "rule": "jsx/class-list-to-class",
+      "file": "transformations/jsx/class-list-to-class/fixtures/rewrites.fixture.tsx",
+      "line": 11,
+      "column": 15,
+      "message": "Rewrite the classList attribute on <span> to class, preserving its value expression.",
+      "guide": "https://github.com/solidjs/solid/blob/2105ffb8ca2fced55f5fac0763177fc93f97c2c2/documentation/solid-2.0/MIGRATION.md#classlist--class-objectarray-forms"
+    },
+    {
+      "rule": "jsx/class-list-to-class",
+      "file": "transformations/jsx/class-list-to-class/fixtures/rewrites.fixture.tsx",
+      "line": 13,
+      "column": 14,
+      "message": "Rewrite the classList attribute on <input> to class, preserving its value expression.",
+      "guide": "https://github.com/solidjs/solid/blob/2105ffb8ca2fced55f5fac0763177fc93f97c2c2/documentation/solid-2.0/MIGRATION.md#classlist--class-objectarray-forms"
+    },
+    {
+      "rule": "jsx/class-list-to-class",
+      "file": "transformations/jsx/class-list-to-class/fixtures/rewrites.fixture.tsx",
+      "line": 14,
+      "column": 19,
+      "message": "Rewrite the classList attribute on <my-element> to class, preserving its value expression.",
+      "guide": "https://github.com/solidjs/solid/blob/2105ffb8ca2fced55f5fac0763177fc93f97c2c2/documentation/solid-2.0/MIGRATION.md#classlist--class-objectarray-forms"
+    },
+    {
+      "rule": "jsx/class-list-to-class",
+      "file": "transformations/jsx/class-list-to-class/fixtures/rewrites.fixture.tsx",
+      "line": 17,
+      "column": 9,
+      "message": "Rewrite the classList attribute on <li> to class, preserving its value expression.",
+      "guide": "https://github.com/solidjs/solid/blob/2105ffb8ca2fced55f5fac0763177fc93f97c2c2/documentation/solid-2.0/MIGRATION.md#classlist--class-objectarray-forms"
+    },
+    {
+      "rule": "jsx/class-list-to-class",
+      "file": "transformations/jsx/class-list-to-class/fixtures/rewrites.fixture.tsx",
+      "line": 23,
+      "column": 10,
+      "message": "Rewrite the classList attribute on <p> to class, preserving its value expression.",
+      "guide": "https://github.com/solidjs/solid/blob/2105ffb8ca2fced55f5fac0763177fc93f97c2c2/documentation/solid-2.0/MIGRATION.md#classlist--class-objectarray-forms"
+    },
+    {
+      "rule": "jsx/class-list-to-class",
+      "file": "transformations/jsx/class-list-to-class/fixtures/rewrites.fixture.tsx",
+      "line": 24,
+      "column": 10,
+      "message": "Rewrite the classList attribute on <b> to class, preserving its value expression.",
+      "guide": "https://github.com/solidjs/solid/blob/2105ffb8ca2fced55f5fac0763177fc93f97c2c2/documentation/solid-2.0/MIGRATION.md#classlist--class-objectarray-forms"
+    },
+    {
+      "rule": "jsx/class-list-to-class",
+      "file": "transformations/jsx/class-list-to-class/fixtures/rewrites.fixture.tsx",
+      "line": 25,
+      "column": 10,
+      "message": "Rewrite the classList attribute on <i> to class, preserving its value expression.",
+      "guide": "https://github.com/solidjs/solid/blob/2105ffb8ca2fced55f5fac0763177fc93f97c2c2/documentation/solid-2.0/MIGRATION.md#classlist--class-objectarray-forms"
+    },
+    {
+      "rule": "jsx/class-list-to-class",
+      "file": "transformations/jsx/class-list-to-class/fixtures/rewrites.fixture.tsx",
+      "line": 26,
+      "column": 29,
+      "message": "Rewrite the classList attribute on <em> to class, preserving its value expression.",
+      "guide": "https://github.com/solidjs/solid/blob/2105ffb8ca2fced55f5fac0763177fc93f97c2c2/documentation/solid-2.0/MIGRATION.md#classlist--class-objectarray-forms"
+    },
+    {
+      "rule": "jsx/class-list-to-class",
+      "file": "transformations/jsx/class-list-to-class/fixtures/rewrites.fixture.tsx",
+      "line": 27,
+      "column": 37,
+      "message": "Rewrite the classList attribute on <u> to class, preserving its value expression.",
+      "guide": "https://github.com/solidjs/solid/blob/2105ffb8ca2fced55f5fac0763177fc93f97c2c2/documentation/solid-2.0/MIGRATION.md#classlist--class-objectarray-forms"
+    },
+    {
+      "rule": "jsx/class-list-to-class",
+      "file": "transformations/jsx/class-list-to-class/fixtures/rewrites.fixture.tsx",
+      "line": 29,
+      "column": 24,
+      "message": "Rewrite the classList attribute on <foreignObject> to class, preserving its value expression.",
+      "guide": "https://github.com/solidjs/solid/blob/2105ffb8ca2fced55f5fac0763177fc93f97c2c2/documentation/solid-2.0/MIGRATION.md#classlist--class-objectarray-forms"
+    }
+  ]
+}

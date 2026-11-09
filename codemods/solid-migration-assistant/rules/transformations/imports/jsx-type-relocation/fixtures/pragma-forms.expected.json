@@ -1,0 +1,20 @@
+{
+  "rewrites": [
+    {
+      "rule": "imports/jsx-type-relocation",
+      "file": "transformations/imports/jsx-type-relocation/fixtures/pragma-forms.fixture.tsx",
+      "line": 2,
+      "column": 1,
+      "message": "Rewrite the @jsxImportSource pragma from solid-js to @solidjs/web.",
+      "guide": "https://github.com/solidjs/solid/blob/2105ffb8ca2fced55f5fac0763177fc93f97c2c2/documentation/solid-2.0/MIGRATION.md#typescript-jsx-solid-js--renderer-package"
+    },
+    {
+      "rule": "imports/jsx-type-relocation",
+      "file": "transformations/imports/jsx-type-relocation/fixtures/pragma-forms.fixture.tsx",
+      "line": 7,
+      "column": 1,
+      "message": "Rewrite the @jsxImportSource pragma from solid-js to @solidjs/web.",
+      "guide": "https://github.com/solidjs/solid/blob/2105ffb8ca2fced55f5fac0763177fc93f97c2c2/documentation/solid-2.0/MIGRATION.md#typescript-jsx-solid-js--renderer-package"
+    }
+  ]
+}

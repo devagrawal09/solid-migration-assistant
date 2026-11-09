@@ -19,118 +19,31 @@ import { dirname, join, relative, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 import { test } from "node:test";
 import { DISCLOSURE } from "../shared/run-workflow.mjs";
+import { generatedFiles } from "../tools/generate.mjs";
 
 const packageDirectory = resolve(dirname(fileURLToPath(import.meta.url)), "..");
+// The shipped list is derived (tools/generate.mjs writes package.json#files),
+// so the checks here are about what it must and must not contain.
 const expectedFiles = [
-  "LICENSE",
-  "README.md",
-  "benchmarks/workspace-pass.ts",
-  "benchmarks/workspace-passes.mjs",
-  "bin/solid-migration-assistant.mjs",
+  ...JSON.parse(generatedFiles().get("package.json")).files,
   "package.json",
-  "rules/analysis/imports/beta32-subpaths/beta32-subpaths.ts",
-  "rules/analysis/imports/jsx-types/jsx-types.ts",
-  "rules/analysis/imports/web-import/web-import.ts",
-  "rules/analysis/jsx/class-list/class-list.ts",
-  "rules/analysis/jsx/component-renames/component-renames.ts",
-  "rules/analysis/jsx/context-provider/context-provider.ts",
-  "rules/analysis/jsx/dom-attr-namespaces/dom-attr-namespaces.ts",
-  "rules/analysis/jsx/dom-event-namespaces/dom-event-namespaces.ts",
-  "rules/analysis/jsx/dom-lowercase-events/dom-lowercase-events.ts",
-  "rules/analysis/jsx/dom-use-directive/dom-use-directive.ts",
-  "rules/analysis/jsx/dynamic-component/dynamic-component.ts",
-  "rules/analysis/jsx/ref-callback-scope/ref-callback-scope.ts",
-  "rules/analysis/lifecycle/on-cleanup/on-cleanup.ts",
-  "rules/analysis/lifecycle/on-mount/on-mount.ts",
-  "rules/analysis/props/merge-props/merge-props.ts",
-  "rules/analysis/props/split-props/split-props.ts",
-  "rules/analysis/reactivity/batch/batch.ts",
-  "rules/analysis/reactivity/create-computed/create-computed.ts",
-  "rules/analysis/reactivity/create-dynamic/create-dynamic.ts",
-  "rules/analysis/reactivity/create-effect/create-effect.ts",
-  "rules/analysis/reactivity/create-memo/create-memo.ts",
-  "rules/analysis/reactivity/create-resource/create-resource.ts",
-  "rules/analysis/reactivity/create-selector/create-selector.ts",
-  "rules/analysis/reactivity/error-handling/error-handling.ts",
-  "rules/analysis/reactivity/from-observable/from-observable.ts",
-  "rules/analysis/reactivity/index-array/index-array.ts",
-  "rules/analysis/reactivity/nested-create-root/nested-create-root.ts",
-  "rules/analysis/reactivity/on-helper/on-helper.ts",
-  "rules/analysis/reactivity/transition-apis/transition-apis.ts",
-  "rules/analysis/reactivity/utility-renames/utility-renames.ts",
-  "rules/analysis/store/mutable/mutable.ts",
-  "rules/analysis/store/produce/produce.ts",
-  "rules/analysis/store/setter-calls/setter-calls.ts",
-  "rules/analysis/store/unwrap/unwrap.ts",
-  "rules/transformations/imports/jsx-type-relocation/jsx-type-relocation.ts",
-  "rules/transformations/imports/legacy-subpath-relocation/legacy-subpath-relocation.ts",
-  "rules/transformations/imports/web-package-relocation/web-package-relocation.ts",
-  "rules/transformations/jsx/class-list-to-class/class-list-to-class.ts",
-  "rules/transformations/jsx/context-provider-to-context/context-provider-to-context.ts",
-  "rules/transformations/jsx/index-to-for/index-to-for.ts",
-  "rules/transformations/jsx/lowercase-event-handlers/lowercase-event-handlers.ts",
-  "scripts/analysis/analyzeBatch.ts",
-  "scripts/analysis/analyzeBeta32SubpathImports.ts",
-  "scripts/analysis/analyzeCatchError.ts",
-  "scripts/analysis/analyzeContextProvider.ts",
-  "scripts/analysis/analyzeCreateComputed.ts",
-  "scripts/analysis/analyzeCreateDeferred.ts",
-  "scripts/analysis/analyzeCreateDynamic.ts",
-  "scripts/analysis/analyzeCreateEffect.ts",
-  "scripts/analysis/analyzeCreateMemo.ts",
-  "scripts/analysis/analyzeCreateMutable.ts",
-  "scripts/analysis/analyzeCreateResource.ts",
-  "scripts/analysis/analyzeCreateSelector.ts",
-  "scripts/analysis/analyzeDomAttrNamespaces.ts",
-  "scripts/analysis/analyzeDomEventNamespaces.ts",
-  "scripts/analysis/analyzeDomLowercaseEvents.ts",
-  "scripts/analysis/analyzeDomUseDirective.ts",
-  "scripts/analysis/analyzeDynamicComponent.ts",
-  "scripts/analysis/analyzeEnableScheduling.ts",
-  "scripts/analysis/analyzeEqualFn.ts",
-  "scripts/analysis/analyzeFrom.ts",
-  "scripts/analysis/analyzeGetListener.ts",
-  "scripts/analysis/analyzeIndexArray.ts",
-  "scripts/analysis/analyzeJsxClassListAttributes.ts",
-  "scripts/analysis/analyzeJsxComponentRenames.ts",
-  "scripts/analysis/analyzeJsxTypeImports.ts",
-  "scripts/analysis/analyzeMergeProps.ts",
-  "scripts/analysis/analyzeModifyMutable.ts",
-  "scripts/analysis/analyzeNestedCreateRoot.ts",
-  "scripts/analysis/analyzeObservable.ts",
-  "scripts/analysis/analyzeOnCleanup.ts",
-  "scripts/analysis/analyzeOnError.ts",
-  "scripts/analysis/analyzeOnHelper.ts",
-  "scripts/analysis/analyzeOnMount.ts",
-  "scripts/analysis/analyzeProduce.ts",
-  "scripts/analysis/analyzeRefCallbackScope.ts",
-  "scripts/analysis/analyzeResetErrorBoundaries.ts",
-  "scripts/analysis/analyzeSplitProps.ts",
-  "scripts/analysis/analyzeStartTransition.ts",
-  "scripts/analysis/analyzeStoreSetterCalls.ts",
-  "scripts/analysis/analyzeUnwrap.ts",
-  "scripts/analysis/analyzeUseTransition.ts",
-  "scripts/analysis/analyzeWebImport.ts",
-  "scripts/analysis/analyzeWriteSignal.ts",
-  "scripts/emit-report.ts",
-  "scripts/transformations/relocateJsxTypes.ts",
-  "scripts/transformations/relocateLegacySubpaths.ts",
-  "scripts/transformations/relocateWebPackage.ts",
-  "scripts/transformations/rewriteClassListToClass.ts",
-  "scripts/transformations/rewriteContextProvider.ts",
-  "scripts/transformations/rewriteIndexToFor.ts",
-  "scripts/transformations/rewriteLowercaseEventHandlers.ts",
-  "shared/analysis.ts",
-  "shared/bindings.ts",
-  "shared/entrypoint.ts",
-  "shared/jsx.ts",
-  "shared/run-workflow.mjs",
-  "shared/severity.mjs",
-  "shared/target.ts",
-  "shared/transform.ts",
-  "transform.yaml",
-  "workflow.yaml"
-];
+].sort();
+
+test("ships every module a shipped file imports, and nothing test-only", () => {
+  const shipped = new Set(expectedFiles);
+  for (const file of expectedFiles) {
+    assert.doesNotMatch(file, /(?:^|\/)(?:tests|tools|fixtures)\/|\.test\.|\.expected\.|\.fixture\./, file);
+    if (!/\.(?:ts|mjs)$/.test(file)) continue;
+    const source = readFileSync(join(packageDirectory, file), "utf8");
+    for (const [, specifier] of source.matchAll(/(?:from|import)\s*\(?\s*"(\.{1,2}\/[^"]+)"/g)) {
+      const resolved = relative(packageDirectory, join(dirname(join(packageDirectory, file)), specifier)).replaceAll("\\", "/");
+      assert.ok(shipped.has(resolved) || resolved === "package.json", `${file} imports ${specifier}, which is not shipped`);
+    }
+  }
+  for (const required of ["bin/solid-migration-assistant.mjs", "workflow.yaml", "transform.yaml", "scripts/emit-report.ts", "shared/format.mjs"]) {
+    assert.ok(shipped.has(required), required);
+  }
+});
 const expectedDescription =
   "Solid 1.9 to Solid 2 RC migration assistant: read-only analyzer plus deterministic legacy import-path relocation and narrow intrinsic JSX rewrites (classList to class, Context.Provider to Context, Index to For keyed={false}, lowercase event handlers to camelCase) for project-owned JavaScript and TypeScript source";
 const expectedKeywords = [
@@ -217,7 +130,6 @@ test(
     );
 
     try {
-      assert.equal(expectedFiles.length, 108);
       const packDirectory = join(temporaryRoot, "pack");
       mkdirSync(packDirectory);
       const pack = command(

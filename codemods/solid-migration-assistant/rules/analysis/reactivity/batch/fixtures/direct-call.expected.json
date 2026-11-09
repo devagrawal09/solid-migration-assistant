@@ -1,0 +1,18 @@
+{
+  "findings": [
+    {
+      "rule": "reactivity/batch",
+      "file": "analysis/reactivity/batch/fixtures/direct-call.fixture.tsx",
+      "line": 6,
+      "column": 1,
+      "severity": "build",
+      "headline": "Migrate this batch call to default batching or flush(fn).",
+      "why": "Solid 2.0.0-rc.21 removes batch. Writes are batched by default and applied in a microtask, and flush(fn) runs fn and then applies its writes synchronously, which is the timing 1.x batch(fn) had; flush is a dev error inside an action body, is not re-entrant inside onSettled or tracked effects, and warns inside effect callbacks, all of which 1.x batch allowed.",
+      "guidance": "Read the complete callback, its reactive writes, and what runs right after the call. Replace batch(fn) with flush(fn) where a caller reads the written values synchronously after the call and the call is not inside an action, onSettled, tracked effect, or effect callback; drop the wrapper and keep fn's body where nothing reads synchronously.",
+      "lint": [
+        "removed-api"
+      ],
+      "guide": "https://github.com/solidjs/solid/blob/2105ffb8ca2fced55f5fac0763177fc93f97c2c2/documentation/solid-2.0/MIGRATION.md#batch--default-microtask-batching--flush"
+    }
+  ]
+}

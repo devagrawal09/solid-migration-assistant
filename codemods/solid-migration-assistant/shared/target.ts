@@ -16,16 +16,3 @@ export const MIGRATION_GUIDE_URL = `https://github.com/solidjs/solid/blob/${SOLI
 export function migrationGuide(anchor?: string): string {
   return anchor === undefined ? MIGRATION_GUIDE_URL : `${MIGRATION_GUIDE_URL}#${anchor}`;
 }
-
-/**
- * A pointer to the eslint-plugin-solid rule (its `v2` config) that keeps
- * reporting a manual-review site after the migration, so the one-shot
- * guidance and the continuous lint read as one pipeline. Only rules whose
- * detection was checked against the plugin's `main` are named.
- */
-export function lintHint(...rules: string[]): string {
-  const names = rules.map((rule) => `solid/${rule}`);
-  const list =
-    names.length === 1 ? `${names[0]} rule` : `${names.slice(0, -1).join(", ")} and ${names[names.length - 1]} rules`;
-  return ` Ongoing check: after migration, eslint-plugin-solid's ${list} (v2 config) reports this site.`;
-}

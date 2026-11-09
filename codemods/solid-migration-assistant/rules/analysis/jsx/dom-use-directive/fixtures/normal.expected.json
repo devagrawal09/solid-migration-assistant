@@ -1,0 +1,28 @@
+{
+  "findings": [
+    {
+      "rule": "jsx/dom-use-directive",
+      "file": "analysis/jsx/dom-use-directive/fixtures/normal.fixture.tsx",
+      "line": 10,
+      "column": 15,
+      "severity": "build",
+      "headline": "Migrate this use: directive to a ref directive factory.",
+      "why": "Solid 2.0.0-rc.21 removes use: directives (the compiler rejects them on native elements); custom element behaviors use ref directive factories with a two-phase pattern: an owned setup phase that creates primitives, effects, and onCleanup registrations, which returns an unowned apply callback that receives the element.",
+      "guidance": "Replace use:focusTrap={options} with ref={focusTrap(options)} (or ref={focusTrap} when the directive takes no options; arrays compose as ref={[a, b]}). Rewrite the directive itself as a factory function that performs its setup in the owned body and returns the element callback (el) => { ... } for DOM writes. Read the directive's source, identify its element setup and teardown logic, and port them to that pattern.",
+      "guide": "https://github.com/solidjs/solid/blob/2105ffb8ca2fced55f5fac0763177fc93f97c2c2/documentation/solid-2.0/MIGRATION.md#directives-use--ref-directive-factories-two-phase-pattern",
+      "lint": []
+    },
+    {
+      "rule": "jsx/dom-use-directive",
+      "file": "analysis/jsx/dom-use-directive/fixtures/normal.fixture.tsx",
+      "line": 9,
+      "column": 12,
+      "severity": "build",
+      "headline": "Migrate this use: directive to a ref directive factory.",
+      "why": "Solid 2.0.0-rc.21 removes use: directives (the compiler rejects them on native elements); custom element behaviors use ref directive factories with a two-phase pattern: an owned setup phase that creates primitives, effects, and onCleanup registrations, which returns an unowned apply callback that receives the element.",
+      "guidance": "Replace use:clickOutside={options} with ref={clickOutside(options)} (or ref={clickOutside} when the directive takes no options; arrays compose as ref={[a, b]}). Rewrite the directive itself as a factory function that performs its setup in the owned body and returns the element callback (el) => { ... } for DOM writes. Read the directive's source, identify its element setup and teardown logic, and port them to that pattern.",
+      "guide": "https://github.com/solidjs/solid/blob/2105ffb8ca2fced55f5fac0763177fc93f97c2c2/documentation/solid-2.0/MIGRATION.md#directives-use--ref-directive-factories-two-phase-pattern",
+      "lint": []
+    }
+  ]
+}

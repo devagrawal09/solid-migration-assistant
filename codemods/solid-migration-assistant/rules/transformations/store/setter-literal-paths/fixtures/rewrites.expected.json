@@ -1,0 +1,84 @@
+{
+  "rewrites": [
+    {
+      "rule": "store/setter-literal-paths",
+      "file": "transformations/store/setter-literal-paths/fixtures/rewrites.fixture.tsx",
+      "line": 2,
+      "column": 29,
+      "message": "Relocate solid-js/store to solid-js for createStore: every setter call in this file is now a draft write.",
+      "guide": "https://github.com/solidjs/solid/blob/2105ffb8ca2fced55f5fac0763177fc93f97c2c2/documentation/solid-2.0/MIGRATION.md#draft-first-setters"
+    },
+    {
+      "rule": "store/setter-literal-paths",
+      "file": "transformations/store/setter-literal-paths/fixtures/rewrites.fixture.tsx",
+      "line": 6,
+      "column": 1,
+      "message": "Rewrite this path-style store setter call with a literal value as a draft write.",
+      "guide": "https://github.com/solidjs/solid/blob/2105ffb8ca2fced55f5fac0763177fc93f97c2c2/documentation/solid-2.0/MIGRATION.md#draft-first-setters"
+    },
+    {
+      "rule": "store/setter-literal-paths",
+      "file": "transformations/store/setter-literal-paths/fixtures/rewrites.fixture.tsx",
+      "line": 7,
+      "column": 1,
+      "message": "Rewrite this path-style store setter call with a literal value as a draft write.",
+      "guide": "https://github.com/solidjs/solid/blob/2105ffb8ca2fced55f5fac0763177fc93f97c2c2/documentation/solid-2.0/MIGRATION.md#draft-first-setters"
+    },
+    {
+      "rule": "store/setter-literal-paths",
+      "file": "transformations/store/setter-literal-paths/fixtures/rewrites.fixture.tsx",
+      "line": 8,
+      "column": 1,
+      "message": "Rewrite this path-style store setter call with a literal value as a draft write.",
+      "guide": "https://github.com/solidjs/solid/blob/2105ffb8ca2fced55f5fac0763177fc93f97c2c2/documentation/solid-2.0/MIGRATION.md#draft-first-setters"
+    },
+    {
+      "rule": "store/setter-literal-paths",
+      "file": "transformations/store/setter-literal-paths/fixtures/rewrites.fixture.tsx",
+      "line": 9,
+      "column": 1,
+      "message": "Rewrite this path-style store setter call with a literal value as a draft write.",
+      "guide": "https://github.com/solidjs/solid/blob/2105ffb8ca2fced55f5fac0763177fc93f97c2c2/documentation/solid-2.0/MIGRATION.md#draft-first-setters"
+    },
+    {
+      "rule": "store/setter-literal-paths",
+      "file": "transformations/store/setter-literal-paths/fixtures/rewrites.fixture.tsx",
+      "line": 10,
+      "column": 1,
+      "message": "Rewrite this path-style store setter call with a literal value as a draft write.",
+      "guide": "https://github.com/solidjs/solid/blob/2105ffb8ca2fced55f5fac0763177fc93f97c2c2/documentation/solid-2.0/MIGRATION.md#draft-first-setters"
+    },
+    {
+      "rule": "store/setter-literal-paths",
+      "file": "transformations/store/setter-literal-paths/fixtures/rewrites.fixture.tsx",
+      "line": 11,
+      "column": 1,
+      "message": "Rewrite this path-style store setter call with a literal value as a draft write.",
+      "guide": "https://github.com/solidjs/solid/blob/2105ffb8ca2fced55f5fac0763177fc93f97c2c2/documentation/solid-2.0/MIGRATION.md#draft-first-setters"
+    },
+    {
+      "rule": "store/setter-literal-paths",
+      "file": "transformations/store/setter-literal-paths/fixtures/rewrites.fixture.tsx",
+      "line": 12,
+      "column": 1,
+      "message": "Rewrite this path-style store setter call with a literal value as a draft write.",
+      "guide": "https://github.com/solidjs/solid/blob/2105ffb8ca2fced55f5fac0763177fc93f97c2c2/documentation/solid-2.0/MIGRATION.md#draft-first-setters"
+    },
+    {
+      "rule": "store/setter-literal-paths",
+      "file": "transformations/store/setter-literal-paths/fixtures/rewrites.fixture.tsx",
+      "line": 13,
+      "column": 1,
+      "message": "Rewrite this path-style store setter call with a literal value as a draft write.",
+      "guide": "https://github.com/solidjs/solid/blob/2105ffb8ca2fced55f5fac0763177fc93f97c2c2/documentation/solid-2.0/MIGRATION.md#draft-first-setters"
+    },
+    {
+      "rule": "store/setter-literal-paths",
+      "file": "transformations/store/setter-literal-paths/fixtures/rewrites.fixture.tsx",
+      "line": 14,
+      "column": 1,
+      "message": "Rewrite this path-style store setter call with a literal value as a draft write.",
+      "guide": "https://github.com/solidjs/solid/blob/2105ffb8ca2fced55f5fac0763177fc93f97c2c2/documentation/solid-2.0/MIGRATION.md#draft-first-setters"
+    }
+  ]
+}

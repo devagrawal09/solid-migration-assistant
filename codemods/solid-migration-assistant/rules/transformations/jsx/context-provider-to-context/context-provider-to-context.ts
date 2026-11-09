@@ -2,6 +2,7 @@ import type { Edit, SgNode } from "codemod:ast-grep";
 import type TSX from "codemod:ast-grep/langs/tsx";
 import { stringLiteralValue } from "../../../../shared/analysis.ts";
 import { findBindings } from "../../../../shared/bindings.ts";
+import { importedConstDeclaration } from "../../../../shared/provenance.ts";
 import {
   collectJsxAttributes,
   compareStart,
@@ -9,6 +10,7 @@ import {
   hasStringValue,
 } from "../../../../shared/jsx.ts";
 import { MIGRATION_GUIDE_URL } from "../../../../shared/target.ts";
+import { rewrite, type RuleRewrite } from "../../../../shared/finding.ts";
 
 export { SOLID_SOURCE_COMMIT } from "../../../../shared/target.ts";
 
@@ -24,7 +26,7 @@ export const SOLID_CORE_MODULE = "solid-js";
  */
 export type ContextProviderRewrite = {
   edit: Edit;
-  report: string;
+  report: RuleRewrite;
 };
 
 /**
@@ -43,7 +45,7 @@ export type ContextProviderRewrite = {
  * children unchanged.
  *
  * That rewrite is what this rule applies, and only when the identifier in
- * front of `.Provider` is proven, inside the same file, to be a Solid context:
+ * front of `.Provider` is proven to be a Solid context. In the same file:
  *
  * - the file has exactly one named `createContext` import from `solid-js`
  *   (an alias is fine; `import type`, namespace imports, and any other module
@@ -64,10 +66,16 @@ export type ContextProviderRewrite = {
  * two name nodes change; attributes, children, comments, and whitespace stay
  * byte-identical.
  *
+ * A context may also be imported from another project file: the workspace
+ * semantic provider must resolve the named import to a `const` declarator
+ * there (`shared/provenance.ts`), and that file must satisfy the same proof,
+ * a direct call of its single `createContext` import from `solid-js`.
+ *
  * Everything else is left to the read-only analyzer, by design:
  *
- * - contexts imported from another module, created through a namespace
- *   import, created by a wrapper function, or created by another library's
+ * - contexts imported from a package, through a default export, a
+ *   re-export, a namespace import, or a file the semantic provider cannot
+ *   resolve; created by a wrapper function; or created by another library's
  *   `createContext`, whose provider shape this rule cannot prove;
  * - contexts declared with `let` or `var`, declared more than once, shadowed
  *   by any other binding of the same name, or named with a lowercase initial;
@@ -88,9 +96,9 @@ export function rewriteContextProvider(
   filename: string,
 ): ContextProviderRewrite[] {
   const createContextLocal = solidCreateContextBinding(rootNode);
-  if (createContextLocal === null) return [];
-
-  const contexts = provenContextNames(rootNode, createContextLocal);
+  const contexts =
+    createContextLocal === null ? new Set<string>() : provenContextNames(rootNode, createContextLocal);
+  for (const name of importedContextNames(rootNode, contexts)) contexts.add(name);
   if (contexts.size === 0) return [];
 
   const rewrites: { element: SgNode<TSX>; entries: ContextProviderRewrite[] }[] =
@@ -187,6 +195,36 @@ function provenContextNames(
   return names;
 }
 
+/**
+ * The names used as `<Name.Provider>` in this file that are imported from
+ * another project file whose own proof holds there: the workspace semantic
+ * provider resolves the import to a `const` declarator
+ * (`importedConstDeclaration`), and in that file the declarator's value is a
+ * direct call of its single proven `createContext` import from `solid-js`.
+ * The local name must start with an uppercase letter, as for local contexts.
+ */
+function importedContextNames(rootNode: SgNode<TSX>, local: ReadonlySet<string>): Set<string> {
+  const names = new Set<string>();
+  for (const member of rootNode.findAll({ rule: { kind: "member_expression" } })) {
+    const element = member.parent();
+    if (element === null || (element.kind() !== "jsx_opening_element" && element.kind() !== "jsx_self_closing_element")) continue;
+    if (element.field("name")?.id() !== member.id()) continue;
+    const object = member.field("object");
+    if (object === null || object.kind() !== "identifier" || member.field("property")?.text() !== "Provider") continue;
+    const name = object.text();
+    if (!/^[A-Z]/.test(name) || local.has(name) || names.has(name)) continue;
+    const imported = importedConstDeclaration(rootNode, name);
+    if (imported === null) continue;
+    const createContextLocal = solidCreateContextBinding(imported.rootNode);
+    const value = imported.declarator.field("value");
+    const callee = value?.kind() === "call_expression" ? value.field("function") : null;
+    if (createContextLocal !== null && callee?.kind() === "identifier" && callee.text() === createContextLocal) {
+      names.add(name);
+    }
+  }
+  return names;
+}
+
 function rewriteElement(
   element: SgNode<TSX>,
   contexts: ReadonlySet<string>,
@@ -206,7 +244,7 @@ function rewriteElement(
   }
 
   const start = element.range().start;
-  const report = `${filename}:${start.line + 1}:${start.column + 1} Rewrite <${contextName}.Provider> to <${contextName}>, keeping its value attribute and children unchanged. Official migration guide: ${CONTEXT_PROVIDER_MIGRATION_GUIDE}`;
+  const report = rewrite(filename, start, `Rewrite <${contextName}.Provider> to <${contextName}>, keeping its value attribute and children unchanged.`, CONTEXT_PROVIDER_MIGRATION_GUIDE);
   return edits.map((edit) => ({ edit, report }));
 }
 

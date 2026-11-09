@@ -1,0 +1,46 @@
+{
+  "findings": [
+    {
+      "rule": "reactivity/error-handling",
+      "file": "analysis/reactivity/error-handling/fixtures/direct-call.fixture.tsx",
+      "line": 6,
+      "column": 1,
+      "severity": "build",
+      "headline": "Migrate this onError callback to an Errored boundary.",
+      "why": "Solid 2 removes onError; error handling uses Errored components whose fallback receives an error accessor rather than a raw error value.",
+      "guidance": "Read the complete callback, its boundary context, and every consumer of recovered values. Replace the onError callback with an Errored boundary wrapping the guarded JSX. The Errored fallback receives an error accessor — update any error.message or error.toString() access accordingly.",
+      "lint": [
+        "removed-api"
+      ],
+      "guide": "https://github.com/solidjs/solid/blob/2105ffb8ca2fced55f5fac0763177fc93f97c2c2/documentation/solid-2.0/MIGRATION.md#onerror--catcherror--errored--effect-error-option"
+    },
+    {
+      "rule": "reactivity/error-handling",
+      "file": "analysis/reactivity/error-handling/fixtures/direct-call.fixture.tsx",
+      "line": 7,
+      "column": 1,
+      "severity": "build",
+      "headline": "Migrate this catchError callback to an Errored boundary.",
+      "why": "Solid 2 removes catchError; error handling uses Errored components whose fallback receives an error accessor rather than a raw error value.",
+      "guidance": "Read the complete callback and its boundary context. Replace the catchError callback with an Errored boundary. The Errored fallback receives an error accessor — update any error.message access.",
+      "lint": [
+        "removed-api"
+      ],
+      "guide": "https://github.com/solidjs/solid/blob/2105ffb8ca2fced55f5fac0763177fc93f97c2c2/documentation/solid-2.0/MIGRATION.md#onerror--catcherror--errored--effect-error-option"
+    },
+    {
+      "rule": "reactivity/error-handling",
+      "file": "analysis/reactivity/error-handling/fixtures/direct-call.fixture.tsx",
+      "line": 8,
+      "column": 1,
+      "severity": "build",
+      "headline": "Remove this resetErrorBoundaries call.",
+      "why": "Solid 2 removes resetErrorBoundaries; Errored boundaries heal automatically on re-render.",
+      "guidance": "Remove this call. In Solid 2, Errored boundaries reset their error state whenever their children re-render without throwing — no explicit reset is needed.",
+      "lint": [
+        "removed-api"
+      ],
+      "guide": "https://github.com/solidjs/solid/blob/2105ffb8ca2fced55f5fac0763177fc93f97c2c2/documentation/solid-2.0/MIGRATION.md#onerror--catcherror--errored--effect-error-option"
+    }
+  ]
+}

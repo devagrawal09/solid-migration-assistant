@@ -1,0 +1,20 @@
+{
+  "rewrites": [
+    {
+      "rule": "imports/jsx-type-relocation",
+      "file": "transformations/imports/jsx-type-relocation/fixtures/mixed-statements.fixture.tsx",
+      "line": 2,
+      "column": 15,
+      "message": "Move the JSX type specifier out of this solid-js import into a separate @solidjs/web type import.",
+      "guide": "https://github.com/solidjs/solid/blob/2105ffb8ca2fced55f5fac0763177fc93f97c2c2/documentation/solid-2.0/MIGRATION.md#typescript-jsx-solid-js--renderer-package"
+    },
+    {
+      "rule": "imports/jsx-type-relocation",
+      "file": "transformations/imports/jsx-type-relocation/fixtures/mixed-statements.fixture.tsx",
+      "line": 3,
+      "column": 10,
+      "message": "Move the JSX type specifier out of this solid-js import into a separate @solidjs/web type import.",
+      "guide": "https://github.com/solidjs/solid/blob/2105ffb8ca2fced55f5fac0763177fc93f97c2c2/documentation/solid-2.0/MIGRATION.md#typescript-jsx-solid-js--renderer-package"
+    }
+  ]
+}

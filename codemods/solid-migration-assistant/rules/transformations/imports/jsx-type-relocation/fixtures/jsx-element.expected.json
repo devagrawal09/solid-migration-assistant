@@ -1,0 +1,12 @@
+{
+  "rewrites": [
+    {
+      "rule": "imports/jsx-type-relocation",
+      "file": "transformations/imports/jsx-type-relocation/fixtures/jsx-element.fixture.tsx",
+      "line": 2,
+      "column": 15,
+      "message": "Replace the JSXElement type import from solid-js with JSX from @solidjs/web and rewrite its 5 type reference(s) to JSX.Element.",
+      "guide": "https://github.com/solidjs/solid/blob/2105ffb8ca2fced55f5fac0763177fc93f97c2c2/documentation/solid-2.0/MIGRATION.md#typescript-jsx-solid-js--renderer-package"
+    }
+  ]
+}

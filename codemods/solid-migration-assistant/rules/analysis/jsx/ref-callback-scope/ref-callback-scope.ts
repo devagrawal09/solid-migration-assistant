@@ -2,6 +2,7 @@ import type { SgNode } from "codemod:ast-grep";
 import type TSX from "codemod:ast-grep/langs/tsx";
 import { isIntrinsicElementName } from "../../../../shared/jsx.ts";
 import { migrationGuide, SOLID_TARGET_VERSION } from "../../../../shared/target.ts";
+import { finding, type RuleFinding } from "../../../../shared/finding.ts";
 
 const MIGRATION_GUIDE = migrationGuide("ref-callbacks-no-longer-owned");
 
@@ -33,8 +34,8 @@ const OWNED_APIS = new Set([
 export function analyzeRefCallbackScope(
   rootNode: SgNode<TSX>,
   context: { filename: string },
-): string[] {
-  const findings: string[] = [];
+): RuleFinding[] {
+  const findings: RuleFinding[] = [];
   for (const elementKind of ["jsx_opening_element", "jsx_self_closing_element"] as const) {
     for (const element of rootNode.findAll({ rule: { kind: elementKind } })) {
       if (!isIntrinsicElementName(element.field("name"))) continue;
@@ -56,9 +57,13 @@ export function analyzeRefCallbackScope(
         const start = name.range().start;
         const names = [...new Set(calls)].sort().join(", ");
         findings.push(
-          `${context.filename}:${start.line + 1}:${start.column + 1} Manual review required: move owner-dependent work out of this ref callback.
-Why: Solid ${SOLID_TARGET_VERSION} runs ref callbacks unowned, so getOwner() is null inside them and the ${names} call(s) here no longer register with the component (Solid 1.x ran the callback inside the component's owner).
-Guidance: Keep only element capture in the ref callback. Move one-off setup and its cleanup into onSettled in the component body, returning the cleanup function, or into the owned setup half of a directive factory whose returned apply callback receives the element. Make and validate that edit yourself; this analyzer never edits or runs the target project. Official migration guide: ${MIGRATION_GUIDE}`,
+          finding(context.filename, start, {
+        severity: "behavior",
+        headline: `Move owner-dependent work out of this ref callback.`,
+        why: `Solid ${SOLID_TARGET_VERSION} runs ref callbacks unowned, so getOwner() is null inside them and the ${names} call(s) here no longer register with the component (Solid 1.x ran the callback inside the component's owner).`,
+        guidance: `Keep only element capture in the ref callback. Move one-off setup and its cleanup into onSettled in the component body, returning the cleanup function, or into the owned setup half of a directive factory whose returned apply callback receives the element.`,
+        guide: MIGRATION_GUIDE,
+      }),
         );
       }
     }

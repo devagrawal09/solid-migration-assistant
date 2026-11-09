@@ -1,0 +1,18 @@
+{
+  "findings": [
+    {
+      "rule": "reactivity/index-array",
+      "file": "analysis/reactivity/index-array/fixtures/direct-call.fixture.tsx",
+      "line": 6,
+      "column": 1,
+      "severity": "build",
+      "headline": "Migrate this indexArray call to mapArray with keyed: false.",
+      "why": "Solid 2 removes indexArray; use mapArray with the keyed: false option for index-keyed list mapping.",
+      "guidance": "Replace indexArray(source, mapFn) with mapArray(source, mapFn, { keyed: false }). The mapFn callback receives the same arguments.",
+      "lint": [
+        "removed-api"
+      ],
+      "guide": "https://github.com/solidjs/solid/blob/2105ffb8ca2fced55f5fac0763177fc93f97c2c2/documentation/solid-2.0/MIGRATION.md#quick-rename--removal-map"
+    }
+  ]
+}

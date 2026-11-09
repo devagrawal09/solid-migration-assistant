@@ -1,0 +1,60 @@
+{
+  "findings": [
+    {
+      "rule": "jsx/dom-lowercase-events",
+      "file": "analysis/jsx/dom-lowercase-events/fixtures/normal.fixture.tsx",
+      "line": 11,
+      "column": 15,
+      "severity": "behavior",
+      "headline": "Migrate this lowercase onclick attribute to a camelCase event handler.",
+      "why": "Solid 2.0.0-rc.21 binds an event only for on followed by an uppercase letter; a lowercase onclick on a native element is a plain attribute in the browser, in SSR output, and through spreads, so a function value is stringified into the attribute instead of listening for click as Solid 1.x did.",
+      "guidance": "Rename onclick to the camelCase handler spelled by Solid's JSX types (for example onClick, onDblClick, onPointerDown) and keep the handler expression unchanged. Keep a string value only if an HTML inline-handler attribute is intended. For a custom event name or native listener options, use a ref callback that calls addEventListener. Stop without proposing a rewrite when a spread attribute or another on-prefixed attribute on this element could bind the same event, or when the intended camelCase spelling is unclear.",
+      "lint": [
+        "event-handlers"
+      ],
+      "guide": "https://github.com/solidjs/solid/blob/2105ffb8ca2fced55f5fac0763177fc93f97c2c2/documentation/solid-2.0/MIGRATION.md#attributes--events-closer-to-html-and-fewer-namespaces"
+    },
+    {
+      "rule": "jsx/dom-lowercase-events",
+      "file": "analysis/jsx/dom-lowercase-events/fixtures/normal.fixture.tsx",
+      "line": 12,
+      "column": 14,
+      "severity": "behavior",
+      "headline": "Migrate this lowercase oninput attribute to a camelCase event handler.",
+      "why": "Solid 2.0.0-rc.21 binds an event only for on followed by an uppercase letter; a lowercase oninput on a native element is a plain attribute in the browser, in SSR output, and through spreads, so a function value is stringified into the attribute instead of listening for input as Solid 1.x did.",
+      "guidance": "Rename oninput to the camelCase handler spelled by Solid's JSX types (for example onClick, onDblClick, onPointerDown) and keep the handler expression unchanged. Keep a string value only if an HTML inline-handler attribute is intended. For a custom event name or native listener options, use a ref callback that calls addEventListener. Stop without proposing a rewrite when a spread attribute or another on-prefixed attribute on this element could bind the same event, or when the intended camelCase spelling is unclear.",
+      "lint": [
+        "event-handlers"
+      ],
+      "guide": "https://github.com/solidjs/solid/blob/2105ffb8ca2fced55f5fac0763177fc93f97c2c2/documentation/solid-2.0/MIGRATION.md#attributes--events-closer-to-html-and-fewer-namespaces"
+    },
+    {
+      "rule": "jsx/dom-lowercase-events",
+      "file": "analysis/jsx/dom-lowercase-events/fixtures/normal.fixture.tsx",
+      "line": 13,
+      "column": 19,
+      "severity": "behavior",
+      "headline": "Migrate this lowercase onmycustomevent attribute to a camelCase event handler.",
+      "why": "Solid 2.0.0-rc.21 binds an event only for on followed by an uppercase letter; a lowercase onmycustomevent on a native element is a plain attribute in the browser, in SSR output, and through spreads, so a function value is stringified into the attribute instead of listening for mycustomevent as Solid 1.x did.",
+      "guidance": "Rename onmycustomevent to the camelCase handler spelled by Solid's JSX types (for example onClick, onDblClick, onPointerDown) and keep the handler expression unchanged. Keep a string value only if an HTML inline-handler attribute is intended. For a custom event name or native listener options, use a ref callback that calls addEventListener. Stop without proposing a rewrite when a spread attribute or another on-prefixed attribute on this element could bind the same event, or when the intended camelCase spelling is unclear.",
+      "lint": [
+        "event-handlers"
+      ],
+      "guide": "https://github.com/solidjs/solid/blob/2105ffb8ca2fced55f5fac0763177fc93f97c2c2/documentation/solid-2.0/MIGRATION.md#attributes--events-closer-to-html-and-fewer-namespaces"
+    },
+    {
+      "rule": "jsx/dom-lowercase-events",
+      "file": "analysis/jsx/dom-lowercase-events/fixtures/normal.fixture.tsx",
+      "line": 14,
+      "column": 27,
+      "severity": "behavior",
+      "headline": "Migrate this lowercase onload attribute to a camelCase event handler.",
+      "why": "Solid 2.0.0-rc.21 binds an event only for on followed by an uppercase letter; a lowercase onload on a native element is a plain attribute in the browser, in SSR output, and through spreads, so a function value is stringified into the attribute instead of listening for load as Solid 1.x did.",
+      "guidance": "Rename onload to the camelCase handler spelled by Solid's JSX types (for example onClick, onDblClick, onPointerDown) and keep the handler expression unchanged. Keep a string value only if an HTML inline-handler attribute is intended. For a custom event name or native listener options, use a ref callback that calls addEventListener. Stop without proposing a rewrite when a spread attribute or another on-prefixed attribute on this element could bind the same event, or when the intended camelCase spelling is unclear.",
+      "lint": [
+        "event-handlers"
+      ],
+      "guide": "https://github.com/solidjs/solid/blob/2105ffb8ca2fced55f5fac0763177fc93f97c2c2/documentation/solid-2.0/MIGRATION.md#attributes--events-closer-to-html-and-fewer-namespaces"
+    }
+  ]
+}

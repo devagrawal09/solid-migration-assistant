@@ -1,0 +1,158 @@
+{
+  "findings": [
+    {
+      "rule": "reactivity/create-resource",
+      "file": "analysis/reactivity/create-resource/fixtures/direct-call.fixture.tsx",
+      "line": 6,
+      "column": 1,
+      "severity": "build",
+      "headline": "Migrate this createResource call to async computations with Loading boundaries.",
+      "why": "Solid 2 removes createResource; async data fetching uses async computations wrapped in Loading boundaries.",
+      "guidance": "Read the complete source, fetcher, options, and every consumer of the resource tuple (data, loading, error, mutate, refetch). Replace with an async computation and wrap the consuming JSX in a Loading boundary whose fallback handles the not-ready state. Track the resource tuple destructuring sites to confirm the replacement covers every field.",
+      "lint": [
+        "removed-api"
+      ],
+      "guide": "https://github.com/solidjs/solid/blob/2105ffb8ca2fced55f5fac0763177fc93f97c2c2/documentation/solid-2.0/MIGRATION.md#createresource--async-computations--loading"
+    },
+    {
+      "rule": "reactivity/create-resource",
+      "file": "analysis/reactivity/create-resource/fixtures/direct-call.fixture.tsx",
+      "line": 23,
+      "column": 37,
+      "severity": "build",
+      "headline": "Migrate this createResource call to async computations with Loading boundaries.",
+      "why": "Solid 2 removes createResource; async data fetching uses async computations wrapped in Loading boundaries.",
+      "guidance": "Read the complete source, fetcher, options, and every consumer of the resource tuple (data, loading, error, mutate, refetch). Replace with an async computation and wrap the consuming JSX in a Loading boundary whose fallback handles the not-ready state. Track the resource tuple destructuring sites to confirm the replacement covers every field.",
+      "lint": [
+        "removed-api"
+      ],
+      "guide": "https://github.com/solidjs/solid/blob/2105ffb8ca2fced55f5fac0763177fc93f97c2c2/documentation/solid-2.0/MIGRATION.md#createresource--async-computations--loading"
+    },
+    {
+      "rule": "reactivity/create-resource",
+      "file": "analysis/reactivity/create-resource/fixtures/direct-call.fixture.tsx",
+      "line": 37,
+      "column": 19,
+      "severity": "build",
+      "headline": "Migrate this createResource call to async computations with Loading boundaries.",
+      "why": "Solid 2 removes createResource; async data fetching uses async computations wrapped in Loading boundaries.",
+      "guidance": "Read the complete source, fetcher, options, and every consumer of the resource tuple (data, loading, error, mutate, refetch). Replace with an async computation and wrap the consuming JSX in a Loading boundary whose fallback handles the not-ready state. Track the resource tuple destructuring sites to confirm the replacement covers every field.",
+      "lint": [
+        "removed-api"
+      ],
+      "guide": "https://github.com/solidjs/solid/blob/2105ffb8ca2fced55f5fac0763177fc93f97c2c2/documentation/solid-2.0/MIGRATION.md#createresource--async-computations--loading"
+    },
+    {
+      "rule": "reactivity/create-resource",
+      "file": "analysis/reactivity/create-resource/fixtures/direct-call.fixture.tsx",
+      "line": 25,
+      "column": 1,
+      "severity": "build",
+      "headline": "Migrate this .loading access.",
+      "why": "Solid 2 removes the resource.loading boolean; use Loading for initial not-ready UI and isPending for in-flight change indicators.",
+      "guidance": "If this reads the initial loading state, wrap the consuming JSX in a <Loading fallback={...}> boundary. If this reads an in-flight pending state (after an input change), replace with isPending(() => resource()).",
+      "lint": [
+        "removed-api"
+      ],
+      "guide": "https://github.com/solidjs/solid/blob/2105ffb8ca2fced55f5fac0763177fc93f97c2c2/documentation/solid-2.0/MIGRATION.md#createresource--async-computations--loading"
+    },
+    {
+      "rule": "reactivity/create-resource",
+      "file": "analysis/reactivity/create-resource/fixtures/direct-call.fixture.tsx",
+      "line": 40,
+      "column": 20,
+      "severity": "build",
+      "headline": "Migrate this .loading access.",
+      "why": "Solid 2 removes the resource.loading boolean; use Loading for initial not-ready UI and isPending for in-flight change indicators.",
+      "guidance": "If this reads the initial loading state, wrap the consuming JSX in a <Loading fallback={...}> boundary. If this reads an in-flight pending state (after an input change), replace with isPending(() => resource()).",
+      "lint": [
+        "removed-api"
+      ],
+      "guide": "https://github.com/solidjs/solid/blob/2105ffb8ca2fced55f5fac0763177fc93f97c2c2/documentation/solid-2.0/MIGRATION.md#createresource--async-computations--loading"
+    },
+    {
+      "rule": "reactivity/create-resource",
+      "file": "analysis/reactivity/create-resource/fixtures/direct-call.fixture.tsx",
+      "line": 26,
+      "column": 1,
+      "severity": "build",
+      "headline": "Migrate this .error access.",
+      "why": "Solid 2 removes the resource.error field; use Errored boundaries for component-level error UI or the effect error option for programmatic handling.",
+      "guidance": "Replace this error read with a structural boundary (<Errored fallback={...}>) or move the error handling to an effect's error option. The error is now an Error object — use err().message in Errored fallbacks.",
+      "lint": [
+        "removed-api"
+      ],
+      "guide": "https://github.com/solidjs/solid/blob/2105ffb8ca2fced55f5fac0763177fc93f97c2c2/documentation/solid-2.0/MIGRATION.md#createresource--async-computations--loading"
+    },
+    {
+      "rule": "reactivity/create-resource",
+      "file": "analysis/reactivity/create-resource/fixtures/direct-call.fixture.tsx",
+      "line": 43,
+      "column": 19,
+      "severity": "build",
+      "headline": "Migrate this .error access.",
+      "why": "Solid 2 removes the resource.error field; use Errored boundaries for component-level error UI or the effect error option for programmatic handling.",
+      "guidance": "Replace this error read with a structural boundary (<Errored fallback={...}>) or move the error handling to an effect's error option. The error is now an Error object — use err().message in Errored fallbacks.",
+      "lint": [
+        "removed-api"
+      ],
+      "guide": "https://github.com/solidjs/solid/blob/2105ffb8ca2fced55f5fac0763177fc93f97c2c2/documentation/solid-2.0/MIGRATION.md#createresource--async-computations--loading"
+    },
+    {
+      "rule": "reactivity/create-resource",
+      "file": "analysis/reactivity/create-resource/fixtures/direct-call.fixture.tsx",
+      "line": 29,
+      "column": 1,
+      "severity": "build",
+      "headline": "Migrate this .refetch() call.",
+      "why": "Solid 2 replaces resource.refetch() with refresh(resource) for explicit recomputation.",
+      "guidance": "Replace this refetch call with refresh(resource) where resource is the async computation or derived store that replaces createResource.",
+      "lint": [
+        "removed-api"
+      ],
+      "guide": "https://github.com/solidjs/solid/blob/2105ffb8ca2fced55f5fac0763177fc93f97c2c2/documentation/solid-2.0/MIGRATION.md#createresource--async-computations--loading"
+    },
+    {
+      "rule": "reactivity/create-resource",
+      "file": "analysis/reactivity/create-resource/fixtures/direct-call.fixture.tsx",
+      "line": 46,
+      "column": 30,
+      "severity": "build",
+      "headline": "Migrate this .refetch() call.",
+      "why": "Solid 2 replaces resource.refetch() with refresh(resource) for explicit recomputation.",
+      "guidance": "Replace this refetch call with refresh(resource) where resource is the async computation or derived store that replaces createResource.",
+      "lint": [
+        "removed-api"
+      ],
+      "guide": "https://github.com/solidjs/solid/blob/2105ffb8ca2fced55f5fac0763177fc93f97c2c2/documentation/solid-2.0/MIGRATION.md#createresource--async-computations--loading"
+    },
+    {
+      "rule": "reactivity/create-resource",
+      "file": "analysis/reactivity/create-resource/fixtures/direct-call.fixture.tsx",
+      "line": 30,
+      "column": 1,
+      "severity": "build",
+      "headline": "Migrate this .mutate() call.",
+      "why": "Solid 2 replaces resource.mutate() with createOptimisticStore and action for optimistic updates.",
+      "guidance": "Replace this mutate call with the optimistic mutation pattern: wrap the server write in action(), use createOptimisticStore for the optimistic UI, and call refresh() after the action completes.",
+      "lint": [
+        "removed-api"
+      ],
+      "guide": "https://github.com/solidjs/solid/blob/2105ffb8ca2fced55f5fac0763177fc93f97c2c2/documentation/solid-2.0/MIGRATION.md#createresource--async-computations--loading"
+    },
+    {
+      "rule": "reactivity/create-resource",
+      "file": "analysis/reactivity/create-resource/fixtures/direct-call.fixture.tsx",
+      "line": 47,
+      "column": 30,
+      "severity": "build",
+      "headline": "Migrate this .mutate() call.",
+      "why": "Solid 2 replaces resource.mutate() with createOptimisticStore and action for optimistic updates.",
+      "guidance": "Replace this mutate call with the optimistic mutation pattern: wrap the server write in action(), use createOptimisticStore for the optimistic UI, and call refresh() after the action completes.",
+      "lint": [
+        "removed-api"
+      ],
+      "guide": "https://github.com/solidjs/solid/blob/2105ffb8ca2fced55f5fac0763177fc93f97c2c2/documentation/solid-2.0/MIGRATION.md#createresource--async-computations--loading"
+    }
+  ]
+}

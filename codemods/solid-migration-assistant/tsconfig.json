@@ -15,5 +15,5 @@
     "noFallthroughCasesInSwitch": true,
     "noUncheckedIndexedAccess": true
   },
-  "exclude": ["tests", "**/*.test.ts", "**/*.fixture.tsx"]
+  "exclude": ["tests", "**/fixtures/**"]
 }

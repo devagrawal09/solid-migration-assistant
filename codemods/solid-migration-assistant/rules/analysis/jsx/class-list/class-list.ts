@@ -1,6 +1,7 @@
 import type { SgNode } from "codemod:ast-grep";
 import type TSX from "codemod:ast-grep/langs/tsx";
-import { lintHint, migrationGuide, SOLID_TARGET_VERSION } from "../../../../shared/target.ts";
+import { migrationGuide, SOLID_TARGET_VERSION } from "../../../../shared/target.ts";
+import { finding, type RuleFinding } from "../../../../shared/finding.ts";
 
 const MIGRATION_GUIDE =
   migrationGuide("classlist--class-objectarray-forms");
@@ -8,12 +9,17 @@ const MIGRATION_GUIDE =
 export function analyzeJsxClassListAttributes(
   rootNode: SgNode<TSX>,
   context: { filename: string },
-): string[] {
+): RuleFinding[] {
   return findClassListAttributeNames(rootNode).map((name) => {
     const start = name.range().start;
-    return `${context.filename}:${start.line + 1}:${start.column + 1} Manual review required: migrate this intrinsic JSX classList attribute to class.
-Why: Solid ${SOLID_TARGET_VERSION} removes the JSX classList attribute in favor of the class attribute's object and array forms; on a native element the compiler now rejects classList with an error that names the replacement.
-Guidance: Read this complete intrinsic element, its classList value, and every class source. Move the classList value into the class attribute's object or array form, preserve static classes and conditional truthiness, and deliberately merge any existing class attribute on the same element. Make and validate this migration yourself; this analyzer never edits or runs the target project. Stop without proposing a rewrite when the value or another class source is spread or forwarded, duplicate class sources have unclear precedence, getters or side effects could change evaluation order or frequency, or a focused rendering test does not prove the resulting static and conditional class tokens. Ask for the smallest focused rendering test or runtime observation that exposes the rendered class attribute across relevant states.${lintHint("removed-api", "prefer-structured-class")} Official migration guide: ${MIGRATION_GUIDE}`;
+    return finding(context.filename, start, {
+        severity: "build",
+        headline: `Migrate this intrinsic JSX classList attribute to class.`,
+        why: `Solid ${SOLID_TARGET_VERSION} removes the JSX classList attribute in favor of the class attribute's object and array forms; on a native element the compiler now rejects classList with an error that names the replacement.`,
+        guidance: `Read this complete intrinsic element, its classList value, and every class source. Move the classList value into the class attribute's object or array form, preserve static classes and conditional truthiness, and deliberately merge any existing class attribute on the same element. Stop without proposing a rewrite when the value or another class source is spread or forwarded, duplicate class sources have unclear precedence, getters or side effects could change evaluation order or frequency, or a focused rendering test does not prove the resulting static and conditional class tokens. Ask for the smallest focused rendering test or runtime observation that exposes the rendered class attribute across relevant states.`,
+        lint: ["removed-api", "prefer-structured-class"],
+        guide: MIGRATION_GUIDE,
+      });
   });
 }
 

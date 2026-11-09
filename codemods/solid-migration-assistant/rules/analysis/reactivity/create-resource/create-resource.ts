@@ -1,7 +1,9 @@
 import type { SgNode } from "codemod:ast-grep";
 import type TSX from "codemod:ast-grep/langs/tsx";
 import { findImportedCalls } from "../../../../shared/analysis.ts";
-import { lintHint, migrationGuide } from "../../../../shared/target.ts";
+import { migrationGuide } from "../../../../shared/target.ts";
+import { finding, type RuleFinding } from "../../../../shared/finding.ts";
+import { referencesOf } from "../../../../shared/semantic.ts";
 
 const MIGRATION_GUIDE =
   migrationGuide("createresource--async-computations--loading");
@@ -9,8 +11,8 @@ const MIGRATION_GUIDE =
 export function analyzeCreateResource(
   rootNode: SgNode<TSX>,
   context: { filename: string },
-): string[] {
-  const findings: string[] = [];
+): RuleFinding[] {
+  const findings: RuleFinding[] = [];
 
   // createResource() call sites
   for (const { call, filename } of findImportedCalls(
@@ -24,9 +26,14 @@ export function analyzeCreateResource(
   )) {
     const start = call.range().start;
     findings.push(
-      `${filename}:${start.line + 1}:${start.column + 1} Manual review required: migrate this createResource call to async computations with Loading boundaries.
-Why: Solid 2 removes createResource; async data fetching uses async computations wrapped in Loading boundaries.
-Guidance: Read the complete source, fetcher, options, and every consumer of the resource tuple (data, loading, error, mutate, refetch). Replace with an async computation and wrap the consuming JSX in a Loading boundary whose fallback handles the not-ready state. Track the resource tuple destructuring sites to confirm the replacement covers every field. Make and validate that edit yourself; this analyzer never edits or runs the target project.${lintHint("removed-api")} Official migration guide: ${MIGRATION_GUIDE}`,
+      finding(filename, start, {
+        severity: "build",
+        headline: `Migrate this createResource call to async computations with Loading boundaries.`,
+        why: `Solid 2 removes createResource; async data fetching uses async computations wrapped in Loading boundaries.`,
+        guidance: `Read the complete source, fetcher, options, and every consumer of the resource tuple (data, loading, error, mutate, refetch). Replace with an async computation and wrap the consuming JSX in a Loading boundary whose fallback handles the not-ready state. Track the resource tuple destructuring sites to confirm the replacement covers every field.`,
+        lint: ["removed-api"],
+        guide: MIGRATION_GUIDE,
+      }),
     );
   }
 
@@ -116,7 +123,7 @@ Guidance: Read the complete source, fetcher, options, and every consumer of the 
     const record = (node: SgNode<TSX>, filename: string) => nodes.set(`${filename}:${node.id()}`, { node, filename });
     const bindings = kind === "access" ? accessors : [...accessors, ...actionObjects];
     for (const binding of bindings) {
-      for (const fileReferences of binding.references()) {
+      for (const fileReferences of referencesOf(binding)) {
         const filename = fileReferences.root.relativeFilename().replaceAll("\\", "/");
         for (const reference of fileReferences.nodes) {
           const member = memberOf(reference);
@@ -132,7 +139,7 @@ Guidance: Read the complete source, fetcher, options, and every consumer of the 
     }
     if (kind === "call") {
       for (const binding of actionFunctions.get(property) ?? []) {
-        for (const fileReferences of binding.references()) {
+        for (const fileReferences of referencesOf(binding)) {
           const filename = fileReferences.root.relativeFilename().replaceAll("\\", "/");
           for (const reference of fileReferences.nodes) {
             const call = callOf(reference);
@@ -148,9 +155,14 @@ Guidance: Read the complete source, fetcher, options, and every consumer of the 
     })) {
       const start = node.range().start;
       findings.push(
-        `${filename}:${start.line + 1}:${start.column + 1} Manual review required: migrate this ${label}.
-Why: ${why}
-Guidance: ${guidance} Make and validate this migration yourself; this analyzer never edits or runs the target project.${lintHint("removed-api")} Official migration guide: ${MIGRATION_GUIDE}`,
+        finding(filename, start, {
+        severity: "build",
+        headline: `Migrate this ${label}.`,
+        why: `${why}`,
+        guidance: `${guidance}`,
+        lint: ["removed-api"],
+        guide: MIGRATION_GUIDE,
+      }),
       );
     }
   }

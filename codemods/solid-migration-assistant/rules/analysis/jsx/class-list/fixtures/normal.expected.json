@@ -1,0 +1,64 @@
+{
+  "findings": [
+    {
+      "rule": "jsx/class-list",
+      "file": "analysis/jsx/class-list/fixtures/normal.fixture.tsx",
+      "line": 8,
+      "column": 14,
+      "severity": "build",
+      "headline": "Migrate this intrinsic JSX classList attribute to class.",
+      "why": "Solid 2.0.0-rc.21 removes the JSX classList attribute in favor of the class attribute's object and array forms; on a native element the compiler now rejects classList with an error that names the replacement.",
+      "guidance": "Read this complete intrinsic element, its classList value, and every class source. Move the classList value into the class attribute's object or array form, preserve static classes and conditional truthiness, and deliberately merge any existing class attribute on the same element. Stop without proposing a rewrite when the value or another class source is spread or forwarded, duplicate class sources have unclear precedence, getters or side effects could change evaluation order or frequency, or a focused rendering test does not prove the resulting static and conditional class tokens. Ask for the smallest focused rendering test or runtime observation that exposes the rendered class attribute across relevant states.",
+      "lint": [
+        "removed-api",
+        "prefer-structured-class"
+      ],
+      "guide": "https://github.com/solidjs/solid/blob/2105ffb8ca2fced55f5fac0763177fc93f97c2c2/documentation/solid-2.0/MIGRATION.md#classlist--class-objectarray-forms"
+    },
+    {
+      "rule": "jsx/class-list",
+      "file": "analysis/jsx/class-list/fixtures/normal.fixture.tsx",
+      "line": 10,
+      "column": 23,
+      "severity": "build",
+      "headline": "Migrate this intrinsic JSX classList attribute to class.",
+      "why": "Solid 2.0.0-rc.21 removes the JSX classList attribute in favor of the class attribute's object and array forms; on a native element the compiler now rejects classList with an error that names the replacement.",
+      "guidance": "Read this complete intrinsic element, its classList value, and every class source. Move the classList value into the class attribute's object or array form, preserve static classes and conditional truthiness, and deliberately merge any existing class attribute on the same element. Stop without proposing a rewrite when the value or another class source is spread or forwarded, duplicate class sources have unclear precedence, getters or side effects could change evaluation order or frequency, or a focused rendering test does not prove the resulting static and conditional class tokens. Ask for the smallest focused rendering test or runtime observation that exposes the rendered class attribute across relevant states.",
+      "lint": [
+        "removed-api",
+        "prefer-structured-class"
+      ],
+      "guide": "https://github.com/solidjs/solid/blob/2105ffb8ca2fced55f5fac0763177fc93f97c2c2/documentation/solid-2.0/MIGRATION.md#classlist--class-objectarray-forms"
+    },
+    {
+      "rule": "jsx/class-list",
+      "file": "analysis/jsx/class-list/fixtures/normal.fixture.tsx",
+      "line": 11,
+      "column": 15,
+      "severity": "build",
+      "headline": "Migrate this intrinsic JSX classList attribute to class.",
+      "why": "Solid 2.0.0-rc.21 removes the JSX classList attribute in favor of the class attribute's object and array forms; on a native element the compiler now rejects classList with an error that names the replacement.",
+      "guidance": "Read this complete intrinsic element, its classList value, and every class source. Move the classList value into the class attribute's object or array form, preserve static classes and conditional truthiness, and deliberately merge any existing class attribute on the same element. Stop without proposing a rewrite when the value or another class source is spread or forwarded, duplicate class sources have unclear precedence, getters or side effects could change evaluation order or frequency, or a focused rendering test does not prove the resulting static and conditional class tokens. Ask for the smallest focused rendering test or runtime observation that exposes the rendered class attribute across relevant states.",
+      "lint": [
+        "removed-api",
+        "prefer-structured-class"
+      ],
+      "guide": "https://github.com/solidjs/solid/blob/2105ffb8ca2fced55f5fac0763177fc93f97c2c2/documentation/solid-2.0/MIGRATION.md#classlist--class-objectarray-forms"
+    },
+    {
+      "rule": "jsx/class-list",
+      "file": "analysis/jsx/class-list/fixtures/normal.fixture.tsx",
+      "line": 13,
+      "column": 14,
+      "severity": "build",
+      "headline": "Migrate this intrinsic JSX classList attribute to class.",
+      "why": "Solid 2.0.0-rc.21 removes the JSX classList attribute in favor of the class attribute's object and array forms; on a native element the compiler now rejects classList with an error that names the replacement.",
+      "guidance": "Read this complete intrinsic element, its classList value, and every class source. Move the classList value into the class attribute's object or array form, preserve static classes and conditional truthiness, and deliberately merge any existing class attribute on the same element. Stop without proposing a rewrite when the value or another class source is spread or forwarded, duplicate class sources have unclear precedence, getters or side effects could change evaluation order or frequency, or a focused rendering test does not prove the resulting static and conditional class tokens. Ask for the smallest focused rendering test or runtime observation that exposes the rendered class attribute across relevant states.",
+      "lint": [
+        "removed-api",
+        "prefer-structured-class"
+      ],
+      "guide": "https://github.com/solidjs/solid/blob/2105ffb8ca2fced55f5fac0763177fc93f97c2c2/documentation/solid-2.0/MIGRATION.md#classlist--class-objectarray-forms"
+    }
+  ]
+}

@@ -2,14 +2,15 @@ import type { SgNode } from "codemod:ast-grep";
 import type TSX from "codemod:ast-grep/langs/tsx";
 import { findBindings } from "../../../../shared/bindings.ts";
 import { migrationGuide, SOLID_TARGET_VERSION } from "../../../../shared/target.ts";
+import { finding, type RuleFinding } from "../../../../shared/finding.ts";
 
 const MIGRATION_GUIDE = migrationGuide("context-providers-contextprovider--context-is-the-provider");
 
 export function analyzeContextProvider(
   rootNode: SgNode<TSX>,
   context: { filename: string },
-): string[] {
-  const findings: string[] = [];
+): RuleFinding[] {
+  const findings: RuleFinding[] = [];
   for (const elementKind of ["jsx_opening_element", "jsx_self_closing_element"] as const) {
     for (const element of rootNode.findAll({ rule: { kind: elementKind } })) {
       const nameField = element.field("name");
@@ -26,9 +27,13 @@ export function analyzeContextProvider(
       const start = element.range().start;
       const contextName = object.text();
       findings.push(
-        `${context.filename}:${start.line + 1}:${start.column + 1} Manual review required: migrate this Context.Provider JSX site to direct context provider syntax.
-Why: Solid ${SOLID_TARGET_VERSION} removes the Context.Provider pattern (createContext now returns the provider component itself, and .Provider is undefined); use the context value directly as a JSX component: <${contextName} value={...}>.
-Guidance: Replace <${contextName}.Provider value={...}> with <${contextName} value={...}>. Remove the .Provider suffix — the context itself is now the provider component. The value prop and children remain unchanged, but confirm the value is never undefined: Solid 2 treats value={undefined} as no provider, so a default-less context then throws ContextNotFoundError instead of falling back as 1.x did; use null as an explicit empty value. Make and validate that edit yourself; this analyzer never edits or runs the target project. Official migration guide: ${MIGRATION_GUIDE}`,
+        finding(context.filename, start, {
+        severity: "build",
+        headline: `Migrate this Context.Provider JSX site to direct context provider syntax.`,
+        why: `Solid ${SOLID_TARGET_VERSION} removes the Context.Provider pattern (createContext now returns the provider component itself, and .Provider is undefined); use the context value directly as a JSX component: <${contextName} value={...}>.`,
+        guidance: `Replace <${contextName}.Provider value={...}> with <${contextName} value={...}>. Remove the .Provider suffix — the context itself is now the provider component. The value prop and children remain unchanged, but confirm the value is never undefined: Solid 2 treats value={undefined} as no provider, so a default-less context then throws ContextNotFoundError instead of falling back as 1.x did; use null as an explicit empty value.`,
+        guide: MIGRATION_GUIDE,
+      }),
       );
     }
   }

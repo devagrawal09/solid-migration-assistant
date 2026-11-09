@@ -2,6 +2,7 @@ import type { SgNode } from "codemod:ast-grep";
 import type TSX from "codemod:ast-grep/langs/tsx";
 import { enclosingFunction, findImportedCalls } from "../../../../shared/analysis.ts";
 import { migrationGuide, SOLID_TARGET_VERSION } from "../../../../shared/target.ts";
+import { finding, type RuleFinding } from "../../../../shared/finding.ts";
 
 const MIGRATION_GUIDE =
   migrationGuide("effects-lifecycle-and-cleanup");
@@ -20,7 +21,7 @@ const MIGRATION_GUIDE =
 export function analyzeOnCleanup(
   rootNode: SgNode<TSX>,
   context: { filename: string },
-): string[] {
+): RuleFinding[] {
   const changedScopes = new Map<string, string>();
   for (const name of ["createEffect", "createRenderEffect", "createComputed", "onMount"]) {
     for (const { call, argumentNodes } of findImportedCalls(rootNode, ["solid-js", "solid-js/web"], name)) {
@@ -43,14 +44,21 @@ export function analyzeOnCleanup(
       const owner = scope === null ? undefined : changedScopes.get(String(scope.id()));
       if (owner === undefined) return [];
       const start = call.range().start;
-      const location = `${filename}:${start.line + 1}:${start.column + 1}`;
       if (owner === "onMount") {
-        return [`${location} Manual review required: move this onCleanup out of the onMount callback into onSettled's returned cleanup.
-Why: Solid ${SOLID_TARGET_VERSION} replaces onMount with onSettled, whose callback takes cleanup as a returned function; onCleanup is rejected inside onSettled (CLEANUP_IN_FORBIDDEN_SCOPE).
-Guidance: When this onMount becomes onSettled, return the cleanup function from the onSettled callback instead of registering it with onCleanup; if the callback already returns something, combine both into one returned cleanup. Make and validate this migration yourself; this analyzer never edits or runs the target project. Official migration guide: ${MIGRATION_GUIDE}`];
+        return [finding(filename, start, {
+        severity: "behavior",
+        headline: `Move this onCleanup out of the onMount callback into onSettled's returned cleanup.`,
+        why: `Solid ${SOLID_TARGET_VERSION} replaces onMount with onSettled, whose callback takes cleanup as a returned function; onCleanup is rejected inside onSettled (CLEANUP_IN_FORBIDDEN_SCOPE).`,
+        guidance: `When this onMount becomes onSettled, return the cleanup function from the onSettled callback instead of registering it with onCleanup; if the callback already returns something, combine both into one returned cleanup.`,
+        guide: MIGRATION_GUIDE,
+      })];
       }
-      return [`${location} Manual review required: move this onCleanup out of the ${owner} callback into the apply callback's returned cleanup.
-Why: Solid ${SOLID_TARGET_VERSION} requires this one-argument ${owner} to split into compute and apply callbacks, and the apply callback takes cleanup as a returned function that runs before the next apply and on disposal.
-Guidance: When splitting the effect, move the work this cleanup undoes into the apply callback and return the cleanup function from it, keeping the cleanup's reads in the apply half; drop the onCleanup wrapper. Make and validate this migration yourself; this analyzer never edits or runs the target project. Official migration guide: ${MIGRATION_GUIDE}`];
+      return [finding(filename, start, {
+        severity: "behavior",
+        headline: `Move this onCleanup out of the ${owner} callback into the apply callback's returned cleanup.`,
+        why: `Solid ${SOLID_TARGET_VERSION} requires this one-argument ${owner} to split into compute and apply callbacks, and the apply callback takes cleanup as a returned function that runs before the next apply and on disposal.`,
+        guidance: `When splitting the effect, move the work this cleanup undoes into the apply callback and return the cleanup function from it, keeping the cleanup's reads in the apply half; drop the onCleanup wrapper.`,
+        guide: MIGRATION_GUIDE,
+      })];
     });
 }

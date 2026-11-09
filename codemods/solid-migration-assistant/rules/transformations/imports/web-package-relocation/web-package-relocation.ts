@@ -2,6 +2,7 @@ import type { Edit, SgNode } from "codemod:ast-grep";
 import type TSX from "codemod:ast-grep/langs/tsx";
 import { stringLiteralValue } from "../../../../shared/analysis.ts";
 import { MIGRATION_GUIDE_URL, SOLID_SOURCE_COMMIT } from "../../../../shared/target.ts";
+import { rewrite, type RuleRewrite } from "../../../../shared/finding.ts";
 
 /**
  * The upstream Solid commit whose worktree was read to build the allowlist
@@ -95,7 +96,7 @@ export const DYNAMIC_DEPRECATION_NOTE =
 
 export type WebPackageRelocation = {
   edit: Edit;
-  report: string;
+  report: RuleRewrite;
 };
 
 /**
@@ -221,7 +222,7 @@ function relocation(
   const note = names.includes("Dynamic") ? ` ${DYNAMIC_DEPRECATION_NOTE}` : "";
   return {
     edit: source.replace(`${quote}${WEB_RELOCATION_TARGET}${quote}`),
-    report: `${filename}:${start.line + 1}:${start.column + 1} Relocate ${LEGACY_WEB_MODULE} to ${WEB_RELOCATION_TARGET} for proven bindings ${names.join(", ")}.${note} Official migration guide: ${WEB_MIGRATION_GUIDE}`,
+    report: rewrite(filename, start, `Relocate ${LEGACY_WEB_MODULE} to ${WEB_RELOCATION_TARGET} for proven bindings ${names.join(", ")}.${note}`, WEB_MIGRATION_GUIDE),
   };
 }
 
