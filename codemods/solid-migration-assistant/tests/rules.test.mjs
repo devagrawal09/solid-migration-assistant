@@ -9,6 +9,7 @@ const rulesDirectory = resolve(packageDirectory, "rules/analysis");
 const ruleCases = [
   { directory: "rules/analysis/imports/web-import" },
   { directory: "rules/analysis/imports/beta32-subpaths" },
+  { directory: "rules/analysis/imports/ecosystem-apis" },
   { directory: "rules/analysis/imports/jsx-types" },
   {
     directory: "rules/analysis/jsx/component-renames",
@@ -113,9 +114,9 @@ const existingAdapters = findFiles(rulesDirectory, (name) =>
   .map((path) => relative(packageDirectory, path))
   .sort();
 
-if (configuredAdapters.length !== 34 || existingAdapters.length !== 34) {
+if (configuredAdapters.length !== 35 || existingAdapters.length !== 35) {
   throw new Error(
-    `Expected 34 rule adapters, found ${configuredAdapters.length} configured and ${existingAdapters.length} on disk.`,
+    `Expected 35 rule adapters, found ${configuredAdapters.length} configured and ${existingAdapters.length} on disk.`,
   );
 }
 if (configuredAdapters.join("\n") !== existingAdapters.join("\n")) {
@@ -143,9 +144,9 @@ const existingFixtures = findFiles(rulesDirectory, (name) =>
   .map((path) => relative(packageDirectory, path))
   .sort();
 
-if (configuredFixtures.length !== 56 || existingFixtures.length !== 56) {
+if (configuredFixtures.length !== 57 || existingFixtures.length !== 57) {
   throw new Error(
-    `Expected 56 colocated fixture cases, found ${configuredFixtures.length} configured and ${existingFixtures.length} on disk.`,
+    `Expected 57 colocated fixture cases, found ${configuredFixtures.length} configured and ${existingFixtures.length} on disk.`,
   );
 }
 if (configuredFixtures.join("\n") !== existingFixtures.join("\n")) {

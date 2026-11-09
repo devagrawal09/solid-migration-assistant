@@ -19,6 +19,14 @@ import { output, treeSnapshot } from "./helpers.mjs";
  * compiler at its `classList` attribute and must have no `Context.Provider`
  * at runtime: that is the evidence that each rewrite is both required and
  * correct for this target.
+ *
+ * Two behavioral scenarios run on both runtimes: each untransformed 1.x
+ * scenario on `solid-js@1.9.13`, and its transformed output on the pinned RC.
+ * `store-scenario.js` must record identical store snapshots after every
+ * literal path-setter call. `on-scenario.js` must record, for every effect,
+ * the identical sequence of values, previous values, and untracked reads;
+ * the interleaving of different effects inside one flush follows Solid 2's
+ * scheduler for any effect and is not compared.
  */
 const packageDirectory = resolve(dirname(fileURLToPath(import.meta.url)), "..");
 const codemodLauncher = resolve(packageDirectory, "node_modules/codemod/codemod");
@@ -38,6 +46,12 @@ const PINNED_PACKAGES = [
   "typescript@6.0.3",
 ];
 const MINIMUM_NODE = [22, 12, 0];
+const LEGACY_SOLID = "solid-js@1.9.13";
+const SCENARIO_RUNNER = `const [scenario, mode] = process.argv.slice(2);
+const flush = mode === "rc" ? (await import("solid-js")).flush : () => {};
+const { run } = await import(new URL(\`./src/\${scenario}.js\`, import.meta.url));
+console.log(JSON.stringify(run(() => flush())));
+`;
 
 /**
  * The pinned target, read from the single source every rule imports, so the
@@ -172,6 +186,38 @@ test(
       const rendered = JSON.parse(render.stdout);
       assert.equal(rendered.legacyProviderType, "undefined");
       assert.equal(rendered.html, EXPECTED_HTML);
+
+      // 6. Behavioral equivalence of the store and on() rewrites: the 1.x
+      //    originals on Solid 1.9.13, the transformed files on the RC, both
+      //    through the browser builds so effects and stores are reactive.
+      const legacy = join(temporaryRoot, "legacy");
+      cpSync(projectDirectory, legacy, { recursive: true });
+      const legacyInstall = run(
+        "npm",
+        ["install", "--no-audit", "--no-fund", "--package-lock=false", "--save-exact", LEGACY_SOLID],
+        legacy,
+      );
+      assert.equal(legacyInstall.status, 0, output(legacyInstall));
+      for (const directory of [legacy, target]) writeFileSync(join(directory, "scenario.mjs"), SCENARIO_RUNNER);
+      const observe = (directory, scenario, mode) => {
+        const result = run(process.execPath, ["--conditions=browser", "scenario.mjs", scenario, mode], directory);
+        assert.equal(result.status, 0, output(result));
+        return JSON.parse(result.stdout);
+      };
+      assert.deepEqual(
+        observe(target, "store-scenario", "rc"),
+        observe(legacy, "store-scenario", "legacy"),
+        "literal path-setter rewrites changed the resulting store state",
+      );
+      const byEffect = (log) => {
+        const groups = {};
+        for (const [label, ...rest] of log) if (label !== "--") (groups[label] ??= []).push(rest);
+        return groups;
+      };
+      const onLegacy = observe(legacy, "on-scenario", "legacy");
+      const onRc = observe(target, "on-scenario", "rc");
+      assert.deepEqual(byEffect(onRc), byEffect(onLegacy), "on() rewrites changed what an effect observes");
+      assert.ok(Object.keys(byEffect(onLegacy)).length === 3 && onLegacy.length > 10, "the on() scenario must exercise all three effects");
     } finally {
       rmSync(temporaryRoot, { recursive: true, force: true });
     }

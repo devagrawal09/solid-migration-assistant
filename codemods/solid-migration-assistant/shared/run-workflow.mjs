@@ -4,6 +4,7 @@ import { createRequire } from "node:module";
 import { dirname, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 import { SEVERITY_TIERS, severityOf } from "./severity.mjs";
+import { DEPENDENCY_MAP, DEPENDENCY_VERIFIED_ON, dependencyHeadline } from "./dependencies.mjs";
 
 const packageDirectory = resolve(dirname(fileURLToPath(import.meta.url)), "..");
 const require = createRequire(import.meta.url);
@@ -47,9 +48,6 @@ export function projectFindings(target) {
     };
     const solid = declared["solid-js"];
     const web = declared["@solidjs/web"];
-    const legacyTooling = ["babel-preset-solid", "vite-plugin-solid"].filter(
-      (name) => declared[name] !== undefined,
-    );
     const onSolid2 = typeof solid === "string" && /(^|[^0-9.])2\.0\.0/.test(solid);
     const problems = [];
     if (typeof solid === "string" && !onSolid2) {
@@ -58,14 +56,15 @@ export function projectFindings(target) {
     if (typeof solid === "string" && web === undefined) {
       problems.push("@solidjs/web, the Solid 2 web renderer package, is not declared");
     }
-    if (legacyTooling.length > 0) {
-      problems.push(`${legacyTooling.join(" and ")} compile Solid 1 JSX only`);
-    }
     if (problems.length > 0) {
       findings.push(`package.json:1:1 Manual review required: move this project's Solid dependencies to ${SOLID_TARGET}.
 Why: ${problems.join("; ")}. Solid 2 splits the web renderer into @solidjs/web, versions it in lockstep with solid-js, and compiles JSX through @solidjs/vite-plugin (or @solidjs/babel-plugin), which is what the official solid-v2 templates use.
-Guidance: Pin solid-js and @solidjs/web to the exact same RC version (${SOLID_TARGET.split("@")[1]}), replace babel-preset-solid or vite-plugin-solid with @solidjs/vite-plugin, and re-run this analyzer after installing, since Solid 1 source is the input this version understands. Make and validate that edit yourself; this analyzer never edits or runs the target project. Official migration guide: ${MIGRATION_GUIDE}#imports-where-things-live-now`);
+Guidance: Pin solid-js and @solidjs/web to the exact same RC version (${SOLID_TARGET.split("@")[1]}), move the other Solid dependencies as the per-package findings below describe, and run this analyzer before installing, since Solid 1 source is the input this version understands. Make and validate that edit yourself; this analyzer never edits or runs the target project. Official migration guide: ${MIGRATION_GUIDE}#imports-where-things-live-now`);
     }
+  }
+
+  if (manifest && typeof manifest === "object") {
+    findings.push(...dependencyFindings(manifest, readFileSync(resolve(target, "package.json"), "utf8")));
   }
 
   const tsconfig = readJsonLike(resolve(target, "tsconfig.json"));
@@ -77,6 +76,33 @@ Guidance: Set compilerOptions.jsxImportSource to "@solidjs/web" (keep "jsx": "pr
   }
 
   return findings;
+}
+
+/**
+ * One finding per dependency in `shared/dependencies.mjs` that the manifest
+ * declares on its Solid 1 line (or at all, for packages with no Solid 2
+ * line), located at the dependency's line so editors can jump to it. A
+ * workspace, catalog, or git range cannot be compared and is reported with a
+ * note to check it.
+ */
+function dependencyFindings(manifest, text) {
+  const findings = [];
+  const sections = [manifest.dependencies, manifest.devDependencies, manifest.peerDependencies];
+  const lines = text.split("\n");
+  for (const entry of DEPENDENCY_MAP) {
+    const range = sections.map((section) => section?.[entry.name]).find((value) => typeof value === "string");
+    if (range === undefined) continue;
+    const comparable = /^[\s^~<>=v]*\d/.test(range);
+    if (entry.legacy !== null && comparable && !entry.legacy(range)) continue;
+    const lineIndex = lines.findIndex((line) => line.includes(`"${entry.name}"`));
+    const line = lineIndex === -1 ? 1 : lineIndex + 1;
+    const column = lineIndex === -1 ? 1 : lines[lineIndex].indexOf(`"${entry.name}"`) + 1;
+    const note = comparable ? "" : ` The declared range ${JSON.stringify(range)} could not be compared, so check which line it resolves to.`;
+    findings.push([line, column, `package.json:${line}:${column} ${dependencyHeadline(entry)}
+Why: package.json declares ${entry.name} ${JSON.stringify(range)}. Checked against the npm registry on ${DEPENDENCY_VERIFIED_ON}: ${entry.replacement === null ? "no Solid 2 release exists" : `the Solid 2 counterpart is ${entry.replacement}`}.${note}
+Guidance: ${entry.guidance} Make and validate that edit yourself; this analyzer never edits or runs the target project. Official migration guide: ${MIGRATION_GUIDE}#imports-where-things-live-now`]);
+  }
+  return findings.sort((left, right) => left[0] - right[0] || left[1] - right[1]).map(([, , text]) => text);
 }
 
 /**
@@ -111,10 +137,10 @@ export const WORKFLOWS = Object.freeze({
   transform: "transform.yaml",
 });
 
-export const FORMATS = Object.freeze(["text", "json"]);
+export const FORMATS = Object.freeze(["text", "json", "agent"]);
 
 /**
- * `[workflow] [--target <dir>] [--allow-dirty] [--format text|json]`. The
+ * `[workflow] [--target <dir>] [--allow-dirty] [--format text|json|agent]`. The
  * workflow defaults to `analyze` and the format to `text`, so every
  * pre-existing invocation keeps its meaning; `--allow-dirty` is accepted only
  * with `transform`, the one workflow that writes to the target.
@@ -171,6 +197,9 @@ export function parseArguments(argumentsList) {
     index += 1;
   }
 
+  if (format === "agent" && workflow !== "analyze") {
+    throw new CliUsageError("--format agent is only accepted with the analyze workflow");
+  }
   return { workflow, target, allowDirty, format };
 }
 
@@ -386,8 +415,64 @@ function run(argumentsList, invocationDirectory, runImpl, dirtyImpl, projectImpl
     ...projectEntries.map(toEntry).filter((entry) => entry !== null),
     ...parseStepOutput(result.stderr, parsed.workflow),
   ];
-  console.log(JSON.stringify(buildJsonReport({ workflow: parsed.workflow, target, entries, status }), null, 2));
+  const report = buildJsonReport({ workflow: parsed.workflow, target, entries, status });
+  console.log(parsed.format === "agent" ? buildAgentReport(report) : JSON.stringify(report, null, 2));
   return status;
+}
+
+/**
+ * The analyzer's findings as one Markdown work list for a coding agent (or a
+ * person): grouped by file, each file's tasks in fix order (severity tier,
+ * then location), every task carrying the full guidance and its official
+ * guide link, followed by the command that re-verifies the result. The
+ * analyzer stays the source of truth: the list tells the reader to re-run it
+ * rather than to trust its own edits.
+ */
+export function buildAgentReport(report) {
+  const tierOrder = new Map(SEVERITY_TIERS.map((tier, index) => [tier.id, index]));
+  const tierLabel = new Map(SEVERITY_TIERS.map((tier) => [tier.id, tier.label]));
+  const byFile = new Map();
+  for (const finding of report.findings) {
+    byFile.set(finding.file, [...(byFile.get(finding.file) ?? []), finding]);
+  }
+  const files = [...byFile.keys()].sort((left, right) => {
+    const worst = (file) => Math.min(...byFile.get(file).map((finding) => tierOrder.get(finding.severity)));
+    return worst(left) - worst(right) || (left < right ? -1 : left > right ? 1 : 0);
+  });
+  const lines = [
+    `# Solid 2 migration tasks`,
+    "",
+    `Target: ${report.solid.target} (source commit ${report.solid.sourceCommit}). Generated by ${report.tool}@${report.version} for \`${report.target}\`.`,
+    "",
+    `${report.summary.findings} findings in ${report.summary.files} file(s): ${SEVERITY_TIERS.map((tier) => `${report.summary.bySeverity[tier.id]} ${tier.label[0].toLowerCase()}${tier.label.slice(1)}`).join(", ")}.`,
+    "",
+    "How to work through this list:",
+    "",
+    "1. Fix every \"will not build or run\" task first; until they are gone the app cannot run, so behavior changes cannot be observed.",
+    "2. Follow each task's guidance, including its stop conditions: when a task says to stop and ask, do not guess.",
+    "3. Keep each edit to the cited site and keep the project's tests green.",
+    `4. Re-run \`npx solid-migration-assistant --format agent --target ${report.target}\` to verify. Fixed tasks disappear; the analyzer, not this list, decides what is done.`,
+    "",
+  ];
+  if (report.findings.length === 0) {
+    lines.push("No supported migration sites were found. This is not proof that the project is ready for Solid 2; run its own type, build, and test checks.");
+    return lines.join("\n");
+  }
+  for (const file of files) {
+    lines.push(`## \`${file}\``, "");
+    const tasks = [...byFile.get(file)].sort(
+      (left, right) =>
+        tierOrder.get(left.severity) - tierOrder.get(right.severity) ||
+        left.line - right.line ||
+        left.column - right.column,
+    );
+    for (const task of tasks) {
+      lines.push(`- [ ] \`${task.file}:${task.line}:${task.column}\` ${task.headline} *(${tierLabel.get(task.severity)})*`);
+      for (const detail of task.text.split("\n").slice(1)) lines.push(`  ${detail}`);
+    }
+    lines.push("");
+  }
+  return lines.join("\n").trimEnd();
 }
 
 function fail(message) {

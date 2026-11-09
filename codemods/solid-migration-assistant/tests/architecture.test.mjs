@@ -5,6 +5,7 @@ import { test } from "node:test";
 import { fileURLToPath } from "node:url";
 import { DISCLOSURE } from "../shared/run-workflow.mjs";
 import { explicitSeverity, severityOf } from "../shared/severity.mjs";
+import { dependencyHeadline } from "../shared/dependencies.mjs";
 
 const packageDirectory = resolve(dirname(fileURLToPath(import.meta.url)), "..");
 const analysisDirectory = resolve(packageDirectory, "rules/analysis");
@@ -13,6 +14,7 @@ const testsDirectory = resolve(packageDirectory, "tests");
 
 const EXPECTED_ANALYSIS_PRODUCTION = [
   "imports/beta32-subpaths/beta32-subpaths.ts",
+  "imports/ecosystem-apis/ecosystem-apis.ts",
   "imports/jsx-types/jsx-types.ts",
   "imports/web-import/web-import.ts",
   "jsx/class-list/class-list.ts",
@@ -49,6 +51,7 @@ const EXPECTED_ANALYSIS_PRODUCTION = [
 ];
 const EXPECTED_ANALYSIS_TESTS = [
   "imports/beta32-subpaths/beta32-subpaths.test.ts",
+  "imports/ecosystem-apis/ecosystem-apis.test.ts",
   "imports/jsx-types/jsx-types.test.ts",
   "imports/web-import/web-import.test.ts",
   "jsx/class-list/class-list.test.ts",
@@ -85,6 +88,7 @@ const EXPECTED_ANALYSIS_TESTS = [
 ];
 const EXPECTED_ANALYSIS_FIXTURES = [
   "imports/beta32-subpaths/static-imports.fixture.tsx",
+  "imports/ecosystem-apis/normal.fixture.tsx",
   "imports/jsx-types/static-imports.fixture.tsx",
   "imports/web-import/static-imports.fixture.tsx",
   "jsx/class-list/normal.fixture.tsx",
@@ -154,6 +158,8 @@ const EXPECTED_TRANSFORM_PRODUCTION = [
   "jsx/context-provider-to-context/context-provider-to-context.ts",
   "jsx/index-to-for/index-to-for.ts",
   "jsx/lowercase-event-handlers/lowercase-event-handlers.ts",
+  "reactivity/on-helper-split/on-helper-split.ts",
+  "store/setter-literal-paths/setter-literal-paths.ts",
 ];
 const EXPECTED_TRANSFORM_TESTS = [
   "imports/jsx-type-relocation/jsx-type-relocation.test.ts",
@@ -163,6 +169,8 @@ const EXPECTED_TRANSFORM_TESTS = [
   "jsx/context-provider-to-context/context-provider-to-context.test.ts",
   "jsx/index-to-for/index-to-for.test.ts",
   "jsx/lowercase-event-handlers/lowercase-event-handlers.test.ts",
+  "reactivity/on-helper-split/on-helper-split.test.ts",
+  "store/setter-literal-paths/setter-literal-paths.test.ts",
 ];
 const EXPECTED_TRANSFORM_FIXTURES = [
   "imports/jsx-type-relocation/fixtures/jsx-element-conflicts.fixture.tsx",
@@ -238,6 +246,19 @@ const EXPECTED_TRANSFORM_FIXTURES = [
   "jsx/lowercase-event-handlers/fixtures/rewrites.fixture.tsx",
   "jsx/lowercase-event-handlers/fixtures/spread-attributes.fixture.tsx",
   "jsx/lowercase-event-handlers/fixtures/unknown-events.fixture.tsx",
+  "reactivity/on-helper-split/fixtures/import-kept.fixture.tsx",
+  "reactivity/on-helper-split/fixtures/no-matches.fixture.tsx",
+  "reactivity/on-helper-split/fixtures/refusals.fixture.tsx",
+  "reactivity/on-helper-split/fixtures/rewrites.fixture.tsx",
+  "reactivity/on-helper-split/fixtures/shadowed.fixture.tsx",
+  "store/setter-literal-paths/fixtures/aliased-with-store-type.fixture.tsx",
+  "store/setter-literal-paths/fixtures/import-stays.fixture.tsx",
+  "store/setter-literal-paths/fixtures/no-matches.fixture.tsx",
+  "store/setter-literal-paths/fixtures/partial.fixture.tsx",
+  "store/setter-literal-paths/fixtures/rewrites.fixture.tsx",
+  "store/setter-literal-paths/fixtures/store-not-literal.fixture.tsx",
+  "store/setter-literal-paths/fixtures/unproven-setters.fixture.tsx",
+  "store/setter-literal-paths/fixtures/unused-or-passed.fixture.tsx",
 ];
 const EXPECTED_TRANSFORM_FOLDERS = EXPECTED_TRANSFORM_PRODUCTION.map((path) =>
   dirname(path),
@@ -264,8 +285,8 @@ test("composes every named rule as its own workflow step", () => {
     ({ name }) => "scripts/transformations/" + name + ".ts",
   );
 
-  assert.equal(analysisRules.length, 43);
-  assert.equal(transformRules.length, 7);
+  assert.equal(analysisRules.length, 44);
+  assert.equal(transformRules.length, 9);
   assert.deepEqual(
     [...analyzeWorkflow.matchAll(/js_file:\s*(\S+)/g)].map(
       (match) => match[1],
@@ -687,6 +708,16 @@ test("assigns every analyzer headline an explicit severity tier", () => {
   headlines.add("Manual review required: rewrite this path-style store setter call as a draft write. This call passes 3 arguments.");
   headlines.add("Manual review required: rewrite this object-merge store setter call as draft assignments. The argument is an object.");
   headlines.add("Manual review required: move this project's Solid dependencies to solid-js@2.0.0-rc.21.");
+  for (const status of ["upgrade", "replace", "use-core", "blocked"]) {
+    headlines.add(dependencyHeadline({ name: "@scope/package", status }));
+  }
+  headlines.add("Manual review required: migrate this A import from @solidjs/router, which Solid 2 removes or moves.");
+  headlines.add("Manual review required: migrate this defineConfig import from @solidjs/start/config, which Solid 2 removes or moves.");
+  headlines.add("Manual review required: migrate this getCookie import from vinxi/http, which Solid 2 removes or moves.");
+  headlines.add("Manual review required: migrate this @solidjs/start/server import, which has no Solid 2 release.");
+  headlines.add("Manual review required: review this revalidate import from @solidjs/router, whose Solid 2 behavior changed.");
+  headlines.add("Manual review required: review this Meta import from @solidjs/meta, whose Solid 2 behavior changed.");
+  headlines.add("Manual review required: replace this deprecated action import from @solidjs/router.");
   const workflowTest = readFileSync(resolve(testsDirectory, "workflow.test.mjs"), "utf8");
   for (const match of workflowTest.matchAll(/^ {2}'[^:']+:\d+:\d+ ([^\\]+?)\\n/gm)) headlines.add(match[1]);
   const baseline = JSON.parse(readFileSync(resolve(testsDirectory, "corpus/baseline.json"), "utf8"));

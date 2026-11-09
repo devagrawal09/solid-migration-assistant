@@ -1,0 +1,4 @@
+import { rewriteStoreSetterLiteralPaths } from "../../rules/transformations/store/setter-literal-paths/setter-literal-paths.ts";
+import { createTransformEntrypoint } from "../../shared/entrypoint.ts";
+
+export default createTransformEntrypoint(rewriteStoreSetterLiteralPaths);

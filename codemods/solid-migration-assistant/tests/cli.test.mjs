@@ -6,6 +6,7 @@ import { dirname, join, resolve } from "node:path";
 import { test } from "node:test";
 import {
   buildCodemodArguments,
+  buildAgentReport,
   buildJsonReport,
   DISCLOSURE,
   parseStepOutput,
@@ -83,14 +84,28 @@ test("reports Solid 1 manifests and jsxImportSource read-only, before the analyz
   try {
     const legacy = join(surface, "legacy");
     mkdirSync(legacy);
-    writeFileSync(join(legacy, "package.json"), JSON.stringify({ dependencies: { "solid-js": "^1.9.3" }, devDependencies: { "vite-plugin-solid": "^2.11.0" } }));
+    writeFileSync(join(legacy, "package.json"), JSON.stringify({ dependencies: { "solid-js": "^1.9.3", "@solidjs/router": "^0.15.3", "@solidjs/testing-library": "^1.0.0-rc.2", "@tanstack/solid-query": "catalog:" }, devDependencies: { "vite-plugin-solid": "^2.11.0", "@kobalte/core": "^0.13.7" } }, null, 2));
     writeFileSync(join(legacy, "tsconfig.json"), '{\n  // comment\n  "compilerOptions": { "jsx": "preserve", "jsxImportSource": "solid-js", },\n}\n');
     const findings = projectFindings(legacy);
-    assert.equal(findings.length, 2);
-    assert.match(findings[0], /^package\.json:1:1 Manual review required: move this project's Solid dependencies to solid-js@2\.0\.0-rc\.21\./);
-    assert.match(findings[0], /declared as "\^1\.9\.3", a Solid 1 range; @solidjs\/web, the Solid 2 web renderer package, is not declared; vite-plugin-solid compile Solid 1 JSX only/);
-    assert.match(findings[1], /^tsconfig\.json:1:1 Manual review required: point jsxImportSource/);
-    assert.match(findings[1], /Official migration guide: https:\/\/github\.com\/solidjs\/solid\/blob\/2105ffb8ca2fced55f5fac0763177fc93f97c2c2\/documentation\/solid-2\.0\/MIGRATION\.md#typescript-jsx-solid-js--renderer-package/);
+    // The solid-js finding, then one finding per mapped dependency at its own
+    // line (sorted by line), then tsconfig. The testing-library range is
+    // already on its Solid 2 line, so it is not reported; the catalog: range
+    // cannot be compared and is reported with a note.
+    assert.deepEqual(
+      findings.map((finding) => finding.split("\n")[0]),
+      [
+        "package.json:1:1 Manual review required: move this project's Solid dependencies to solid-js@2.0.0-rc.21.",
+        "package.json:4:5 Manual review required: move @solidjs/router to its Solid 2 line.",
+        "package.json:6:5 Manual review required: move @tanstack/solid-query to its Solid 2 line.",
+        "package.json:9:5 Manual review required: replace vite-plugin-solid with its Solid 2 successor.",
+        "package.json:10:5 Manual review required: resolve @kobalte/core, which has no Solid 2 release yet.",
+        "tsconfig.json:1:1 Manual review required: point jsxImportSource at the Solid 2 renderer package.",
+      ],
+    );
+    assert.match(findings[0], /declared as "\^1\.9\.3", a Solid 1 range; @solidjs\/web, the Solid 2 web renderer package, is not declared\./);
+    assert.match(findings[2], /"catalog:" could not be compared/);
+    assert.match(findings[4], /pins solid-js and @solidjs\/web to exactly 2\.0\.0-rc\.16/);
+    assert.match(findings[5], /Official migration guide: https:\/\/github\.com\/solidjs\/solid\/blob\/2105ffb8ca2fced55f5fac0763177fc93f97c2c2\/documentation\/solid-2\.0\/MIGRATION\.md#typescript-jsx-solid-js--renderer-package/);
 
     const migrated = join(surface, "migrated");
     mkdirSync(migrated);
@@ -128,6 +143,7 @@ test("reports Solid 1 manifests and jsxImportSource read-only, before the analyz
     assert.deepEqual(order, ["findings", "codemod"]);
     assert.equal(printed.length, 1);
     assert.match(printed[0], /^package\.json:1:1 /);
+    assert.match(printed[0], /\n\npackage\.json:4:5 Manual review required: move @solidjs\/router/);
     assert.match(printed[0], /\n\ntsconfig\.json:1:1 /);
 
     const transformRun = captureMain(["transform", "--allow-dirty", "--target", legacy], {
@@ -195,6 +211,41 @@ test("--format json re-emits captured findings as one sorted, tiered JSON docume
   assert.deepEqual(options, { capture: true });
   assert.equal(printed.length, 1, "JSON mode prints exactly one document on stdout");
   assert.equal(JSON.parse(printed[0]).summary.findings, 2);
+});
+
+test("--format agent prints a fix-ordered Markdown work list and is analyze-only", () => {
+  assert.throws(() => parseArguments(["transform", "--format", "agent"]), /--format agent is only accepted with the analyze workflow/);
+  const finding = (file, line, headline, severity) => ({
+    file,
+    line,
+    column: 1,
+    headline,
+    severity,
+    guide: null,
+    text: `${file}:${line}:1 ${headline}\nWhy: because.\nGuidance: do it.`,
+  });
+  const markdown = buildAgentReport({
+    tool: "solid-migration-assistant",
+    version: "0.0.0",
+    solid: { target: "solid-js@2.0.0-rc.21", sourceCommit: "c".repeat(40) },
+    target: "/app",
+    summary: { findings: 3, files: 2, bySeverity: { build: 1, behavior: 1, deprecated: 1 } },
+    findings: [
+      finding("src/b.tsx", 9, "Behavior headline.", "behavior"),
+      finding("src/b.tsx", 2, "Deprecated headline.", "deprecated"),
+      finding("src/a.tsx", 5, "Build headline.", "build"),
+    ],
+  });
+  const tasks = markdown.split("\n").filter((line) => line.startsWith("- [ ] "));
+  assert.deepEqual(tasks, [
+    "- [ ] `src/a.tsx:5:1` Build headline. *(Will not build or run on Solid 2)*",
+    "- [ ] `src/b.tsx:9:1` Behavior headline. *(Builds but behaves differently)*",
+    "- [ ] `src/b.tsx:2:1` Deprecated headline. *(Deprecated but still working)*",
+  ]);
+  assert.match(markdown, /^# Solid 2 migration tasks/);
+  assert.match(markdown, /\n  Why: because\.\n  Guidance: do it\./);
+  assert.match(markdown, /--format agent --target \/app`/);
+  assert.ok(markdown.indexOf("## `src/a.tsx`") < markdown.indexOf("## `src/b.tsx`"), "files with build-tier tasks come first");
 });
 
 test("rejects unknown, missing, and duplicate options", () => {

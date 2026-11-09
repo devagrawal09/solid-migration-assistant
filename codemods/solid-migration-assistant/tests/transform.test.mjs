@@ -37,10 +37,11 @@ test(
       assertJsxTypeReport(first.stderr);
       assert.equal(
         reportLines(first.stderr).length,
-        22 + 7 + 5 + 2 + 2 + 8 + 5 + 4,
+        22 + 7 + 5 + 2 + 2 + 8 + 5 + 4 + 4 + 2,
         "unexpected total number of rewrite report lines",
       );
-      assertSummary(first.stderr, 55, 11);
+      assertSummary(first.stderr, 61, 14);
+      assertStoreAndOnReport(first.stderr);
       assert.deepEqual(
         reportLines(first.stderr),
         [...reportLines(first.stderr)].sort(),
@@ -101,8 +102,13 @@ function reportLines(stderr) {
 }
 
 function relocationLines(stderr) {
+  // The JSX type and store moves have exact assertions of their own; the
+  // generic tally below covers the subpath and solid-js/web relocations.
   return reportLines(stderr).filter(
-    (line) => line.includes("Relocate ") && !line.includes("JSX type import"),
+    (line) =>
+      line.includes("Relocate ") &&
+      !line.includes("JSX type import") &&
+      !line.includes("Relocate solid-js/store to solid-js for createStore"),
   );
 }
 
@@ -119,6 +125,29 @@ const CONTEXT_PROVIDER_GUIDE = `${GUIDE}#context-providers-contextprovider--cont
 const INDEX_GUIDE = `${GUIDE}#list-rendering-index-is-gone-and-for-handles-each-keying-mode`;
 const EVENT_HANDLER_GUIDE = `${GUIDE}#attributes--events-closer-to-html-and-fewer-namespaces`;
 const JSX_TYPE_GUIDE = `${GUIDE}#typescript-jsx-solid-js--renderer-package`;
+const STORE_GUIDE = `${GUIDE}#draft-first-setters`;
+const ON_GUIDE = `${GUIDE}#on-helper--split-effects`;
+
+/**
+ * Literal path setters become draft writes everywhere; the store import moves
+ * only in store.ts, where every setter call was rewritten, and stays in
+ * store-merge.ts (an object merge remains) and in the files that import
+ * createStore without calling it. The on() effect is split and its import
+ * removed.
+ */
+function assertStoreAndOnReport(stderr) {
+  assert.deepEqual(
+    reportLines(stderr).filter((line) => /store setter|solid-js\/store to solid-js|createEffect\(on|the on import/.test(line)),
+    [
+      `src/effects.ts:2:38 Remove the on import from solid-js; every use is now a split createEffect. Official migration guide: ${ON_GUIDE}`,
+      `src/effects.ts:5:1 Rewrite createEffect(on(dep, fn)) as createEffect(compute, apply), keeping the callback unchanged. Official migration guide: ${ON_GUIDE}`,
+      `src/store-merge.ts:6:1 Rewrite this path-style store setter call with a literal value as a draft write. Official migration guide: ${STORE_GUIDE}`,
+      `src/store.ts:3:29 Relocate solid-js/store to solid-js for createStore: every setter call in this file is now a draft write. Official migration guide: ${STORE_GUIDE}`,
+      `src/store.ts:6:1 Rewrite this path-style store setter call with a literal value as a draft write. Official migration guide: ${STORE_GUIDE}`,
+      `src/store.ts:7:1 Rewrite this path-style store setter call with a literal value as a draft write. Official migration guide: ${STORE_GUIDE}`,
+    ],
+  );
+}
 
 /**
  * The transform rewrites exactly the five intrinsic classList attributes whose

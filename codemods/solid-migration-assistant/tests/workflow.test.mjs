@@ -54,7 +54,7 @@ const SUMMARY_PREFIX = "[solid-migration-assistant] Summary: ";
 function launcherFindings(stdout) {
   return stripAnsi(stdout)
     .split("\n")
-    .filter((line) => /^(?:package|tsconfig)\.json:1:1 /.test(line));
+    .filter((line) => /^(?:package|tsconfig)\.json:\d+:\d+ /.test(line));
 }
 
 /**

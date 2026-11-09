@@ -119,6 +119,38 @@ nodes:
             - "**/build/**"
             - "**/coverage/**"
             - "**/*.d.ts"
+      - name: rewriteOnHelper
+        js-ast-grep:
+          js_file: scripts/transformations/rewriteOnHelper.ts
+          base_path: "."
+          language: "tsx"
+          include:
+            - "**/*.js"
+            - "**/*.jsx"
+            - "**/*.ts"
+            - "**/*.tsx"
+          exclude:
+            - "**/node_modules/**"
+            - "**/dist/**"
+            - "**/build/**"
+            - "**/coverage/**"
+            - "**/*.d.ts"
+      - name: rewriteStoreSetterLiteralPaths
+        js-ast-grep:
+          js_file: scripts/transformations/rewriteStoreSetterLiteralPaths.ts
+          base_path: "."
+          language: "tsx"
+          include:
+            - "**/*.js"
+            - "**/*.jsx"
+            - "**/*.ts"
+            - "**/*.tsx"
+          exclude:
+            - "**/node_modules/**"
+            - "**/dist/**"
+            - "**/build/**"
+            - "**/coverage/**"
+            - "**/*.d.ts"
       - name: Emit the rewrite report once in deterministic whole-string order
         js-ast-grep:
           js_file: scripts/emit-report.ts

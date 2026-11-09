@@ -82,7 +82,7 @@ const updateBaseline = process.argv.includes("--update-baseline");
  * always at `1:1`.
  */
 const REPORT_LINE = /^ {2}(\S+):(\d+):(\d+) (.*)$/;
-const LAUNCHER_FINDING = /^(package\.json|tsconfig\.json):1:1 (.*)$/;
+const LAUNCHER_FINDING = /^(package\.json|tsconfig\.json):\d+:\d+ (.*)$/;
 /** The per-headline summary repeats every headline, so parsing stops here. */
 const SUMMARY_LINE = /^ {2}\[solid-migration-assistant\] Summary: (\d+) (?:findings|rewrites)/;
 const CRASH_SIGNATURE = /panic|RuntimeError|Cannot read|TypeError|ReferenceError/;

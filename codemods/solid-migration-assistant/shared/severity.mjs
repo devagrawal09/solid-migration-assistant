@@ -35,6 +35,12 @@ const BUILD = [
   /^Manual review required: point this @jsxImportSource pragma at the renderer package\.$/,
   /^Manual review required: point jsxImportSource at the Solid 2 renderer package\.$/,
   /^Manual review required: move this project's Solid dependencies to /,
+  /^Manual review required: migrate this \S+ import from (?:@solidjs\/(?:router|meta|start\S*)|vinxi\S*), which Solid 2 removes or moves\.$/,
+  /^Manual review required: migrate this (?:@solidjs\/start\S*|vinxi\S*) import, which has no Solid 2 release\.$/,
+  /^Manual review required: move \S+ to its Solid 2 line\.$/,
+  /^Manual review required: replace \S+ with its Solid 2 successor\.$/,
+  /^Manual review required: move \S+ usage to Solid 2 core\.$/,
+  /^Manual review required: resolve \S+, which has no Solid 2 release yet\.$/,
   /^Manual review required: migrate this intrinsic JSX classList attribute to class\.$/,
   /^Manual review required: migrate this (?:attr|bool): namespace attribute /,
   /^Manual review required: migrate this (?:on|oncapture):event namespace attribute /,
@@ -79,11 +85,13 @@ const BEHAVIOR = [
   /^Manual review required: migrate this from call /,
   /^Manual review required: review this createDeferred call /,
   /^Manual review required: review the value this store setter callback returns\.$/,
+  /^Manual review required: review this \S+ import from @solidjs\/(?:router|meta), whose Solid 2 behavior changed\.$/,
   /^Manual review required: trace this store setter that is passed as a value\.$/,
 ];
 
 const DEPRECATED = [
   /^Manual review required: replace this deprecated Dynamic element /,
+  /^Manual review required: replace this deprecated \S+ import from @solidjs\/router\.$/,
 ];
 
 const TABLE = [

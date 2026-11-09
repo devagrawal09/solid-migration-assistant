@@ -6,8 +6,8 @@ import { fileURLToPath } from "node:url";
 
 const packageDirectory = resolve(dirname(fileURLToPath(import.meta.url)), "..");
 const transformationsDirectory = resolve(packageDirectory, "rules/transformations");
-const EXPECTED_ADAPTER_COUNT = 7;
-const EXPECTED_FIXTURE_COUNT = 73;
+const EXPECTED_ADAPTER_COUNT = 9;
+const EXPECTED_FIXTURE_COUNT = 86;
 const ruleCases = [
   { directory: "rules/transformations/imports/jsx-type-relocation" },
   { directory: "rules/transformations/imports/legacy-subpath-relocation" },
@@ -16,6 +16,8 @@ const ruleCases = [
   { directory: "rules/transformations/jsx/context-provider-to-context" },
   { directory: "rules/transformations/jsx/index-to-for" },
   { directory: "rules/transformations/jsx/lowercase-event-handlers" },
+  { directory: "rules/transformations/reactivity/on-helper-split" },
+  { directory: "rules/transformations/store/setter-literal-paths" },
 ];
 
 const configuredAdapters = ruleCases.map(adapterForRule).sort();
