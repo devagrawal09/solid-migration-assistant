@@ -1,0 +1,76 @@
+{
+  "findings": [
+    {
+      "rule": "jsx/dom-attr-namespaces",
+      "file": "analysis/jsx/dom-attr-namespaces/fixtures/normal.fixture.tsx",
+      "line": 6,
+      "column": 14,
+      "severity": "build",
+      "headline": "Migrate this attr: namespace attribute to a standard HTML attribute.",
+      "why": "Solid 2 removes the attr: namespace; attributes use standard HTML behavior. The bare attribute name (type) replaces the namespaced form.",
+      "guidance": "Remove the attr: prefix from this attribute, keeping the attribute value unchanged.",
+      "guide": "https://github.com/solidjs/solid/blob/2105ffb8ca2fced55f5fac0763177fc93f97c2c2/documentation/solid-2.0/MIGRATION.md#attributes--events-closer-to-html-and-fewer-namespaces",
+      "lint": []
+    },
+    {
+      "rule": "jsx/dom-attr-namespaces",
+      "file": "analysis/jsx/dom-attr-namespaces/fixtures/normal.fixture.tsx",
+      "line": 6,
+      "column": 31,
+      "severity": "build",
+      "headline": "Migrate this attr: namespace attribute to a standard HTML attribute.",
+      "why": "Solid 2 removes the attr: namespace; attributes use standard HTML behavior. The bare attribute name (disabled) replaces the namespaced form.",
+      "guidance": "Remove the attr: prefix from this attribute, keeping the attribute value unchanged.",
+      "guide": "https://github.com/solidjs/solid/blob/2105ffb8ca2fced55f5fac0763177fc93f97c2c2/documentation/solid-2.0/MIGRATION.md#attributes--events-closer-to-html-and-fewer-namespaces",
+      "lint": []
+    },
+    {
+      "rule": "jsx/dom-attr-namespaces",
+      "file": "analysis/jsx/dom-attr-namespaces/fixtures/normal.fixture.tsx",
+      "line": 7,
+      "column": 15,
+      "severity": "build",
+      "headline": "Migrate this bool: namespace attribute to a standard HTML boolean attribute.",
+      "why": "Solid 2 removes the bool: namespace; boolean attributes use standard HTML behavior. The bare attribute name (disabled) replaces the namespaced form.",
+      "guidance": "Remove the bool: prefix. A standard HTML boolean attribute is true when present and false when absent — replace explicit true/false values with attribute presence/absence.",
+      "guide": "https://github.com/solidjs/solid/blob/2105ffb8ca2fced55f5fac0763177fc93f97c2c2/documentation/solid-2.0/MIGRATION.md#attributes--events-closer-to-html-and-fewer-namespaces",
+      "lint": []
+    },
+    {
+      "rule": "jsx/dom-attr-namespaces",
+      "file": "analysis/jsx/dom-attr-namespaces/fixtures/normal.fixture.tsx",
+      "line": 7,
+      "column": 44,
+      "severity": "build",
+      "headline": "Migrate this attr: namespace attribute to a standard HTML attribute.",
+      "why": "Solid 2 removes the attr: namespace; attributes use standard HTML behavior. The bare attribute name (aria-label) replaces the namespaced form.",
+      "guidance": "Remove the attr: prefix from this attribute, keeping the attribute value unchanged.",
+      "guide": "https://github.com/solidjs/solid/blob/2105ffb8ca2fced55f5fac0763177fc93f97c2c2/documentation/solid-2.0/MIGRATION.md#attributes--events-closer-to-html-and-fewer-namespaces",
+      "lint": []
+    },
+    {
+      "rule": "jsx/dom-attr-namespaces",
+      "file": "analysis/jsx/dom-attr-namespaces/fixtures/normal.fixture.tsx",
+      "line": 8,
+      "column": 13,
+      "severity": "build",
+      "headline": "Migrate this attr: namespace attribute to a standard HTML attribute.",
+      "why": "Solid 2 removes the attr: namespace; attributes use standard HTML behavior. The bare attribute name (data-x) replaces the namespaced form.",
+      "guidance": "Remove the attr: prefix from this attribute, keeping the attribute value unchanged.",
+      "guide": "https://github.com/solidjs/solid/blob/2105ffb8ca2fced55f5fac0763177fc93f97c2c2/documentation/solid-2.0/MIGRATION.md#attributes--events-closer-to-html-and-fewer-namespaces",
+      "lint": []
+    },
+    {
+      "rule": "jsx/dom-attr-namespaces",
+      "file": "analysis/jsx/dom-attr-namespaces/fixtures/normal.fixture.tsx",
+      "line": 8,
+      "column": 29,
+      "severity": "build",
+      "headline": "Migrate this bool: namespace attribute to a standard HTML boolean attribute.",
+      "why": "Solid 2 removes the bool: namespace; boolean attributes use standard HTML behavior. The bare attribute name (hidden) replaces the namespaced form.",
+      "guidance": "Remove the bool: prefix. A standard HTML boolean attribute is true when present and false when absent — replace explicit true/false values with attribute presence/absence.",
+      "guide": "https://github.com/solidjs/solid/blob/2105ffb8ca2fced55f5fac0763177fc93f97c2c2/documentation/solid-2.0/MIGRATION.md#attributes--events-closer-to-html-and-fewer-namespaces",
+      "lint": []
+    }
+  ]
+}

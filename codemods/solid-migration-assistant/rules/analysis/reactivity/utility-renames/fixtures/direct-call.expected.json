@@ -1,0 +1,98 @@
+{
+  "findings": [
+    {
+      "rule": "reactivity/utility-renames",
+      "file": "analysis/reactivity/utility-renames/fixtures/direct-call.fixture.tsx",
+      "line": 6,
+      "column": 1,
+      "severity": "build",
+      "headline": "Migrate this equalFn reference to its Solid 2 replacement.",
+      "why": "Solid 2 renames equalFn to isEqual with the same (a, b) => boolean signature.",
+      "guidance": "Replace every reference to equalFn with isEqual. No other changes are required — the signature is identical.",
+      "lint": [
+        "removed-api"
+      ],
+      "guide": "https://github.com/solidjs/solid/blob/2105ffb8ca2fced55f5fac0763177fc93f97c2c2/documentation/solid-2.0/MIGRATION.md#quick-rename--removal-map"
+    },
+    {
+      "rule": "reactivity/utility-renames",
+      "file": "analysis/reactivity/utility-renames/fixtures/direct-call.fixture.tsx",
+      "line": 11,
+      "column": 1,
+      "severity": "build",
+      "headline": "Migrate this equalFn reference to its Solid 2 replacement.",
+      "why": "Solid 2 renames equalFn to isEqual with the same (a, b) => boolean signature.",
+      "guidance": "Replace every reference to equalFn with isEqual. No other changes are required — the signature is identical.",
+      "lint": [
+        "removed-api"
+      ],
+      "guide": "https://github.com/solidjs/solid/blob/2105ffb8ca2fced55f5fac0763177fc93f97c2c2/documentation/solid-2.0/MIGRATION.md#quick-rename--removal-map"
+    },
+    {
+      "rule": "reactivity/utility-renames",
+      "file": "analysis/reactivity/utility-renames/fixtures/direct-call.fixture.tsx",
+      "line": 12,
+      "column": 1,
+      "severity": "build",
+      "headline": "Migrate this equalFn reference to its Solid 2 replacement.",
+      "why": "Solid 2 renames equalFn to isEqual with the same (a, b) => boolean signature.",
+      "guidance": "Replace every reference to equalFn with isEqual. No other changes are required — the signature is identical.",
+      "lint": [
+        "removed-api"
+      ],
+      "guide": "https://github.com/solidjs/solid/blob/2105ffb8ca2fced55f5fac0763177fc93f97c2c2/documentation/solid-2.0/MIGRATION.md#quick-rename--removal-map"
+    },
+    {
+      "rule": "reactivity/utility-renames",
+      "file": "analysis/reactivity/utility-renames/fixtures/direct-call.fixture.tsx",
+      "line": 13,
+      "column": 1,
+      "severity": "build",
+      "headline": "Migrate this equalFn reference to its Solid 2 replacement.",
+      "why": "Solid 2 renames equalFn to isEqual with the same (a, b) => boolean signature.",
+      "guidance": "Replace every reference to equalFn with isEqual. No other changes are required — the signature is identical.",
+      "lint": [
+        "removed-api"
+      ],
+      "guide": "https://github.com/solidjs/solid/blob/2105ffb8ca2fced55f5fac0763177fc93f97c2c2/documentation/solid-2.0/MIGRATION.md#quick-rename--removal-map"
+    },
+    {
+      "rule": "reactivity/utility-renames",
+      "file": "analysis/reactivity/utility-renames/fixtures/direct-call.fixture.tsx",
+      "line": 7,
+      "column": 1,
+      "severity": "build",
+      "headline": "Migrate this getListener reference to its Solid 2 replacement.",
+      "why": "Solid 2 renames getListener to getObserver with the same signature.",
+      "guidance": "Replace every reference to getListener with getObserver. No other changes are required — the signature is identical.",
+      "lint": [
+        "removed-api"
+      ],
+      "guide": "https://github.com/solidjs/solid/blob/2105ffb8ca2fced55f5fac0763177fc93f97c2c2/documentation/solid-2.0/MIGRATION.md#quick-rename--removal-map"
+    },
+    {
+      "rule": "reactivity/utility-renames",
+      "file": "analysis/reactivity/utility-renames/fixtures/direct-call.fixture.tsx",
+      "line": 8,
+      "column": 1,
+      "severity": "build",
+      "headline": "Remove this writeSignal call.",
+      "why": "Solid 2 removes writeSignal; batching is now default — use the normal setter.",
+      "guidance": "Remove this call. Replace with the signal's normal setter; updates are batched automatically.",
+      "lint": [],
+      "guide": "https://github.com/solidjs/solid/blob/2105ffb8ca2fced55f5fac0763177fc93f97c2c2/documentation/solid-2.0/MIGRATION.md#quick-rename--removal-map"
+    },
+    {
+      "rule": "reactivity/utility-renames",
+      "file": "analysis/reactivity/utility-renames/fixtures/direct-call.fixture.tsx",
+      "line": 9,
+      "column": 1,
+      "severity": "build",
+      "headline": "Remove this enableScheduling call.",
+      "why": "Solid 2 removes enableScheduling; the global scheduler no longer exists.",
+      "guidance": "Remove this call. Solid 2 has no global scheduler toggle.",
+      "lint": [],
+      "guide": "https://github.com/solidjs/solid/blob/2105ffb8ca2fced55f5fac0763177fc93f97c2c2/documentation/solid-2.0/MIGRATION.md#quick-rename--removal-map"
+    }
+  ]
+}

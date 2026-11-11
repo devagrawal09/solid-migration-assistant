@@ -1,0 +1,52 @@
+{
+  "findings": [
+    {
+      "rule": "lifecycle/on-cleanup",
+      "file": "analysis/lifecycle/on-cleanup/fixtures/direct-call.fixture.tsx",
+      "line": 9,
+      "column": 3,
+      "severity": "behavior",
+      "headline": "Move this onCleanup out of the createEffect callback into the apply callback's returned cleanup.",
+      "why": "Solid 2.0.0-rc.21 requires this one-argument createEffect to split into compute and apply callbacks, and the apply callback takes cleanup as a returned function that runs before the next apply and on disposal.",
+      "guidance": "When splitting the effect, move the work this cleanup undoes into the apply callback and return the cleanup function from it, keeping the cleanup's reads in the apply half; drop the onCleanup wrapper.",
+      "guide": "https://github.com/solidjs/solid/blob/2105ffb8ca2fced55f5fac0763177fc93f97c2c2/documentation/solid-2.0/MIGRATION.md#effects-lifecycle-and-cleanup",
+      "lint": []
+    },
+    {
+      "rule": "lifecycle/on-cleanup",
+      "file": "analysis/lifecycle/on-cleanup/fixtures/direct-call.fixture.tsx",
+      "line": 15,
+      "column": 3,
+      "severity": "behavior",
+      "headline": "Move this onCleanup out of the onMount callback into onSettled's returned cleanup.",
+      "why": "Solid 2.0.0-rc.21 replaces onMount with onSettled, whose callback takes cleanup as a returned function; onCleanup is rejected inside onSettled (CLEANUP_IN_FORBIDDEN_SCOPE).",
+      "guidance": "When this onMount becomes onSettled, return the cleanup function from the onSettled callback instead of registering it with onCleanup; if the callback already returns something, combine both into one returned cleanup.",
+      "guide": "https://github.com/solidjs/solid/blob/2105ffb8ca2fced55f5fac0763177fc93f97c2c2/documentation/solid-2.0/MIGRATION.md#effects-lifecycle-and-cleanup",
+      "lint": []
+    },
+    {
+      "rule": "lifecycle/on-cleanup",
+      "file": "analysis/lifecycle/on-cleanup/fixtures/direct-call.fixture.tsx",
+      "line": 20,
+      "column": 3,
+      "severity": "behavior",
+      "headline": "Move this onCleanup out of the createEffect callback into the apply callback's returned cleanup.",
+      "why": "Solid 2.0.0-rc.21 requires this one-argument createEffect to split into compute and apply callbacks, and the apply callback takes cleanup as a returned function that runs before the next apply and on disposal.",
+      "guidance": "When splitting the effect, move the work this cleanup undoes into the apply callback and return the cleanup function from it, keeping the cleanup's reads in the apply half; drop the onCleanup wrapper.",
+      "guide": "https://github.com/solidjs/solid/blob/2105ffb8ca2fced55f5fac0763177fc93f97c2c2/documentation/solid-2.0/MIGRATION.md#effects-lifecycle-and-cleanup",
+      "lint": []
+    },
+    {
+      "rule": "lifecycle/on-cleanup",
+      "file": "analysis/lifecycle/on-cleanup/fixtures/direct-call.fixture.tsx",
+      "line": 21,
+      "column": 3,
+      "severity": "behavior",
+      "headline": "Move this onCleanup out of the createEffect callback into the apply callback's returned cleanup.",
+      "why": "Solid 2.0.0-rc.21 requires this one-argument createEffect to split into compute and apply callbacks, and the apply callback takes cleanup as a returned function that runs before the next apply and on disposal.",
+      "guidance": "When splitting the effect, move the work this cleanup undoes into the apply callback and return the cleanup function from it, keeping the cleanup's reads in the apply half; drop the onCleanup wrapper.",
+      "guide": "https://github.com/solidjs/solid/blob/2105ffb8ca2fced55f5fac0763177fc93f97c2c2/documentation/solid-2.0/MIGRATION.md#effects-lifecycle-and-cleanup",
+      "lint": []
+    }
+  ]
+}

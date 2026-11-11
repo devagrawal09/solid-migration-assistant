@@ -1,0 +1,12 @@
+{
+  "rewrites": [
+    {
+      "rule": "jsx/context-provider-to-context",
+      "file": "transformations/jsx/context-provider-to-context/fixtures/shadowed-bindings.fixture.tsx",
+      "line": 11,
+      "column": 10,
+      "message": "Rewrite <ThemeContext.Provider> to <ThemeContext>, keeping its value attribute and children unchanged.",
+      "guide": "https://github.com/solidjs/solid/blob/2105ffb8ca2fced55f5fac0763177fc93f97c2c2/documentation/solid-2.0/MIGRATION.md#context-providers-contextprovider--context-is-the-provider"
+    }
+  ]
+}

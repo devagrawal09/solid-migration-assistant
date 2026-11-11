@@ -7,11 +7,29 @@ nodes:
     name: Apply the deterministic Solid 2 source rewrites
     type: automatic
     steps:
+      - name: relocateJsxTypes
+        js-ast-grep:
+          js_file: scripts/transformations/relocateJsxTypes.ts
+          base_path: "."
+          language: "tsx"
+          semantic_analysis: workspace
+          include:
+            - "**/*.js"
+            - "**/*.jsx"
+            - "**/*.ts"
+            - "**/*.tsx"
+          exclude:
+            - "**/node_modules/**"
+            - "**/dist/**"
+            - "**/build/**"
+            - "**/coverage/**"
+            - "**/*.d.ts"
       - name: relocateLegacySubpaths
         js-ast-grep:
           js_file: scripts/transformations/relocateLegacySubpaths.ts
           base_path: "."
           language: "tsx"
+          semantic_analysis: workspace
           include:
             - "**/*.js"
             - "**/*.jsx"
@@ -28,6 +46,7 @@ nodes:
           js_file: scripts/transformations/relocateWebPackage.ts
           base_path: "."
           language: "tsx"
+          semantic_analysis: workspace
           include:
             - "**/*.js"
             - "**/*.jsx"
@@ -44,6 +63,7 @@ nodes:
           js_file: scripts/transformations/rewriteClassListToClass.ts
           base_path: "."
           language: "tsx"
+          semantic_analysis: workspace
           include:
             - "**/*.js"
             - "**/*.jsx"
@@ -55,7 +75,92 @@ nodes:
             - "**/build/**"
             - "**/coverage/**"
             - "**/*.d.ts"
-      - name: Emit the rewrite report once in deterministic whole-string order
+      - name: rewriteContextProvider
+        js-ast-grep:
+          js_file: scripts/transformations/rewriteContextProvider.ts
+          base_path: "."
+          language: "tsx"
+          semantic_analysis: workspace
+          include:
+            - "**/*.js"
+            - "**/*.jsx"
+            - "**/*.ts"
+            - "**/*.tsx"
+          exclude:
+            - "**/node_modules/**"
+            - "**/dist/**"
+            - "**/build/**"
+            - "**/coverage/**"
+            - "**/*.d.ts"
+      - name: rewriteIndexToFor
+        js-ast-grep:
+          js_file: scripts/transformations/rewriteIndexToFor.ts
+          base_path: "."
+          language: "tsx"
+          semantic_analysis: workspace
+          include:
+            - "**/*.js"
+            - "**/*.jsx"
+            - "**/*.ts"
+            - "**/*.tsx"
+          exclude:
+            - "**/node_modules/**"
+            - "**/dist/**"
+            - "**/build/**"
+            - "**/coverage/**"
+            - "**/*.d.ts"
+      - name: rewriteLowercaseEventHandlers
+        js-ast-grep:
+          js_file: scripts/transformations/rewriteLowercaseEventHandlers.ts
+          base_path: "."
+          language: "tsx"
+          semantic_analysis: workspace
+          include:
+            - "**/*.js"
+            - "**/*.jsx"
+            - "**/*.ts"
+            - "**/*.tsx"
+          exclude:
+            - "**/node_modules/**"
+            - "**/dist/**"
+            - "**/build/**"
+            - "**/coverage/**"
+            - "**/*.d.ts"
+      - name: rewriteOnHelper
+        js-ast-grep:
+          js_file: scripts/transformations/rewriteOnHelper.ts
+          base_path: "."
+          language: "tsx"
+          semantic_analysis: workspace
+          include:
+            - "**/*.js"
+            - "**/*.jsx"
+            - "**/*.ts"
+            - "**/*.tsx"
+          exclude:
+            - "**/node_modules/**"
+            - "**/dist/**"
+            - "**/build/**"
+            - "**/coverage/**"
+            - "**/*.d.ts"
+      - name: rewriteStoreSetterLiteralPaths
+        js-ast-grep:
+          js_file: scripts/transformations/rewriteStoreSetterLiteralPaths.ts
+          base_path: "."
+          language: "tsx"
+          semantic_analysis: workspace
+          include:
+            - "**/*.js"
+            - "**/*.jsx"
+            - "**/*.ts"
+            - "**/*.tsx"
+          exclude:
+            - "**/node_modules/**"
+            - "**/dist/**"
+            - "**/build/**"
+            - "**/coverage/**"
+            - "**/*.d.ts"
+      - name: Emit the rewrite report once in location order
         js-ast-grep:
           js_file: scripts/emit-report.ts
           base_path: "."

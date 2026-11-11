@@ -1,0 +1,76 @@
+{
+  "rewrites": [
+    {
+      "rule": "jsx/lowercase-event-handlers",
+      "file": "transformations/jsx/lowercase-event-handlers/fixtures/rewrites.fixture.tsx",
+      "line": 10,
+      "column": 15,
+      "message": "Rewrite the onclick event handler attribute on <button> to onClick, preserving its value expression.",
+      "guide": "https://github.com/solidjs/solid/blob/2105ffb8ca2fced55f5fac0763177fc93f97c2c2/documentation/solid-2.0/MIGRATION.md#attributes--events-closer-to-html-and-fewer-namespaces"
+    },
+    {
+      "rule": "jsx/lowercase-event-handlers",
+      "file": "transformations/jsx/lowercase-event-handlers/fixtures/rewrites.fixture.tsx",
+      "line": 11,
+      "column": 14,
+      "message": "Rewrite the oninput event handler attribute on <input> to onInput, preserving its value expression.",
+      "guide": "https://github.com/solidjs/solid/blob/2105ffb8ca2fced55f5fac0763177fc93f97c2c2/documentation/solid-2.0/MIGRATION.md#attributes--events-closer-to-html-and-fewer-namespaces"
+    },
+    {
+      "rule": "jsx/lowercase-event-handlers",
+      "file": "transformations/jsx/lowercase-event-handlers/fixtures/rewrites.fixture.tsx",
+      "line": 12,
+      "column": 12,
+      "message": "Rewrite the ondblclick event handler attribute on <div> to onDblClick, preserving its value expression.",
+      "guide": "https://github.com/solidjs/solid/blob/2105ffb8ca2fced55f5fac0763177fc93f97c2c2/documentation/solid-2.0/MIGRATION.md#attributes--events-closer-to-html-and-fewer-namespaces"
+    },
+    {
+      "rule": "jsx/lowercase-event-handlers",
+      "file": "transformations/jsx/lowercase-event-handlers/fixtures/rewrites.fixture.tsx",
+      "line": 12,
+      "column": 41,
+      "message": "Rewrite the onpointerdown event handler attribute on <div> to onPointerDown, preserving its value expression.",
+      "guide": "https://github.com/solidjs/solid/blob/2105ffb8ca2fced55f5fac0763177fc93f97c2c2/documentation/solid-2.0/MIGRATION.md#attributes--events-closer-to-html-and-fewer-namespaces"
+    },
+    {
+      "rule": "jsx/lowercase-event-handlers",
+      "file": "transformations/jsx/lowercase-event-handlers/fixtures/rewrites.fixture.tsx",
+      "line": 12,
+      "column": 67,
+      "message": "Rewrite the onkeydown event handler attribute on <div> to onKeyDown, preserving its value expression.",
+      "guide": "https://github.com/solidjs/solid/blob/2105ffb8ca2fced55f5fac0763177fc93f97c2c2/documentation/solid-2.0/MIGRATION.md#attributes--events-closer-to-html-and-fewer-namespaces"
+    },
+    {
+      "rule": "jsx/lowercase-event-handlers",
+      "file": "transformations/jsx/lowercase-event-handlers/fixtures/rewrites.fixture.tsx",
+      "line": 13,
+      "column": 19,
+      "message": "Rewrite the onfocusin event handler attribute on <my-element> to onFocusIn, preserving its value expression.",
+      "guide": "https://github.com/solidjs/solid/blob/2105ffb8ca2fced55f5fac0763177fc93f97c2c2/documentation/solid-2.0/MIGRATION.md#attributes--events-closer-to-html-and-fewer-namespaces"
+    },
+    {
+      "rule": "jsx/lowercase-event-handlers",
+      "file": "transformations/jsx/lowercase-event-handlers/fixtures/rewrites.fixture.tsx",
+      "line": 15,
+      "column": 9,
+      "message": "Rewrite the onchange event handler attribute on <textarea> to onChange, preserving its value expression.",
+      "guide": "https://github.com/solidjs/solid/blob/2105ffb8ca2fced55f5fac0763177fc93f97c2c2/documentation/solid-2.0/MIGRATION.md#attributes--events-closer-to-html-and-fewer-namespaces"
+    },
+    {
+      "rule": "jsx/lowercase-event-handlers",
+      "file": "transformations/jsx/lowercase-event-handlers/fixtures/rewrites.fixture.tsx",
+      "line": 22,
+      "column": 15,
+      "message": "Rewrite the onmouseenter event handler attribute on <rect> to onMouseEnter, preserving its value expression.",
+      "guide": "https://github.com/solidjs/solid/blob/2105ffb8ca2fced55f5fac0763177fc93f97c2c2/documentation/solid-2.0/MIGRATION.md#attributes--events-closer-to-html-and-fewer-namespaces"
+    },
+    {
+      "rule": "jsx/lowercase-event-handlers",
+      "file": "transformations/jsx/lowercase-event-handlers/fixtures/rewrites.fixture.tsx",
+      "line": 24,
+      "column": 19,
+      "message": "Rewrite the onclick event handler attribute on <a> to onClick, preserving its value expression.",
+      "guide": "https://github.com/solidjs/solid/blob/2105ffb8ca2fced55f5fac0763177fc93f97c2c2/documentation/solid-2.0/MIGRATION.md#attributes--events-closer-to-html-and-fewer-namespaces"
+    }
+  ]
+}

@@ -1,0 +1,36 @@
+{
+  "rewrites": [
+    {
+      "rule": "jsx/class-list-to-class",
+      "file": "transformations/jsx/class-list-to-class/fixtures/class-merges.fixture.tsx",
+      "line": 9,
+      "column": 12,
+      "message": "Merge the class and classList attributes on <div> into the class array form, preserving the static string and the object literal.",
+      "guide": "https://github.com/solidjs/solid/blob/2105ffb8ca2fced55f5fac0763177fc93f97c2c2/documentation/solid-2.0/MIGRATION.md#classlist--class-objectarray-forms"
+    },
+    {
+      "rule": "jsx/class-list-to-class",
+      "file": "transformations/jsx/class-list-to-class/fixtures/class-merges.fixture.tsx",
+      "line": 10,
+      "column": 15,
+      "message": "Merge the class and classList attributes on <button> into the class array form, preserving the static string and the object literal.",
+      "guide": "https://github.com/solidjs/solid/blob/2105ffb8ca2fced55f5fac0763177fc93f97c2c2/documentation/solid-2.0/MIGRATION.md#classlist--class-objectarray-forms"
+    },
+    {
+      "rule": "jsx/class-list-to-class",
+      "file": "transformations/jsx/class-list-to-class/fixtures/class-merges.fixture.tsx",
+      "line": 14,
+      "column": 9,
+      "message": "Merge the class and classList attributes on <span> into the class array form, preserving the static string and the object literal.",
+      "guide": "https://github.com/solidjs/solid/blob/2105ffb8ca2fced55f5fac0763177fc93f97c2c2/documentation/solid-2.0/MIGRATION.md#classlist--class-objectarray-forms"
+    },
+    {
+      "rule": "jsx/class-list-to-class",
+      "file": "transformations/jsx/class-list-to-class/fixtures/class-merges.fixture.tsx",
+      "line": 21,
+      "column": 49,
+      "message": "Merge the class and classList attributes on <my-element> into the class array form, preserving the static string and the object literal.",
+      "guide": "https://github.com/solidjs/solid/blob/2105ffb8ca2fced55f5fac0763177fc93f97c2c2/documentation/solid-2.0/MIGRATION.md#classlist--class-objectarray-forms"
+    }
+  ]
+}

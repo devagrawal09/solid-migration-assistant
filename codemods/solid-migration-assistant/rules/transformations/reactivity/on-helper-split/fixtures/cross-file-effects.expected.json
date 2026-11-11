@@ -1,0 +1,12 @@
+{
+  "rewrites": [
+    {
+      "rule": "reactivity/on-helper-split",
+      "file": "transformations/reactivity/on-helper-split/fixtures/cross-file-effects.fixture.tsx",
+      "line": 6,
+      "column": 1,
+      "message": "Rewrite createEffect(on(dep, fn)) as createEffect(compute, apply), keeping the callback unchanged.",
+      "guide": "https://github.com/solidjs/solid/blob/2105ffb8ca2fced55f5fac0763177fc93f97c2c2/documentation/solid-2.0/MIGRATION.md#on-helper--split-effects"
+    }
+  ]
+}

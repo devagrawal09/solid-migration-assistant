@@ -1,0 +1,60 @@
+{
+  "rewrites": [
+    {
+      "rule": "imports/legacy-subpath-relocation",
+      "file": "transformations/imports/legacy-subpath-relocation/fixtures/static-imports.fixture.tsx",
+      "line": 2,
+      "column": 15,
+      "message": "Relocate solid-js/h to @solidjs/h.",
+      "guide": "https://github.com/solidjs/solid/blob/2105ffb8ca2fced55f5fac0763177fc93f97c2c2/documentation/solid-2.0/MIGRATION.md#imports-where-things-live-now"
+    },
+    {
+      "rule": "imports/legacy-subpath-relocation",
+      "file": "transformations/imports/legacy-subpath-relocation/fixtures/static-imports.fixture.tsx",
+      "line": 3,
+      "column": 30,
+      "message": "Relocate solid-js/html to @solidjs/html.",
+      "guide": "https://github.com/solidjs/solid/blob/2105ffb8ca2fced55f5fac0763177fc93f97c2c2/documentation/solid-2.0/MIGRATION.md#imports-where-things-live-now"
+    },
+    {
+      "rule": "imports/legacy-subpath-relocation",
+      "file": "transformations/imports/legacy-subpath-relocation/fixtures/static-imports.fixture.tsx",
+      "line": 4,
+      "column": 44,
+      "message": "Relocate solid-js/universal to @solidjs/universal.",
+      "guide": "https://github.com/solidjs/solid/blob/2105ffb8ca2fced55f5fac0763177fc93f97c2c2/documentation/solid-2.0/MIGRATION.md#imports-where-things-live-now"
+    },
+    {
+      "rule": "imports/legacy-subpath-relocation",
+      "file": "transformations/imports/legacy-subpath-relocation/fixtures/static-imports.fixture.tsx",
+      "line": 5,
+      "column": 27,
+      "message": "Relocate solid-js/jsx-runtime to @solidjs/web/jsx-runtime.",
+      "guide": "https://github.com/solidjs/solid/blob/2105ffb8ca2fced55f5fac0763177fc93f97c2c2/documentation/solid-2.0/MIGRATION.md#imports-where-things-live-now"
+    },
+    {
+      "rule": "imports/legacy-subpath-relocation",
+      "file": "transformations/imports/legacy-subpath-relocation/fixtures/static-imports.fixture.tsx",
+      "line": 6,
+      "column": 31,
+      "message": "Relocate solid-js/jsx-dev-runtime to @solidjs/web/jsx-dev-runtime.",
+      "guide": "https://github.com/solidjs/solid/blob/2105ffb8ca2fced55f5fac0763177fc93f97c2c2/documentation/solid-2.0/MIGRATION.md#imports-where-things-live-now"
+    },
+    {
+      "rule": "imports/legacy-subpath-relocation",
+      "file": "transformations/imports/legacy-subpath-relocation/fixtures/static-imports.fixture.tsx",
+      "line": 7,
+      "column": 29,
+      "message": "Relocate solid-js/h to @solidjs/h.",
+      "guide": "https://github.com/solidjs/solid/blob/2105ffb8ca2fced55f5fac0763177fc93f97c2c2/documentation/solid-2.0/MIGRATION.md#imports-where-things-live-now"
+    },
+    {
+      "rule": "imports/legacy-subpath-relocation",
+      "file": "transformations/imports/legacy-subpath-relocation/fixtures/static-imports.fixture.tsx",
+      "line": 8,
+      "column": 8,
+      "message": "Relocate solid-js/jsx-runtime to @solidjs/web/jsx-runtime.",
+      "guide": "https://github.com/solidjs/solid/blob/2105ffb8ca2fced55f5fac0763177fc93f97c2c2/documentation/solid-2.0/MIGRATION.md#imports-where-things-live-now"
+    }
+  ]
+}

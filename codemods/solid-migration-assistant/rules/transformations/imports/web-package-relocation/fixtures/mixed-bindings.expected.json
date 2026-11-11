@@ -1,0 +1,28 @@
+{
+  "rewrites": [
+    {
+      "rule": "imports/web-package-relocation",
+      "file": "transformations/imports/web-package-relocation/fixtures/mixed-bindings.fixture.tsx",
+      "line": 8,
+      "column": 70,
+      "message": "Relocate solid-js/web to @solidjs/web for proven bindings render, Dynamic. Note: Dynamic is deprecated in Solid 2 in favor of the dynamic(source) factory; it keeps working without a runtime warning.",
+      "guide": "https://github.com/solidjs/solid/blob/2105ffb8ca2fced55f5fac0763177fc93f97c2c2/documentation/solid-2.0/MIGRATION.md#imports-where-things-live-now"
+    },
+    {
+      "rule": "imports/web-package-relocation",
+      "file": "transformations/imports/web-package-relocation/fixtures/mixed-bindings.fixture.tsx",
+      "line": 9,
+      "column": 65,
+      "message": "Relocate solid-js/web to @solidjs/web for proven bindings render, isServer.",
+      "guide": "https://github.com/solidjs/solid/blob/2105ffb8ca2fced55f5fac0763177fc93f97c2c2/documentation/solid-2.0/MIGRATION.md#imports-where-things-live-now"
+    },
+    {
+      "rule": "imports/web-package-relocation",
+      "file": "transformations/imports/web-package-relocation/fixtures/mixed-bindings.fixture.tsx",
+      "line": 10,
+      "column": 67,
+      "message": "Relocate solid-js/web to @solidjs/web for proven bindings hydrate, isServer.",
+      "guide": "https://github.com/solidjs/solid/blob/2105ffb8ca2fced55f5fac0763177fc93f97c2c2/documentation/solid-2.0/MIGRATION.md#imports-where-things-live-now"
+    }
+  ]
+}

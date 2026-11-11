@@ -1,0 +1,18 @@
+{
+  "findings": [
+    {
+      "rule": "imports/web-import",
+      "file": "analysis/imports/web-import/fixtures/renamed-names-stay-behind.fixture.tsx",
+      "line": 1,
+      "column": 46,
+      "severity": "build",
+      "headline": "Move this Solid web renderer static import.",
+      "why": "Solid 2 publishes the web renderer from @solidjs/web instead of the solid-js/web subpath.",
+      "guidance": "Do not move Suspense and mergeProps with the module source: replace Suspense with Loading from solid-js; replace mergeProps with merge from solid-js after reviewing its undefined-value semantics. Move only render to @solidjs/web, preserving aliases and quote style.",
+      "lint": [
+        "removed-api"
+      ],
+      "guide": "https://github.com/solidjs/solid/blob/2105ffb8ca2fced55f5fac0763177fc93f97c2c2/documentation/solid-2.0/MIGRATION.md#imports-where-things-live-now"
+    }
+  ]
+}

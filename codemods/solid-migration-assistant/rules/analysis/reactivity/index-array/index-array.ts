@@ -1,13 +1,15 @@
 import type { SgNode } from "codemod:ast-grep";
 import type TSX from "codemod:ast-grep/langs/tsx";
 import { findImportedCalls } from "../../../../shared/analysis.ts";
+import { MIGRATION_GUIDE_URL } from "../../../../shared/target.ts";
+import { finding, type RuleFinding } from "../../../../shared/finding.ts";
 
-const GUIDE = "https://github.com/solidjs/solid/blob/ff4d3c4479163fbdd3327f5b22d0c3ea7bd1a2c5/documentation/solid-2.0/MIGRATION.md";
+const GUIDE = MIGRATION_GUIDE_URL;
 
 export function analyzeIndexArray(
   rootNode: SgNode<TSX>,
   context: { filename: string },
-): string[] {
+): RuleFinding[] {
   return findImportedCalls(rootNode, ["solid-js", "solid-js/web"], "indexArray")
     .filter(
       ({ argumentNodes }) =>
@@ -16,8 +18,13 @@ export function analyzeIndexArray(
     )
     .map(({ call, filename }) => {
       const start = call.range().start;
-      return `${filename}:${start.line + 1}:${start.column + 1} Manual review required: migrate this indexArray call to mapArray with keyed: false.
-Why: Solid 2 removes indexArray; use mapArray with the keyed: false option for index-keyed list mapping.
-Guidance: Replace indexArray(source, mapFn) with mapArray(source, mapFn, { keyed: false }). The mapFn callback receives the same arguments. Make and validate that edit yourself; this analyzer never edits or runs the target project. Official migration guide: ${GUIDE}#quick-rename--removal-map`;
+      return finding(filename, start, {
+        severity: "build",
+        headline: `Migrate this indexArray call to mapArray with keyed: false.`,
+        why: `Solid 2 removes indexArray; use mapArray with the keyed: false option for index-keyed list mapping.`,
+        guidance: `Replace indexArray(source, mapFn) with mapArray(source, mapFn, { keyed: false }). The mapFn callback receives the same arguments.`,
+        lint: ["removed-api"],
+        guide: `${GUIDE}#quick-rename--removal-map`,
+      });
     });
 }

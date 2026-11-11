@@ -1,14 +1,16 @@
 import type { SgNode } from "codemod:ast-grep";
 import type TSX from "codemod:ast-grep/langs/tsx";
 import { findImportedCalls } from "../../../../shared/analysis.ts";
+import { migrationGuide } from "../../../../shared/target.ts";
+import { finding, type RuleFinding } from "../../../../shared/finding.ts";
 
 const MIGRATION_GUIDE =
-  "https://github.com/solidjs/solid/blob/ff4d3c4479163fbdd3327f5b22d0c3ea7bd1a2c5/documentation/solid-2.0/MIGRATION.md#effects-lifecycle-and-cleanup";
+  migrationGuide("effects-lifecycle-and-cleanup");
 
 export function analyzeOnMount(
   rootNode: SgNode<TSX>,
   context: { filename: string },
-): string[] {
+): RuleFinding[] {
   return findImportedCalls(rootNode, ["solid-js", "solid-js/web"], "onMount")
     .filter(
       ({ argumentNodes }) =>
@@ -17,8 +19,13 @@ export function analyzeOnMount(
     )
     .map(({ call, filename }) => {
       const start = call.range().start;
-      return `${filename}:${start.line + 1}:${start.column + 1} Manual review required: migrate this onMount lifecycle callback.
-Why: Solid 2 removes onMount; onSettled is its closest replacement and can return an owner-bound cleanup function, but the correct migration depends on the callback's ownership, required timing, and cleanup behavior.
-Guidance: Read the complete callback, its owner, and nearby cleanup registration. Establish who owns the work, when it must run relative to rendering and settling, and what must be disposed. Move the work to onSettled only after proving that timing is compatible, and return owner-bound cleanup from the onSettled callback. Make and validate this migration yourself; this analyzer never edits or runs the target project. Stop without proposing a rewrite when the callback registers cleanup, starts async work, contains nested control flow that changes lifecycle behavior, creates reactive primitives, or has unclear ownership. Ask for the smallest focused test or runtime observation that makes the required timing and cleanup behavior observable. Official migration guide: ${MIGRATION_GUIDE}`;
+      return finding(filename, start, {
+        severity: "build",
+        headline: `Migrate this onMount lifecycle callback.`,
+        why: `Solid 2 removes onMount; onSettled is its closest replacement and can return an owner-bound cleanup function, but the correct migration depends on the callback's ownership, required timing, and cleanup behavior.`,
+        guidance: `Read the complete callback, its owner, and nearby cleanup registration. Establish who owns the work, when it must run relative to rendering and settling, and what must be disposed. Move the work to onSettled only after proving that timing is compatible, and return owner-bound cleanup from the onSettled callback. Stop without proposing a rewrite when the callback registers cleanup, starts async work, contains nested control flow that changes lifecycle behavior, creates reactive primitives, or has unclear ownership. Ask for the smallest focused test or runtime observation that makes the required timing and cleanup behavior observable.`,
+        lint: ["removed-api"],
+        guide: MIGRATION_GUIDE,
+      });
     });
 }

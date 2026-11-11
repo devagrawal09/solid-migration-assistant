@@ -1,0 +1,521 @@
+{
+  "tool": "solid-migration-assistant",
+  "version": "0.4.0",
+  "workflow": "transform",
+  "solid": {
+    "target": "solid-js@2.0.0-rc.21",
+    "sourceCommit": "2105ffb8ca2fced55f5fac0763177fc93f97c2c2"
+  },
+  "target": "<target>",
+  "status": 0,
+  "summary": {
+    "rewrites": 63,
+    "files": 16
+  },
+  "rewrites": [
+    {
+      "rule": "jsx/class-list-to-class",
+      "file": "src/class-list.tsx",
+      "line": 14,
+      "column": 14,
+      "message": "Rewrite the classList attribute on <section> to class, preserving its value expression.",
+      "guide": "https://github.com/solidjs/solid/blob/2105ffb8ca2fced55f5fac0763177fc93f97c2c2/documentation/solid-2.0/MIGRATION.md#classlist--class-objectarray-forms"
+    },
+    {
+      "rule": "jsx/class-list-to-class",
+      "file": "src/class-list.tsx",
+      "line": 15,
+      "column": 23,
+      "message": "Rewrite the classList attribute on <div> to class, preserving its value expression.",
+      "guide": "https://github.com/solidjs/solid/blob/2105ffb8ca2fced55f5fac0763177fc93f97c2c2/documentation/solid-2.0/MIGRATION.md#classlist--class-objectarray-forms"
+    },
+    {
+      "rule": "jsx/class-list-to-class",
+      "file": "src/class-list.tsx",
+      "line": 16,
+      "column": 15,
+      "message": "Rewrite the classList attribute on <span> to class, preserving its value expression.",
+      "guide": "https://github.com/solidjs/solid/blob/2105ffb8ca2fced55f5fac0763177fc93f97c2c2/documentation/solid-2.0/MIGRATION.md#classlist--class-objectarray-forms"
+    },
+    {
+      "rule": "jsx/class-list-to-class",
+      "file": "src/class-list.tsx",
+      "line": 20,
+      "column": 12,
+      "message": "Merge the class and classList attributes on <div> into the class array form, preserving the static string and the object literal.",
+      "guide": "https://github.com/solidjs/solid/blob/2105ffb8ca2fced55f5fac0763177fc93f97c2c2/documentation/solid-2.0/MIGRATION.md#classlist--class-objectarray-forms"
+    },
+    {
+      "rule": "jsx/index-to-for",
+      "file": "src/combined.tsx",
+      "line": 3,
+      "column": 39,
+      "message": "Rewrite the Index import from solid-js to For.",
+      "guide": "https://github.com/solidjs/solid/blob/2105ffb8ca2fced55f5fac0763177fc93f97c2c2/documentation/solid-2.0/MIGRATION.md#list-rendering-index-is-gone-and-for-handles-each-keying-mode"
+    },
+    {
+      "rule": "imports/web-package-relocation",
+      "file": "src/combined.tsx",
+      "line": 4,
+      "column": 33,
+      "message": "Relocate solid-js/web to @solidjs/web for proven bindings Dynamic, render. Note: Dynamic is deprecated in Solid 2 in favor of the dynamic(source) factory; it keeps working without a runtime warning.",
+      "guide": "https://github.com/solidjs/solid/blob/2105ffb8ca2fced55f5fac0763177fc93f97c2c2/documentation/solid-2.0/MIGRATION.md#imports-where-things-live-now"
+    },
+    {
+      "rule": "imports/legacy-subpath-relocation",
+      "file": "src/combined.tsx",
+      "line": 5,
+      "column": 32,
+      "message": "Relocate solid-js/universal to @solidjs/universal.",
+      "guide": "https://github.com/solidjs/solid/blob/2105ffb8ca2fced55f5fac0763177fc93f97c2c2/documentation/solid-2.0/MIGRATION.md#imports-where-things-live-now"
+    },
+    {
+      "rule": "jsx/context-provider-to-context",
+      "file": "src/combined.tsx",
+      "line": 17,
+      "column": 5,
+      "message": "Rewrite <ThemeContext.Provider> to <ThemeContext>, keeping its value attribute and children unchanged.",
+      "guide": "https://github.com/solidjs/solid/blob/2105ffb8ca2fced55f5fac0763177fc93f97c2c2/documentation/solid-2.0/MIGRATION.md#context-providers-contextprovider--context-is-the-provider"
+    },
+    {
+      "rule": "jsx/class-list-to-class",
+      "file": "src/combined.tsx",
+      "line": 18,
+      "column": 11,
+      "message": "Rewrite the classList attribute on <ul> to class, preserving its value expression.",
+      "guide": "https://github.com/solidjs/solid/blob/2105ffb8ca2fced55f5fac0763177fc93f97c2c2/documentation/solid-2.0/MIGRATION.md#classlist--class-objectarray-forms"
+    },
+    {
+      "rule": "jsx/lowercase-event-handlers",
+      "file": "src/combined.tsx",
+      "line": 18,
+      "column": 46,
+      "message": "Rewrite the onclick event handler attribute on <ul> to onClick, preserving its value expression.",
+      "guide": "https://github.com/solidjs/solid/blob/2105ffb8ca2fced55f5fac0763177fc93f97c2c2/documentation/solid-2.0/MIGRATION.md#attributes--events-closer-to-html-and-fewer-namespaces"
+    },
+    {
+      "rule": "jsx/index-to-for",
+      "file": "src/combined.tsx",
+      "line": 19,
+      "column": 9,
+      "message": "Rewrite <Index> to <For keyed={false}>, keeping its each, fallback, and child callback unchanged.",
+      "guide": "https://github.com/solidjs/solid/blob/2105ffb8ca2fced55f5fac0763177fc93f97c2c2/documentation/solid-2.0/MIGRATION.md#list-rendering-index-is-gone-and-for-handles-each-keying-mode"
+    },
+    {
+      "rule": "jsx/context-provider-to-context",
+      "file": "src/context.tsx",
+      "line": 11,
+      "column": 5,
+      "message": "Rewrite <ThemeContext.Provider> to <ThemeContext>, keeping its value attribute and children unchanged.",
+      "guide": "https://github.com/solidjs/solid/blob/2105ffb8ca2fced55f5fac0763177fc93f97c2c2/documentation/solid-2.0/MIGRATION.md#context-providers-contextprovider--context-is-the-provider"
+    },
+    {
+      "rule": "reactivity/on-helper-split",
+      "file": "src/effects.ts",
+      "line": 2,
+      "column": 38,
+      "message": "Remove the on import from solid-js; every use is now a split createEffect.",
+      "guide": "https://github.com/solidjs/solid/blob/2105ffb8ca2fced55f5fac0763177fc93f97c2c2/documentation/solid-2.0/MIGRATION.md#on-helper--split-effects"
+    },
+    {
+      "rule": "reactivity/on-helper-split",
+      "file": "src/effects.ts",
+      "line": 5,
+      "column": 1,
+      "message": "Rewrite createEffect(on(dep, fn)) as createEffect(compute, apply), keeping the callback unchanged.",
+      "guide": "https://github.com/solidjs/solid/blob/2105ffb8ca2fced55f5fac0763177fc93f97c2c2/documentation/solid-2.0/MIGRATION.md#on-helper--split-effects"
+    },
+    {
+      "rule": "jsx/lowercase-event-handlers",
+      "file": "src/events.tsx",
+      "line": 12,
+      "column": 15,
+      "message": "Rewrite the onclick event handler attribute on <button> to onClick, preserving its value expression.",
+      "guide": "https://github.com/solidjs/solid/blob/2105ffb8ca2fced55f5fac0763177fc93f97c2c2/documentation/solid-2.0/MIGRATION.md#attributes--events-closer-to-html-and-fewer-namespaces"
+    },
+    {
+      "rule": "jsx/lowercase-event-handlers",
+      "file": "src/events.tsx",
+      "line": 12,
+      "column": 33,
+      "message": "Rewrite the oninput event handler attribute on <button> to onInput, preserving its value expression.",
+      "guide": "https://github.com/solidjs/solid/blob/2105ffb8ca2fced55f5fac0763177fc93f97c2c2/documentation/solid-2.0/MIGRATION.md#attributes--events-closer-to-html-and-fewer-namespaces"
+    },
+    {
+      "rule": "jsx/lowercase-event-handlers",
+      "file": "src/events.tsx",
+      "line": 15,
+      "column": 19,
+      "message": "Rewrite the onpointerdown event handler attribute on <my-element> to onPointerDown, preserving its value expression.",
+      "guide": "https://github.com/solidjs/solid/blob/2105ffb8ca2fced55f5fac0763177fc93f97c2c2/documentation/solid-2.0/MIGRATION.md#attributes--events-closer-to-html-and-fewer-namespaces"
+    },
+    {
+      "rule": "jsx/context-provider-to-context",
+      "file": "src/legacy/locale-provider.jsx",
+      "line": 4,
+      "column": 3,
+      "message": "Rewrite <LocaleContext.Provider> to <LocaleContext>, keeping its value attribute and children unchanged.",
+      "guide": "https://github.com/solidjs/solid/blob/2105ffb8ca2fced55f5fac0763177fc93f97c2c2/documentation/solid-2.0/MIGRATION.md#context-providers-contextprovider--context-is-the-provider"
+    },
+    {
+      "rule": "jsx/index-to-for",
+      "file": "src/lists.tsx",
+      "line": 2,
+      "column": 24,
+      "message": "Rewrite the Index import from solid-js to For.",
+      "guide": "https://github.com/solidjs/solid/blob/2105ffb8ca2fced55f5fac0763177fc93f97c2c2/documentation/solid-2.0/MIGRATION.md#list-rendering-index-is-gone-and-for-handles-each-keying-mode"
+    },
+    {
+      "rule": "jsx/index-to-for",
+      "file": "src/lists.tsx",
+      "line": 9,
+      "column": 7,
+      "message": "Rewrite <Index> to <For keyed={false}>, keeping its each, fallback, and child callback unchanged.",
+      "guide": "https://github.com/solidjs/solid/blob/2105ffb8ca2fced55f5fac0763177fc93f97c2c2/documentation/solid-2.0/MIGRATION.md#list-rendering-index-is-gone-and-for-handles-each-keying-mode"
+    },
+    {
+      "rule": "jsx/index-to-for",
+      "file": "src/lists.tsx",
+      "line": 13,
+      "column": 13,
+      "message": "Rewrite <Index> to <For keyed={false}>, keeping its each, fallback, and child callback unchanged.",
+      "guide": "https://github.com/solidjs/solid/blob/2105ffb8ca2fced55f5fac0763177fc93f97c2c2/documentation/solid-2.0/MIGRATION.md#list-rendering-index-is-gone-and-for-handles-each-keying-mode"
+    },
+    {
+      "rule": "jsx/index-to-for",
+      "file": "src/lists.tsx",
+      "line": 17,
+      "column": 7,
+      "message": "Rewrite <Index> to <For keyed={false}>, keeping its each, fallback, and child callback unchanged.",
+      "guide": "https://github.com/solidjs/solid/blob/2105ffb8ca2fced55f5fac0763177fc93f97c2c2/documentation/solid-2.0/MIGRATION.md#list-rendering-index-is-gone-and-for-handles-each-keying-mode"
+    },
+    {
+      "rule": "imports/legacy-subpath-relocation",
+      "file": "src/nested/deep.jsx",
+      "line": 4,
+      "column": 32,
+      "message": "Relocate solid-js/universal to @solidjs/universal.",
+      "guide": "https://github.com/solidjs/solid/blob/2105ffb8ca2fced55f5fac0763177fc93f97c2c2/documentation/solid-2.0/MIGRATION.md#imports-where-things-live-now"
+    },
+    {
+      "rule": "imports/legacy-subpath-relocation",
+      "file": "src/nested/deep.jsx",
+      "line": 5,
+      "column": 21,
+      "message": "Relocate solid-js/jsx-runtime to @solidjs/web/jsx-runtime.",
+      "guide": "https://github.com/solidjs/solid/blob/2105ffb8ca2fced55f5fac0763177fc93f97c2c2/documentation/solid-2.0/MIGRATION.md#imports-where-things-live-now"
+    },
+    {
+      "rule": "imports/web-package-relocation",
+      "file": "src/nested/deep.jsx",
+      "line": 6,
+      "column": 34,
+      "message": "Relocate solid-js/web to @solidjs/web for proven bindings render, isServer.",
+      "guide": "https://github.com/solidjs/solid/blob/2105ffb8ca2fced55f5fac0763177fc93f97c2c2/documentation/solid-2.0/MIGRATION.md#imports-where-things-live-now"
+    },
+    {
+      "rule": "jsx/class-list-to-class",
+      "file": "src/nested/deep.jsx",
+      "line": 11,
+      "column": 41,
+      "message": "Rewrite the classList attribute on <div> to class, preserving its value expression.",
+      "guide": "https://github.com/solidjs/solid/blob/2105ffb8ca2fced55f5fac0763177fc93f97c2c2/documentation/solid-2.0/MIGRATION.md#classlist--class-objectarray-forms"
+    },
+    {
+      "rule": "imports/legacy-subpath-relocation",
+      "file": "src/nested/deep.jsx",
+      "line": 17,
+      "column": 24,
+      "message": "Relocate solid-js/html to @solidjs/html.",
+      "guide": "https://github.com/solidjs/solid/blob/2105ffb8ca2fced55f5fac0763177fc93f97c2c2/documentation/solid-2.0/MIGRATION.md#imports-where-things-live-now"
+    },
+    {
+      "rule": "imports/legacy-subpath-relocation",
+      "file": "src/plain.js",
+      "line": 2,
+      "column": 19,
+      "message": "Relocate solid-js/h to @solidjs/h.",
+      "guide": "https://github.com/solidjs/solid/blob/2105ffb8ca2fced55f5fac0763177fc93f97c2c2/documentation/solid-2.0/MIGRATION.md#imports-where-things-live-now"
+    },
+    {
+      "rule": "imports/legacy-subpath-relocation",
+      "file": "src/plain.js",
+      "line": 3,
+      "column": 22,
+      "message": "Relocate solid-js/html to @solidjs/html.",
+      "guide": "https://github.com/solidjs/solid/blob/2105ffb8ca2fced55f5fac0763177fc93f97c2c2/documentation/solid-2.0/MIGRATION.md#imports-where-things-live-now"
+    },
+    {
+      "rule": "jsx/index-to-for",
+      "file": "src/real-world/active-element.tsx",
+      "line": 9,
+      "column": 40,
+      "message": "Rewrite the Index import from solid-js to For.",
+      "guide": "https://github.com/solidjs/solid/blob/2105ffb8ca2fced55f5fac0763177fc93f97c2c2/documentation/solid-2.0/MIGRATION.md#list-rendering-index-is-gone-and-for-handles-each-keying-mode"
+    },
+    {
+      "rule": "jsx/class-list-to-class",
+      "file": "src/real-world/active-element.tsx",
+      "line": 21,
+      "column": 7,
+      "message": "Merge the class and classList attributes on <button> into the class array form, preserving the static string and the object literal.",
+      "guide": "https://github.com/solidjs/solid/blob/2105ffb8ca2fced55f5fac0763177fc93f97c2c2/documentation/solid-2.0/MIGRATION.md#classlist--class-objectarray-forms"
+    },
+    {
+      "rule": "jsx/index-to-for",
+      "file": "src/real-world/active-element.tsx",
+      "line": 40,
+      "column": 7,
+      "message": "Rewrite <Index> to <For keyed={false}>, keeping its each, fallback, and child callback unchanged.",
+      "guide": "https://github.com/solidjs/solid/blob/2105ffb8ca2fced55f5fac0763177fc93f97c2c2/documentation/solid-2.0/MIGRATION.md#list-rendering-index-is-gone-and-for-handles-each-keying-mode"
+    },
+    {
+      "rule": "jsx/lowercase-event-handlers",
+      "file": "src/real-world/active-element.tsx",
+      "line": 49,
+      "column": 9,
+      "message": "Rewrite the onclick event handler attribute on <button> to onClick, preserving its value expression.",
+      "guide": "https://github.com/solidjs/solid/blob/2105ffb8ca2fced55f5fac0763177fc93f97c2c2/documentation/solid-2.0/MIGRATION.md#attributes--events-closer-to-html-and-fewer-namespaces"
+    },
+    {
+      "rule": "imports/legacy-subpath-relocation",
+      "file": "src/relocations.tsx",
+      "line": 1,
+      "column": 15,
+      "message": "Relocate solid-js/h to @solidjs/h.",
+      "guide": "https://github.com/solidjs/solid/blob/2105ffb8ca2fced55f5fac0763177fc93f97c2c2/documentation/solid-2.0/MIGRATION.md#imports-where-things-live-now"
+    },
+    {
+      "rule": "imports/legacy-subpath-relocation",
+      "file": "src/relocations.tsx",
+      "line": 2,
+      "column": 18,
+      "message": "Relocate solid-js/html to @solidjs/html.",
+      "guide": "https://github.com/solidjs/solid/blob/2105ffb8ca2fced55f5fac0763177fc93f97c2c2/documentation/solid-2.0/MIGRATION.md#imports-where-things-live-now"
+    },
+    {
+      "rule": "imports/legacy-subpath-relocation",
+      "file": "src/relocations.tsx",
+      "line": 3,
+      "column": 32,
+      "message": "Relocate solid-js/universal to @solidjs/universal.",
+      "guide": "https://github.com/solidjs/solid/blob/2105ffb8ca2fced55f5fac0763177fc93f97c2c2/documentation/solid-2.0/MIGRATION.md#imports-where-things-live-now"
+    },
+    {
+      "rule": "imports/legacy-subpath-relocation",
+      "file": "src/relocations.tsx",
+      "line": 4,
+      "column": 21,
+      "message": "Relocate solid-js/jsx-runtime to @solidjs/web/jsx-runtime.",
+      "guide": "https://github.com/solidjs/solid/blob/2105ffb8ca2fced55f5fac0763177fc93f97c2c2/documentation/solid-2.0/MIGRATION.md#imports-where-things-live-now"
+    },
+    {
+      "rule": "imports/legacy-subpath-relocation",
+      "file": "src/relocations.tsx",
+      "line": 5,
+      "column": 24,
+      "message": "Relocate solid-js/jsx-dev-runtime to @solidjs/web/jsx-dev-runtime.",
+      "guide": "https://github.com/solidjs/solid/blob/2105ffb8ca2fced55f5fac0763177fc93f97c2c2/documentation/solid-2.0/MIGRATION.md#imports-where-things-live-now"
+    },
+    {
+      "rule": "imports/legacy-subpath-relocation",
+      "file": "src/relocations.tsx",
+      "line": 7,
+      "column": 36,
+      "message": "Relocate solid-js/html to @solidjs/html.",
+      "guide": "https://github.com/solidjs/solid/blob/2105ffb8ca2fced55f5fac0763177fc93f97c2c2/documentation/solid-2.0/MIGRATION.md#imports-where-things-live-now"
+    },
+    {
+      "rule": "imports/legacy-subpath-relocation",
+      "file": "src/relocations.tsx",
+      "line": 9,
+      "column": 50,
+      "message": "Relocate solid-js/universal to @solidjs/universal.",
+      "guide": "https://github.com/solidjs/solid/blob/2105ffb8ca2fced55f5fac0763177fc93f97c2c2/documentation/solid-2.0/MIGRATION.md#imports-where-things-live-now"
+    },
+    {
+      "rule": "imports/legacy-subpath-relocation",
+      "file": "src/relocations.tsx",
+      "line": 10,
+      "column": 36,
+      "message": "Relocate solid-js/html to @solidjs/html.",
+      "guide": "https://github.com/solidjs/solid/blob/2105ffb8ca2fced55f5fac0763177fc93f97c2c2/documentation/solid-2.0/MIGRATION.md#imports-where-things-live-now"
+    },
+    {
+      "rule": "imports/legacy-subpath-relocation",
+      "file": "src/relocations.tsx",
+      "line": 11,
+      "column": 50,
+      "message": "Relocate solid-js/universal to @solidjs/universal.",
+      "guide": "https://github.com/solidjs/solid/blob/2105ffb8ca2fced55f5fac0763177fc93f97c2c2/documentation/solid-2.0/MIGRATION.md#imports-where-things-live-now"
+    },
+    {
+      "rule": "imports/legacy-subpath-relocation",
+      "file": "src/relocations.tsx",
+      "line": 12,
+      "column": 41,
+      "message": "Relocate solid-js/jsx-runtime to @solidjs/web/jsx-runtime.",
+      "guide": "https://github.com/solidjs/solid/blob/2105ffb8ca2fced55f5fac0763177fc93f97c2c2/documentation/solid-2.0/MIGRATION.md#imports-where-things-live-now"
+    },
+    {
+      "rule": "imports/legacy-subpath-relocation",
+      "file": "src/relocations.tsx",
+      "line": 13,
+      "column": 37,
+      "message": "Relocate solid-js/jsx-dev-runtime to @solidjs/web/jsx-dev-runtime.",
+      "guide": "https://github.com/solidjs/solid/blob/2105ffb8ca2fced55f5fac0763177fc93f97c2c2/documentation/solid-2.0/MIGRATION.md#imports-where-things-live-now"
+    },
+    {
+      "rule": "imports/legacy-subpath-relocation",
+      "file": "src/relocations.tsx",
+      "line": 16,
+      "column": 34,
+      "message": "Relocate solid-js/h to @solidjs/h.",
+      "guide": "https://github.com/solidjs/solid/blob/2105ffb8ca2fced55f5fac0763177fc93f97c2c2/documentation/solid-2.0/MIGRATION.md#imports-where-things-live-now"
+    },
+    {
+      "rule": "imports/legacy-subpath-relocation",
+      "file": "src/relocations.tsx",
+      "line": 17,
+      "column": 15,
+      "message": "Relocate solid-js/html to @solidjs/html.",
+      "guide": "https://github.com/solidjs/solid/blob/2105ffb8ca2fced55f5fac0763177fc93f97c2c2/documentation/solid-2.0/MIGRATION.md#imports-where-things-live-now"
+    },
+    {
+      "rule": "imports/legacy-subpath-relocation",
+      "file": "src/relocations.tsx",
+      "line": 19,
+      "column": 28,
+      "message": "Relocate solid-js/html to @solidjs/html.",
+      "guide": "https://github.com/solidjs/solid/blob/2105ffb8ca2fced55f5fac0763177fc93f97c2c2/documentation/solid-2.0/MIGRATION.md#imports-where-things-live-now"
+    },
+    {
+      "rule": "imports/legacy-subpath-relocation",
+      "file": "src/relocations.tsx",
+      "line": 21,
+      "column": 35,
+      "message": "Relocate solid-js/universal to @solidjs/universal.",
+      "guide": "https://github.com/solidjs/solid/blob/2105ffb8ca2fced55f5fac0763177fc93f97c2c2/documentation/solid-2.0/MIGRATION.md#imports-where-things-live-now"
+    },
+    {
+      "rule": "imports/legacy-subpath-relocation",
+      "file": "src/relocations.tsx",
+      "line": 22,
+      "column": 28,
+      "message": "Relocate solid-js/jsx-runtime to @solidjs/web/jsx-runtime.",
+      "guide": "https://github.com/solidjs/solid/blob/2105ffb8ca2fced55f5fac0763177fc93f97c2c2/documentation/solid-2.0/MIGRATION.md#imports-where-things-live-now"
+    },
+    {
+      "rule": "imports/web-package-relocation",
+      "file": "src/relocations.tsx",
+      "line": 25,
+      "column": 60,
+      "message": "Relocate solid-js/web to @solidjs/web for proven bindings render, hydrate.",
+      "guide": "https://github.com/solidjs/solid/blob/2105ffb8ca2fced55f5fac0763177fc93f97c2c2/documentation/solid-2.0/MIGRATION.md#imports-where-things-live-now"
+    },
+    {
+      "rule": "imports/web-package-relocation",
+      "file": "src/relocations.tsx",
+      "line": 26,
+      "column": 41,
+      "message": "Relocate solid-js/web to @solidjs/web for proven bindings isServer.",
+      "guide": "https://github.com/solidjs/solid/blob/2105ffb8ca2fced55f5fac0763177fc93f97c2c2/documentation/solid-2.0/MIGRATION.md#imports-where-things-live-now"
+    },
+    {
+      "rule": "imports/web-package-relocation",
+      "file": "src/relocations.tsx",
+      "line": 27,
+      "column": 46,
+      "message": "Relocate solid-js/web to @solidjs/web for proven bindings hydrate.",
+      "guide": "https://github.com/solidjs/solid/blob/2105ffb8ca2fced55f5fac0763177fc93f97c2c2/documentation/solid-2.0/MIGRATION.md#imports-where-things-live-now"
+    },
+    {
+      "rule": "imports/web-package-relocation",
+      "file": "src/relocations.tsx",
+      "line": 28,
+      "column": 45,
+      "message": "Relocate solid-js/web to @solidjs/web for proven bindings Dynamic. Note: Dynamic is deprecated in Solid 2 in favor of the dynamic(source) factory; it keeps working without a runtime warning.",
+      "guide": "https://github.com/solidjs/solid/blob/2105ffb8ca2fced55f5fac0763177fc93f97c2c2/documentation/solid-2.0/MIGRATION.md#imports-where-things-live-now"
+    },
+    {
+      "rule": "imports/web-package-relocation",
+      "file": "src/relocations.tsx",
+      "line": 30,
+      "column": 47,
+      "message": "Relocate solid-js/web to @solidjs/web for proven bindings render.",
+      "guide": "https://github.com/solidjs/solid/blob/2105ffb8ca2fced55f5fac0763177fc93f97c2c2/documentation/solid-2.0/MIGRATION.md#imports-where-things-live-now"
+    },
+    {
+      "rule": "store/setter-literal-paths",
+      "file": "src/store-merge.ts",
+      "line": 6,
+      "column": 1,
+      "message": "Rewrite this path-style store setter call with a literal value as a draft write.",
+      "guide": "https://github.com/solidjs/solid/blob/2105ffb8ca2fced55f5fac0763177fc93f97c2c2/documentation/solid-2.0/MIGRATION.md#draft-first-setters"
+    },
+    {
+      "rule": "store/setter-literal-paths",
+      "file": "src/store.ts",
+      "line": 3,
+      "column": 29,
+      "message": "Relocate solid-js/store to solid-js for createStore: every setter call in this file is now a draft write.",
+      "guide": "https://github.com/solidjs/solid/blob/2105ffb8ca2fced55f5fac0763177fc93f97c2c2/documentation/solid-2.0/MIGRATION.md#draft-first-setters"
+    },
+    {
+      "rule": "store/setter-literal-paths",
+      "file": "src/store.ts",
+      "line": 6,
+      "column": 1,
+      "message": "Rewrite this path-style store setter call with a literal value as a draft write.",
+      "guide": "https://github.com/solidjs/solid/blob/2105ffb8ca2fced55f5fac0763177fc93f97c2c2/documentation/solid-2.0/MIGRATION.md#draft-first-setters"
+    },
+    {
+      "rule": "store/setter-literal-paths",
+      "file": "src/store.ts",
+      "line": 7,
+      "column": 1,
+      "message": "Rewrite this path-style store setter call with a literal value as a draft write.",
+      "guide": "https://github.com/solidjs/solid/blob/2105ffb8ca2fced55f5fac0763177fc93f97c2c2/documentation/solid-2.0/MIGRATION.md#draft-first-setters"
+    },
+    {
+      "rule": "jsx/context-provider-to-context",
+      "file": "src/theme-provider.tsx",
+      "line": 7,
+      "column": 10,
+      "message": "Rewrite <ThemeContext.Provider> to <ThemeContext>, keeping its value attribute and children unchanged.",
+      "guide": "https://github.com/solidjs/solid/blob/2105ffb8ca2fced55f5fac0763177fc93f97c2c2/documentation/solid-2.0/MIGRATION.md#context-providers-contextprovider--context-is-the-provider"
+    },
+    {
+      "rule": "imports/jsx-type-relocation",
+      "file": "src/types-element.tsx",
+      "line": 3,
+      "column": 10,
+      "message": "Replace the JSXElement type import from solid-js with JSX from @solidjs/web and rewrite its 3 type reference(s) to JSX.Element.",
+      "guide": "https://github.com/solidjs/solid/blob/2105ffb8ca2fced55f5fac0763177fc93f97c2c2/documentation/solid-2.0/MIGRATION.md#typescript-jsx-solid-js--renderer-package"
+    },
+    {
+      "rule": "imports/jsx-type-relocation",
+      "file": "src/types.tsx",
+      "line": 1,
+      "column": 1,
+      "message": "Rewrite the @jsxImportSource pragma from solid-js to @solidjs/web.",
+      "guide": "https://github.com/solidjs/solid/blob/2105ffb8ca2fced55f5fac0763177fc93f97c2c2/documentation/solid-2.0/MIGRATION.md#typescript-jsx-solid-js--renderer-package"
+    },
+    {
+      "rule": "imports/jsx-type-relocation",
+      "file": "src/types.tsx",
+      "line": 4,
+      "column": 26,
+      "message": "Relocate the JSX type import from solid-js to @solidjs/web.",
+      "guide": "https://github.com/solidjs/solid/blob/2105ffb8ca2fced55f5fac0763177fc93f97c2c2/documentation/solid-2.0/MIGRATION.md#typescript-jsx-solid-js--renderer-package"
+    },
+    {
+      "rule": "imports/jsx-type-relocation",
+      "file": "src/types.tsx",
+      "line": 5,
+      "column": 15,
+      "message": "Move the JSX type specifier out of this solid-js import into a separate @solidjs/web type import.",
+      "guide": "https://github.com/solidjs/solid/blob/2105ffb8ca2fced55f5fac0763177fc93f97c2c2/documentation/solid-2.0/MIGRATION.md#typescript-jsx-solid-js--renderer-package"
+    }
+  ]
+}

@@ -1,15 +1,18 @@
 import type { SgNode } from "codemod:ast-grep";
 import type TSX from "codemod:ast-grep/langs/tsx";
 import { findImportedCalls } from "../../../../shared/analysis.ts";
+import { migrationGuide } from "../../../../shared/target.ts";
+import { finding, type RuleFinding } from "../../../../shared/finding.ts";
+import { referencesOf } from "../../../../shared/semantic.ts";
 
 const MIGRATION_GUIDE =
-  "https://github.com/solidjs/solid/blob/ff4d3c4479163fbdd3327f5b22d0c3ea7bd1a2c5/documentation/solid-2.0/MIGRATION.md#createresource--async-computations--loading";
+  migrationGuide("createresource--async-computations--loading");
 
 export function analyzeCreateResource(
   rootNode: SgNode<TSX>,
   context: { filename: string },
-): string[] {
-  const findings: string[] = [];
+): RuleFinding[] {
+  const findings: RuleFinding[] = [];
 
   // createResource() call sites
   for (const { call, filename } of findImportedCalls(
@@ -23,31 +26,50 @@ export function analyzeCreateResource(
   )) {
     const start = call.range().start;
     findings.push(
-      `${filename}:${start.line + 1}:${start.column + 1} Manual review required: migrate this createResource call to async computations with Loading boundaries.
-Why: Solid 2 removes createResource; async data fetching uses async computations wrapped in Loading boundaries.
-Guidance: Read the complete source, fetcher, options, and every consumer of the resource tuple (data, loading, error, mutate, refetch). Replace with an async computation and wrap the consuming JSX in a Loading boundary whose fallback handles the not-ready state. Track the resource tuple destructuring sites to confirm the replacement covers every field. Make and validate that edit yourself; this analyzer never edits or runs the target project. Official migration guide: ${MIGRATION_GUIDE}`,
+      finding(filename, start, {
+        severity: "build",
+        headline: `Migrate this createResource call to async computations with Loading boundaries.`,
+        why: `Solid 2 removes createResource; async data fetching uses async computations wrapped in Loading boundaries.`,
+        guidance: `Read the complete source, fetcher, options, and every consumer of the resource tuple (data, loading, error, mutate, refetch). Replace with an async computation and wrap the consuming JSX in a Loading boundary whose fallback handles the not-ready state. Track the resource tuple destructuring sites to confirm the replacement covers every field.`,
+        lint: ["removed-api"],
+        guide: MIGRATION_GUIDE,
+      }),
     );
   }
 
-  // Resource tuple member access — only when createResource is imported
-  // Only scan for tuple members when createResource is imported
-  let importsCreateResource = false;
-  for (const statement of rootNode.findAll({
-    rule: { kind: "import_statement" },
-  })) {
-    const source = statement.children().find((child) => child.is("string"));
-    if (!source) continue;
-    const moduleName = source.text().slice(1, -1);
-    if (moduleName !== "solid-js" && moduleName !== "solid-js/web") continue;
-    for (const specifier of statement.findAll({
-      rule: { kind: "import_specifier" },
-    })) {
-      if (specifier.text().trim() === "createResource") {
-        importsCreateResource = true;
+  // Resource tuple members, resolved from the bindings each createResource
+  // call introduces: `const [data, { refetch, mutate }] = createResource(...)`
+  // or `const [data, actions] = createResource(...)`. Only references to those
+  // bindings are reported, so `console.error`, `toast.error`, or an unrelated
+  // object's `.loading` never match (they did when this was a text match).
+  const accessors: SgNode<TSX>[] = [];
+  const actionObjects: SgNode<TSX>[] = [];
+  const actionFunctions = new Map<string, SgNode<TSX>[]>();
+  for (const { call } of findImportedCalls(rootNode, ["solid-js", "solid-js/web"], "createResource")) {
+    const declarator = call.parent();
+    if (declarator === null || declarator.kind() !== "variable_declarator") continue;
+    const pattern = declarator.field("name");
+    if (pattern === null || pattern.kind() !== "array_pattern") continue;
+    const elements = pattern.children().filter((child) => child.isNamed() && child.kind() !== "comment");
+    const [accessor, actions] = elements;
+    if (accessor !== undefined && accessor.kind() === "identifier") accessors.push(accessor);
+    if (actions === undefined) continue;
+    if (actions.kind() === "identifier") actionObjects.push(actions);
+    if (actions.kind() === "object_pattern") {
+      for (const property of actions.children()) {
+        if (property.kind() === "shorthand_property_identifier_pattern") {
+          actionFunctions.set(property.text(), [...(actionFunctions.get(property.text()) ?? []), property]);
+        } else if (property.kind() === "pair_pattern") {
+          const key = property.field("key");
+          const value = property.field("value");
+          if (key !== null && value !== null && value.kind() === "identifier") {
+            actionFunctions.set(key.text(), [...(actionFunctions.get(key.text()) ?? []), value]);
+          }
+        }
       }
     }
   }
-  if (!importsCreateResource) return findings;
+  if (accessors.length === 0 && actionObjects.length === 0 && actionFunctions.size === 0) return findings;
 
   const patterns = [
     {
@@ -84,37 +106,63 @@ Guidance: Read the complete source, fetcher, options, and every consumer of the 
     },
   ];
 
+  const memberOf = (reference: SgNode<TSX>): SgNode<TSX> | null => {
+    const member = reference.parent();
+    if (member === null || member.kind() !== "member_expression") return null;
+    if (member.field("object")?.id() !== reference.id()) return null;
+    return member;
+  };
+  const callOf = (callee: SgNode<TSX>): SgNode<TSX> | null => {
+    const call = callee.parent();
+    if (call === null || call.kind() !== "call_expression") return null;
+    return call.field("function")?.id() === callee.id() ? call : null;
+  };
+
   for (const { property, kind, label, why, guidance } of patterns) {
-    const nodes: SgNode<TSX>[] = [];
-    if (kind === "call") {
-      for (const call of rootNode.findAll({
-        rule: { kind: "call_expression" },
-      })) {
-        const fn = call.children().find(
-          (child) => child.kind() === "member_expression",
-        );
-        if (!fn) continue;
-        const prop = fn.children().find(
-          (child) => child.kind() === "property_identifier",
-        );
-        if (prop && prop.text() === property) nodes.push(call);
-      }
-    } else {
-      for (const member of rootNode.findAll({
-        rule: { kind: "member_expression" },
-      })) {
-        const prop = member.children().find(
-          (child) => child.kind() === "property_identifier",
-        );
-        if (prop && prop.text() === property) nodes.push(member);
+    const nodes = new Map<string, { node: SgNode<TSX>; filename: string }>();
+    const record = (node: SgNode<TSX>, filename: string) => nodes.set(`${filename}:${node.id()}`, { node, filename });
+    const bindings = kind === "access" ? accessors : [...accessors, ...actionObjects];
+    for (const binding of bindings) {
+      for (const fileReferences of referencesOf(binding)) {
+        const filename = fileReferences.root.relativeFilename().replaceAll("\\", "/");
+        for (const reference of fileReferences.nodes) {
+          const member = memberOf(reference);
+          if (member === null) continue;
+          if (member.field("property")?.text() !== property) continue;
+          if (kind === "access") record(member, filename);
+          else {
+            const call = callOf(member);
+            if (call !== null) record(call, filename);
+          }
+        }
       }
     }
-    for (const node of nodes) {
+    if (kind === "call") {
+      for (const binding of actionFunctions.get(property) ?? []) {
+        for (const fileReferences of referencesOf(binding)) {
+          const filename = fileReferences.root.relativeFilename().replaceAll("\\", "/");
+          for (const reference of fileReferences.nodes) {
+            const call = callOf(reference);
+            if (call !== null) record(call, filename);
+          }
+        }
+      }
+    }
+    for (const { node, filename } of [...nodes.values()].sort((left, right) => {
+      const a = left.node.range().start;
+      const b = right.node.range().start;
+      return left.filename.localeCompare(right.filename) || a.line - b.line || a.column - b.column;
+    })) {
       const start = node.range().start;
       findings.push(
-        `${context.filename}:${start.line + 1}:${start.column + 1} Manual review required: migrate this ${label}.
-Why: ${why}
-Guidance: ${guidance} Make and validate this migration yourself; this analyzer never edits or runs the target project. Official migration guide: ${MIGRATION_GUIDE}`,
+        finding(filename, start, {
+        severity: "build",
+        headline: `Migrate this ${label}.`,
+        why: `${why}`,
+        guidance: `${guidance}`,
+        lint: ["removed-api"],
+        guide: MIGRATION_GUIDE,
+      }),
       );
     }
   }

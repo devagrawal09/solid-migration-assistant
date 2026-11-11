@@ -1,0 +1,7 @@
+{
+  "name": "solid-migration-assistant-rc-compat",
+  "private": true,
+  "version": "0.0.0",
+  "description": "Solid 1.9 input whose transformed form is compiled, typechecked, and server-rendered against the pinned Solid 2 RC",
+  "type": "module"
+}

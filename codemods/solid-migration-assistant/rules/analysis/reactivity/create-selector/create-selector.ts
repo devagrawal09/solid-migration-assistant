@@ -1,13 +1,15 @@
 import type { SgNode } from "codemod:ast-grep";
 import type TSX from "codemod:ast-grep/langs/tsx";
 import { findImportedCalls } from "../../../../shared/analysis.ts";
+import { MIGRATION_GUIDE_URL } from "../../../../shared/target.ts";
+import { finding, type RuleFinding } from "../../../../shared/finding.ts";
 
-const GUIDE = "https://github.com/solidjs/solid/blob/ff4d3c4479163fbdd3327f5b22d0c3ea7bd1a2c5/documentation/solid-2.0/MIGRATION.md";
+const GUIDE = MIGRATION_GUIDE_URL;
 
 export function analyzeCreateSelector(
   rootNode: SgNode<TSX>,
   context: { filename: string },
-): string[] {
+): RuleFinding[] {
   return findImportedCalls(rootNode, ["solid-js", "solid-js/web"], "createSelector")
     .filter(
       ({ argumentNodes }) =>
@@ -16,8 +18,13 @@ export function analyzeCreateSelector(
     )
     .map(({ call, filename }) => {
       const start = call.range().start;
-      return `${filename}:${start.line + 1}:${start.column + 1} Manual review required: migrate this createSelector call to createProjection or function-form createStore.
-Why: Solid 2 replaces createSelector with createProjection(fn, seed) for derived stores with reactive reconciliation.
-Guidance: Read the source and optional equality function. Replace with createProjection for derived store projections or function-form createStore(fn) for writable derived stores. Review all consumers of the returned signal to confirm the replacement preserves equality semantics. Make and validate that edit yourself; this analyzer never edits or runs the target project. Official migration guide: ${GUIDE}#quick-rename--removal-map`;
+      return finding(filename, start, {
+        severity: "build",
+        headline: `Migrate this createSelector call to createProjection or function-form createStore.`,
+        why: `Solid 2 replaces createSelector with createProjection(fn, seed) for derived stores with reactive reconciliation.`,
+        guidance: `Read the source and optional equality function. Replace with createProjection for derived store projections or function-form createStore(fn) for writable derived stores. Review all consumers of the returned signal to confirm the replacement preserves equality semantics.`,
+        lint: ["removed-api"],
+        guide: `${GUIDE}#quick-rename--removal-map`,
+      });
     });
 }

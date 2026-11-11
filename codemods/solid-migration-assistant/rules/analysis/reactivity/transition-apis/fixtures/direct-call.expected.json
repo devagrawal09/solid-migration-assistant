@@ -1,0 +1,46 @@
+{
+  "findings": [
+    {
+      "rule": "reactivity/transition-apis",
+      "file": "analysis/reactivity/transition-apis/fixtures/direct-call.fixture.tsx",
+      "line": 6,
+      "column": 1,
+      "severity": "build",
+      "headline": "Migrate this startTransition call to Solid 2 built-in transitions.",
+      "why": "Solid 2 removes startTransition; use built-in transition batching with isPending() to observe in-flight state.",
+      "guidance": "Remove the startTransition wrapper. The callback's writes are batched automatically. Add isPending() checks where the caller previously observed the pending boolean.",
+      "lint": [
+        "removed-api"
+      ],
+      "guide": "https://github.com/solidjs/solid/blob/2105ffb8ca2fced55f5fac0763177fc93f97c2c2/documentation/solid-2.0/MIGRATION.md#async-data--transitions"
+    },
+    {
+      "rule": "reactivity/transition-apis",
+      "file": "analysis/reactivity/transition-apis/fixtures/direct-call.fixture.tsx",
+      "line": 7,
+      "column": 1,
+      "severity": "build",
+      "headline": "Migrate this useTransition call to Solid 2 built-in transitions.",
+      "why": "Solid 2 removes useTransition; use isPending() and Loading boundaries to track transition state.",
+      "guidance": "Replace useTransition() with isPending(fn) at each site that previously read the pending flag. Wrap the JSX with Loading boundaries for in-flight fallback UI.",
+      "lint": [
+        "removed-api"
+      ],
+      "guide": "https://github.com/solidjs/solid/blob/2105ffb8ca2fced55f5fac0763177fc93f97c2c2/documentation/solid-2.0/MIGRATION.md#async-data--transitions"
+    },
+    {
+      "rule": "reactivity/transition-apis",
+      "file": "analysis/reactivity/transition-apis/fixtures/direct-call.fixture.tsx",
+      "line": 8,
+      "column": 1,
+      "severity": "behavior",
+      "headline": "Review this createDeferred call against its Solid 2 meaning.",
+      "why": "Solid ${SOLID_TARGET_VERSION} keeps the createDeferred name with a new meaning: an async memo that may lag but never leads, keeping its last answer while a refetch is in flight (isPending reports the refetch). The 1.x idle-time deferral and the timeoutMs option are gone, and with a synchronous function it behaves like createMemo.",
+      "guidance": "Decide whether the call wanted idle-time deferral (replace with a plain createMemo or a direct read of the source, since values update after the microtask flush) or lag-tolerant async derivation (keep createDeferred, drop any timeoutMs option, and observe refetches with isPending).",
+      "lint": [
+        "removed-api"
+      ],
+      "guide": "https://github.com/solidjs/solid/blob/2105ffb8ca2fced55f5fac0763177fc93f97c2c2/documentation/solid-2.0/MIGRATION.md#async-data--transitions"
+    }
+  ]
+}

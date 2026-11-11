@@ -17,6 +17,8 @@ export function View() {
       </div>
 
       <div class="card" classList={flags} />
+      <div class={["card", { active: flags.active, "is-open": other.hidden }]} />
+      <div class="a b" classList={{ b: flags.active }} />
       <div className="card" classList={flags} />
       <div classList={flags} class:active={flags.active} />
       <div {...spread} classList={flags} />

@@ -24,6 +24,40 @@ nodes:
             - "**/build/**"
             - "**/coverage/**"
             - "**/*.d.ts"
+      - name: analyzeEcosystemImports
+        js-ast-grep:
+          js_file: scripts/analysis/analyzeEcosystemImports.ts
+          base_path: "."
+          language: "tsx"
+          semantic_analysis: workspace
+          include:
+            - "**/*.js"
+            - "**/*.jsx"
+            - "**/*.ts"
+            - "**/*.tsx"
+          exclude:
+            - "**/node_modules/**"
+            - "**/dist/**"
+            - "**/build/**"
+            - "**/coverage/**"
+            - "**/*.d.ts"
+      - name: analyzeJsxTypeImports
+        js-ast-grep:
+          js_file: scripts/analysis/analyzeJsxTypeImports.ts
+          base_path: "."
+          language: "tsx"
+          semantic_analysis: workspace
+          include:
+            - "**/*.js"
+            - "**/*.jsx"
+            - "**/*.ts"
+            - "**/*.tsx"
+          exclude:
+            - "**/node_modules/**"
+            - "**/dist/**"
+            - "**/build/**"
+            - "**/coverage/**"
+            - "**/*.d.ts"
       - name: analyzeWebImport
         js-ast-grep:
           js_file: scripts/analysis/analyzeWebImport.ts
@@ -126,9 +160,60 @@ nodes:
             - "**/build/**"
             - "**/coverage/**"
             - "**/*.d.ts"
+      - name: analyzeDomLowercaseEvents
+        js-ast-grep:
+          js_file: scripts/analysis/analyzeDomLowercaseEvents.ts
+          base_path: "."
+          language: "tsx"
+          semantic_analysis: workspace
+          include:
+            - "**/*.js"
+            - "**/*.jsx"
+            - "**/*.ts"
+            - "**/*.tsx"
+          exclude:
+            - "**/node_modules/**"
+            - "**/dist/**"
+            - "**/build/**"
+            - "**/coverage/**"
+            - "**/*.d.ts"
       - name: analyzeDomUseDirective
         js-ast-grep:
           js_file: scripts/analysis/analyzeDomUseDirective.ts
+          base_path: "."
+          language: "tsx"
+          semantic_analysis: workspace
+          include:
+            - "**/*.js"
+            - "**/*.jsx"
+            - "**/*.ts"
+            - "**/*.tsx"
+          exclude:
+            - "**/node_modules/**"
+            - "**/dist/**"
+            - "**/build/**"
+            - "**/coverage/**"
+            - "**/*.d.ts"
+      - name: analyzeDynamicComponent
+        js-ast-grep:
+          js_file: scripts/analysis/analyzeDynamicComponent.ts
+          base_path: "."
+          language: "tsx"
+          semantic_analysis: workspace
+          include:
+            - "**/*.js"
+            - "**/*.jsx"
+            - "**/*.ts"
+            - "**/*.tsx"
+          exclude:
+            - "**/node_modules/**"
+            - "**/dist/**"
+            - "**/build/**"
+            - "**/coverage/**"
+            - "**/*.d.ts"
+      - name: analyzeRefCallbackScope
+        js-ast-grep:
+          js_file: scripts/analysis/analyzeRefCallbackScope.ts
           base_path: "."
           language: "tsx"
           semantic_analysis: workspace
@@ -432,6 +517,23 @@ nodes:
             - "**/build/**"
             - "**/coverage/**"
             - "**/*.d.ts"
+      - name: analyzeNestedCreateRoot
+        js-ast-grep:
+          js_file: scripts/analysis/analyzeNestedCreateRoot.ts
+          base_path: "."
+          language: "tsx"
+          semantic_analysis: workspace
+          include:
+            - "**/*.js"
+            - "**/*.jsx"
+            - "**/*.ts"
+            - "**/*.tsx"
+          exclude:
+            - "**/node_modules/**"
+            - "**/dist/**"
+            - "**/build/**"
+            - "**/coverage/**"
+            - "**/*.d.ts"
       - name: analyzeOnHelper
         js-ast-grep:
           js_file: scripts/analysis/analyzeOnHelper.ts
@@ -619,6 +721,23 @@ nodes:
             - "**/build/**"
             - "**/coverage/**"
             - "**/*.d.ts"
+      - name: analyzeStoreSetterCalls
+        js-ast-grep:
+          js_file: scripts/analysis/analyzeStoreSetterCalls.ts
+          base_path: "."
+          language: "tsx"
+          semantic_analysis: workspace
+          include:
+            - "**/*.js"
+            - "**/*.jsx"
+            - "**/*.ts"
+            - "**/*.tsx"
+          exclude:
+            - "**/node_modules/**"
+            - "**/dist/**"
+            - "**/build/**"
+            - "**/coverage/**"
+            - "**/*.d.ts"
       - name: analyzeUnwrap
         js-ast-grep:
           js_file: scripts/analysis/analyzeUnwrap.ts
@@ -636,7 +755,7 @@ nodes:
             - "**/build/**"
             - "**/coverage/**"
             - "**/*.d.ts"
-      - name: Emit all guidance once in deterministic whole-string order
+      - name: Emit all findings once in location order
         js-ast-grep:
           js_file: scripts/emit-report.ts
           base_path: "."

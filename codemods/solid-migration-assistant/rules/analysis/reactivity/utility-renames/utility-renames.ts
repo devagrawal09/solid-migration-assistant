@@ -1,20 +1,22 @@
 import type { SgNode } from "codemod:ast-grep";
 import type TSX from "codemod:ast-grep/langs/tsx";
 import { findImportedCalls } from "../../../../shared/analysis.ts";
+import { finding, type RuleFinding } from "../../../../shared/finding.ts";
+import { MIGRATION_GUIDE_URL } from "../../../../shared/target.ts";
 
 const GUIDE =
-  "https://github.com/solidjs/solid/blob/ff4d3c4479163fbdd3327f5b22d0c3ea7bd1a2c5/documentation/solid-2.0/MIGRATION.md";
+  MIGRATION_GUIDE_URL;
 
 function utilityGuidance(
   name: string,
   call: SgNode<TSX>,
   filename: string,
-): string {
+): RuleFinding {
   const start = call.range().start;
   const headline =
     name === "equalFn" || name === "getListener"
-      ? `migrate this ${name} reference to its Solid 2 replacement`
-      : `remove this ${name} call`;
+      ? `Migrate this ${name} reference to its Solid 2 replacement.`
+      : `Remove this ${name} call.`;
   const why: Record<string, string> = {
     equalFn:
       "Solid 2 renames equalFn to isEqual with the same (a, b) => boolean signature.",
@@ -35,15 +37,21 @@ function utilityGuidance(
     enableScheduling:
       "Remove this call. Solid 2 has no global scheduler toggle.",
   };
-  return `${filename}:${start.line + 1}:${start.column + 1} Manual review required: ${headline}
-Why: ${why[name]}
-Guidance: ${steps[name]} Make and validate that edit yourself; this analyzer never edits or runs the target project. Official migration guide: ${GUIDE}#quick-rename--removal-map`;
+  const renamed = name === "equalFn" || name === "getListener";
+  return finding(filename, start, {
+    severity: "build",
+    headline,
+    why: why[name]!,
+    guidance: `${steps[name]}`,
+    lint: renamed ? ["removed-api"] : [],
+    guide: `${GUIDE}#quick-rename--removal-map`,
+  });
 }
 
 export function analyzeEqualFn(
   rootNode: SgNode<TSX>,
   context: { filename: string },
-): string[] {
+): RuleFinding[] {
   return findImportedCalls(rootNode, ["solid-js", "solid-js/web"], "equalFn").map(
     ({ call, filename }) => utilityGuidance("equalFn", call, filename),
   );
@@ -52,7 +60,7 @@ export function analyzeEqualFn(
 export function analyzeGetListener(
   rootNode: SgNode<TSX>,
   context: { filename: string },
-): string[] {
+): RuleFinding[] {
   return findImportedCalls(rootNode, ["solid-js", "solid-js/web"], "getListener").map(
     ({ call, filename }) => utilityGuidance("getListener", call, filename),
   );
@@ -61,7 +69,7 @@ export function analyzeGetListener(
 export function analyzeWriteSignal(
   rootNode: SgNode<TSX>,
   context: { filename: string },
-): string[] {
+): RuleFinding[] {
   return findImportedCalls(rootNode, ["solid-js", "solid-js/web"], "writeSignal").map(
     ({ call, filename }) => utilityGuidance("writeSignal", call, filename),
   );
@@ -70,7 +78,7 @@ export function analyzeWriteSignal(
 export function analyzeEnableScheduling(
   rootNode: SgNode<TSX>,
   context: { filename: string },
-): string[] {
+): RuleFinding[] {
   return findImportedCalls(rootNode, ["solid-js", "solid-js/web"], "enableScheduling").map(
     ({ call, filename }) => utilityGuidance("enableScheduling", call, filename),
   );

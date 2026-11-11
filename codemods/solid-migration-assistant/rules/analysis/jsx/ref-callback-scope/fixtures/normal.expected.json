@@ -1,0 +1,28 @@
+{
+  "findings": [
+    {
+      "rule": "jsx/ref-callback-scope",
+      "file": "analysis/jsx/ref-callback-scope/fixtures/normal.fixture.tsx",
+      "line": 15,
+      "column": 9,
+      "severity": "behavior",
+      "headline": "Move owner-dependent work out of this ref callback.",
+      "why": "Solid 2.0.0-rc.21 runs ref callbacks unowned, so getOwner() is null inside them and the onCleanup call(s) here no longer register with the component (Solid 1.x ran the callback inside the component's owner).",
+      "guidance": "Keep only element capture in the ref callback. Move one-off setup and its cleanup into onSettled in the component body, returning the cleanup function, or into the owned setup half of a directive factory whose returned apply callback receives the element.",
+      "guide": "https://github.com/solidjs/solid/blob/2105ffb8ca2fced55f5fac0763177fc93f97c2c2/documentation/solid-2.0/MIGRATION.md#ref-callbacks-no-longer-owned",
+      "lint": []
+    },
+    {
+      "rule": "jsx/ref-callback-scope",
+      "file": "analysis/jsx/ref-callback-scope/fixtures/normal.fixture.tsx",
+      "line": 20,
+      "column": 14,
+      "severity": "behavior",
+      "headline": "Move owner-dependent work out of this ref callback.",
+      "why": "Solid 2.0.0-rc.21 runs ref callbacks unowned, so getOwner() is null inside them and the createEffect call(s) here no longer register with the component (Solid 1.x ran the callback inside the component's owner).",
+      "guidance": "Keep only element capture in the ref callback. Move one-off setup and its cleanup into onSettled in the component body, returning the cleanup function, or into the owned setup half of a directive factory whose returned apply callback receives the element.",
+      "guide": "https://github.com/solidjs/solid/blob/2105ffb8ca2fced55f5fac0763177fc93f97c2c2/documentation/solid-2.0/MIGRATION.md#ref-callbacks-no-longer-owned",
+      "lint": []
+    }
+  ]
+}

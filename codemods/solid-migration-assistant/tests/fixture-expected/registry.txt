@@ -1,0 +1,279 @@
+[solid-migration-assistant] 33 findings for Solid 2.0.0-rc.21. Each is a manual edit for you (or your agent) to make and validate; this analyzer never edits or runs the target project.
+
+src/events.tsx:7:13 [behavior] Migrate this lowercase onclick attribute to a camelCase event handler.
+  Rule: jsx/dom-lowercase-events
+  Why: Solid 2.0.0-rc.21 binds an event only for on followed by an uppercase letter; a lowercase onclick on a native element is a plain attribute in the browser, in SSR output, and through spreads, so a function value is stringified into the attribute instead of listening for click as Solid 1.x did.
+  Guidance: Rename onclick to the camelCase handler spelled by Solid's JSX types (for example onClick, onDblClick, onPointerDown) and keep the handler expression unchanged. Keep a string value only if an HTML inline-handler attribute is intended. For a custom event name or native listener options, use a ref callback that calls addEventListener. Stop without proposing a rewrite when a spread attribute or another on-prefixed attribute on this element could bind the same event, or when the intended camelCase spelling is unclear.
+  Lint: eslint-plugin-solid's solid/event-handlers (v2 config) keeps reporting this site after migration.
+  Guide: https://github.com/solidjs/solid/blob/2105ffb8ca2fced55f5fac0763177fc93f97c2c2/documentation/solid-2.0/MIGRATION.md#attributes--events-closer-to-html-and-fewer-namespaces
+
+src/excluded.ts:3:1 [build] Choose a Solid 2 replacement for this createComputed call.
+  Rule: reactivity/create-computed
+  Why: Solid 2.0.0-rc.21 removes createComputed; the correct replacement depends on whether the callback derives a value, performs an effect, or encodes stateful update logic. This call has 1 semantic argument(s).
+  Guidance: Read the complete callback, its consumers, nearby signal/store declarations, and ordering assumptions. Use createMemo only for a readonly derived value that consumers read. Use Solid 2's split createEffect when reactive reads can be isolated in the compute callback and imperative work belongs in the untracked effect callback. Use function-form createSignal, or derived createStore for object and array projections, only when writable derived state is intentional. Stop without proposing a rewrite when the callback uses its previous value or an initial/options argument, writes to a dependency or may form a cycle, mixes several operations, relies on immediate or render ordering, registers cleanup, starts async work, contains nested control flow or reactive primitive creation, or has unclear ownership or consumers. Ask for the smallest focused test or runtime observation that exposes the required value, timing, and write behavior.
+  Lint: eslint-plugin-solid's solid/removed-api (v2 config) keeps reporting this site after migration.
+  Guide: https://github.com/solidjs/solid/blob/2105ffb8ca2fced55f5fac0763177fc93f97c2c2/documentation/solid-2.0/MIGRATION.md#createcomputed--creatememo-createeffect-or-derived-createsignal
+
+src/excluded.ts:4:1 [build] Migrate this mergeProps call to a reviewed merge.
+  Rule: props/merge-props
+  Why: Solid 2.0.0-rc.21 replaces mergeProps with merge, but merge treats a property that exists on a later source with the value undefined as the winner instead of falling through to an earlier source. This call has 2 semantic argument(s).
+  Guidance: Read every source in argument order, list all overlapping keys, and trace every consumer of the merged value. Replace mergeProps with merge from solid-js only after proving that every later overlapping value is non-undefined and that zero-argument behavior, one-source result identity, and mutation semantics do not matter. Stop without proposing a replacement when existing TypeScript types or the inferred Merge result type are the only runtime-safety evidence, a source is any/unknown/union-typed at runtime, a props or store proxy, a function, or has getters or dynamic key presence, source or result identity or mutation is observed, or a consumer depends on fallback-through-undefined behavior. If old undefined-fallback behavior is required, preserve live reactive reads with a targeted manual guard at the disputed property boundary rather than object spread or Object.assign. Ask for the smallest focused test or runtime observation that exposes the disputed property's value, precedence, identity, and mutation boundary.
+  Lint: eslint-plugin-solid's solid/removed-api (v2 config) keeps reporting this site after migration.
+  Guide: https://github.com/solidjs/solid/blob/2105ffb8ca2fced55f5fac0763177fc93f97c2c2/documentation/solid-2.0/MIGRATION.md#mergeprops--splitprops--merge--omit
+
+src/excluded.ts:5:1 [behavior] Migrate this createMemo initial value.
+  Rule: reactivity/create-memo
+  Why: Solid 1.x treats this call's second argument as its initial value, while Solid 2.0.0-rc.21 treats the second argument as options and has no initial-value argument.
+  Guidance: Read the complete callback, the initial-value expression, its consumers, and nearby reactive state. Establish what the callback must receive on its first run and how later updates use the previous value. Preserve that behavior explicitly in surrounding state or callback logic before removing the legacy initial-value argument. For a three-argument call, review the legacy options separately and move only options supported by Solid 2.0.0-rc.21 into the second-argument position; for a two-argument call, do not reinterpret an option-shaped initial value as options. Stop without proposing a rewrite when first-run or previous-value behavior is unclear, the initial-value expression has meaningful evaluation timing or side effects, options are dynamic or their compatibility is unknown, the callback writes to its inputs or may form a cycle, or ownership and consumers are unclear. Ask for the smallest focused test or runtime observation that exposes the first computed value and subsequent updates.
+  Guide: https://github.com/solidjs/solid/blob/2105ffb8ca2fced55f5fac0763177fc93f97c2c2/documentation/solid-2.0/MIGRATION.md#effects-lifecycle-and-cleanup
+
+src/language.js:1:24 [build] Move this Solid web renderer static import.
+  Rule: imports/web-import
+  Why: Solid 2 publishes the web renderer from @solidjs/web instead of the solid-js/web subpath.
+  Guidance: Change only this static import's module source to @solidjs/web and preserve its import form and quote style.
+  Lint: eslint-plugin-solid's solid/removed-api (v2 config) keeps reporting this site after migration.
+  Guide: https://github.com/solidjs/solid/blob/2105ffb8ca2fced55f5fac0763177fc93f97c2c2/documentation/solid-2.0/MIGRATION.md#imports-where-things-live-now
+
+src/language.jsx:1:39 [build] Migrate this intrinsic JSX classList attribute to class.
+  Rule: jsx/class-list
+  Why: Solid 2.0.0-rc.21 removes the JSX classList attribute in favor of the class attribute's object and array forms; on a native element the compiler now rejects classList with an error that names the replacement.
+  Guidance: Read this complete intrinsic element, its classList value, and every class source. Move the classList value into the class attribute's object or array form, preserve static classes and conditional truthiness, and deliberately merge any existing class attribute on the same element. Stop without proposing a rewrite when the value or another class source is spread or forwarded, duplicate class sources have unclear precedence, getters or side effects could change evaluation order or frequency, or a focused rendering test does not prove the resulting static and conditional class tokens. Ask for the smallest focused rendering test or runtime observation that exposes the rendered class attribute across relevant states.
+  Lint: eslint-plugin-solid's solid/removed-api and solid/prefer-structured-class (v2 config) keeps reporting this site after migration.
+  Guide: https://github.com/solidjs/solid/blob/2105ffb8ca2fced55f5fac0763177fc93f97c2c2/documentation/solid-2.0/MIGRATION.md#classlist--class-objectarray-forms
+
+src/migration-sites.tsx:14:63 [build] Move this Solid 2 legacy subpath static import.
+  Rule: imports/beta32-subpaths
+  Why: Solid 2 publishes solid-js/store from solid-js.
+  Guidance: Change only this static import's module source and preserve its import form and quote style. Stop: do not blindly rewrite this source. The plain createStore setter in Solid 2 accepts only a draft callback, setStore(state => { ... }); 1.x path setters such as setStore("user", "name", value) and object merges such as setStore({ count: 1 }) must become draft writes, reconcile(value, options) became reconcile(value, key), and unwrap, produce, createMutable, and modifyMutable are renamed or removed. Migrate those call sites first, then move the surviving store imports to solid-js.
+  Lint: eslint-plugin-solid's solid/removed-api (v2 config) keeps reporting this site after migration.
+  Guide: https://github.com/solidjs/solid/blob/2105ffb8ca2fced55f5fac0763177fc93f97c2c2/documentation/solid-2.0/MIGRATION.md#imports-where-things-live-now
+
+src/migration-sites.tsx:15:24 [build] Move this Solid web renderer static import.
+  Rule: imports/web-import
+  Why: Solid 2 publishes the web renderer from @solidjs/web instead of the solid-js/web subpath.
+  Guidance: Change only this static import's module source to @solidjs/web and preserve its import form and quote style.
+  Lint: eslint-plugin-solid's solid/removed-api (v2 config) keeps reporting this site after migration.
+  Guide: https://github.com/solidjs/solid/blob/2105ffb8ca2fced55f5fac0763177fc93f97c2c2/documentation/solid-2.0/MIGRATION.md#imports-where-things-live-now
+
+src/migration-sites.tsx:19:15 [build] Migrate this mergeProps call to a reviewed merge.
+  Rule: props/merge-props
+  Why: Solid 2.0.0-rc.21 replaces mergeProps with merge, but merge treats a property that exists on a later source with the value undefined as the winner instead of falling through to an earlier source. This call has 2 semantic argument(s).
+  Guidance: Read every source in argument order, list all overlapping keys, and trace every consumer of the merged value. Replace mergeProps with merge from solid-js only after proving that every later overlapping value is non-undefined and that zero-argument behavior, one-source result identity, and mutation semantics do not matter. Stop without proposing a replacement when existing TypeScript types or the inferred Merge result type are the only runtime-safety evidence, a source is any/unknown/union-typed at runtime, a props or store proxy, a function, or has getters or dynamic key presence, source or result identity or mutation is observed, or a consumer depends on fallback-through-undefined behavior. If old undefined-fallback behavior is required, preserve live reactive reads with a targeted manual guard at the disputed property boundary rather than object spread or Object.assign. Ask for the smallest focused test or runtime observation that exposes the disputed property's value, precedence, identity, and mutation boundary.
+  Lint: eslint-plugin-solid's solid/removed-api (v2 config) keeps reporting this site after migration.
+  Guide: https://github.com/solidjs/solid/blob/2105ffb8ca2fced55f5fac0763177fc93f97c2c2/documentation/solid-2.0/MIGRATION.md#mergeprops--splitprops--merge--omit
+
+src/migration-sites.tsx:20:33 [build] Migrate this splitProps tuple to reviewed omit-based values.
+  Rule: props/split-props
+  Why: Solid 2.0.0-rc.21 replaces splitProps with omit, but omit returns one object while splitProps returns a tuple containing one selected object per key group plus a final remainder, so migration depends on how those positions are consumed. This call has 1 key group(s).
+  Guidance: Trace the complete tuple destructuring or other call-site use, list the exact keys represented by every group, and trace every downstream consumer and reactive property access for each selected value and the remainder. Design explicit omit-based values only after proving how every old tuple member will be produced and that live reactive property access is preserved. Stop without proposing a replacement when keys are dynamic or overlapping, more than one selected group is consumed, the tuple escapes or is indexed dynamically, rest destructuring or reassignment is involved, props or store proxy identity matters, or any consumer is unclear. Ask for the smallest focused test or runtime observation that exposes each consumed tuple member's keys, value, reactive updates, and identity boundary.
+  Lint: eslint-plugin-solid's solid/removed-api (v2 config) keeps reporting this site after migration.
+  Guide: https://github.com/solidjs/solid/blob/2105ffb8ca2fced55f5fac0763177fc93f97c2c2/documentation/solid-2.0/MIGRATION.md#mergeprops--splitprops--merge--omit
+
+src/migration-sites.tsx:21:16 [behavior] Migrate this createMemo initial value.
+  Rule: reactivity/create-memo
+  Why: Solid 1.x treats this call's second argument as its initial value, while Solid 2.0.0-rc.21 treats the second argument as options and has no initial-value argument.
+  Guidance: Read the complete callback, the initial-value expression, its consumers, and nearby reactive state. Establish what the callback must receive on its first run and how later updates use the previous value. Preserve that behavior explicitly in surrounding state or callback logic before removing the legacy initial-value argument. For a three-argument call, review the legacy options separately and move only options supported by Solid 2.0.0-rc.21 into the second-argument position; for a two-argument call, do not reinterpret an option-shaped initial value as options. Stop without proposing a rewrite when first-run or previous-value behavior is unclear, the initial-value expression has meaningful evaluation timing or side effects, options are dynamic or their compatibility is unknown, the callback writes to its inputs or may form a cycle, or ownership and consumers are unclear. Ask for the smallest focused test or runtime observation that exposes the first computed value and subsequent updates.
+  Guide: https://github.com/solidjs/solid/blob/2105ffb8ca2fced55f5fac0763177fc93f97c2c2/documentation/solid-2.0/MIGRATION.md#effects-lifecycle-and-cleanup
+
+src/migration-sites.tsx:22:23 [build] Migrate this createMutable call to an owned createStore tuple.
+  Rule: store/mutable
+  Why: Solid 2.0.0-rc.21 removes createMutable in favor of createStore, which returns a store-and-setter tuple rather than the directly mutable proxy this call creates. This call has exactly 1 semantic argument(s), so its initial value and any second options argument require review before the value and every write can move to that tuple.
+  Guidance: Trace the created value through every alias, return, call site, and write, identify its owner and every reader and writer, and review a second options argument separately. Introduce createStore only after mapping every property assignment, delete, and mutating array operation to the tuple's explicit setter, including the exact setter path or draft-first setter callback needed to preserve selection and sequencing. Stop without proposing a rewrite when the value escapes, a consumer requires direct mutation or proxy identity, mutation happens through an unknown helper, setter paths cannot be identified, ownership is unclear, or focused tests do not cover the affected reads and writes. Ask for the smallest focused test or runtime observation that exposes the value's reads, writes, identity, and ownership boundary.
+  Lint: eslint-plugin-solid's solid/removed-api (v2 config) keeps reporting this site after migration.
+  Guide: https://github.com/solidjs/solid/blob/2105ffb8ca2fced55f5fac0763177fc93f97c2c2/documentation/solid-2.0/MIGRATION.md#createmutable--modifymutable--createstore-with-draft-setters
+
+src/migration-sites.tsx:23:1 [build] Migrate this modifyMutable call to its target store's setter.
+  Rule: store/mutable
+  Why: Solid 2.0.0-rc.21 removes modifyMutable; a createStore tuple's draft-first setter can replace this mutation entry point only after the target is resolved to its store owner, the complete recipe is reviewed, and the exact setter mapping is established.
+  Guidance: Resolve the first target argument to its exact createMutable owner and planned createStore tuple, inspect the complete second-argument mutation recipe, and map that recipe to the owner's explicit setter while preserving the setter overload, path selection, and update sequencing. Stop without proposing a rewrite when the target origin or setter is unknown, the state or recipe escapes, mutation is delegated to an unknown helper, the callback returns a meaningful value, nested updates or async work are present, or focused tests do not expose the affected reads and writes. Ask for the smallest focused test or runtime observation that exposes the selected target owner, setter path, recipe result, and resulting store update.
+  Lint: eslint-plugin-solid's solid/removed-api (v2 config) keeps reporting this site after migration.
+  Guide: https://github.com/solidjs/solid/blob/2105ffb8ca2fced55f5fac0763177fc93f97c2c2/documentation/solid-2.0/MIGRATION.md#createmutable--modifymutable--createstore-with-draft-setters
+
+src/migration-sites.tsx:26:22 [build] Migrate this unwrap call to a reviewed snapshot.
+  Rule: store/unwrap
+  Why: Solid 2.0.0-rc.21 replaces unwrap(store) with snapshot(store) for capturing a point-in-time, non-reactive snapshot of a Solid store, but replacement safety depends on the input, capture time, and every consumer.
+  Guidance: Read the complete input expression and prove it is a Solid store, then trace every consumer of the unwrap result. Replace unwrap with snapshot from solid-js only after proving that a point-in-time snapshot is intended, and preserve the exact surrounding evaluation point so capture timing and side effects do not move. Stop without proposing a replacement when the input's store provenance is unclear, the current value's object or nested identity is observed, the value is expected to remain live across store updates, the result or nested data is mutated, the result escapes or is passed to code with unknown ownership, or any consumer is unclear. Ask for the smallest focused test or runtime observation that exposes the disputed capture or consumer boundary at this site, such as the result before and after a store update, nested reads, identity, mutation, serialization, or ownership transfer.
+  Lint: eslint-plugin-solid's solid/removed-api (v2 config) keeps reporting this site after migration.
+  Guide: https://github.com/solidjs/solid/blob/2105ffb8ca2fced55f5fac0763177fc93f97c2c2/documentation/solid-2.0/MIGRATION.md#unwrapstore--snapshotstore
+
+src/migration-sites.tsx:27:22 [build] Migrate this produce wrapper to draft-first setter behavior.
+  Rule: store/produce
+  Why: Solid 2.0.0-rc.21 store setters are draft-first and receive a mutable draft in their mutation callback, so a legacy produce wrapper is unnecessary only after the surrounding call is proven to use the intended store-setter overload.
+  Guidance: Read the immediate parent call, identify the exact store setter overload and any path arguments, and review the full mutation callback. Pass the callback directly to the setter only after proving that this wrapper supplies that setter's mutation callback. For nested produce calls, review each wrapper, its containing call, and its full callback independently. Stop without proposing wrapper removal when the result is stored, returned, composed, passed through another function, used with a non-store setter, or when callback returns, nested control flow, async work, external mutation, or target ownership make draft behavior unclear. Ask for the smallest focused test or runtime observation that exposes the selected setter overload and resulting store update.
+  Lint: eslint-plugin-solid's solid/removed-api (v2 config) keeps reporting this site after migration.
+  Guide: https://github.com/solidjs/solid/blob/2105ffb8ca2fced55f5fac0763177fc93f97c2c2/documentation/solid-2.0/MIGRATION.md#produce--now-the-default-setter-behavior
+
+src/migration-sites.tsx:31:1 [build] Choose a Solid 2 replacement for this createComputed call.
+  Rule: reactivity/create-computed
+  Why: Solid 2.0.0-rc.21 removes createComputed; the correct replacement depends on whether the callback derives a value, performs an effect, or encodes stateful update logic. This call has 1 semantic argument(s).
+  Guidance: Read the complete callback, its consumers, nearby signal/store declarations, and ordering assumptions. Use createMemo only for a readonly derived value that consumers read. Use Solid 2's split createEffect when reactive reads can be isolated in the compute callback and imperative work belongs in the untracked effect callback. Use function-form createSignal, or derived createStore for object and array projections, only when writable derived state is intentional. Stop without proposing a rewrite when the callback uses its previous value or an initial/options argument, writes to a dependency or may form a cycle, mixes several operations, relies on immediate or render ordering, registers cleanup, starts async work, contains nested control flow or reactive primitive creation, or has unclear ownership or consumers. Ask for the smallest focused test or runtime observation that exposes the required value, timing, and write behavior.
+  Lint: eslint-plugin-solid's solid/removed-api (v2 config) keeps reporting this site after migration.
+  Guide: https://github.com/solidjs/solid/blob/2105ffb8ca2fced55f5fac0763177fc93f97c2c2/documentation/solid-2.0/MIGRATION.md#createcomputed--creatememo-createeffect-or-derived-createsignal
+
+src/migration-sites.tsx:32:1 [build] Split this one-argument createEffect into compute and apply callbacks (simple shape).
+  Rule: reactivity/create-effect
+  Why: Solid 2 requires separate compute and apply callbacks. This callback takes no previous value, registers no cleanup, creates no reactive primitives, and is not async, so the split is usually mechanical.
+  Guidance: Move the reactive reads into the compute callback and return what the side effect needs, then perform the imperative work in the apply callback: createEffect(() => [a(), b()], ([a, b]) => { ... }). Reads left in the apply callback are no longer tracked. createTrackedEffect keeps the one-function shape as an escape hatch, but it may run more than once per change, cannot create primitives, and throws on a pending async read, so prefer the split.
+  Lint: eslint-plugin-solid's solid/no-single-arg-create-effect (v2 config) keeps reporting this site after migration.
+  Guide: https://github.com/solidjs/solid/blob/2105ffb8ca2fced55f5fac0763177fc93f97c2c2/documentation/solid-2.0/MIGRATION.md#effects-lifecycle-and-cleanup
+
+src/migration-sites.tsx:36:1 [build] Migrate this onMount lifecycle callback.
+  Rule: lifecycle/on-mount
+  Why: Solid 2 removes onMount; onSettled is its closest replacement and can return an owner-bound cleanup function, but the correct migration depends on the callback's ownership, required timing, and cleanup behavior.
+  Guidance: Read the complete callback, its owner, and nearby cleanup registration. Establish who owns the work, when it must run relative to rendering and settling, and what must be disposed. Move the work to onSettled only after proving that timing is compatible, and return owner-bound cleanup from the onSettled callback. Stop without proposing a rewrite when the callback registers cleanup, starts async work, contains nested control flow that changes lifecycle behavior, creates reactive primitives, or has unclear ownership. Ask for the smallest focused test or runtime observation that makes the required timing and cleanup behavior observable.
+  Lint: eslint-plugin-solid's solid/removed-api (v2 config) keeps reporting this site after migration.
+  Guide: https://github.com/solidjs/solid/blob/2105ffb8ca2fced55f5fac0763177fc93f97c2c2/documentation/solid-2.0/MIGRATION.md#effects-lifecycle-and-cleanup
+
+src/migration-sites.tsx:42:5 [build] Migrate this imported Suspense JSX site to Loading.
+  Rule: jsx/component-renames
+  Why: Solid 2 replaces the solid-js Suspense component with Loading for initial not-ready fallback UI.
+  Guidance: Read this complete boundary, its fallback, children, props, and corresponding import. Replace the unaliased named Suspense import and this JSX component with Loading only after confirming that the boundary owns initial not-ready UI and that its fallback and children preserve their rendering behavior. Stop without proposing a rewrite when props are spread or forwarded, fallback ownership or evaluation is indirect, nested async boundaries make the intended initial-loading behavior unclear, or focused rendering tests do not cover the fallback and ready states. Ask for the smallest focused test or runtime observation that exposes both states.
+  Lint: eslint-plugin-solid's solid/removed-api (v2 config) keeps reporting this site after migration.
+  Guide: https://github.com/solidjs/solid/blob/2105ffb8ca2fced55f5fac0763177fc93f97c2c2/documentation/solid-2.0/MIGRATION.md#suspense--errorboundary--loading--errored
+
+src/migration-sites.tsx:43:7 [build] Migrate this imported ErrorBoundary JSX site to Errored.
+  Rule: jsx/component-renames
+  Why: Solid 2 replaces the solid-js ErrorBoundary component with Errored, whose fallback receives an error accessor rather than a raw error value.
+  Guidance: Read this complete boundary, its fallback, children, props, and corresponding import. Replace the unaliased named ErrorBoundary import and this JSX component with Errored only after updating every fallback use to read the error accessor, such as err(), while preserving error ownership and recovery behavior. Stop without proposing a rewrite when props are spread or forwarded, the fallback is indirect or escapes, the error value is passed to unknown code, reset or recovery behavior is unclear, or focused tests do not cover thrown and recovered states. Ask for the smallest focused test or runtime observation that exposes the fallback value and recovery behavior.
+  Lint: eslint-plugin-solid's solid/removed-api (v2 config) keeps reporting this site after migration.
+  Guide: https://github.com/solidjs/solid/blob/2105ffb8ca2fced55f5fac0763177fc93f97c2c2/documentation/solid-2.0/MIGRATION.md#suspense--errorboundary--loading--errored
+
+src/migration-sites.tsx:44:9 [build] Migrate this imported SuspenseList JSX site to Reveal.
+  Rule: jsx/component-renames
+  Why: Solid 2 replaces SuspenseList with Reveal for coordinating sibling Loading boundaries and replaces revealOrder and tail controls with order and collapsed semantics.
+  Guidance: Read the complete group, its revealOrder and tail values, children, nesting, props, and corresponding import. Replace the unaliased named SuspenseList import and this JSX component with Reveal only after mapping literal revealOrder="forwards" to the default or order="sequential", revealOrder="together" to order="together", and tail="collapsed" to collapsed only under sequential order; review the children as sibling Loading boundaries, and do not use the earlier-beta boolean together prop. Stop without proposing a rewrite when props are spread or forwarded, revealOrder or tail is dynamic or has another value, child boundary ownership or nesting is unclear, intended reveal timing cannot be established, or focused behavior tests do not cover the coordinated states. Ask for the smallest focused test or runtime observation that exposes ordering, fallback, and collapsed-tail behavior.
+  Lint: eslint-plugin-solid's solid/removed-api (v2 config) keeps reporting this site after migration.
+  Guide: https://github.com/solidjs/solid/blob/2105ffb8ca2fced55f5fac0763177fc93f97c2c2/documentation/solid-2.0/MIGRATION.md#coordinating-loading-boundaries-suspenselist--reveal
+
+src/migration-sites.tsx:45:11 [build] Migrate this imported Index JSX site to For keyed={false}.
+  Rule: jsx/component-renames
+  Why: Solid 2 removes Index; its direct replacement is For with keyed={false}, whose child callback receives an item accessor and a stable numeric index.
+  Guidance: Read the complete list site, its each value, child callback, props, and corresponding import. Replace the unaliased named Index import and this JSX component with For, add the literal keyed={false} mode, and review the callback so the item remains an accessor and the index remains a stable number. Stop without proposing a rewrite when props are spread or forwarded, each or the child callback is indirect, callback parameters escape to unknown code, item identity or index behavior is unclear, or focused list-update tests do not prove state preservation. Ask for the smallest focused test or runtime observation that covers insertion, removal, reordering, and item updates.
+  Lint: eslint-plugin-solid's solid/removed-api (v2 config) keeps reporting this site after migration.
+  Guide: https://github.com/solidjs/solid/blob/2105ffb8ca2fced55f5fac0763177fc93f97c2c2/documentation/solid-2.0/MIGRATION.md#list-rendering-index-is-gone-and-for-handles-each-keying-mode
+
+src/migration-sites.tsx:47:23 [build] Migrate this intrinsic JSX classList attribute to class.
+  Rule: jsx/class-list
+  Why: Solid 2.0.0-rc.21 removes the JSX classList attribute in favor of the class attribute's object and array forms; on a native element the compiler now rejects classList with an error that names the replacement.
+  Guidance: Read this complete intrinsic element, its classList value, and every class source. Move the classList value into the class attribute's object or array form, preserve static classes and conditional truthiness, and deliberately merge any existing class attribute on the same element. Stop without proposing a rewrite when the value or another class source is spread or forwarded, duplicate class sources have unclear precedence, getters or side effects could change evaluation order or frequency, or a focused rendering test does not prove the resulting static and conditional class tokens. Ask for the smallest focused rendering test or runtime observation that exposes the rendered class attribute across relevant states.
+  Lint: eslint-plugin-solid's solid/removed-api and solid/prefer-structured-class (v2 config) keeps reporting this site after migration.
+  Guide: https://github.com/solidjs/solid/blob/2105ffb8ca2fced55f5fac0763177fc93f97c2c2/documentation/solid-2.0/MIGRATION.md#classlist--class-objectarray-forms
+
+src/nonmatches.tsx:4:1 [build] Split this one-argument createEffect into compute and apply callbacks (simple shape).
+  Rule: reactivity/create-effect
+  Why: Solid 2 requires separate compute and apply callbacks. This callback takes no previous value, registers no cleanup, creates no reactive primitives, and is not async, so the split is usually mechanical.
+  Guidance: Move the reactive reads into the compute callback and return what the side effect needs, then perform the imperative work in the apply callback: createEffect(() => [a(), b()], ([a, b]) => { ... }). Reads left in the apply callback are no longer tracked. createTrackedEffect keeps the one-function shape as an escape hatch, but it may run more than once per change, cannot create primitives, and throws on a pending async read, so prefer the split.
+  Lint: eslint-plugin-solid's solid/no-single-arg-create-effect (v2 config) keeps reporting this site after migration.
+  Guide: https://github.com/solidjs/solid/blob/2105ffb8ca2fced55f5fac0763177fc93f97c2c2/documentation/solid-2.0/MIGRATION.md#effects-lifecycle-and-cleanup
+
+src/nonmatches.tsx:5:1 [build] Split this one-argument createEffect into compute and apply callbacks (simple shape).
+  Rule: reactivity/create-effect
+  Why: Solid 2 requires separate compute and apply callbacks. This callback takes no previous value, registers no cleanup, creates no reactive primitives, and is not async, so the split is usually mechanical.
+  Guidance: Move the reactive reads into the compute callback and return what the side effect needs, then perform the imperative work in the apply callback: createEffect(() => [a(), b()], ([a, b]) => { ... }). Reads left in the apply callback are no longer tracked. createTrackedEffect keeps the one-function shape as an escape hatch, but it may run more than once per change, cannot create primitives, and throws on a pending async read, so prefer the split.
+  Lint: eslint-plugin-solid's solid/no-single-arg-create-effect (v2 config) keeps reporting this site after migration.
+  Guide: https://github.com/solidjs/solid/blob/2105ffb8ca2fced55f5fac0763177fc93f97c2c2/documentation/solid-2.0/MIGRATION.md#effects-lifecycle-and-cleanup
+
+src/nonmatches.tsx:7:24 [build] Move this Solid web renderer re-export.
+  Rule: imports/web-import
+  Why: Solid 2 publishes the web renderer from @solidjs/web instead of the solid-js/web subpath.
+  Guidance: Change only this re-export's module source to @solidjs/web and preserve its export form and quote style.
+  Lint: eslint-plugin-solid's solid/removed-api (v2 config) keeps reporting this site after migration.
+  Guide: https://github.com/solidjs/solid/blob/2105ffb8ca2fced55f5fac0763177fc93f97c2c2/documentation/solid-2.0/MIGRATION.md#imports-where-things-live-now
+
+src/nonmatches.tsx:8:30 [build] Move this Solid web renderer dynamic import().
+  Rule: imports/web-import
+  Why: Solid 2 publishes the web renderer from @solidjs/web instead of the solid-js/web subpath.
+  Guidance: Change only this dynamic import's module source to @solidjs/web and preserve its quote style. If this code reads Suspense, ErrorBoundary, SuspenseList, mergeProps, Index, createDynamic or renderToStringAsync from the module, replace those first; @solidjs/web does not export them.
+  Lint: eslint-plugin-solid's solid/removed-api (v2 config) keeps reporting this site after migration.
+  Guide: https://github.com/solidjs/solid/blob/2105ffb8ca2fced55f5fac0763177fc93f97c2c2/documentation/solid-2.0/MIGRATION.md#imports-where-things-live-now
+
+src/nonmatches.tsx:10:32 [build] Move this Solid web renderer require() call.
+  Rule: imports/web-import
+  Why: Solid 2 publishes the web renderer from @solidjs/web instead of the solid-js/web subpath.
+  Guidance: Change only this require call's module source to @solidjs/web and preserve its quote style. If this code reads Suspense, ErrorBoundary, SuspenseList, mergeProps, Index, createDynamic or renderToStringAsync from the module, replace those first; @solidjs/web does not export them.
+  Lint: eslint-plugin-solid's solid/removed-api (v2 config) keeps reporting this site after migration.
+  Guide: https://github.com/solidjs/solid/blob/2105ffb8ca2fced55f5fac0763177fc93f97c2c2/documentation/solid-2.0/MIGRATION.md#imports-where-things-live-now
+
+src/nonmatches.tsx:11:24 [build] Move this Solid web renderer dynamic import().
+  Rule: imports/web-import
+  Why: Solid 2 publishes the web renderer from @solidjs/web instead of the solid-js/web subpath.
+  Guidance: Change only this dynamic import's module source to @solidjs/web and preserve its quote style. If this code reads Suspense, ErrorBoundary, SuspenseList, mergeProps, Index, createDynamic or renderToStringAsync from the module, replace those first; @solidjs/web does not export them.
+  Lint: eslint-plugin-solid's solid/removed-api (v2 config) keeps reporting this site after migration.
+  Guide: https://github.com/solidjs/solid/blob/2105ffb8ca2fced55f5fac0763177fc93f97c2c2/documentation/solid-2.0/MIGRATION.md#imports-where-things-live-now
+
+src/types.tsx:1:1 [build] Point this @jsxImportSource pragma at the renderer package.
+  Rule: imports/jsx-types
+  Why: Solid 2.0.0-rc.21 does not ship jsx-runtime type entries from solid-js; web JSX types come from @solidjs/web (hyperscript from @solidjs/h).
+  Guidance: Change the pragma to @jsxImportSource @solidjs/web for web components, and mirror the change in tsconfig.json's compilerOptions.jsxImportSource, which this analyzer does not scan.
+  Guide: https://github.com/solidjs/solid/blob/2105ffb8ca2fced55f5fac0763177fc93f97c2c2/documentation/solid-2.0/MIGRATION.md#typescript-jsx-solid-js--renderer-package
+
+src/types.tsx:2:15 [build] Move this JSX type import off solid-js.
+  Rule: imports/jsx-types
+  Why: Solid 2.0.0-rc.21 no longer exports the JSX namespace or the JSXElement alias from solid-js; renderer packages own JSX types, and web projects import JSX from @solidjs/web.
+  Guidance: Move this specifier to a separate import type { JSX } from "@solidjs/web" statement (or set jsxImportSource to @solidjs/web and use the global JSX namespace), leaving every other solid-js binding in place. Also set compilerOptions.jsxImportSource to @solidjs/web in tsconfig.json, which this analyzer does not scan.
+  Guide: https://github.com/solidjs/solid/blob/2105ffb8ca2fced55f5fac0763177fc93f97c2c2/documentation/solid-2.0/MIGRATION.md#typescript-jsx-solid-js--renderer-package
+
+src/types.tsx:2:20 [build] Move this JSXElement type import off solid-js.
+  Rule: imports/jsx-types
+  Why: Solid 2.0.0-rc.21 no longer exports the JSX namespace or the JSXElement alias from solid-js; renderer packages own JSX types, and web projects import JSX from @solidjs/web.
+  Guidance: Replace JSXElement with JSX.Element from @solidjs/web, or with Element from solid-js for renderer-neutral component code. Also set compilerOptions.jsxImportSource to @solidjs/web in tsconfig.json, which this analyzer does not scan.
+  Guide: https://github.com/solidjs/solid/blob/2105ffb8ca2fced55f5fac0763177fc93f97c2c2/documentation/solid-2.0/MIGRATION.md#typescript-jsx-solid-js--renderer-package
+
+src/workspace-reference.tsx:3:32 [build] Migrate this mergeProps call to a reviewed merge.
+  Rule: props/merge-props
+  Why: Solid 2.0.0-rc.21 replaces mergeProps with merge, but merge treats a property that exists on a later source with the value undefined as the winner instead of falling through to an earlier source. This call has 2 semantic argument(s).
+  Guidance: Read every source in argument order, list all overlapping keys, and trace every consumer of the merged value. Replace mergeProps with merge from solid-js only after proving that every later overlapping value is non-undefined and that zero-argument behavior, one-source result identity, and mutation semantics do not matter. Stop without proposing a replacement when existing TypeScript types or the inferred Merge result type are the only runtime-safety evidence, a source is any/unknown/union-typed at runtime, a props or store proxy, a function, or has getters or dynamic key presence, source or result identity or mutation is observed, or a consumer depends on fallback-through-undefined behavior. If old undefined-fallback behavior is required, preserve live reactive reads with a targeted manual guard at the disputed property boundary rather than object spread or Object.assign. Ask for the smallest focused test or runtime observation that exposes the disputed property's value, precedence, identity, and mutation boundary.
+  Lint: eslint-plugin-solid's solid/removed-api (v2 config) keeps reporting this site after migration.
+  Guide: https://github.com/solidjs/solid/blob/2105ffb8ca2fced55f5fac0763177fc93f97c2c2/documentation/solid-2.0/MIGRATION.md#mergeprops--splitprops--merge--omit
+
+[solid-migration-assistant] Summary: 33 findings in 8 files
+Will not build or run on Solid 2: 30 findings
+   3  Migrate this mergeProps call to a reviewed merge.
+      sites: src/excluded.ts:4:1, src/migration-sites.tsx:19:15, src/workspace-reference.tsx:3:32
+   3  Split this one-argument createEffect into compute and apply callbacks (simple shape).
+      sites: src/migration-sites.tsx:32:1, src/nonmatches.tsx:4:1, src/nonmatches.tsx:5:1
+   2  Choose a Solid 2 replacement for this createComputed call.
+      sites: src/excluded.ts:3:1, src/migration-sites.tsx:31:1
+   2  Migrate this intrinsic JSX classList attribute to class.
+      sites: src/language.jsx:1:39, src/migration-sites.tsx:47:23
+   2  Move this Solid web renderer dynamic import().
+      sites: src/nonmatches.tsx:8:30, src/nonmatches.tsx:11:24
+   2  Move this Solid web renderer static import.
+      sites: src/language.js:1:24, src/migration-sites.tsx:15:24
+   1  Migrate this createMutable call to an owned createStore tuple.
+      sites: src/migration-sites.tsx:22:23
+   1  Migrate this imported ErrorBoundary JSX site to Errored.
+      sites: src/migration-sites.tsx:43:7
+   1  Migrate this imported Index JSX site to For keyed={false}.
+      sites: src/migration-sites.tsx:45:11
+   1  Migrate this imported Suspense JSX site to Loading.
+      sites: src/migration-sites.tsx:42:5
+   1  Migrate this imported SuspenseList JSX site to Reveal.
+      sites: src/migration-sites.tsx:44:9
+   1  Migrate this modifyMutable call to its target store's setter.
+      sites: src/migration-sites.tsx:23:1
+   1  Migrate this onMount lifecycle callback.
+      sites: src/migration-sites.tsx:36:1
+   1  Migrate this produce wrapper to draft-first setter behavior.
+      sites: src/migration-sites.tsx:27:22
+   1  Migrate this splitProps tuple to reviewed omit-based values.
+      sites: src/migration-sites.tsx:20:33
+   1  Migrate this unwrap call to a reviewed snapshot.
+      sites: src/migration-sites.tsx:26:22
+   1  Move this JSX type import off solid-js.
+      sites: src/types.tsx:2:15
+   1  Move this JSXElement type import off solid-js.
+      sites: src/types.tsx:2:20
+   1  Move this Solid 2 legacy subpath static import.
+      sites: src/migration-sites.tsx:14:63
+   1  Move this Solid web renderer re-export.
+      sites: src/nonmatches.tsx:7:24
+   1  Move this Solid web renderer require() call.
+      sites: src/nonmatches.tsx:10:32
+   1  Point this @jsxImportSource pragma at the renderer package.
+      sites: src/types.tsx:1:1
+Builds but behaves differently: 3 findings
+   2  Migrate this createMemo initial value.
+      sites: src/excluded.ts:5:1, src/migration-sites.tsx:21:16
+   1  Migrate this lowercase onclick attribute to a camelCase event handler.
+      sites: src/events.tsx:7:13
