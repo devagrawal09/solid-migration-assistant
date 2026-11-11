@@ -1,0 +1,76 @@
+{
+  "findings": [
+    {
+      "rule": "jsx/portal-props",
+      "file": "analysis/jsx/portal-props/fixtures/positive.fixture.tsx",
+      "line": 7,
+      "column": 11,
+      "severity": "build",
+      "headline": "Drop this Portal useShadow prop and host shadow content in a custom element.",
+      "why": "Solid 2.0.0-rc.21's @solidjs/web declares Portal as (props: { mount?: Element; children: JSX.Element }) and reads only props.mount and props.children at runtime, so the useShadow prop is a type error and has no effect even if the typecheck is skipped. Solid 1.x created a container element (a <div> or SVG <g>) and attached a shadow root to it when useShadow was set; rc.21's Portal creates no wrapper and offers no shadow-root option.",
+      "guidance": "Remove useShadow. If the portal content must live in a shadow root, render a custom element whose constructor attaches a shadow root and place the portal's children inside that element; the Portal's mount prop can target that element directly. Stop and ask when the shadow boundary is required for style isolation and no custom-element wrapper is available.",
+      "guide": "https://github.com/solidjs/solid/blob/2105ffb8ca2fced55f5fac0763177fc93f97c2c2/documentation/solid-2.0/MIGRATION.md#attributes--events-closer-to-html-and-fewer-namespaces",
+      "lint": []
+    },
+    {
+      "rule": "jsx/portal-props",
+      "file": "analysis/jsx/portal-props/fixtures/positive.fixture.tsx",
+      "line": 13,
+      "column": 11,
+      "severity": "build",
+      "headline": "Drop this Portal isSVG prop and pass an SVG mount instead.",
+      "why": "Solid 2.0.0-rc.21's @solidjs/web declares Portal as (props: { mount?: Element; children: JSX.Element }) and reads only props.mount and props.children at runtime, so the isSVG prop is a type error and has no effect even if the typecheck is skipped. Solid 1.x wrapped children in an SVG <g> element when isSVG was set; rc.21's Portal inserts children directly into the mount node and offers no namespace flag.",
+      "guidance": "Remove isSVG. To render into an SVG context, pass an SVG element (or an existing <g>) as the mount prop, created or looked up by the consumer. Stop and ask when the portal must create its own SVG container and the caller cannot supply one.",
+      "guide": "https://github.com/solidjs/solid/blob/2105ffb8ca2fced55f5fac0763177fc93f97c2c2/documentation/solid-2.0/MIGRATION.md#attributes--events-closer-to-html-and-fewer-namespaces",
+      "lint": []
+    },
+    {
+      "rule": "jsx/portal-props",
+      "file": "analysis/jsx/portal-props/fixtures/positive.fixture.tsx",
+      "line": 19,
+      "column": 11,
+      "severity": "build",
+      "headline": "Move this Portal ref onto the first child element.",
+      "why": "Solid 2.0.0-rc.21's @solidjs/web declares Portal as (props: { mount?: Element; children: JSX.Element }) and reads only props.mount and props.children at runtime, so the ref prop is a type error and has no effect even if the typecheck is skipped. Solid 1.x exposed the generated container element through ref; rc.21's Portal creates no container element, so a ref on Portal has nothing to point at.",
+      "guidance": "Remove ref from the Portal and put the ref on the first child element the portal renders (wrap the children in a single element if there was none), since the mount node is now caller-owned rather than Solid-created. Stop and ask when the ref consumer requires the container element identity Solid 1.x used to provide.",
+      "guide": "https://github.com/solidjs/solid/blob/2105ffb8ca2fced55f5fac0763177fc93f97c2c2/documentation/solid-2.0/MIGRATION.md#attributes--events-closer-to-html-and-fewer-namespaces",
+      "lint": []
+    },
+    {
+      "rule": "jsx/portal-props",
+      "file": "analysis/jsx/portal-props/fixtures/positive.fixture.tsx",
+      "line": 25,
+      "column": 11,
+      "severity": "build",
+      "headline": "Drop this Portal useShadow prop and host shadow content in a custom element.",
+      "why": "Solid 2.0.0-rc.21's @solidjs/web declares Portal as (props: { mount?: Element; children: JSX.Element }) and reads only props.mount and props.children at runtime, so the useShadow prop is a type error and has no effect even if the typecheck is skipped. Solid 1.x created a container element (a <div> or SVG <g>) and attached a shadow root to it when useShadow was set; rc.21's Portal creates no wrapper and offers no shadow-root option.",
+      "guidance": "Remove useShadow. If the portal content must live in a shadow root, render a custom element whose constructor attaches a shadow root and place the portal's children inside that element; the Portal's mount prop can target that element directly. Stop and ask when the shadow boundary is required for style isolation and no custom-element wrapper is available.",
+      "guide": "https://github.com/solidjs/solid/blob/2105ffb8ca2fced55f5fac0763177fc93f97c2c2/documentation/solid-2.0/MIGRATION.md#attributes--events-closer-to-html-and-fewer-namespaces",
+      "lint": []
+    },
+    {
+      "rule": "jsx/portal-props",
+      "file": "analysis/jsx/portal-props/fixtures/positive.fixture.tsx",
+      "line": 25,
+      "column": 21,
+      "severity": "build",
+      "headline": "Drop this Portal isSVG prop and pass an SVG mount instead.",
+      "why": "Solid 2.0.0-rc.21's @solidjs/web declares Portal as (props: { mount?: Element; children: JSX.Element }) and reads only props.mount and props.children at runtime, so the isSVG prop is a type error and has no effect even if the typecheck is skipped. Solid 1.x wrapped children in an SVG <g> element when isSVG was set; rc.21's Portal inserts children directly into the mount node and offers no namespace flag.",
+      "guidance": "Remove isSVG. To render into an SVG context, pass an SVG element (or an existing <g>) as the mount prop, created or looked up by the consumer. Stop and ask when the portal must create its own SVG container and the caller cannot supply one.",
+      "guide": "https://github.com/solidjs/solid/blob/2105ffb8ca2fced55f5fac0763177fc93f97c2c2/documentation/solid-2.0/MIGRATION.md#attributes--events-closer-to-html-and-fewer-namespaces",
+      "lint": []
+    },
+    {
+      "rule": "jsx/portal-props",
+      "file": "analysis/jsx/portal-props/fixtures/positive.fixture.tsx",
+      "line": 25,
+      "column": 27,
+      "severity": "build",
+      "headline": "Move this Portal ref onto the first child element.",
+      "why": "Solid 2.0.0-rc.21's @solidjs/web declares Portal as (props: { mount?: Element; children: JSX.Element }) and reads only props.mount and props.children at runtime, so the ref prop is a type error and has no effect even if the typecheck is skipped. Solid 1.x exposed the generated container element through ref; rc.21's Portal creates no container element, so a ref on Portal has nothing to point at.",
+      "guidance": "Remove ref from the Portal and put the ref on the first child element the portal renders (wrap the children in a single element if there was none), since the mount node is now caller-owned rather than Solid-created. Stop and ask when the ref consumer requires the container element identity Solid 1.x used to provide.",
+      "guide": "https://github.com/solidjs/solid/blob/2105ffb8ca2fced55f5fac0763177fc93f97c2c2/documentation/solid-2.0/MIGRATION.md#attributes--events-closer-to-html-and-fewer-namespaces",
+      "lint": []
+    }
+  ]
+}

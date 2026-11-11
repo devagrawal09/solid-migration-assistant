@@ -126,6 +126,23 @@ nodes:
             - "**/build/**"
             - "**/coverage/**"
             - "**/*.d.ts"
+      - name: analyzeDomAttrCasing
+        js-ast-grep:
+          js_file: scripts/analysis/analyzeDomAttrCasing.ts
+          base_path: "."
+          language: "tsx"
+          semantic_analysis: workspace
+          include:
+            - "**/*.js"
+            - "**/*.jsx"
+            - "**/*.ts"
+            - "**/*.tsx"
+          exclude:
+            - "**/node_modules/**"
+            - "**/dist/**"
+            - "**/build/**"
+            - "**/coverage/**"
+            - "**/*.d.ts"
       - name: analyzeDomAttrNamespaces
         js-ast-grep:
           js_file: scripts/analysis/analyzeDomAttrNamespaces.ts
@@ -197,6 +214,23 @@ nodes:
       - name: analyzeDynamicComponent
         js-ast-grep:
           js_file: scripts/analysis/analyzeDynamicComponent.ts
+          base_path: "."
+          language: "tsx"
+          semantic_analysis: workspace
+          include:
+            - "**/*.js"
+            - "**/*.jsx"
+            - "**/*.ts"
+            - "**/*.tsx"
+          exclude:
+            - "**/node_modules/**"
+            - "**/dist/**"
+            - "**/build/**"
+            - "**/coverage/**"
+            - "**/*.d.ts"
+      - name: analyzePortalProps
+        js-ast-grep:
+          js_file: scripts/analysis/analyzePortalProps.ts
           base_path: "."
           language: "tsx"
           semantic_analysis: workspace
@@ -415,6 +449,23 @@ nodes:
             - "**/build/**"
             - "**/coverage/**"
             - "**/*.d.ts"
+      - name: analyzeCreateSignalFunction
+        js-ast-grep:
+          js_file: scripts/analysis/analyzeCreateSignalFunction.ts
+          base_path: "."
+          language: "tsx"
+          semantic_analysis: workspace
+          include:
+            - "**/*.js"
+            - "**/*.jsx"
+            - "**/*.ts"
+            - "**/*.tsx"
+          exclude:
+            - "**/node_modules/**"
+            - "**/dist/**"
+            - "**/build/**"
+            - "**/coverage/**"
+            - "**/*.d.ts"
       - name: analyzeOnError
         js-ast-grep:
           js_file: scripts/analysis/analyzeOnError.ts
@@ -588,6 +639,23 @@ nodes:
       - name: analyzeCreateDeferred
         js-ast-grep:
           js_file: scripts/analysis/analyzeCreateDeferred.ts
+          base_path: "."
+          language: "tsx"
+          semantic_analysis: workspace
+          include:
+            - "**/*.js"
+            - "**/*.jsx"
+            - "**/*.ts"
+            - "**/*.tsx"
+          exclude:
+            - "**/node_modules/**"
+            - "**/dist/**"
+            - "**/build/**"
+            - "**/coverage/**"
+            - "**/*.d.ts"
+      - name: analyzeUseContextDefault
+        js-ast-grep:
+          js_file: scripts/analysis/analyzeUseContextDefault.ts
           base_path: "."
           language: "tsx"
           semantic_analysis: workspace

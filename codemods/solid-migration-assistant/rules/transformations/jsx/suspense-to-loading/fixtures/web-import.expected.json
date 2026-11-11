@@ -1,0 +1,20 @@
+{
+  "rewrites": [
+    {
+      "rule": "jsx/suspense-to-loading",
+      "file": "transformations/jsx/suspense-to-loading/fixtures/web-import.fixture.tsx",
+      "line": 2,
+      "column": 10,
+      "message": "Rewrite the Suspense import from solid-js/web to Loading.",
+      "guide": "https://github.com/solidjs/solid/blob/2105ffb8ca2fced55f5fac0763177fc93f97c2c2/documentation/solid-2.0/MIGRATION.md#suspense--errorboundary--loading--errored"
+    },
+    {
+      "rule": "jsx/suspense-to-loading",
+      "file": "transformations/jsx/suspense-to-loading/fixtures/web-import.fixture.tsx",
+      "line": 5,
+      "column": 10,
+      "message": "Rewrite <Suspense> to <Loading>, keeping its fallback attribute and children unchanged.",
+      "guide": "https://github.com/solidjs/solid/blob/2105ffb8ca2fced55f5fac0763177fc93f97c2c2/documentation/solid-2.0/MIGRATION.md#suspense--errorboundary--loading--errored"
+    }
+  ]
+}

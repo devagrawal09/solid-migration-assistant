@@ -1,0 +1,64 @@
+{
+  "findings": [
+    {
+      "rule": "reactivity/create-effect",
+      "file": "analysis/reactivity/create-effect/fixtures/split-form.fixture.tsx",
+      "line": 21,
+      "column": 1,
+      "severity": "build",
+      "headline": "Migrate this two-argument createEffect call.",
+      "why": "Solid 1 reads the second argument as the initial value, but Solid 2's signature is createEffect(compute, effectFn, options), so the second argument is the apply callback that receives each computed value. A second argument that is syntactically an arrow or function expression is the Solid 2 apply callback and is not reported; this call's second argument is not.",
+      "guidance": "If the second argument is a Solid 1 initial value, move it to a default parameter of the compute callback and pass the side effect as the second argument: createEffect((prev = INITIAL_VALUE) => compute(prev), (value) => { ... }). If the second argument is already the apply callback, the call is split and needs no change. Stop and ask when you cannot tell which of the two it is.",
+      "guide": "https://github.com/solidjs/solid/blob/2105ffb8ca2fced55f5fac0763177fc93f97c2c2/documentation/solid-2.0/MIGRATION.md#effects-lifecycle-and-cleanup",
+      "lint": []
+    },
+    {
+      "rule": "reactivity/create-effect",
+      "file": "analysis/reactivity/create-effect/fixtures/split-form.fixture.tsx",
+      "line": 22,
+      "column": 1,
+      "severity": "build",
+      "headline": "Migrate this two-argument createEffect call.",
+      "why": "Solid 1 reads the second argument as the initial value, but Solid 2's signature is createEffect(compute, effectFn, options), so the second argument is the apply callback that receives each computed value. A second argument that is syntactically an arrow or function expression is the Solid 2 apply callback and is not reported; this call's second argument is not.",
+      "guidance": "If the second argument is a Solid 1 initial value, move it to a default parameter of the compute callback and pass the side effect as the second argument: createEffect((prev = INITIAL_VALUE) => compute(prev), (value) => { ... }). If the second argument is already the apply callback, the call is split and needs no change. Stop and ask when you cannot tell which of the two it is.",
+      "guide": "https://github.com/solidjs/solid/blob/2105ffb8ca2fced55f5fac0763177fc93f97c2c2/documentation/solid-2.0/MIGRATION.md#effects-lifecycle-and-cleanup",
+      "lint": []
+    },
+    {
+      "rule": "reactivity/create-effect",
+      "file": "analysis/reactivity/create-effect/fixtures/split-form.fixture.tsx",
+      "line": 23,
+      "column": 1,
+      "severity": "build",
+      "headline": "Migrate this two-argument createEffect call.",
+      "why": "Solid 1 reads the second argument as the initial value, but Solid 2's signature is createEffect(compute, effectFn, options), so the second argument is the apply callback that receives each computed value. A second argument that is syntactically an arrow or function expression is the Solid 2 apply callback and is not reported; this call's second argument is not.",
+      "guidance": "If the second argument is a Solid 1 initial value, move it to a default parameter of the compute callback and pass the side effect as the second argument: createEffect((prev = INITIAL_VALUE) => compute(prev), (value) => { ... }). If the second argument is already the apply callback, the call is split and needs no change. Stop and ask when you cannot tell which of the two it is.",
+      "guide": "https://github.com/solidjs/solid/blob/2105ffb8ca2fced55f5fac0763177fc93f97c2c2/documentation/solid-2.0/MIGRATION.md#effects-lifecycle-and-cleanup",
+      "lint": []
+    },
+    {
+      "rule": "reactivity/create-effect",
+      "file": "analysis/reactivity/create-effect/fixtures/split-form.fixture.tsx",
+      "line": 24,
+      "column": 1,
+      "severity": "build",
+      "headline": "Migrate this two-argument createEffect call.",
+      "why": "Solid 1 reads the second argument as the initial value, but Solid 2's signature is createEffect(compute, effectFn, options), so the second argument is the apply callback that receives each computed value. A second argument that is syntactically an arrow or function expression is the Solid 2 apply callback and is not reported; this call's second argument is not.",
+      "guidance": "If the second argument is a Solid 1 initial value, move it to a default parameter of the compute callback and pass the side effect as the second argument: createEffect((prev = INITIAL_VALUE) => compute(prev), (value) => { ... }). If the second argument is already the apply callback, the call is split and needs no change. Stop and ask when you cannot tell which of the two it is.",
+      "guide": "https://github.com/solidjs/solid/blob/2105ffb8ca2fced55f5fac0763177fc93f97c2c2/documentation/solid-2.0/MIGRATION.md#effects-lifecycle-and-cleanup",
+      "lint": []
+    },
+    {
+      "rule": "reactivity/create-effect",
+      "file": "analysis/reactivity/create-effect/fixtures/split-form.fixture.tsx",
+      "line": 27,
+      "column": 1,
+      "severity": "build",
+      "headline": "Migrate this 3-argument createEffect call.",
+      "why": "Solid 1's signature is createEffect(fn, initialValue, options), but Solid 2's is createEffect(compute, effectFn, options): the second argument is the apply callback and options stay third. A second argument that is syntactically an arrow or function expression is the Solid 2 apply callback and is not reported; this call's second argument is not.",
+      "guidance": "Move the initial value to a default parameter of the compute callback, pass the side effect as the second argument, and keep the options object third, dropping any option Solid 2 does not support: createEffect((prev = INITIAL_VALUE) => compute(prev), (value) => { ... }, options). If the second argument is already the apply callback, only the options need checking. Stop and ask when you cannot tell the role of each argument.",
+      "guide": "https://github.com/solidjs/solid/blob/2105ffb8ca2fced55f5fac0763177fc93f97c2c2/documentation/solid-2.0/MIGRATION.md#effects-lifecycle-and-cleanup",
+      "lint": []
+    }
+  ]
+}

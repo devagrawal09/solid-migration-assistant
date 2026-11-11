@@ -1,0 +1,20 @@
+{
+  "rewrites": [
+    {
+      "rule": "jsx/error-boundary-to-errored",
+      "file": "transformations/jsx/error-boundary-to-errored/fixtures/replacement-already-imported.fixture.tsx",
+      "line": 2,
+      "column": 10,
+      "message": "Remove the ErrorBoundary import from solid-js; Errored is already imported.",
+      "guide": "https://github.com/solidjs/solid/blob/2105ffb8ca2fced55f5fac0763177fc93f97c2c2/documentation/solid-2.0/MIGRATION.md#suspense--errorboundary--loading--errored"
+    },
+    {
+      "rule": "jsx/error-boundary-to-errored",
+      "file": "transformations/jsx/error-boundary-to-errored/fixtures/replacement-already-imported.fixture.tsx",
+      "line": 7,
+      "column": 7,
+      "message": "Rewrite <ErrorBoundary> to <Errored>, keeping its non-function fallback attribute and children unchanged.",
+      "guide": "https://github.com/solidjs/solid/blob/2105ffb8ca2fced55f5fac0763177fc93f97c2c2/documentation/solid-2.0/MIGRATION.md#suspense--errorboundary--loading--errored"
+    }
+  ]
+}

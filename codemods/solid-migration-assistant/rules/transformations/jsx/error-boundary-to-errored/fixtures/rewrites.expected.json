@@ -1,0 +1,52 @@
+{
+  "rewrites": [
+    {
+      "rule": "jsx/error-boundary-to-errored",
+      "file": "transformations/jsx/error-boundary-to-errored/fixtures/rewrites.fixture.tsx",
+      "line": 2,
+      "column": 24,
+      "message": "Rewrite the ErrorBoundary import from solid-js to Errored.",
+      "guide": "https://github.com/solidjs/solid/blob/2105ffb8ca2fced55f5fac0763177fc93f97c2c2/documentation/solid-2.0/MIGRATION.md#suspense--errorboundary--loading--errored"
+    },
+    {
+      "rule": "jsx/error-boundary-to-errored",
+      "file": "transformations/jsx/error-boundary-to-errored/fixtures/rewrites.fixture.tsx",
+      "line": 9,
+      "column": 7,
+      "message": "Rewrite <ErrorBoundary> to <Errored>, keeping its non-function fallback attribute and children unchanged.",
+      "guide": "https://github.com/solidjs/solid/blob/2105ffb8ca2fced55f5fac0763177fc93f97c2c2/documentation/solid-2.0/MIGRATION.md#suspense--errorboundary--loading--errored"
+    },
+    {
+      "rule": "jsx/error-boundary-to-errored",
+      "file": "transformations/jsx/error-boundary-to-errored/fixtures/rewrites.fixture.tsx",
+      "line": 12,
+      "column": 11,
+      "message": "Rewrite <ErrorBoundary> to <Errored>, keeping its non-function fallback attribute and children unchanged.",
+      "guide": "https://github.com/solidjs/solid/blob/2105ffb8ca2fced55f5fac0763177fc93f97c2c2/documentation/solid-2.0/MIGRATION.md#suspense--errorboundary--loading--errored"
+    },
+    {
+      "rule": "jsx/error-boundary-to-errored",
+      "file": "transformations/jsx/error-boundary-to-errored/fixtures/rewrites.fixture.tsx",
+      "line": 22,
+      "column": 7,
+      "message": "Rewrite <ErrorBoundary> to <Errored>, keeping its non-function fallback attribute and children unchanged.",
+      "guide": "https://github.com/solidjs/solid/blob/2105ffb8ca2fced55f5fac0763177fc93f97c2c2/documentation/solid-2.0/MIGRATION.md#suspense--errorboundary--loading--errored"
+    },
+    {
+      "rule": "jsx/error-boundary-to-errored",
+      "file": "transformations/jsx/error-boundary-to-errored/fixtures/rewrites.fixture.tsx",
+      "line": 23,
+      "column": 7,
+      "message": "Rewrite <ErrorBoundary> to <Errored>, keeping its non-function fallback attribute and children unchanged.",
+      "guide": "https://github.com/solidjs/solid/blob/2105ffb8ca2fced55f5fac0763177fc93f97c2c2/documentation/solid-2.0/MIGRATION.md#suspense--errorboundary--loading--errored"
+    },
+    {
+      "rule": "jsx/error-boundary-to-errored",
+      "file": "transformations/jsx/error-boundary-to-errored/fixtures/rewrites.fixture.tsx",
+      "line": 24,
+      "column": 7,
+      "message": "Rewrite <ErrorBoundary> to <Errored>, keeping its non-function fallback attribute and children unchanged.",
+      "guide": "https://github.com/solidjs/solid/blob/2105ffb8ca2fced55f5fac0763177fc93f97c2c2/documentation/solid-2.0/MIGRATION.md#suspense--errorboundary--loading--errored"
+    }
+  ]
+}

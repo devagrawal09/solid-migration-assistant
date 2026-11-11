@@ -1,0 +1,88 @@
+{
+  "findings": [
+    {
+      "rule": "reactivity/use-context-default",
+      "file": "analysis/reactivity/use-context-default/fixtures/positive.fixture.tsx",
+      "line": 10,
+      "column": 15,
+      "severity": "behavior",
+      "headline": "Drop this useContext undefined fallback: rc.21 throws instead of returning undefined.",
+      "why": "Solid 2.0.0-rc.21 types createContext() without a default as Context<T> and throws ContextNotFoundError when no Provider is mounted, so useContext(TodosContext) returns T and never undefined; the ctx falsiness/null check here reads as dead code to a TypeScript reader and hides the throw at runtime.",
+      "guidance": "Delete the ctx falsiness/null/undefined check: a wrapper that threw on undefined becomes a plain useContext call, and callers that relied on the undefined fallback should either pass an explicit default to createContext (use null for an optional context — rc.21 treats undefined as \"not provided\" and still throws) or wrap the useContext call in try/catch. Stop and ask when the branch does real recovery (not just a throw), when the context's declaration is unclear, or when ctx escapes this function so the test might run far from here.",
+      "guide": "https://github.com/solidjs/solid/blob/2105ffb8ca2fced55f5fac0763177fc93f97c2c2/documentation/solid-2.0/MIGRATION.md#usecontext-on-a-default-less-context-returns-t-not-t--undefined",
+      "lint": []
+    },
+    {
+      "rule": "reactivity/use-context-default",
+      "file": "analysis/reactivity/use-context-default/fixtures/positive.fixture.tsx",
+      "line": 17,
+      "column": 15,
+      "severity": "behavior",
+      "headline": "Drop this useContext undefined fallback: rc.21 throws instead of returning undefined.",
+      "why": "Solid 2.0.0-rc.21 types createContext() without a default as Context<T> and throws ContextNotFoundError when no Provider is mounted, so useContext(TodosContext) returns T and never undefined; the ctx falsiness/null check here reads as dead code to a TypeScript reader and hides the throw at runtime.",
+      "guidance": "Delete the ctx falsiness/null/undefined check: a wrapper that threw on undefined becomes a plain useContext call, and callers that relied on the undefined fallback should either pass an explicit default to createContext (use null for an optional context — rc.21 treats undefined as \"not provided\" and still throws) or wrap the useContext call in try/catch. Stop and ask when the branch does real recovery (not just a throw), when the context's declaration is unclear, or when ctx escapes this function so the test might run far from here.",
+      "guide": "https://github.com/solidjs/solid/blob/2105ffb8ca2fced55f5fac0763177fc93f97c2c2/documentation/solid-2.0/MIGRATION.md#usecontext-on-a-default-less-context-returns-t-not-t--undefined",
+      "lint": []
+    },
+    {
+      "rule": "reactivity/use-context-default",
+      "file": "analysis/reactivity/use-context-default/fixtures/positive.fixture.tsx",
+      "line": 24,
+      "column": 15,
+      "severity": "behavior",
+      "headline": "Drop this useContext undefined fallback: rc.21 throws instead of returning undefined.",
+      "why": "Solid 2.0.0-rc.21 types createContext() without a default as Context<T> and throws ContextNotFoundError when no Provider is mounted, so useContext(TodosContext) returns T and never undefined; the ctx falsiness/null check here reads as dead code to a TypeScript reader and hides the throw at runtime.",
+      "guidance": "Delete the ctx falsiness/null/undefined check: a wrapper that threw on undefined becomes a plain useContext call, and callers that relied on the undefined fallback should either pass an explicit default to createContext (use null for an optional context — rc.21 treats undefined as \"not provided\" and still throws) or wrap the useContext call in try/catch. Stop and ask when the branch does real recovery (not just a throw), when the context's declaration is unclear, or when ctx escapes this function so the test might run far from here.",
+      "guide": "https://github.com/solidjs/solid/blob/2105ffb8ca2fced55f5fac0763177fc93f97c2c2/documentation/solid-2.0/MIGRATION.md#usecontext-on-a-default-less-context-returns-t-not-t--undefined",
+      "lint": []
+    },
+    {
+      "rule": "reactivity/use-context-default",
+      "file": "analysis/reactivity/use-context-default/fixtures/positive.fixture.tsx",
+      "line": 31,
+      "column": 15,
+      "severity": "behavior",
+      "headline": "Drop this useContext undefined fallback: rc.21 throws instead of returning undefined.",
+      "why": "Solid 2.0.0-rc.21 types createContext() without a default as Context<T> and throws ContextNotFoundError when no Provider is mounted, so useContext(TodosContext) returns T and never undefined; the ctx falsiness/null check here reads as dead code to a TypeScript reader and hides the throw at runtime.",
+      "guidance": "Delete the ctx falsiness/null/undefined check: a wrapper that threw on undefined becomes a plain useContext call, and callers that relied on the undefined fallback should either pass an explicit default to createContext (use null for an optional context — rc.21 treats undefined as \"not provided\" and still throws) or wrap the useContext call in try/catch. Stop and ask when the branch does real recovery (not just a throw), when the context's declaration is unclear, or when ctx escapes this function so the test might run far from here.",
+      "guide": "https://github.com/solidjs/solid/blob/2105ffb8ca2fced55f5fac0763177fc93f97c2c2/documentation/solid-2.0/MIGRATION.md#usecontext-on-a-default-less-context-returns-t-not-t--undefined",
+      "lint": []
+    },
+    {
+      "rule": "reactivity/use-context-default",
+      "file": "analysis/reactivity/use-context-default/fixtures/positive.fixture.tsx",
+      "line": 37,
+      "column": 15,
+      "severity": "behavior",
+      "headline": "Drop this useContext undefined fallback: rc.21 throws instead of returning undefined.",
+      "why": "Solid 2.0.0-rc.21 types createContext() without a default as Context<T> and throws ContextNotFoundError when no Provider is mounted, so useContext(TodosContext) returns T and never undefined; the ctx falsiness/null check here reads as dead code to a TypeScript reader and hides the throw at runtime.",
+      "guidance": "Delete the ctx falsiness/null/undefined check: a wrapper that threw on undefined becomes a plain useContext call, and callers that relied on the undefined fallback should either pass an explicit default to createContext (use null for an optional context — rc.21 treats undefined as \"not provided\" and still throws) or wrap the useContext call in try/catch. Stop and ask when the branch does real recovery (not just a throw), when the context's declaration is unclear, or when ctx escapes this function so the test might run far from here.",
+      "guide": "https://github.com/solidjs/solid/blob/2105ffb8ca2fced55f5fac0763177fc93f97c2c2/documentation/solid-2.0/MIGRATION.md#usecontext-on-a-default-less-context-returns-t-not-t--undefined",
+      "lint": []
+    },
+    {
+      "rule": "reactivity/use-context-default",
+      "file": "analysis/reactivity/use-context-default/fixtures/positive.fixture.tsx",
+      "line": 43,
+      "column": 15,
+      "severity": "behavior",
+      "headline": "Drop this useContext undefined fallback: rc.21 throws instead of returning undefined.",
+      "why": "Solid 2.0.0-rc.21 types createContext() without a default as Context<T> and throws ContextNotFoundError when no Provider is mounted, so useContext(TodosContext) returns T and never undefined; the ctx falsiness/null check here reads as dead code to a TypeScript reader and hides the throw at runtime.",
+      "guidance": "Delete the ctx falsiness/null/undefined check: a wrapper that threw on undefined becomes a plain useContext call, and callers that relied on the undefined fallback should either pass an explicit default to createContext (use null for an optional context — rc.21 treats undefined as \"not provided\" and still throws) or wrap the useContext call in try/catch. Stop and ask when the branch does real recovery (not just a throw), when the context's declaration is unclear, or when ctx escapes this function so the test might run far from here.",
+      "guide": "https://github.com/solidjs/solid/blob/2105ffb8ca2fced55f5fac0763177fc93f97c2c2/documentation/solid-2.0/MIGRATION.md#usecontext-on-a-default-less-context-returns-t-not-t--undefined",
+      "lint": []
+    },
+    {
+      "rule": "reactivity/use-context-default",
+      "file": "analysis/reactivity/use-context-default/fixtures/positive.fixture.tsx",
+      "line": 49,
+      "column": 15,
+      "severity": "behavior",
+      "headline": "Drop this useContext undefined fallback: rc.21 throws instead of returning undefined.",
+      "why": "Solid 2.0.0-rc.21 types createContext() without a default as Context<T> and throws ContextNotFoundError when no Provider is mounted, so useContext(UndefinedDefault) returns T and never undefined; the ctx falsiness/null check here reads as dead code to a TypeScript reader and hides the throw at runtime.",
+      "guidance": "Delete the ctx falsiness/null/undefined check: a wrapper that threw on undefined becomes a plain useContext call, and callers that relied on the undefined fallback should either pass an explicit default to createContext (use null for an optional context — rc.21 treats undefined as \"not provided\" and still throws) or wrap the useContext call in try/catch. Stop and ask when the branch does real recovery (not just a throw), when the context's declaration is unclear, or when ctx escapes this function so the test might run far from here.",
+      "guide": "https://github.com/solidjs/solid/blob/2105ffb8ca2fced55f5fac0763177fc93f97c2c2/documentation/solid-2.0/MIGRATION.md#usecontext-on-a-default-less-context-returns-t-not-t--undefined",
+      "lint": []
+    }
+  ]
+}

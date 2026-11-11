@@ -8,7 +8,12 @@ import {
   buildCodemodArguments,
   buildAgentReport,
   buildJsonReport,
+  declaredSolidVersion,
   DISCLOSURE,
+  ecosystemPackageFromHeadline,
+  filterEcosystemFindings,
+  isSolid2Range,
+  packagesOnSolid2Line,
   parseStepOutput,
   dirtyTreeReason,
   main,
@@ -17,6 +22,7 @@ import {
   projectFindings,
   resolveCodemodLauncher,
   runCodemod,
+  solid2Notice,
 } from "../shared/run-workflow.mjs";
 
 const packageDirectory = resolve(import.meta.dirname, "..");
@@ -418,6 +424,175 @@ test("ends usage and target failures with disclosure", () => {
     }
   } finally {
     rmSync(surface, { recursive: true, force: true });
+  }
+});
+
+test("drops ecosystem-apis findings for packages the manifest already pins to their Solid 2 line", () => {
+  // The ecosystem-apis rule has no access to package.json. A project that
+  // already upgraded its @solidjs/router or @solidjs/meta to the Solid 2
+  // line still gets per-import findings from the rule; the launcher drops
+  // them after collection so every output format agrees.
+  assert.equal(ecosystemPackageFromHeadline("Migrate this A import from @solidjs/router, which Solid 2 removes or moves."), "@solidjs/router");
+  assert.equal(ecosystemPackageFromHeadline("Review this Meta import from @solidjs/meta, whose Solid 2 behavior changed."), "@solidjs/meta");
+  assert.equal(ecosystemPackageFromHeadline("Replace this deprecated action import from @solidjs/router."), "@solidjs/router");
+  assert.equal(ecosystemPackageFromHeadline("Migrate this @solidjs/start/config import, which has no Solid 2 release."), "@solidjs/start/config");
+  assert.equal(ecosystemPackageFromHeadline("Split this one-argument createEffect into compute and apply callbacks (simple shape)."), null);
+
+  // The DEPENDENCY_MAP table decides which range counts as the Solid 2
+  // line; router asks for 2.0.0-next.*, meta asks for 1.0.0-next.*, and
+  // @solidjs/start (legacy: null) has no Solid 2 line to be on.
+  assert.deepEqual([...packagesOnSolid2Line({ dependencies: { "@solidjs/router": "2.0.0-next.42" } })], ["@solidjs/router"]);
+  assert.deepEqual([...packagesOnSolid2Line({ dependencies: { "@solidjs/router": "^1.0.1" } })], []);
+  assert.deepEqual([...packagesOnSolid2Line({ devDependencies: { "@solidjs/meta": "1.0.0-next.2" } })], ["@solidjs/meta"]);
+  assert.deepEqual([...packagesOnSolid2Line({ dependencies: { "@solidjs/meta": "0.29.8" } })], []);
+  assert.deepEqual([...packagesOnSolid2Line({ dependencies: { "@solidjs/start": "^2.0.0-next.1" } })], []);
+  assert.deepEqual([...packagesOnSolid2Line({})], []);
+  assert.deepEqual([...packagesOnSolid2Line(null)], []);
+
+  const routerFinding = { rule: "imports/ecosystem-apis", file: "src/a.tsx", line: 1, column: 10, severity: "build", headline: "Migrate this A import from @solidjs/router, which Solid 2 removes or moves.", why: "", guidance: "", lint: [], guide: "x" };
+  const metaFinding = { rule: "imports/ecosystem-apis", file: "src/b.tsx", line: 2, column: 1, severity: "behavior", headline: "Review this Meta import from @solidjs/meta, whose Solid 2 behavior changed.", why: "", guidance: "", lint: [], guide: "x" };
+  const startFinding = { rule: "imports/ecosystem-apis", file: "src/c.tsx", line: 3, column: 1, severity: "build", headline: "Migrate this @solidjs/start/config import, which has no Solid 2 release.", why: "", guidance: "", lint: [], guide: "x" };
+  const otherFinding = { rule: "reactivity/create-effect", file: "src/d.tsx", line: 4, column: 1, severity: "build", headline: "Migrate this two-argument createEffect call.", why: "", guidance: "", lint: [], guide: "x" };
+
+  const allFindings = [routerFinding, metaFinding, startFinding, otherFinding];
+  const migrated = { dependencies: { "@solidjs/router": "2.0.0-next.42", "@solidjs/meta": "1.0.0-next.2" } };
+  assert.deepEqual(
+    filterEcosystemFindings(allFindings, migrated).map((finding) => finding.rule + " " + finding.file),
+    ["imports/ecosystem-apis src/c.tsx", "reactivity/create-effect src/d.tsx"],
+  );
+  // A subpath specifier is matched to its root package.
+  const routerSubpath = { ...routerFinding, headline: "Migrate this fileRoutes import from @solidjs/router/fs, which Solid 2 removes or moves." };
+  assert.deepEqual(
+    filterEcosystemFindings([routerSubpath], migrated),
+    [],
+  );
+  // A project that already declares solid-js 2.x uses createSignal(fn) and
+  // createStore(fn) as the documented derived primitives, so that rule's
+  // review findings are dropped there and kept on Solid 1 projects.
+  const derivedFinding = { rule: "reactivity/create-signal-function", file: "src/e.tsx", line: 5, column: 1, severity: "behavior", headline: "Review this createSignal(fn) call: a function first argument now creates a writable derived signal.", why: "", guidance: "", lint: [], guide: "x" };
+  assert.deepEqual(
+    filterEcosystemFindings([derivedFinding, otherFinding], { dependencies: { "solid-js": "2.0.0-rc.18" } }).map((finding) => finding.rule),
+    ["reactivity/create-effect"],
+  );
+  assert.deepEqual(filterEcosystemFindings([derivedFinding], { dependencies: { "solid-js": "^1.9.7" } }), [derivedFinding]);
+  // Only a range whose lower bound is major 2 counts as the Solid 2 line.
+  for (const range of ["2.0.0-rc.21", "^2.0.0-rc.18", "~2.0.0", ">=2.0.0-rc.1", "=2.0.0", " 2.1.0"]) assert.equal(isSolid2Range(range), true, range);
+  for (const range of ["^1.9.7", "1.9.19", "<2.0.0", ">=1.0.0 <2.0.0", "next", "workspace:*", "", undefined]) assert.equal(isSolid2Range(range), false, String(range));
+  // When nothing is declared on the Solid 2 line, nothing is filtered.
+  assert.deepEqual(filterEcosystemFindings(allFindings, {}), allFindings);
+  assert.deepEqual(filterEcosystemFindings(allFindings, null), allFindings);
+  // The transform workflow is never filtered (its rewrites are not findings).
+  assert.deepEqual(
+    filterEcosystemFindings([{ rule: "other" }, routerFinding], migrated).map((finding) => finding.rule),
+    ["other"],
+  );
+
+  // End-to-end: on an analyze run, filter applies to every output format.
+  const reported = { findings: [routerFinding, metaFinding, otherFinding], rewrites: [] };
+  const stepOutput = `  SMA-REPORT ${JSON.stringify(reported)}`;
+  for (const format of ["json", "text", "agent"]) {
+    const surface = mkdtempSync(join(tmpdir(), "sma-ecosystem-filter-"));
+    try {
+      writeFileSync(join(surface, "package.json"), JSON.stringify(migrated));
+      const printed = [];
+      const originalLog = console.log;
+      console.log = (...values) => printed.push(values.join(" "));
+      let result;
+      try {
+        result = captureMain(["--format", format, "--target", surface], {
+          cwd: surface,
+          projectImpl: () => [],
+          runImpl: () => ({ status: 0, stderr: stepOutput }),
+        });
+      } finally {
+        console.log = originalLog;
+      }
+      assert.equal(result.status, 0);
+      const rendered = printed.join("\n");
+      assert.ok(!rendered.includes("@solidjs/router"), `${format}: must drop the @solidjs/router finding`);
+      assert.ok(!rendered.includes("@solidjs/meta"), `${format}: must drop the @solidjs/meta finding`);
+      assert.ok(rendered.includes("createEffect"), `${format}: must keep the non-ecosystem finding`);
+      if (format === "json") {
+        const document = JSON.parse(printed[0]);
+        assert.equal(document.summary.findings, 1);
+      }
+    } finally {
+      rmSync(surface, { recursive: true, force: true });
+    }
+  }
+});
+
+test("announces on stderr that the project already declares Solid 2", () => {
+  assert.equal(declaredSolidVersion({ dependencies: { "solid-js": "2.0.0-rc.18" } }), "2.0.0-rc.18");
+  assert.equal(declaredSolidVersion({ devDependencies: { "solid-js": "^1.9.3" } }), "^1.9.3");
+  assert.equal(declaredSolidVersion({ peerDependencies: { "solid-js": "^2.0.0" } }), "^2.0.0");
+  assert.equal(declaredSolidVersion({}), null);
+  assert.equal(declaredSolidVersion(null), null);
+  assert.equal(isSolid2Range("2.0.0-rc.18"), true);
+  assert.equal(isSolid2Range("^2.0.0"), true);
+  assert.equal(isSolid2Range("~2.0.0-next.42"), true);
+  assert.equal(isSolid2Range("^1.9.3"), false);
+  assert.equal(isSolid2Range("1.0.1"), false);
+  assert.equal(isSolid2Range(undefined), false);
+  assert.equal(solid2Notice({ dependencies: { "solid-js": "^1.9.3" } }), null);
+  const notice = solid2Notice({ dependencies: { "solid-js": "2.0.0-rc.18" } });
+  assert.match(notice, /^\[solid-migration-assistant\]/);
+  assert.match(notice, /already declares Solid 2/);
+  assert.match(notice, /understands Solid 1 source/);
+  assert.match(notice, /"2\.0\.0-rc\.18"/);
+
+  const stepOutput = `  SMA-REPORT ${JSON.stringify({ findings: [], rewrites: [] })}`;
+  const solid2 = mkdtempSync(join(tmpdir(), "sma-solid2-notice-"));
+  const solid1 = mkdtempSync(join(tmpdir(), "sma-solid1-no-notice-"));
+  try {
+    writeFileSync(join(solid2, "package.json"), JSON.stringify({ dependencies: { "solid-js": "2.0.0-rc.18", "@solidjs/web": "2.0.0-rc.18" } }));
+    writeFileSync(join(solid1, "package.json"), JSON.stringify({ dependencies: { "solid-js": "^1.9.3" } }));
+
+    const originalLog = console.log;
+    console.log = () => {};
+    let two;
+    let one;
+    try {
+      two = captureMain(["--target", solid2], {
+        cwd: solid2,
+        projectImpl: () => [],
+        runImpl: () => ({ status: 0, stderr: stepOutput }),
+      });
+      one = captureMain(["--target", solid1], {
+        cwd: solid1,
+        projectImpl: () => [],
+        runImpl: () => ({ status: 0, stderr: stepOutput }),
+      });
+    } finally {
+      console.log = originalLog;
+    }
+    assert.equal(two.status, 0);
+    assert.ok(two.diagnostics.some((line) => /already declares Solid 2/.test(line)), "Solid 2 project must print the notice on stderr");
+    // Notice is emitted before the final disclosure.
+    const noticeIndex = two.diagnostics.findIndex((line) => /already declares Solid 2/.test(line));
+    const disclosureIndex = two.diagnostics.indexOf(DISCLOSURE);
+    assert.ok(noticeIndex < disclosureIndex, "notice must precede DISCLOSURE");
+    assert.equal(one.status, 0);
+    assert.ok(!one.diagnostics.some((line) => /already declares Solid 2/.test(line)), "Solid 1 project must not print the notice");
+
+    // Transform never prints the notice: it is scoped to analyze output.
+    let transform;
+    const originalLog2 = console.log;
+    console.log = () => {};
+    try {
+      transform = captureMain(["transform", "--allow-dirty", "--target", solid2], {
+        cwd: solid2,
+        projectImpl: () => assert.fail("transform must not read manifest findings"),
+        runImpl: () => ({ status: 0, stderr: stepOutput }),
+      });
+    } finally {
+      console.log = originalLog2;
+    }
+    assert.equal(transform.status, 0);
+    assert.ok(!transform.diagnostics.some((line) => /already declares Solid 2/.test(line)), "transform must not print the analyzer-scoped notice");
+  } finally {
+    rmSync(solid2, { recursive: true, force: true });
+    rmSync(solid1, { recursive: true, force: true });
   }
 });
 

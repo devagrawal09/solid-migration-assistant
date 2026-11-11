@@ -1,5 +1,17 @@
-[solid-migration-assistant] 63 rewrites applied. Review the diff and run the project's own checks.
+[solid-migration-assistant] 69 rewrites applied. Review the diff and run the project's own checks.
 
+src/boundaries.tsx:4:24 Rewrite the ErrorBoundary import from solid-js to Errored.
+  Rule: jsx/error-boundary-to-errored  Guide: https://github.com/solidjs/solid/blob/2105ffb8ca2fced55f5fac0763177fc93f97c2c2/documentation/solid-2.0/MIGRATION.md#suspense--errorboundary--loading--errored
+src/boundaries.tsx:4:33 Rewrite the Suspense import from solid-js to Loading.
+  Rule: jsx/suspense-to-loading  Guide: https://github.com/solidjs/solid/blob/2105ffb8ca2fced55f5fac0763177fc93f97c2c2/documentation/solid-2.0/MIGRATION.md#suspense--errorboundary--loading--errored
+src/boundaries.tsx:11:7 Rewrite <Suspense> to <Loading>, keeping its fallback attribute and children unchanged.
+  Rule: jsx/suspense-to-loading  Guide: https://github.com/solidjs/solid/blob/2105ffb8ca2fced55f5fac0763177fc93f97c2c2/documentation/solid-2.0/MIGRATION.md#suspense--errorboundary--loading--errored
+src/boundaries.tsx:12:9 Rewrite <ErrorBoundary> to <Errored>, keeping its non-function fallback attribute and children unchanged.
+  Rule: jsx/error-boundary-to-errored  Guide: https://github.com/solidjs/solid/blob/2105ffb8ca2fced55f5fac0763177fc93f97c2c2/documentation/solid-2.0/MIGRATION.md#suspense--errorboundary--loading--errored
+src/boundaries.tsx:14:11 Rewrite <ErrorBoundary> to <Errored>, keeping its non-function fallback attribute and children unchanged.
+  Rule: jsx/error-boundary-to-errored  Guide: https://github.com/solidjs/solid/blob/2105ffb8ca2fced55f5fac0763177fc93f97c2c2/documentation/solid-2.0/MIGRATION.md#suspense--errorboundary--loading--errored
+src/boundaries.tsx:17:7 Rewrite <Suspense> to <Loading>, keeping its fallback attribute and children unchanged.
+  Rule: jsx/suspense-to-loading  Guide: https://github.com/solidjs/solid/blob/2105ffb8ca2fced55f5fac0763177fc93f97c2c2/documentation/solid-2.0/MIGRATION.md#suspense--errorboundary--loading--errored
 src/class-list.tsx:14:14 Rewrite the classList attribute on <section> to class, preserving its value expression.
   Rule: jsx/class-list-to-class  Guide: https://github.com/solidjs/solid/blob/2105ffb8ca2fced55f5fac0763177fc93f97c2c2/documentation/solid-2.0/MIGRATION.md#classlist--class-objectarray-forms
 src/class-list.tsx:15:23 Rewrite the classList attribute on <div> to class, preserving its value expression.
@@ -127,7 +139,7 @@ src/types.tsx:4:26 Relocate the JSX type import from solid-js to @solidjs/web.
 src/types.tsx:5:15 Move the JSX type specifier out of this solid-js import into a separate @solidjs/web type import.
   Rule: imports/jsx-type-relocation  Guide: https://github.com/solidjs/solid/blob/2105ffb8ca2fced55f5fac0763177fc93f97c2c2/documentation/solid-2.0/MIGRATION.md#typescript-jsx-solid-js--renderer-package
 
-[solid-migration-assistant] Summary: 63 rewrites in 16 files
+[solid-migration-assistant] Summary: 69 rewrites in 17 files
    7  Relocate solid-js/html to @solidjs/html.
       sites: src/nested/deep.jsx:17:24, src/plain.js:3:22, src/relocations.tsx:2:18, src/relocations.tsx:7:36, src/relocations.tsx:10:36, src/relocations.tsx:17:15, src/relocations.tsx:19:28
    6  Relocate solid-js/universal to @solidjs/universal.
@@ -146,6 +158,10 @@ src/types.tsx:5:15 Move the JSX type specifier out of this solid-js import into 
       sites: src/store-merge.ts:6:1, src/store.ts:6:1, src/store.ts:7:1
    2  Relocate solid-js/jsx-dev-runtime to @solidjs/web/jsx-dev-runtime.
       sites: src/relocations.tsx:5:24, src/relocations.tsx:13:37
+   2  Rewrite <ErrorBoundary> to <Errored>, keeping its non-function fallback attribute and children unchanged.
+      sites: src/boundaries.tsx:12:9, src/boundaries.tsx:14:11
+   2  Rewrite <Suspense> to <Loading>, keeping its fallback attribute and children unchanged.
+      sites: src/boundaries.tsx:11:7, src/boundaries.tsx:17:7
    2  Rewrite the classList attribute on <div> to class, preserving its value expression.
       sites: src/class-list.tsx:15:23, src/nested/deep.jsx:11:41
    2  Rewrite the onclick event handler attribute on <button> to onClick, preserving its value expression.
@@ -184,6 +200,10 @@ src/types.tsx:5:15 Move the JSX type specifier out of this solid-js import into 
       sites: src/effects.ts:5:1
    1  Rewrite the @jsxImportSource pragma from solid-js to @solidjs/web.
       sites: src/types.tsx:1:1
+   1  Rewrite the ErrorBoundary import from solid-js to Errored.
+      sites: src/boundaries.tsx:4:24
+   1  Rewrite the Suspense import from solid-js to Loading.
+      sites: src/boundaries.tsx:4:33
    1  Rewrite the classList attribute on <section> to class, preserving its value expression.
       sites: src/class-list.tsx:14:14
    1  Rewrite the classList attribute on <span> to class, preserving its value expression.

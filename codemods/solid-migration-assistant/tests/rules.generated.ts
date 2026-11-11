@@ -6,11 +6,13 @@ import { analyzeWebImport } from "../rules/analysis/imports/web-import/web-impor
 import { analyzeJsxClassListAttributes } from "../rules/analysis/jsx/class-list/class-list.ts";
 import { analyzeJsxComponentRenames } from "../rules/analysis/jsx/component-renames/component-renames.ts";
 import { analyzeContextProvider } from "../rules/analysis/jsx/context-provider/context-provider.ts";
+import { analyzeDomAttrCasing } from "../rules/analysis/jsx/dom-attr-casing/dom-attr-casing.ts";
 import { analyzeDomAttrNamespaces } from "../rules/analysis/jsx/dom-attr-namespaces/dom-attr-namespaces.ts";
 import { analyzeDomEventNamespaces } from "../rules/analysis/jsx/dom-event-namespaces/dom-event-namespaces.ts";
 import { analyzeDomLowercaseEvents } from "../rules/analysis/jsx/dom-lowercase-events/dom-lowercase-events.ts";
 import { analyzeDomUseDirective } from "../rules/analysis/jsx/dom-use-directive/dom-use-directive.ts";
 import { analyzeDynamicComponent } from "../rules/analysis/jsx/dynamic-component/dynamic-component.ts";
+import { analyzePortalProps } from "../rules/analysis/jsx/portal-props/portal-props.ts";
 import { analyzeRefCallbackScope } from "../rules/analysis/jsx/ref-callback-scope/ref-callback-scope.ts";
 import { analyzeOnCleanup } from "../rules/analysis/lifecycle/on-cleanup/on-cleanup.ts";
 import { analyzeOnMount } from "../rules/analysis/lifecycle/on-mount/on-mount.ts";
@@ -23,12 +25,14 @@ import { analyzeCreateEffect } from "../rules/analysis/reactivity/create-effect/
 import { analyzeCreateMemo } from "../rules/analysis/reactivity/create-memo/create-memo.ts";
 import { analyzeCreateResource } from "../rules/analysis/reactivity/create-resource/create-resource.ts";
 import { analyzeCreateSelector } from "../rules/analysis/reactivity/create-selector/create-selector.ts";
+import { analyzeCreateSignalFunction } from "../rules/analysis/reactivity/create-signal-function/create-signal-function.ts";
 import { analyzeOnError, analyzeCatchError, analyzeResetErrorBoundaries } from "../rules/analysis/reactivity/error-handling/error-handling.ts";
 import { analyzeFrom, analyzeObservable } from "../rules/analysis/reactivity/from-observable/from-observable.ts";
 import { analyzeIndexArray } from "../rules/analysis/reactivity/index-array/index-array.ts";
 import { analyzeNestedCreateRoot } from "../rules/analysis/reactivity/nested-create-root/nested-create-root.ts";
 import { analyzeOnHelper } from "../rules/analysis/reactivity/on-helper/on-helper.ts";
 import { analyzeStartTransition, analyzeUseTransition, analyzeCreateDeferred } from "../rules/analysis/reactivity/transition-apis/transition-apis.ts";
+import { analyzeUseContextDefault } from "../rules/analysis/reactivity/use-context-default/use-context-default.ts";
 import { analyzeEqualFn, analyzeGetListener, analyzeWriteSignal, analyzeEnableScheduling } from "../rules/analysis/reactivity/utility-renames/utility-renames.ts";
 import { analyzeCreateMutable, analyzeModifyMutable } from "../rules/analysis/store/mutable/mutable.ts";
 import { analyzeProduce } from "../rules/analysis/store/produce/produce.ts";
@@ -39,8 +43,10 @@ import { relocateLegacySubpaths } from "../rules/transformations/imports/legacy-
 import { relocateWebPackage } from "../rules/transformations/imports/web-package-relocation/web-package-relocation.ts";
 import { rewriteClassListToClass } from "../rules/transformations/jsx/class-list-to-class/class-list-to-class.ts";
 import { rewriteContextProvider } from "../rules/transformations/jsx/context-provider-to-context/context-provider-to-context.ts";
+import { rewriteErrorBoundaryToErrored } from "../rules/transformations/jsx/error-boundary-to-errored/error-boundary-to-errored.ts";
 import { rewriteIndexToFor } from "../rules/transformations/jsx/index-to-for/index-to-for.ts";
 import { rewriteLowercaseEventHandlers } from "../rules/transformations/jsx/lowercase-event-handlers/lowercase-event-handlers.ts";
+import { rewriteSuspenseToLoading } from "../rules/transformations/jsx/suspense-to-loading/suspense-to-loading.ts";
 import { rewriteOnHelper } from "../rules/transformations/reactivity/on-helper-split/on-helper-split.ts";
 import { rewriteStoreSetterLiteralPaths } from "../rules/transformations/store/setter-literal-paths/setter-literal-paths.ts";
 
@@ -52,11 +58,13 @@ export const ANALYSIS_RULES = {
   "jsx/class-list": [analyzeJsxClassListAttributes],
   "jsx/component-renames": [analyzeJsxComponentRenames],
   "jsx/context-provider": [analyzeContextProvider],
+  "jsx/dom-attr-casing": [analyzeDomAttrCasing],
   "jsx/dom-attr-namespaces": [analyzeDomAttrNamespaces],
   "jsx/dom-event-namespaces": [analyzeDomEventNamespaces],
   "jsx/dom-lowercase-events": [analyzeDomLowercaseEvents],
   "jsx/dom-use-directive": [analyzeDomUseDirective],
   "jsx/dynamic-component": [analyzeDynamicComponent],
+  "jsx/portal-props": [analyzePortalProps],
   "jsx/ref-callback-scope": [analyzeRefCallbackScope],
   "lifecycle/on-cleanup": [analyzeOnCleanup],
   "lifecycle/on-mount": [analyzeOnMount],
@@ -69,12 +77,14 @@ export const ANALYSIS_RULES = {
   "reactivity/create-memo": [analyzeCreateMemo],
   "reactivity/create-resource": [analyzeCreateResource],
   "reactivity/create-selector": [analyzeCreateSelector],
+  "reactivity/create-signal-function": [analyzeCreateSignalFunction],
   "reactivity/error-handling": [analyzeOnError, analyzeCatchError, analyzeResetErrorBoundaries],
   "reactivity/from-observable": [analyzeFrom, analyzeObservable],
   "reactivity/index-array": [analyzeIndexArray],
   "reactivity/nested-create-root": [analyzeNestedCreateRoot],
   "reactivity/on-helper": [analyzeOnHelper],
   "reactivity/transition-apis": [analyzeStartTransition, analyzeUseTransition, analyzeCreateDeferred],
+  "reactivity/use-context-default": [analyzeUseContextDefault],
   "reactivity/utility-renames": [analyzeEqualFn, analyzeGetListener, analyzeWriteSignal, analyzeEnableScheduling],
   "store/mutable": [analyzeCreateMutable, analyzeModifyMutable],
   "store/produce": [analyzeProduce],
@@ -88,8 +98,10 @@ export const TRANSFORM_RULES = {
   "imports/web-package-relocation": [relocateWebPackage],
   "jsx/class-list-to-class": [rewriteClassListToClass],
   "jsx/context-provider-to-context": [rewriteContextProvider],
+  "jsx/error-boundary-to-errored": [rewriteErrorBoundaryToErrored],
   "jsx/index-to-for": [rewriteIndexToFor],
   "jsx/lowercase-event-handlers": [rewriteLowercaseEventHandlers],
+  "jsx/suspense-to-loading": [rewriteSuspenseToLoading],
   "reactivity/on-helper-split": [rewriteOnHelper],
   "store/setter-literal-paths": [rewriteStoreSetterLiteralPaths],
 };

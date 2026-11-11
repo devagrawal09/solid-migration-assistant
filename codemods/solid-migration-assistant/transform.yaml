@@ -92,6 +92,23 @@ nodes:
             - "**/build/**"
             - "**/coverage/**"
             - "**/*.d.ts"
+      - name: rewriteErrorBoundaryToErrored
+        js-ast-grep:
+          js_file: scripts/transformations/rewriteErrorBoundaryToErrored.ts
+          base_path: "."
+          language: "tsx"
+          semantic_analysis: workspace
+          include:
+            - "**/*.js"
+            - "**/*.jsx"
+            - "**/*.ts"
+            - "**/*.tsx"
+          exclude:
+            - "**/node_modules/**"
+            - "**/dist/**"
+            - "**/build/**"
+            - "**/coverage/**"
+            - "**/*.d.ts"
       - name: rewriteIndexToFor
         js-ast-grep:
           js_file: scripts/transformations/rewriteIndexToFor.ts
@@ -112,6 +129,23 @@ nodes:
       - name: rewriteLowercaseEventHandlers
         js-ast-grep:
           js_file: scripts/transformations/rewriteLowercaseEventHandlers.ts
+          base_path: "."
+          language: "tsx"
+          semantic_analysis: workspace
+          include:
+            - "**/*.js"
+            - "**/*.jsx"
+            - "**/*.ts"
+            - "**/*.tsx"
+          exclude:
+            - "**/node_modules/**"
+            - "**/dist/**"
+            - "**/build/**"
+            - "**/coverage/**"
+            - "**/*.d.ts"
+      - name: rewriteSuspenseToLoading
+        js-ast-grep:
+          js_file: scripts/transformations/rewriteSuspenseToLoading.ts
           base_path: "."
           language: "tsx"
           semantic_analysis: workspace

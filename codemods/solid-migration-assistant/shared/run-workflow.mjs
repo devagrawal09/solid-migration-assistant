@@ -49,7 +49,7 @@ export function projectFindings(target) {
     };
     const solid = declared["solid-js"];
     const web = declared["@solidjs/web"];
-    const onSolid2 = typeof solid === "string" && /(^|[^0-9.])2\.0\.0/.test(solid);
+    const onSolid2 = isSolid2Range(solid);
     const problems = [];
     if (typeof solid === "string" && !onSolid2) {
       problems.push(`solid-js is declared as ${JSON.stringify(solid)}, a Solid 1 range`);
@@ -151,6 +151,121 @@ function readJsonLike(path) {
       return undefined;
     }
   }
+}
+
+/**
+ * The ecosystem-apis rule has no access to package.json (rules only receive
+ * `{ filename }`), so a project that has already moved an ecosystem package
+ * to its Solid 2 line (`@solidjs/router` 2.0.0-next.*, `@solidjs/meta`
+ * 1.0.0-next.*, …) still gets one finding per surviving import that the
+ * rule's audited tables list. Filter them here, after collection, so every
+ * output format (text, JSON, agent) agrees. The audited Solid 2 line per
+ * package is encoded by `DEPENDENCY_MAP[*].legacy`: a non-null `legacy`
+ * returning `false` for the declared range means the package is already on
+ * its Solid 2 line.
+ */
+export function filterEcosystemFindings(findings, manifest) {
+  const solid2 = packagesOnSolid2Line(manifest);
+  // In a project that already declares solid-js 2.x, a function first
+  // argument to createSignal or createStore is the documented Solid 2
+  // derived form, not a Solid 1 function value, so that rule's review
+  // findings are noise there.
+  const coreOnSolid2 = isSolid2Range(declaredSolidVersion(manifest));
+  if (solid2.size === 0 && !coreOnSolid2) return findings;
+  return findings.filter((finding) => {
+    if (coreOnSolid2 && finding.rule === "reactivity/create-signal-function") return false;
+    if (finding.rule !== "imports/ecosystem-apis") return true;
+    const pkg = ecosystemPackageFromHeadline(finding.headline);
+    if (pkg === null) return true;
+    return !solid2.has(rootPackage(pkg));
+  });
+}
+
+/**
+ * The set of ecosystem packages whose declared range in `manifest` sits on
+ * the Solid 2 line audited by `shared/dependencies.mjs`. A package whose
+ * `legacy` predicate is `null` has no Solid 2 line at all, so it is never
+ * returned, even when the manifest declares a 2.x range for it.
+ */
+export function packagesOnSolid2Line(manifest) {
+  const solid2 = new Set();
+  if (!manifest || typeof manifest !== "object") return solid2;
+  const declared = {
+    ...(manifest.dependencies ?? {}),
+    ...(manifest.devDependencies ?? {}),
+    ...(manifest.peerDependencies ?? {}),
+  };
+  for (const entry of DEPENDENCY_MAP) {
+    if (entry.legacy === null) continue;
+    const range = declared[entry.name];
+    if (typeof range !== "string") continue;
+    const comparable = /^[\s^~<>=v]*\d/.test(range);
+    if (comparable && !entry.legacy(range)) solid2.add(entry.name);
+  }
+  return solid2;
+}
+
+/**
+ * The package the ecosystem-apis rule names in its headline. The rule
+ * writes three per-name forms, all ending in `from <package>` followed by
+ * `,` or `.`, plus one package-level form for `@solidjs/start` / `vinxi`
+ * subpaths with no mapping: `Migrate this <package> import, which has no
+ * Solid 2 release.`. Returns the package (possibly a subpath like
+ * `@solidjs/start/config`), or null for a headline this rule did not write.
+ */
+export function ecosystemPackageFromHeadline(headline) {
+  if (typeof headline !== "string") return null;
+  const fromMatch = headline.match(/ import from ([^\s,.]+)/);
+  if (fromMatch !== null) return fromMatch[1];
+  const noReleaseMatch = headline.match(/^Migrate this (\S+) import, which has no Solid 2 release\.$/);
+  if (noReleaseMatch !== null) return noReleaseMatch[1];
+  return null;
+}
+
+/** The root npm package name for a bare or subpath import specifier. */
+function rootPackage(name) {
+  if (name.startsWith("@")) {
+    const parts = name.split("/");
+    return parts.length >= 2 ? `${parts[0]}/${parts[1]}` : name;
+  }
+  return name.split("/")[0];
+}
+
+/**
+ * The declared solid-js range from `manifest`, or null when none is
+ * declared. Peer dependencies are included so a library that peers on
+ * solid-js is still seen as declaring it.
+ */
+export function declaredSolidVersion(manifest) {
+  if (!manifest || typeof manifest !== "object") return null;
+  const declared = {
+    ...(manifest.dependencies ?? {}),
+    ...(manifest.devDependencies ?? {}),
+    ...(manifest.peerDependencies ?? {}),
+  };
+  const range = declared["solid-js"];
+  return typeof range === "string" ? range : null;
+}
+
+/**
+ * Whether `range` is on the Solid 2 line: an exact, caret, tilde, `=`, `>`,
+ * or `>=` range whose major is 2 (any prerelease or release). An upper
+ * bound such as `<2.0.0` or `>=1.0.0 <2.0.0`, a dist-tag, or a workspace
+ * protocol is not.
+ */
+export function isSolid2Range(range) {
+  return typeof range === "string" && /^\s*(?:[\^~=v]|>=?)?\s*2\.\d/.test(range);
+}
+
+/**
+ * The one-line stderr notice that this project's package.json already
+ * declares Solid 2, so remaining findings are Solid 1 API sites. Returns
+ * null when the project does not declare Solid 2.
+ */
+export function solid2Notice(manifest) {
+  const range = declaredSolidVersion(manifest);
+  if (!isSolid2Range(range)) return null;
+  return `[solid-migration-assistant] This project's package.json already declares Solid 2 (solid-js ${JSON.stringify(range)}). This analyzer understands Solid 1 source, so any findings below are sites that still use Solid 1 APIs in a project that otherwise declares Solid 2.`;
 }
 
 export class CliUsageError extends Error {}
@@ -392,16 +507,20 @@ function run(argumentsList, invocationDirectory, runImpl, dirtyImpl, projectImpl
     if (reason !== null) return fail(reason);
   }
 
+  const manifest = parsed.workflow === "analyze" ? readJsonLike(resolve(target, "package.json")) : null;
   const project = parsed.workflow === "analyze" ? projectImpl(target) : [];
   const result = runImpl(target, parsed.workflow);
   if (result.error) throw result.error;
   const status = result.status ?? 1;
   const { findings, rewrites, diagnostics } = parseStepOutput(result.stderr);
   if (diagnostics.length > 0) console.error(diagnostics.join("\n"));
+  const combinedFindings = parsed.workflow === "analyze"
+    ? filterEcosystemFindings([...project, ...findings], manifest)
+    : [...project, ...findings];
   const report = buildJsonReport({
     workflow: parsed.workflow,
     target,
-    findings: [...project, ...findings],
+    findings: combinedFindings,
     rewrites,
     status,
   });
@@ -416,6 +535,10 @@ function run(argumentsList, invocationDirectory, runImpl, dirtyImpl, projectImpl
         ? text
         : `[solid-migration-assistant] ${parsed.workflow === "analyze" ? "No supported migration sites found. This is not proof that the project is ready for Solid 2; run its own type, build, and test checks." : "Nothing to rewrite."}`,
     );
+  }
+  if (parsed.workflow === "analyze") {
+    const notice = solid2Notice(manifest);
+    if (notice !== null) console.error(notice);
   }
   return status;
 }

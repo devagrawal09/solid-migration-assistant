@@ -9,11 +9,11 @@
   "target": "<target>",
   "status": 0,
   "summary": {
-    "findings": 35,
+    "findings": 40,
     "files": 10,
     "bySeverity": {
-      "build": 32,
-      "behavior": 3,
+      "build": 34,
+      "behavior": 6,
       "deprecated": 0
     }
   },
@@ -116,8 +116,8 @@
     {
       "rule": "imports/beta32-subpaths",
       "file": "src/migration-sites.tsx",
-      "line": 14,
-      "column": 63,
+      "line": 16,
+      "column": 76,
       "severity": "build",
       "headline": "Move this Solid 2 legacy subpath static import.",
       "why": "Solid 2 publishes solid-js/store from solid-js.",
@@ -130,8 +130,8 @@
     {
       "rule": "imports/web-import",
       "file": "src/migration-sites.tsx",
-      "line": 15,
-      "column": 24,
+      "line": 17,
+      "column": 32,
       "severity": "build",
       "headline": "Move this Solid web renderer static import.",
       "why": "Solid 2 publishes the web renderer from @solidjs/web instead of the solid-js/web subpath.",
@@ -142,9 +142,45 @@
       "guide": "https://github.com/solidjs/solid/blob/2105ffb8ca2fced55f5fac0763177fc93f97c2c2/documentation/solid-2.0/MIGRATION.md#imports-where-things-live-now"
     },
     {
+      "rule": "reactivity/create-signal-function",
+      "file": "src/migration-sites.tsx",
+      "line": 21,
+      "column": 19,
+      "severity": "behavior",
+      "headline": "Review this createSignal(fn) call: a function first argument now creates a writable derived signal.",
+      "why": "Solid 1.9.13 stored this call's first argument as the signal's initial value, so a function was returned literally by the getter, but Solid 2.0.0-rc.21's \"new function forms\" section reads a function first argument as a derived computation (createSignal(fn) returns a writable derived signal; createStore(fn, seed) returns a derived store), so the signal now runs the function and tracks its reactive reads.",
+      "guidance": "Decide whether a derived signal was intended. If a function value was intended, wrap it in another function (createSignal(() => theFunction)) or store it elsewhere (a plain let, a ref, or an object property that this signal holds) so the getter returns the function itself. If a derived signal was intended, keep the call as is and confirm every reader is prepared to re-run on tracked changes. Stop without proposing a change when the intended value shape is unclear, when the callback reads reactive state with its own timing, or when consumers observe the function identity rather than its result.",
+      "guide": "https://github.com/solidjs/solid/blob/2105ffb8ca2fced55f5fac0763177fc93f97c2c2/documentation/solid-2.0/MIGRATION.md#new-function-forms-createsignalfn-and-createstorefn",
+      "lint": []
+    },
+    {
+      "rule": "reactivity/create-signal-function",
+      "file": "src/migration-sites.tsx",
+      "line": 23,
+      "column": 21,
+      "severity": "behavior",
+      "headline": "Review this createStore(fn) call: a function first argument now creates a derived store.",
+      "why": "Solid 1.9.13 stored this call's first argument as the store's initial value, so a function was returned literally by the getter, but Solid 2.0.0-rc.21's \"new function forms\" section reads a function first argument as a derived computation (createSignal(fn) returns a writable derived signal; createStore(fn, seed) returns a derived store), so the store now runs the function and tracks its reactive reads.",
+      "guidance": "Decide whether a derived store was intended. If a function value was intended, wrap it in another function (createStore(() => theFunction)) or store it elsewhere (a plain let, a ref, or an object property that this store holds) so the getter returns the function itself. If a derived store was intended, keep the call as is and confirm every reader is prepared to re-run on tracked changes and, when needed, supply a seed as the second argument. Stop without proposing a change when the intended value shape is unclear, when the callback reads reactive state with its own timing, or when consumers observe the function identity rather than its result.",
+      "guide": "https://github.com/solidjs/solid/blob/2105ffb8ca2fced55f5fac0763177fc93f97c2c2/documentation/solid-2.0/MIGRATION.md#new-function-forms-createsignalfn-and-createstorefn",
+      "lint": []
+    },
+    {
+      "rule": "reactivity/use-context-default",
+      "file": "src/migration-sites.tsx",
+      "line": 28,
+      "column": 15,
+      "severity": "behavior",
+      "headline": "Drop this useContext undefined fallback: rc.21 throws instead of returning undefined.",
+      "why": "Solid 2.0.0-rc.21 types createContext() without a default as Context<T> and throws ContextNotFoundError when no Provider is mounted, so useContext(TodosContext) returns T and never undefined; the ctx falsiness/null check here reads as dead code to a TypeScript reader and hides the throw at runtime.",
+      "guidance": "Delete the ctx falsiness/null/undefined check: a wrapper that threw on undefined becomes a plain useContext call, and callers that relied on the undefined fallback should either pass an explicit default to createContext (use null for an optional context — rc.21 treats undefined as \"not provided\" and still throws) or wrap the useContext call in try/catch. Stop and ask when the branch does real recovery (not just a throw), when the context's declaration is unclear, or when ctx escapes this function so the test might run far from here.",
+      "guide": "https://github.com/solidjs/solid/blob/2105ffb8ca2fced55f5fac0763177fc93f97c2c2/documentation/solid-2.0/MIGRATION.md#usecontext-on-a-default-less-context-returns-t-not-t--undefined",
+      "lint": []
+    },
+    {
       "rule": "props/merge-props",
       "file": "src/migration-sites.tsx",
-      "line": 19,
+      "line": 33,
       "column": 15,
       "severity": "build",
       "headline": "Migrate this mergeProps call to a reviewed merge.",
@@ -158,7 +194,7 @@
     {
       "rule": "props/split-props",
       "file": "src/migration-sites.tsx",
-      "line": 20,
+      "line": 34,
       "column": 33,
       "severity": "build",
       "headline": "Migrate this splitProps tuple to reviewed omit-based values.",
@@ -172,7 +208,7 @@
     {
       "rule": "reactivity/create-memo",
       "file": "src/migration-sites.tsx",
-      "line": 21,
+      "line": 35,
       "column": 16,
       "severity": "behavior",
       "headline": "Migrate this createMemo initial value.",
@@ -184,7 +220,7 @@
     {
       "rule": "store/mutable",
       "file": "src/migration-sites.tsx",
-      "line": 22,
+      "line": 36,
       "column": 23,
       "severity": "build",
       "headline": "Migrate this createMutable call to an owned createStore tuple.",
@@ -198,7 +234,7 @@
     {
       "rule": "store/mutable",
       "file": "src/migration-sites.tsx",
-      "line": 23,
+      "line": 37,
       "column": 1,
       "severity": "build",
       "headline": "Migrate this modifyMutable call to its target store's setter.",
@@ -212,7 +248,7 @@
     {
       "rule": "store/unwrap",
       "file": "src/migration-sites.tsx",
-      "line": 26,
+      "line": 40,
       "column": 22,
       "severity": "build",
       "headline": "Migrate this unwrap call to a reviewed snapshot.",
@@ -226,7 +262,7 @@
     {
       "rule": "store/produce",
       "file": "src/migration-sites.tsx",
-      "line": 27,
+      "line": 41,
       "column": 22,
       "severity": "build",
       "headline": "Migrate this produce wrapper to draft-first setter behavior.",
@@ -240,7 +276,7 @@
     {
       "rule": "reactivity/create-computed",
       "file": "src/migration-sites.tsx",
-      "line": 31,
+      "line": 45,
       "column": 1,
       "severity": "build",
       "headline": "Choose a Solid 2 replacement for this createComputed call.",
@@ -254,7 +290,7 @@
     {
       "rule": "reactivity/create-effect",
       "file": "src/migration-sites.tsx",
-      "line": 32,
+      "line": 46,
       "column": 1,
       "severity": "build",
       "headline": "Split this one-argument createEffect into compute and apply callbacks (simple shape).",
@@ -268,7 +304,7 @@
     {
       "rule": "lifecycle/on-mount",
       "file": "src/migration-sites.tsx",
-      "line": 36,
+      "line": 50,
       "column": 1,
       "severity": "build",
       "headline": "Migrate this onMount lifecycle callback.",
@@ -282,12 +318,12 @@
     {
       "rule": "jsx/component-renames",
       "file": "src/migration-sites.tsx",
-      "line": 42,
+      "line": 56,
       "column": 5,
       "severity": "build",
       "headline": "Migrate this imported Suspense JSX site to Loading.",
       "why": "Solid 2 replaces the solid-js Suspense component with Loading for initial not-ready fallback UI.",
-      "guidance": "Read this complete boundary, its fallback, children, props, and corresponding import. Replace the unaliased named Suspense import and this JSX component with Loading only after confirming that the boundary owns initial not-ready UI and that its fallback and children preserve their rendering behavior. Stop without proposing a rewrite when props are spread or forwarded, fallback ownership or evaluation is indirect, nested async boundaries make the intended initial-loading behavior unclear, or focused rendering tests do not cover the fallback and ready states. Ask for the smallest focused test or runtime observation that exposes both states.",
+      "guidance": "The opt-in jsx/suspense-to-loading transform rewrites a Suspense JSX site and renames the import when the element carries only an optional fallback expression and no spread, so this site is reported because it is outside that proven-equivalent subset (for example a spread, an extra prop, an aliased or shadowed import, or a non-matching closing tag). Read this complete boundary, its fallback, children, props, and corresponding import. Replace the unaliased named Suspense import and this JSX component with Loading only after confirming that the boundary owns initial not-ready UI and that its fallback and children preserve their rendering behavior. Stop without proposing a rewrite when props are spread or forwarded, fallback ownership or evaluation is indirect, nested async boundaries make the intended initial-loading behavior unclear, or focused rendering tests do not cover the fallback and ready states. Ask for the smallest focused test or runtime observation that exposes both states.",
       "lint": [
         "removed-api"
       ],
@@ -296,12 +332,12 @@
     {
       "rule": "jsx/component-renames",
       "file": "src/migration-sites.tsx",
-      "line": 43,
+      "line": 57,
       "column": 7,
       "severity": "build",
       "headline": "Migrate this imported ErrorBoundary JSX site to Errored.",
       "why": "Solid 2 replaces the solid-js ErrorBoundary component with Errored, whose fallback receives an error accessor rather than a raw error value.",
-      "guidance": "Read this complete boundary, its fallback, children, props, and corresponding import. Replace the unaliased named ErrorBoundary import and this JSX component with Errored only after updating every fallback use to read the error accessor, such as err(), while preserving error ownership and recovery behavior. Stop without proposing a rewrite when props are spread or forwarded, the fallback is indirect or escapes, the error value is passed to unknown code, reset or recovery behavior is unclear, or focused tests do not cover thrown and recovered states. Ask for the smallest focused test or runtime observation that exposes the fallback value and recovery behavior.",
+      "guidance": "The opt-in jsx/error-boundary-to-errored transform rewrites an ErrorBoundary JSX site and renames the import when the element carries only a non-function fallback (a string or a JSX element or fragment) and no spread, so this site is reported because it is outside that proven-equivalent subset — most often a function fallback, whose err parameter becomes an accessor in 2.0. Read this complete boundary, its fallback, children, props, and corresponding import. Replace the unaliased named ErrorBoundary import and this JSX component with Errored only after updating every fallback use to read the error accessor, such as err(), while preserving error ownership and recovery behavior. Stop without proposing a rewrite when props are spread or forwarded, the fallback is indirect or escapes, the error value is passed to unknown code, reset or recovery behavior is unclear, or focused tests do not cover thrown and recovered states. Ask for the smallest focused test or runtime observation that exposes the fallback value and recovery behavior.",
       "lint": [
         "removed-api"
       ],
@@ -310,7 +346,7 @@
     {
       "rule": "jsx/component-renames",
       "file": "src/migration-sites.tsx",
-      "line": 44,
+      "line": 58,
       "column": 9,
       "severity": "build",
       "headline": "Migrate this imported SuspenseList JSX site to Reveal.",
@@ -324,7 +360,7 @@
     {
       "rule": "jsx/component-renames",
       "file": "src/migration-sites.tsx",
-      "line": 45,
+      "line": 59,
       "column": 11,
       "severity": "build",
       "headline": "Migrate this imported Index JSX site to For keyed={false}.",
@@ -338,7 +374,7 @@
     {
       "rule": "jsx/class-list",
       "file": "src/migration-sites.tsx",
-      "line": 47,
+      "line": 62,
       "column": 23,
       "severity": "build",
       "headline": "Migrate this intrinsic JSX classList attribute to class.",
@@ -349,6 +385,30 @@
         "prefer-structured-class"
       ],
       "guide": "https://github.com/solidjs/solid/blob/2105ffb8ca2fced55f5fac0763177fc93f97c2c2/documentation/solid-2.0/MIGRATION.md#classlist--class-objectarray-forms"
+    },
+    {
+      "rule": "jsx/dom-attr-casing",
+      "file": "src/migration-sites.tsx",
+      "line": 62,
+      "column": 71,
+      "severity": "build",
+      "headline": "Rename this tabIndex attribute to tabindex.",
+      "why": "Solid 2.0.0-rc.21's JSX types declare tabindex on this intrinsic element and no longer declare the camelCase tabIndex alias that Solid 1.9.13's types accepted, so tsc rejects the attribute key at this site.",
+      "guidance": "Rename tabIndex to tabindex on this element. Keep the attribute value byte-identical: the runtime attribute name is the same HTML attribute, only the TypeScript property key changed. Stop and ask when the value expression was computed from a type that depended on the camelCase key (for example a mapped type keyed by this attribute name).",
+      "guide": "https://github.com/solidjs/solid/blob/2105ffb8ca2fced55f5fac0763177fc93f97c2c2/documentation/solid-2.0/MIGRATION.md#attributes--events-closer-to-html-and-fewer-namespaces",
+      "lint": []
+    },
+    {
+      "rule": "jsx/portal-props",
+      "file": "src/migration-sites.tsx",
+      "line": 69,
+      "column": 17,
+      "severity": "build",
+      "headline": "Drop this Portal useShadow prop and host shadow content in a custom element.",
+      "why": "Solid 2.0.0-rc.21's @solidjs/web declares Portal as (props: { mount?: Element; children: JSX.Element }) and reads only props.mount and props.children at runtime, so the useShadow prop is a type error and has no effect even if the typecheck is skipped. Solid 1.x created a container element (a <div> or SVG <g>) and attached a shadow root to it when useShadow was set; rc.21's Portal creates no wrapper and offers no shadow-root option.",
+      "guidance": "Remove useShadow. If the portal content must live in a shadow root, render a custom element whose constructor attaches a shadow root and place the portal's children inside that element; the Portal's mount prop can target that element directly. Stop and ask when the shadow boundary is required for style isolation and no custom-element wrapper is available.",
+      "guide": "https://github.com/solidjs/solid/blob/2105ffb8ca2fced55f5fac0763177fc93f97c2c2/documentation/solid-2.0/MIGRATION.md#attributes--events-closer-to-html-and-fewer-namespaces",
+      "lint": []
     },
     {
       "rule": "reactivity/create-effect",

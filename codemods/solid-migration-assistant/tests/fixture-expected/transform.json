@@ -9,10 +9,58 @@
   "target": "<target>",
   "status": 0,
   "summary": {
-    "rewrites": 63,
-    "files": 16
+    "rewrites": 69,
+    "files": 17
   },
   "rewrites": [
+    {
+      "rule": "jsx/error-boundary-to-errored",
+      "file": "src/boundaries.tsx",
+      "line": 4,
+      "column": 24,
+      "message": "Rewrite the ErrorBoundary import from solid-js to Errored.",
+      "guide": "https://github.com/solidjs/solid/blob/2105ffb8ca2fced55f5fac0763177fc93f97c2c2/documentation/solid-2.0/MIGRATION.md#suspense--errorboundary--loading--errored"
+    },
+    {
+      "rule": "jsx/suspense-to-loading",
+      "file": "src/boundaries.tsx",
+      "line": 4,
+      "column": 33,
+      "message": "Rewrite the Suspense import from solid-js to Loading.",
+      "guide": "https://github.com/solidjs/solid/blob/2105ffb8ca2fced55f5fac0763177fc93f97c2c2/documentation/solid-2.0/MIGRATION.md#suspense--errorboundary--loading--errored"
+    },
+    {
+      "rule": "jsx/suspense-to-loading",
+      "file": "src/boundaries.tsx",
+      "line": 11,
+      "column": 7,
+      "message": "Rewrite <Suspense> to <Loading>, keeping its fallback attribute and children unchanged.",
+      "guide": "https://github.com/solidjs/solid/blob/2105ffb8ca2fced55f5fac0763177fc93f97c2c2/documentation/solid-2.0/MIGRATION.md#suspense--errorboundary--loading--errored"
+    },
+    {
+      "rule": "jsx/error-boundary-to-errored",
+      "file": "src/boundaries.tsx",
+      "line": 12,
+      "column": 9,
+      "message": "Rewrite <ErrorBoundary> to <Errored>, keeping its non-function fallback attribute and children unchanged.",
+      "guide": "https://github.com/solidjs/solid/blob/2105ffb8ca2fced55f5fac0763177fc93f97c2c2/documentation/solid-2.0/MIGRATION.md#suspense--errorboundary--loading--errored"
+    },
+    {
+      "rule": "jsx/error-boundary-to-errored",
+      "file": "src/boundaries.tsx",
+      "line": 14,
+      "column": 11,
+      "message": "Rewrite <ErrorBoundary> to <Errored>, keeping its non-function fallback attribute and children unchanged.",
+      "guide": "https://github.com/solidjs/solid/blob/2105ffb8ca2fced55f5fac0763177fc93f97c2c2/documentation/solid-2.0/MIGRATION.md#suspense--errorboundary--loading--errored"
+    },
+    {
+      "rule": "jsx/suspense-to-loading",
+      "file": "src/boundaries.tsx",
+      "line": 17,
+      "column": 7,
+      "message": "Rewrite <Suspense> to <Loading>, keeping its fallback attribute and children unchanged.",
+      "guide": "https://github.com/solidjs/solid/blob/2105ffb8ca2fced55f5fac0763177fc93f97c2c2/documentation/solid-2.0/MIGRATION.md#suspense--errorboundary--loading--errored"
+    },
     {
       "rule": "jsx/class-list-to-class",
       "file": "src/class-list.tsx",

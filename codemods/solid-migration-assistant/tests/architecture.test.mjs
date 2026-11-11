@@ -154,13 +154,17 @@ test("keeps each transform rule inside its declared scope", () => {
     assert.doesNotMatch(allowlist[1], new RegExp(`"${vetoed}"`), vetoed);
   }
 
-  // The JSX rewrites stay on JSX syntax: only the Index rule may touch an
-  // import statement (to rename or remove the Index specifier), and none of
-  // them may rewrite a module source string.
+  // The JSX rewrites stay on JSX syntax: the Index, Suspense, and
+  // ErrorBoundary rules may touch an import statement (to rename or remove
+  // the legacy specifier), and none of them may rewrite a module source
+  // string. Suspense/ErrorBoundary rename the specifier in place via shared
+  // helpers, so the rule source does not need to spell `import_statement`.
   for (const [rule, touchesImports] of [
     ["jsx/context-provider-to-context/context-provider-to-context.ts", true],
+    ["jsx/error-boundary-to-errored/error-boundary-to-errored.ts", false],
     ["jsx/index-to-for/index-to-for.ts", true],
     ["jsx/lowercase-event-handlers/lowercase-event-handlers.ts", false],
+    ["jsx/suspense-to-loading/suspense-to-loading.ts", false],
   ]) {
     const source = readFileSync(resolve(transformationsDirectory, rule), "utf8");
     assert.match(source, /jsx_opening_element/, rule);

@@ -1,0 +1,88 @@
+{
+  "findings": [
+    {
+      "rule": "reactivity/create-signal-function",
+      "file": "analysis/reactivity/create-signal-function/fixtures/positive.fixture.tsx",
+      "line": 5,
+      "column": 13,
+      "severity": "behavior",
+      "headline": "Review this createSignal(fn) call: a function first argument now creates a writable derived signal.",
+      "why": "Solid 1.9.13 stored this call's first argument as the signal's initial value, so a function was returned literally by the getter, but Solid 2.0.0-rc.21's \"new function forms\" section reads a function first argument as a derived computation (createSignal(fn) returns a writable derived signal; createStore(fn, seed) returns a derived store), so the signal now runs the function and tracks its reactive reads.",
+      "guidance": "Decide whether a derived signal was intended. If a function value was intended, wrap it in another function (createSignal(() => theFunction)) or store it elsewhere (a plain let, a ref, or an object property that this signal holds) so the getter returns the function itself. If a derived signal was intended, keep the call as is and confirm every reader is prepared to re-run on tracked changes. Stop without proposing a change when the intended value shape is unclear, when the callback reads reactive state with its own timing, or when consumers observe the function identity rather than its result.",
+      "guide": "https://github.com/solidjs/solid/blob/2105ffb8ca2fced55f5fac0763177fc93f97c2c2/documentation/solid-2.0/MIGRATION.md#new-function-forms-createsignalfn-and-createstorefn",
+      "lint": []
+    },
+    {
+      "rule": "reactivity/create-signal-function",
+      "file": "analysis/reactivity/create-signal-function/fixtures/positive.fixture.tsx",
+      "line": 6,
+      "column": 13,
+      "severity": "behavior",
+      "headline": "Review this createSignal(fn) call: a function first argument now creates a writable derived signal.",
+      "why": "Solid 1.9.13 stored this call's first argument as the signal's initial value, so a function was returned literally by the getter, but Solid 2.0.0-rc.21's \"new function forms\" section reads a function first argument as a derived computation (createSignal(fn) returns a writable derived signal; createStore(fn, seed) returns a derived store), so the signal now runs the function and tracks its reactive reads.",
+      "guidance": "Decide whether a derived signal was intended. If a function value was intended, wrap it in another function (createSignal(() => theFunction)) or store it elsewhere (a plain let, a ref, or an object property that this signal holds) so the getter returns the function itself. If a derived signal was intended, keep the call as is and confirm every reader is prepared to re-run on tracked changes. Stop without proposing a change when the intended value shape is unclear, when the callback reads reactive state with its own timing, or when consumers observe the function identity rather than its result.",
+      "guide": "https://github.com/solidjs/solid/blob/2105ffb8ca2fced55f5fac0763177fc93f97c2c2/documentation/solid-2.0/MIGRATION.md#new-function-forms-createsignalfn-and-createstorefn",
+      "lint": []
+    },
+    {
+      "rule": "reactivity/create-signal-function",
+      "file": "analysis/reactivity/create-signal-function/fixtures/positive.fixture.tsx",
+      "line": 9,
+      "column": 13,
+      "severity": "behavior",
+      "headline": "Review this createStore(fn) call: a function first argument now creates a derived store.",
+      "why": "Solid 1.9.13 stored this call's first argument as the store's initial value, so a function was returned literally by the getter, but Solid 2.0.0-rc.21's \"new function forms\" section reads a function first argument as a derived computation (createSignal(fn) returns a writable derived signal; createStore(fn, seed) returns a derived store), so the store now runs the function and tracks its reactive reads.",
+      "guidance": "Decide whether a derived store was intended. If a function value was intended, wrap it in another function (createStore(() => theFunction)) or store it elsewhere (a plain let, a ref, or an object property that this store holds) so the getter returns the function itself. If a derived store was intended, keep the call as is and confirm every reader is prepared to re-run on tracked changes and, when needed, supply a seed as the second argument. Stop without proposing a change when the intended value shape is unclear, when the callback reads reactive state with its own timing, or when consumers observe the function identity rather than its result.",
+      "guide": "https://github.com/solidjs/solid/blob/2105ffb8ca2fced55f5fac0763177fc93f97c2c2/documentation/solid-2.0/MIGRATION.md#new-function-forms-createsignalfn-and-createstorefn",
+      "lint": []
+    },
+    {
+      "rule": "reactivity/create-signal-function",
+      "file": "analysis/reactivity/create-signal-function/fixtures/positive.fixture.tsx",
+      "line": 10,
+      "column": 13,
+      "severity": "behavior",
+      "headline": "Review this createStore(fn) call: a function first argument now creates a derived store.",
+      "why": "Solid 1.9.13 stored this call's first argument as the store's initial value, so a function was returned literally by the getter, but Solid 2.0.0-rc.21's \"new function forms\" section reads a function first argument as a derived computation (createSignal(fn) returns a writable derived signal; createStore(fn, seed) returns a derived store), so the store now runs the function and tracks its reactive reads.",
+      "guidance": "Decide whether a derived store was intended. If a function value was intended, wrap it in another function (createStore(() => theFunction)) or store it elsewhere (a plain let, a ref, or an object property that this store holds) so the getter returns the function itself. If a derived store was intended, keep the call as is and confirm every reader is prepared to re-run on tracked changes and, when needed, supply a seed as the second argument. Stop without proposing a change when the intended value shape is unclear, when the callback reads reactive state with its own timing, or when consumers observe the function identity rather than its result.",
+      "guide": "https://github.com/solidjs/solid/blob/2105ffb8ca2fced55f5fac0763177fc93f97c2c2/documentation/solid-2.0/MIGRATION.md#new-function-forms-createsignalfn-and-createstorefn",
+      "lint": []
+    },
+    {
+      "rule": "reactivity/create-signal-function",
+      "file": "analysis/reactivity/create-signal-function/fixtures/positive.fixture.tsx",
+      "line": 16,
+      "column": 13,
+      "severity": "behavior",
+      "headline": "Review this createSignal(fn) call: a function first argument now creates a writable derived signal.",
+      "why": "Solid 1.9.13 stored this call's first argument as the signal's initial value, so a function was returned literally by the getter, but Solid 2.0.0-rc.21's \"new function forms\" section reads a function first argument as a derived computation (createSignal(fn) returns a writable derived signal; createStore(fn, seed) returns a derived store), so the signal now runs the function and tracks its reactive reads.",
+      "guidance": "Decide whether a derived signal was intended. If a function value was intended, wrap it in another function (createSignal(() => theFunction)) or store it elsewhere (a plain let, a ref, or an object property that this signal holds) so the getter returns the function itself. If a derived signal was intended, keep the call as is and confirm every reader is prepared to re-run on tracked changes. Stop without proposing a change when the intended value shape is unclear, when the callback reads reactive state with its own timing, or when consumers observe the function identity rather than its result.",
+      "guide": "https://github.com/solidjs/solid/blob/2105ffb8ca2fced55f5fac0763177fc93f97c2c2/documentation/solid-2.0/MIGRATION.md#new-function-forms-createsignalfn-and-createstorefn",
+      "lint": []
+    },
+    {
+      "rule": "reactivity/create-signal-function",
+      "file": "analysis/reactivity/create-signal-function/fixtures/positive.fixture.tsx",
+      "line": 20,
+      "column": 13,
+      "severity": "behavior",
+      "headline": "Review this createStore(fn) call: a function first argument now creates a derived store.",
+      "why": "Solid 1.9.13 stored this call's first argument as the store's initial value, so a function was returned literally by the getter, but Solid 2.0.0-rc.21's \"new function forms\" section reads a function first argument as a derived computation (createSignal(fn) returns a writable derived signal; createStore(fn, seed) returns a derived store), so the store now runs the function and tracks its reactive reads.",
+      "guidance": "Decide whether a derived store was intended. If a function value was intended, wrap it in another function (createStore(() => theFunction)) or store it elsewhere (a plain let, a ref, or an object property that this store holds) so the getter returns the function itself. If a derived store was intended, keep the call as is and confirm every reader is prepared to re-run on tracked changes and, when needed, supply a seed as the second argument. Stop without proposing a change when the intended value shape is unclear, when the callback reads reactive state with its own timing, or when consumers observe the function identity rather than its result.",
+      "guide": "https://github.com/solidjs/solid/blob/2105ffb8ca2fced55f5fac0763177fc93f97c2c2/documentation/solid-2.0/MIGRATION.md#new-function-forms-createsignalfn-and-createstorefn",
+      "lint": []
+    },
+    {
+      "rule": "reactivity/create-signal-function",
+      "file": "analysis/reactivity/create-signal-function/fixtures/positive.fixture.tsx",
+      "line": 26,
+      "column": 13,
+      "severity": "behavior",
+      "headline": "Review this createStore(fn) call: a function first argument now creates a derived store.",
+      "why": "Solid 1.9.13 stored this call's first argument as the store's initial value, so a function was returned literally by the getter, but Solid 2.0.0-rc.21's \"new function forms\" section reads a function first argument as a derived computation (createSignal(fn) returns a writable derived signal; createStore(fn, seed) returns a derived store), so the store now runs the function and tracks its reactive reads.",
+      "guidance": "Decide whether a derived store was intended. If a function value was intended, wrap it in another function (createStore(() => theFunction)) or store it elsewhere (a plain let, a ref, or an object property that this store holds) so the getter returns the function itself. If a derived store was intended, keep the call as is and confirm every reader is prepared to re-run on tracked changes and, when needed, supply a seed as the second argument. Stop without proposing a change when the intended value shape is unclear, when the callback reads reactive state with its own timing, or when consumers observe the function identity rather than its result.",
+      "guide": "https://github.com/solidjs/solid/blob/2105ffb8ca2fced55f5fac0763177fc93f97c2c2/documentation/solid-2.0/MIGRATION.md#new-function-forms-createsignalfn-and-createstorefn",
+      "lint": []
+    }
+  ]
+}

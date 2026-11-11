@@ -2,7 +2,7 @@ schema_version: "1.0"
 
 name: "solid-migration-assistant"
 version: "0.4.0"
-description: "Solid 1.9 to Solid 2 RC migration assistant: read-only analyzer plus deterministic legacy import-path relocation and narrow intrinsic JSX rewrites (classList to class, Context.Provider to Context, Index to For keyed={false}, lowercase event handlers to camelCase) for project-owned JavaScript and TypeScript source"
+description: "Solid 1.9 to Solid 2 RC migration assistant: read-only analyzer plus deterministic legacy import-path relocation and narrow intrinsic JSX rewrites (classList to class, Context.Provider to Context, Index to For keyed={false}, Suspense to Loading, ErrorBoundary to Errored, lowercase event handlers to camelCase) for project-owned JavaScript and TypeScript source"
 author: "Solid Migration Assistant Contributors"
 license: "MIT"
 category: "migration"

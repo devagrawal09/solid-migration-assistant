@@ -45,7 +45,7 @@ test("ships every module a shipped file imports, and nothing test-only", () => {
   }
 });
 const expectedDescription =
-  "Solid 1.9 to Solid 2 RC migration assistant: read-only analyzer plus deterministic legacy import-path relocation and narrow intrinsic JSX rewrites (classList to class, Context.Provider to Context, Index to For keyed={false}, lowercase event handlers to camelCase) for project-owned JavaScript and TypeScript source";
+  "Solid 1.9 to Solid 2 RC migration assistant: read-only analyzer plus deterministic legacy import-path relocation and narrow intrinsic JSX rewrites (classList to class, Context.Provider to Context, Index to For keyed={false}, Suspense to Loading, ErrorBoundary to Errored, lowercase event handlers to camelCase) for project-owned JavaScript and TypeScript source";
 const expectedKeywords = [
   "solid",
   "solidjs",
