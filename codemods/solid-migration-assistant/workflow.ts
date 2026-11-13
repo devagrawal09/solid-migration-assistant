@@ -1,9 +1,11 @@
 import { approval, forEachFile, getState, jssg, shell, step } from "codemod:workflow";
+import { DEPENDENCY_MAP } from "./shared/dependencies.mjs";
+import { renderText } from "./shared/format.mjs";
+import { SOLID_TARGET_VERSION } from "./shared/target.ts";
 
-// Prototype of the Solid 1.9 -> 2 RC assistant on the code-first engine
-// (codemod/codemod#2485). The workflow module may only import from
-// codemod:workflow on #2485, so the tables below are inlined copies of
-// shared/dependencies.mjs and the generated rule list.
+// The Solid 1.9 -> 2 RC assistant on the code-first engine
+// (codemod/codemod#2485 at 5a33930): the launcher's dependency table and the
+// report renderer are imported from shared/ instead of copied.
 
 const SOURCES = {
   include: ["**/*.js", "**/*.jsx", "**/*.ts", "**/*.tsx"],
@@ -12,34 +14,14 @@ const SOURCES = {
 const FINDINGS = "solid-migration-assistant-guidance";
 const REWRITES = "solid-migration-assistant-transform-report";
 
-// What each common Solid 1 dependency needs on Solid 2 (shared/dependencies.mjs,
-// verified 2026-11-09). `legacy` is a pattern a Solid 2 range matches; a
-// declared range that does not match it is still on the Solid 1 line.
-const DEPENDENCIES: { name: string; status: string; solid2?: string; replacement?: string }[] = [
-  { name: "@solidjs/router", status: "upgrade", solid2: "2\\.0\\.0-next", replacement: "@solidjs/router@2.0.0-next.44" },
-  { name: "@solidjs/meta", status: "use-core", solid2: "1\\.0\\.0-next", replacement: "useHead from @solidjs/web" },
-  { name: "@solidjs/start", status: "replace", replacement: "@solidjs/vite-plugin start mode" },
-  { name: "vinxi", status: "replace", replacement: "vite with @solidjs/vite-plugin" },
-  { name: "solid-start", status: "replace", replacement: "@solidjs/vite-plugin start mode" },
-  { name: "vite-plugin-solid", status: "replace", replacement: "@solidjs/vite-plugin@3.0.0-next.57" },
-  { name: "babel-preset-solid", status: "replace", replacement: "@solidjs/babel-plugin@2.0.0-rc.21" },
-  { name: "@solidjs/testing-library", status: "upgrade", solid2: "(^|[^0-9.])1\\.0\\.0-", replacement: "@solidjs/testing-library@1.0.0-rc.2" },
-  { name: "solid-testing-library", status: "replace", replacement: "@solidjs/testing-library@1.0.0-rc.2" },
-  { name: "@solid-primitives/storage", status: "upgrade", solid2: "(^|[^0-9.])([5-9]|\\d\\d)\\.", replacement: "@solid-primitives/storage@5.0.0-next.7" },
-  { name: "@solid-primitives/event-listener", status: "upgrade", solid2: "(^|[^0-9.])([3-9]|\\d\\d)\\.", replacement: "@solid-primitives/event-listener@3.0.0-next.9" },
-  { name: "@solid-primitives/media", status: "upgrade", solid2: "(^|[^0-9.])([4-9]|\\d\\d)\\.", replacement: "@solid-primitives/media@4.0.0-next.6" },
-  { name: "@solid-primitives/scheduled", status: "upgrade", solid2: "(^|[^0-9.])([2-9]|\\d\\d)\\.", replacement: "@solid-primitives/scheduled@2.0.0-next.4" },
-  { name: "@tanstack/solid-query", status: "upgrade", solid2: "(^|[^0-9.])([6-9]|\\d\\d)\\.", replacement: "@tanstack/solid-query@6.0.0-rc.5" },
-  { name: "@tanstack/solid-router", status: "upgrade", solid2: "(^|[^0-9.])([2-9]|\\d\\d)\\.", replacement: "@tanstack/solid-router@2.0.0-rc.10" },
-  { name: "@kobalte/core", status: "blocked" },
-  { name: "@tanstack/solid-form", status: "blocked" },
-  { name: "@tanstack/solid-virtual", status: "blocked" },
-  { name: "@tanstack/solid-table", status: "blocked" },
-  { name: "solid-icons", status: "blocked" },
-  { name: "@modular-forms/solid", status: "blocked" },
-  { name: "@felte/solid", status: "blocked" },
-  { name: "solid-transition-group", status: "blocked" },
-];
+type DependencyEntry = {
+  name: string;
+  legacy: ((range: string) => boolean) | null;
+  status: "upgrade" | "replace" | "use-core" | "blocked";
+  replacement: string | null;
+};
+// shared/dependencies.mjs is untyped JavaScript; this is its shape.
+const DEPENDENCIES = DEPENDENCY_MAP as readonly DependencyEntry[];
 
 const ECOSYSTEM = ["@solidjs/router", "@solidjs/meta", "@solidjs/start", "vinxi"];
 
@@ -142,8 +124,8 @@ export default async function main({ params }: { params: { mode?: string; verify
   if (solid === undefined) return { skipped: "solid-js is not a dependency of this project" };
   if ((major(solid) ?? 1) >= 2) return { skipped: `solid-js is already ${solid}` };
 
-  const dependencyPlan = DEPENDENCIES.filter((d) => declared[d.name] !== undefined)
-    .filter((d) => d.solid2 === undefined || !new RegExp(d.solid2).test(declared[d.name]))
+  const dependencyPlan = DEPENDENCIES.filter((d) => typeof declared[d.name] === "string")
+    .filter((d) => d.legacy === null || d.legacy(declared[d.name]!))
     .map((d) => ({ name: d.name, declared: declared[d.name], resolved: resolved[d.name], status: d.status, replacement: d.replacement }));
   const blocked = dependencyPlan.filter((d) => d.status === "blocked").map((d) => d.name);
   const unknown = Object.keys(declared).filter(
@@ -204,6 +186,9 @@ export default async function main({ params }: { params: { mode?: string; verify
   const lintSites = new Set((before?.messages ?? []).map((m: any) => `${m.file}:${m.rule}`));
   const withLint = findings.filter((f) => f.lint.length > 0);
   const unconfirmed = withLint.filter((f) => !f.lint.some((rule: string) => lintSites.has(`${f.file}:solid/${rule}`)));
+
+  console.log(renderText({ findings, rewrites, solidVersion: SOLID_TARGET_VERSION }));
+  if (verify) console.log(`eslint-plugin-solid v2: ${before?.total ?? "?"} messages before${after ? `, ${after.total} after` : ""}; ${withLint.length - unconfirmed.length} of ${withLint.length} findings confirmed by the linter.`);
 
   return {
     solid,
