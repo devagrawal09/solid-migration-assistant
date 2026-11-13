@@ -25,3 +25,6 @@ workflows:
   - name: transform
     default: false
     path: transform.yaml
+  - name: v2
+    default: false
+    path: workflow.ts

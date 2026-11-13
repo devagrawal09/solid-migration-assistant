@@ -214,6 +214,7 @@ test("uses normal analyzer end-to-end fixtures", () => {
     "transform-expected",
     "transform-fixture",
     "transform.test.mjs",
+    "workflow-v2.test.mjs",
     "workflow.test.mjs",
   ]);
   assert.equal(existsSync(resolve(testsDirectory, "transform.test.ts")), false);

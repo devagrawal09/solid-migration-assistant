@@ -15,5 +15,5 @@
     "noFallthroughCasesInSwitch": true,
     "noUncheckedIndexedAccess": true
   },
-  "exclude": ["tests", "**/fixtures/**"]
+  "exclude": ["tests", "**/fixtures/**", "workflow.ts"]
 }
