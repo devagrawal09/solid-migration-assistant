@@ -1,9 +1,10 @@
 import { spawnSync } from "node:child_process";
-import { existsSync, readFileSync, statSync } from "node:fs";
+import { mkdtempSync, readFileSync, readdirSync, rmSync, statSync } from "node:fs";
 import { createRequire } from "node:module";
-import { dirname, resolve } from "node:path";
+import { tmpdir } from "node:os";
+import { dirname, join, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
-import { REPORT_MARKER, byLocation, renderAgentReport, renderText, summaryOf } from "./format.mjs";
+import { byLocation, renderAgentReport, renderText, summaryOf } from "./format.mjs";
 import { DEPENDENCY_MAP, DEPENDENCY_VERIFIED_ON, dependencyHeadline } from "./dependencies.mjs";
 
 const packageDirectory = resolve(dirname(fileURLToPath(import.meta.url)), "..");
@@ -155,23 +156,26 @@ function readJsonLike(path) {
 
 export class CliUsageError extends Error {}
 
+/** The launcher's workflow names, as `workflow.ts` modes. */
 export const WORKFLOWS = Object.freeze({
-  analyze: "workflow.yaml",
-  transform: "transform.yaml",
+  analyze: "analyze",
+  transform: "migrate",
 });
 
 export const FORMATS = Object.freeze(["text", "json", "agent"]);
 
 /**
- * `[workflow] [--target <dir>] [--allow-dirty] [--format text|json|agent]`. The
- * workflow defaults to `analyze` and the format to `text`, so every
- * pre-existing invocation keeps its meaning; `--allow-dirty` is accepted only
- * with `transform`, the one workflow that writes to the target.
+ * `[workflow] [--target <dir>] [--allow-dirty] [--allow-blocked] [--format text|json|agent]`.
+ * The workflow defaults to `analyze` and the format to `text`, so every
+ * pre-existing invocation keeps its meaning; `--allow-dirty` and
+ * `--allow-blocked` are accepted only with `transform`, the one workflow that
+ * writes to the target.
  */
 export function parseArguments(argumentsList) {
   let workflow = "analyze";
   let target = ".";
   let allowDirty = false;
+  let allowBlocked = false;
   let format = "text";
   let hasExplicitTarget = false;
   let hasExplicitFormat = false;
@@ -189,6 +193,13 @@ export function parseArguments(argumentsList) {
         throw new CliUsageError("--allow-dirty is only accepted with the transform workflow");
       }
       allowDirty = true;
+      continue;
+    }
+    if (argument === "--allow-blocked") {
+      if (workflow !== "transform") {
+        throw new CliUsageError("--allow-blocked is only accepted with the transform workflow");
+      }
+      allowBlocked = true;
       continue;
     }
     if (argument === "--format") {
@@ -223,7 +234,7 @@ export function parseArguments(argumentsList) {
   if (format === "agent" && workflow !== "analyze") {
     throw new CliUsageError("--format agent is only accepted with the analyze workflow");
   }
-  return { workflow, target, allowDirty, format };
+  return { workflow, target, allowDirty, allowBlocked, format };
 }
 
 /** Backwards-compatible view of `parseArguments` for the analyze workflow. */
@@ -257,13 +268,13 @@ export function resolveCodemodLauncher() {
   return resolve(dirname(require.resolve("codemod/package.json")), "codemod");
 }
 
-export function buildCodemodArguments(target, workflow = "analyze") {
+export function buildCodemodArguments(target, workflow = "analyze", { allowBlocked = false } = {}) {
   return [
     "--disable-analytics",
     "workflow",
     "run",
     "-w",
-    resolve(packageDirectory, WORKFLOWS[workflow]),
+    packageDirectory,
     "-t",
     target,
     // Codemod's own dirty-tree check is bypassed because the launcher runs
@@ -271,48 +282,70 @@ export function buildCodemodArguments(target, workflow = "analyze") {
     // writes to the target.
     "--allow-dirty",
     "--no-interactive",
-    // The report step prints one machine-readable line instead of text; the
-    // launcher renders every format from it (`shared/format.mjs`).
     "--param",
-    "format=json",
+    `mode=${WORKFLOWS[workflow]}`,
+    // The eslint-plugin-solid check installs packages, so the launcher, which
+    // runs nothing in or for the target, leaves it off.
+    "--param",
+    "verify=false",
+    // The launcher renders every format from the run output (`shared/format.mjs`).
+    "--param",
+    "report=none",
+    // The workflow's one approval is the pause before rewriting a project
+    // whose dependencies have no Solid 2 release.
+    ...(allowBlocked ? ["--approve"] : []),
   ];
 }
 
-export function runCodemod(target, { spawnImpl = spawnSync, workflow = "analyze" } = {}) {
-  return spawnImpl(
-    process.execPath,
-    [resolveCodemodLauncher(), ...buildCodemodArguments(target, workflow)],
-    {
-      cwd: packageDirectory,
-      // Codemod prints its progress envelope to stdout and every workflow
-      // step's console output to stderr. Progress goes straight to our
-      // stderr; step output is captured so the report line can be parsed and
-      // everything else (diagnostics) re-emitted on our stderr.
-      stdio: [0, 2, "pipe"],
-      encoding: "utf8",
-      maxBuffer: 256 * 1024 * 1024,
-    },
-  );
+/**
+ * Runs workflow.ts with its run record in a temporary directory, so no state
+ * outlives the run, and returns the spawn result with the workflow's return
+ * value as `output` (undefined when the run produced none).
+ */
+export function runCodemod(target, { spawnImpl = spawnSync, workflow = "analyze", allowBlocked = false } = {}) {
+  const runStore = mkdtempSync(join(tmpdir(), "solid-migration-assistant-run-"));
+  try {
+    const result = spawnImpl(
+      process.execPath,
+      [resolveCodemodLauncher(), ...buildCodemodArguments(target, workflow, { allowBlocked })],
+      {
+        cwd: packageDirectory,
+        env: { ...process.env, CODEMOD_RUN_STORE_DIR: runStore },
+        // Progress goes straight to our stderr; anything Codemod prints on
+        // stderr (rule errors) is captured and re-emitted as diagnostics.
+        stdio: [0, 2, "pipe"],
+        encoding: "utf8",
+        maxBuffer: 256 * 1024 * 1024,
+      },
+    );
+    return { ...result, ...readRun(runStore) };
+  } finally {
+    rmSync(runStore, { recursive: true, force: true });
+  }
+}
+
+function readRun(runStore) {
+  const [id] = readdirSync(runStore);
+  if (id === undefined) return { output: undefined, runStatus: undefined };
+  const run = JSON.parse(readFileSync(join(runStore, id, "run.json"), "utf8"));
+  return { output: run.output ?? undefined, runStatus: run.status };
 }
 
 /**
- * The report the workflow's report step printed (`{ findings, rewrites }`)
- * and every other line of captured step output, which the launcher passes
- * through to stderr so a rule's runtime error is never swallowed. A run that
- * printed no report line (no matching file, or a failure) reports nothing.
+ * The findings and rewrites the workflow returned, and the diagnostics to
+ * pass through to stderr: Codemod's own stderr, files a rule step failed on,
+ * and why the workflow skipped the target or paused.
  */
-export function parseStepOutput(text) {
-  let report = { findings: [], rewrites: [] };
-  const diagnostics = [];
-  for (const line of String(text ?? "").split("\n")) {
-    const marker = line.indexOf(REPORT_MARKER);
-    if (marker !== -1 && line.slice(0, marker).trim() === "") {
-      report = JSON.parse(line.slice(marker + REPORT_MARKER.length));
-    } else if (line.trim() !== "") {
-      diagnostics.push(line);
-    }
+export function parseRunOutput({ output, stderr, runStatus }) {
+  const diagnostics = String(stderr ?? "").split("\n").filter((line) => line.trim() !== "");
+  for (const failure of output?.failures ?? []) {
+    diagnostics.push(`${failure.step}: ${failure.path}: ${failure.error}`);
   }
-  return { ...report, diagnostics };
+  if (output?.skipped) diagnostics.push(`[solid-migration-assistant] skipped: ${output.skipped}`);
+  if (output === undefined && runStatus !== undefined && runStatus !== "succeeded") {
+    diagnostics.push(`[solid-migration-assistant] the run stopped with status ${runStatus}`);
+  }
+  return { findings: output?.findings ?? [], rewrites: output?.rewrites ?? [], diagnostics };
 }
 
 /**
@@ -341,7 +374,7 @@ export function main(
   argumentsList = process.argv.slice(2),
   {
     cwd,
-    runImpl = (target, workflow) => runCodemod(target, { workflow }),
+    runImpl = (target, workflow, options) => runCodemod(target, { workflow, ...options }),
     dirtyImpl = dirtyTreeReason,
     projectImpl = projectFindings,
   } = {},
@@ -393,10 +426,13 @@ function run(argumentsList, invocationDirectory, runImpl, dirtyImpl, projectImpl
   }
 
   const project = parsed.workflow === "analyze" ? projectImpl(target) : [];
-  const result = runImpl(target, parsed.workflow);
+  const result = runImpl(target, parsed.workflow, { allowBlocked: parsed.allowBlocked });
   if (result.error) throw result.error;
+  if (result.runStatus === "awaiting-approval") {
+    return fail("nothing was rewritten: a dependency has no Solid 2 release (named above); pass --allow-blocked to apply the source rewrites anyway");
+  }
   const status = result.status ?? 1;
-  const { findings, rewrites, diagnostics } = parseStepOutput(result.stderr);
+  const { findings, rewrites, diagnostics } = parseRunOutput(result);
   if (diagnostics.length > 0) console.error(diagnostics.join("\n"));
   const report = buildJsonReport({
     workflow: parsed.workflow,

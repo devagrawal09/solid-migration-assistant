@@ -158,7 +158,7 @@ for (const entry of corpus) {
         const original = treeSnapshot(copy);
         assert.deepEqual(original, before, "the copy does not match the clone");
         started = performance.now();
-        const transform = runLauncher(["transform", "--allow-dirty", "--target", copy, "--format", "json"]);
+        const transform = runLauncher(["transform", "--allow-dirty", "--allow-blocked", "--target", copy, "--format", "json"]);
         elapsedMs.transform = Math.round(performance.now() - started);
         assert.equal(transform.status, 0, output(transform));
         assertNoCrash(transform, "transform");
@@ -189,7 +189,7 @@ for (const entry of corpus) {
 
         // 5. Idempotency: a second run reports nothing and changes nothing.
         started = performance.now();
-        const second = runLauncher(["transform", "--allow-dirty", "--target", copy, "--format", "json"]);
+        const second = runLauncher(["transform", "--allow-dirty", "--allow-blocked", "--target", copy, "--format", "json"]);
         elapsedMs.idempotency = Math.round(performance.now() - started);
         assert.equal(second.status, 0, output(second));
         assertNoCrash(second, "second transform");

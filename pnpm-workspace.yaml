@@ -1,2 +1,11 @@
 packages:
   - "codemods/*"
+minimumReleaseAgeExclude:
+  - '@codemod.com/cli-darwin-arm64@2.0.0-alpha.3'
+  - '@codemod.com/cli-darwin-x64@2.0.0-alpha.3'
+  - '@codemod.com/cli-linux-arm64-gnu@2.0.0-alpha.3'
+  - '@codemod.com/cli-linux-arm64-musl@2.0.0-alpha.3'
+  - '@codemod.com/cli-linux-x64-gnu@2.0.0-alpha.3'
+  - '@codemod.com/cli-linux-x64-musl@2.0.0-alpha.3'
+  - '@codemod.com/cli-win32-x64-msvc@2.0.0-alpha.3'
+  - codemod@2.0.0-alpha.3

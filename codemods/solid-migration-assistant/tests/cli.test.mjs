@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
 import { createRequire } from "node:module";
-import { mkdirSync, mkdtempSync, rmSync, writeFileSync } from "node:fs";
+import { existsSync, mkdirSync, mkdtempSync, rmSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { dirname, join, resolve } from "node:path";
 import { test } from "node:test";
@@ -9,7 +9,7 @@ import {
   buildAgentReport,
   buildJsonReport,
   DISCLOSURE,
-  parseStepOutput,
+  parseRunOutput,
   dirtyTreeReason,
   main,
   parseArguments,
@@ -28,17 +28,20 @@ test("defaults the target to the invocation directory", () => {
 });
 
 test("parses the optional workflow and the transform-only --allow-dirty flag", () => {
-  assert.deepEqual(parseArguments([]), { workflow: "analyze", target: ".", allowDirty: false, format: "text" });
-  assert.deepEqual(parseArguments(["analyze", "--target", "p"]), { workflow: "analyze", target: "p", allowDirty: false, format: "text" });
-  assert.deepEqual(parseArguments(["transform"]), { workflow: "transform", target: ".", allowDirty: false, format: "text" });
-  assert.deepEqual(parseArguments(["transform", "--allow-dirty", "--target", "p"]), { workflow: "transform", target: "p", allowDirty: true, format: "text" });
-  assert.deepEqual(parseArguments(["--format", "json"]), { workflow: "analyze", target: ".", allowDirty: false, format: "json" });
+  assert.deepEqual(parseArguments([]), { workflow: "analyze", target: ".", allowDirty: false, allowBlocked: false, format: "text" });
+  assert.deepEqual(parseArguments(["analyze", "--target", "p"]), { workflow: "analyze", target: "p", allowDirty: false, allowBlocked: false, format: "text" });
+  assert.deepEqual(parseArguments(["transform"]), { workflow: "transform", target: ".", allowDirty: false, allowBlocked: false, format: "text" });
+  assert.deepEqual(parseArguments(["transform", "--allow-dirty", "--target", "p"]), { workflow: "transform", target: "p", allowDirty: true, allowBlocked: false, format: "text" });
+  assert.deepEqual(parseArguments(["--format", "json"]), { workflow: "analyze", target: ".", allowDirty: false, allowBlocked: false, format: "json" });
   assert.throws(() => parseArguments(["--format", "xml"]), /--format requires one of: text, json/);
   assert.throws(() => parseArguments(["--format"]), /--format requires one of/);
   assert.throws(() => parseArguments(["--format", "json", "--format", "text"]), /--format may only be specified once/);
   assert.throws(() => parseArguments(["--allow-dirty"]), /only accepted with the transform workflow/);
   assert.throws(() => parseArguments(["analyze", "--allow-dirty"]), /only accepted with the transform workflow/);
-  assert.deepEqual(buildCodemodArguments("/t", "transform")[4], resolve(packageDirectory, "transform.yaml"));
+  assert.ok(buildCodemodArguments("/t", "transform").includes("mode=migrate"));
+  assert.equal(parseArguments(["transform", "--allow-blocked"]).allowBlocked, true);
+  assert.throws(() => parseArguments(["--allow-blocked"]), /only accepted with the transform workflow/);
+  assert.equal(buildCodemodArguments("/t", "transform", { allowBlocked: true }).at(-1), "--approve");
 });
 
 test("refuses to transform a dirty or non-git target unless --allow-dirty", () => {
@@ -166,19 +169,17 @@ function fakeFinding(file, line, headline, severity, rule = "jsx/example") {
 }
 
 test("--format json re-emits the workflow's report as one sorted, tiered JSON document", () => {
-  const reported = {
+  const output = {
     findings: [fakeFinding("src/b.tsx", 4, "Behavior headline.", "behavior"), fakeFinding("src/a.tsx", 2, "Build headline.", "build")],
     rewrites: [],
+    failures: [{ step: "JSX: analyzeExample", path: "src/c.tsx", error: "TypeError: boom" }],
   };
-  const stepOutput = [
-    "src/last-file-codemod-prints.tsx",
-    `  SMA-REPORT ${JSON.stringify(reported)}`,
-    "  some rule printed this diagnostic",
-  ].join("\n");
-  const parsed = parseStepOutput(stepOutput);
-  assert.deepEqual(parsed.findings, reported.findings);
-  assert.deepEqual(parsed.diagnostics, ["src/last-file-codemod-prints.tsx", "  some rule printed this diagnostic"]);
-  assert.deepEqual(parseStepOutput("no report line here"), { findings: [], rewrites: [], diagnostics: ["no report line here"] });
+  const parsed = parseRunOutput({ output, stderr: "  some rule printed this diagnostic\n" });
+  assert.deepEqual(parsed.findings, output.findings);
+  assert.deepEqual(parsed.diagnostics, ["  some rule printed this diagnostic", "JSX: analyzeExample: src/c.tsx: TypeError: boom"]);
+  assert.deepEqual(parseRunOutput({ output: { skipped: "solid-js is not a dependency of this project" } }), {
+    findings: [], rewrites: [], diagnostics: ["[solid-migration-assistant] skipped: solid-js is not a dependency of this project"],
+  });
 
   const report = buildJsonReport({ workflow: "analyze", target: "/t", findings: parsed.findings, status: 0 });
   assert.equal(report.solid.target, "solid-js@2.0.0-rc.21");
@@ -203,13 +204,13 @@ test("--format json re-emits the workflow's report as one sorted, tiered JSON do
     result = captureMain(["--format", "json"], {
       cwd: packageDirectory,
       projectImpl: () => [],
-      runImpl: () => ({ status: 0, stderr: stepOutput }),
+      runImpl: () => ({ status: 0, output, stderr: "  some rule printed this diagnostic\n" }),
     });
   } finally {
     console.log = originalLog;
   }
   assert.equal(result.status, 0);
-  // Step output other than the report line is passed through to stderr.
+  // Codemod's stderr and failed files are passed through to stderr.
   assert.deepEqual(result.diagnostics, [parsed.diagnostics.join("\n"), DISCLOSURE]);
   assert.equal(printed.length, 1, "JSON mode prints exactly one document on stdout");
   assert.equal(JSON.parse(printed[0]).summary.findings, 2);
@@ -261,12 +262,14 @@ test("runs the pinned package-local Codemod launcher with safe flags", () => {
     resolve(dirname(require.resolve("codemod/package.json")), "codemod"),
   );
   const codemodPackage = require("codemod/package.json");
-  assert.equal(codemodPackage.version, "1.12.13");
+  assert.equal(codemodPackage.version, "2.0.0-alpha.3");
   assert.deepEqual(Object.keys(codemodPackage.optionalDependencies).sort(), [
     "@codemod.com/cli-darwin-arm64",
     "@codemod.com/cli-darwin-x64",
     "@codemod.com/cli-linux-arm64-gnu",
+    "@codemod.com/cli-linux-arm64-musl",
     "@codemod.com/cli-linux-x64-gnu",
+    "@codemod.com/cli-linux-x64-musl",
     "@codemod.com/cli-win32-x64-msvc",
   ]);
 
@@ -276,13 +279,17 @@ test("runs the pinned package-local Codemod launcher with safe flags", () => {
     "workflow",
     "run",
     "-w",
-    resolve(packageDirectory, "workflow.yaml"),
+    packageDirectory,
     "-t",
     target,
     "--allow-dirty",
     "--no-interactive",
     "--param",
-    "format=json",
+    "mode=analyze",
+    "--param",
+    "verify=false",
+    "--param",
+    "report=none",
   ]);
 });
 
@@ -302,14 +309,16 @@ test("delegates runtime availability to the pinned Codemod launcher", () => {
     resolveCodemodLauncher(),
     ...buildCodemodArguments(target),
   ]);
-  // Progress goes to our stderr; step output is captured for the report line.
-  assert.deepEqual(invocation.options, {
+  // Progress goes to our stderr; the run record goes to a temporary
+  // directory that is removed after the run.
+  const { env, ...options } = invocation.options;
+  assert.deepEqual(options, {
     cwd: packageDirectory,
     stdio: [0, 2, "pipe"],
     encoding: "utf8",
     maxBuffer: 256 * 1024 * 1024,
   });
-  assert.equal(Object.hasOwn(invocation.options, "env"), false);
+  assert.equal(existsSync(env.CODEMOD_RUN_STORE_DIR), false);
 });
 
 test("does not reject platforms before invoking Codemod", () => {
@@ -439,3 +448,11 @@ function assertFinalDisclosure(diagnostics) {
     1,
   );
 }
+
+test("stops a transform that a dependency without a Solid 2 release paused", () => {
+  const result = captureMain(["transform", "--allow-dirty"], {
+    cwd: packageDirectory,
+    runImpl: () => ({ status: 0, runStatus: "awaiting-approval", output: undefined }),
+  });
+  assert.equal(result.status, 2);
+});

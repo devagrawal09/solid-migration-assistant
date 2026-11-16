@@ -24,9 +24,6 @@ export const SEVERITY_TIERS = Object.freeze([
   Object.freeze({ id: "deprecated", label: "Deprecated but still working" }),
 ]);
 
-/** Marks the machine-readable report line `emit-report` prints for the launcher. */
-export const REPORT_MARKER = "SMA-REPORT ";
-
 const PREFIX = "[solid-migration-assistant]";
 const TIER_ORDER = new Map(SEVERITY_TIERS.map((tier, index) => [tier.id, index]));
 

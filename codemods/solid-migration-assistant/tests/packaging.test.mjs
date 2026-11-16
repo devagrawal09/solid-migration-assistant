@@ -40,7 +40,7 @@ test("ships every module a shipped file imports, and nothing test-only", () => {
       assert.ok(shipped.has(resolved) || resolved === "package.json", `${file} imports ${specifier}, which is not shipped`);
     }
   }
-  for (const required of ["bin/solid-migration-assistant.mjs", "workflow.yaml", "transform.yaml", "scripts/emit-report.ts", "shared/format.mjs"]) {
+  for (const required of ["bin/solid-migration-assistant.mjs", "codemod.yaml", "workflow.ts", "shared/steps.generated.ts", "shared/format.mjs"]) {
     assert.ok(shipped.has(required), required);
   }
 });
@@ -68,7 +68,7 @@ test("publishes complete public npm and Codemod metadata", () => {
   assert.equal(packageJson.description, expectedDescription);
   assert.deepEqual(packageJson.keywords, expectedKeywords);
   assert.equal(packageJson.license, "MIT");
-  assert.equal(packageJson.dependencies.codemod, "1.12.13");
+  assert.equal(packageJson.dependencies.codemod, "2.0.0-alpha.3");
   assert.equal(packageJson.engines.node, ">=20.0.0");
   assert.equal(packageJson.publishConfig.access, "public");
   assert.equal(packageJson.os, undefined);
@@ -113,7 +113,7 @@ test("publishes complete public npm and Codemod metadata", () => {
     );
     assert.match(
       contents,
-      /Actual execution support depends on native runtime availability from the pinned Codemod 1\.12\.13 dependency/,
+      /Actual execution support depends on native runtime availability from the pinned Codemod 2\.0\.0-alpha\.3 dependency/,
     );
     assert.match(
       contents,
@@ -157,7 +157,7 @@ test(
       mkdirSync(join(consumer, "src"), { recursive: true });
       writeFileSync(
         join(consumer, "package.json"),
-        JSON.stringify({ name: "package-smoke", private: true }, null, 2) +
+        JSON.stringify({ name: "package-smoke", private: true, dependencies: { "solid-js": "^1.9.5" } }, null, 2) +
           "\n",
       );
       writeFileSync(
@@ -246,23 +246,17 @@ test(
         // Codemod colors its envelope only when stderr is a terminal (or the
         // platform forces color), so both the colored and the plain spelling
         // of each line are accepted; only the generated values are masked.
-        const workflowId =
-          /^((?:\u001b\[36m)?Workflow started(?:\u001b\[0m)? (?:\u001b\[2m)?)([0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12})((?:\u001b\[0m)?\r?)$/gm;
-        const workflowDuration =
-          /^((?:\u001b\[32m)?Workflow completed(?:\u001b\[0m)? (?:\u001b\[2m)?in )([0-9]+(?:\.[0-9]+)?(?:ms|s))((?:\u001b\[0m)?\r?)$/gm;
+        const runId =
+          /^((?:\u001b\[[0-9;]*m)*Run (?:\u001b\[[0-9;]*m)*)([0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12})((?:\u001b\[[0-9;]*m)*\r?)$/gm;
+        const stepDuration = /\(([0-9]+(?:\.[0-9]+)?(?:ms|s))\)/g;
         assert.equal(
-          [...smoke.stderr.matchAll(workflowId)].length,
+          [...smoke.stderr.matchAll(runId)].length,
           1,
-          `packed run ${index + 1} workflow UUID envelope`,
-        );
-        assert.equal(
-          [...smoke.stderr.matchAll(workflowDuration)].length,
-          1,
-          `packed run ${index + 1} workflow timing envelope`,
+          `packed run ${index + 1} run UUID envelope`,
         );
         const stableProgress = smoke.stderr
-          .replace(workflowId, "$1<generated-workflow-uuid>$3")
-          .replace(workflowDuration, "$1<generated-workflow-duration>$3");
+          .replace(runId, "$1<generated-run-uuid>$3")
+          .replace(stepDuration, "(<generated-duration>)");
         return Buffer.concat([
           Buffer.from(stableProgress, "utf8"),
           Buffer.from([0]),

@@ -19,12 +19,6 @@ registry:
 capabilities: []
 
 workflows:
-  - name: analyze
+  - name: assistant
     default: true
-    path: workflow.yaml
-  - name: transform
-    default: false
-    path: transform.yaml
-  - name: v2
-    default: false
     path: workflow.ts

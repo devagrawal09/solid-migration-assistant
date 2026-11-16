@@ -1,6 +1,7 @@
 import { approval, forEachFile, getState, jssg, shell, step } from "codemod/workflow";
 import { DEPENDENCY_MAP } from "./shared/dependencies.mjs";
-import { renderText } from "./shared/format.mjs";
+import { byLocation, renderText } from "./shared/format.mjs";
+import { ANALYSIS_STEPS, TRANSFORM_STEPS } from "./shared/steps.generated.ts";
 import { SOLID_TARGET_VERSION } from "./shared/target.ts";
 
 // The Solid 1.9 -> 2 RC assistant on the code-first engine
@@ -24,58 +25,22 @@ const DEPENDENCIES = DEPENDENCY_MAP as readonly DependencyEntry[];
 
 const ECOSYSTEM = ["@solidjs/router", "@solidjs/meta", "@solidjs/start", "vinxi"];
 
-// One stage per rule domain. `needs` is the dependency guard; `scan` is the
-// file guard: rules in the stage only see files whose text contains one of
-// these strings (null: every source file, for JSX rules that match syntax
-// rather than imports).
-const STAGES: { name: string; needs: string[]; scan: string[] | null; analyses: string[]; rewrites: string[] }[] = [
-  {
-    name: "Imports",
-    needs: ["solid-js"],
-    scan: ["solid-js"],
-    analyses: ["analyzeBeta32SubpathImports", "analyzeJsxTypeImports", "analyzeWebImport"],
-    rewrites: ["relocateJsxTypes", "relocateLegacySubpaths", "relocateWebPackage"],
-  },
-  {
-    name: "JSX",
-    needs: ["solid-js"],
-    scan: null,
-    analyses: [
-      "analyzeJsxClassListAttributes", "analyzeJsxComponentRenames", "analyzeContextProvider",
-      "analyzeDomAttrNamespaces", "analyzeDomEventNamespaces", "analyzeDomLowercaseEvents",
-      "analyzeDomUseDirective", "analyzeDynamicComponent", "analyzeRefCallbackScope",
-    ],
-    rewrites: ["rewriteClassListToClass", "rewriteContextProvider", "rewriteIndexToFor", "rewriteLowercaseEventHandlers"],
-  },
+// One stage per group of rule domains (rules/<kind>/<domain>/<rule>). `needs`
+// is the dependency guard; `scan` is the file guard: rules in the stage only
+// see files whose text contains one of these strings (null: every source
+// file, for JSX rules that match syntax rather than imports). The steps come
+// from shared/steps.generated.ts, which `pnpm generate` derives from rules/.
+const STAGES: { name: string; needs: string[]; scan: string[] | null; rules: (rule: string) => boolean }[] = [
+  { name: "Imports", needs: ["solid-js"], scan: ["solid-js"], rules: (r) => r.startsWith("imports/") && r !== "imports/ecosystem-apis" },
+  { name: "JSX", needs: ["solid-js"], scan: null, rules: (r) => r.startsWith("jsx/") },
   {
     name: "Reactivity, lifecycle and props",
     needs: ["solid-js"],
     scan: ["solid-js"],
-    analyses: [
-      "analyzeOnCleanup", "analyzeOnMount", "analyzeMergeProps", "analyzeSplitProps", "analyzeBatch",
-      "analyzeCreateComputed", "analyzeCreateDynamic", "analyzeCreateEffect", "analyzeCreateMemo",
-      "analyzeCreateResource", "analyzeCreateSelector", "analyzeOnError", "analyzeCatchError",
-      "analyzeResetErrorBoundaries", "analyzeFrom", "analyzeObservable", "analyzeIndexArray",
-      "analyzeNestedCreateRoot", "analyzeOnHelper", "analyzeStartTransition", "analyzeUseTransition",
-      "analyzeCreateDeferred", "analyzeEqualFn", "analyzeGetListener", "analyzeWriteSignal",
-      "analyzeEnableScheduling",
-    ],
-    rewrites: ["rewriteOnHelper"],
+    rules: (r) => /^(reactivity|lifecycle|props)\//.test(r),
   },
-  {
-    name: "Stores",
-    needs: ["solid-js"],
-    scan: ["solid-js/store"],
-    analyses: ["analyzeCreateMutable", "analyzeModifyMutable", "analyzeProduce", "analyzeStoreSetterCalls", "analyzeUnwrap"],
-    rewrites: ["rewriteStoreSetterLiteralPaths"],
-  },
-  {
-    name: "Router, meta and start",
-    needs: ECOSYSTEM,
-    scan: ECOSYSTEM,
-    analyses: ["analyzeEcosystemImports"],
-    rewrites: [],
-  },
+  { name: "Stores", needs: ["solid-js"], scan: ["solid-js/store"], rules: (r) => r.startsWith("store/") },
+  { name: "Router, meta and start", needs: ECOSYSTEM, scan: ECOSYSTEM, rules: (r) => r === "imports/ecosystem-apis" },
 ];
 
 // Stand-in for the dependency analysis task being built on #2485. It reads
@@ -103,9 +68,19 @@ function major(version: string | undefined): number | undefined {
   return match ? Number(match[1]) : undefined;
 }
 
-export default async function main({ params }: { params: { mode?: string; verify?: string } }) {
+type Params = {
+  /** analyze (default) reports findings; migrate also applies the rewrites. */
+  mode?: string;
+  /** Lint before and after with eslint-plugin-solid's v2 config (default true). */
+  verify?: boolean | string;
+  /** none skips the text report (the CLI renders its own from the run output). */
+  report?: string;
+};
+
+export default async function main({ params }: { params: Params }) {
   const migrate = params.mode === "migrate";
-  const verify = params.verify !== "false";
+  // --param values arrive as JSON when they parse as JSON, so false is a boolean.
+  const verify = params.verify !== false && params.verify !== "false";
 
   const manifests = await step(
     "Read dependencies",
@@ -144,6 +119,8 @@ export default async function main({ params }: { params: { mode?: string; verify
   const files = scanned.outputs as { path: string; hits: string[] }[];
   const plan = STAGES.map((stage) => ({
     ...stage,
+    analyses: ANALYSIS_STEPS.filter((s) => stage.rules(s.rule)).map((s) => s.name),
+    rewrites: TRANSFORM_STEPS.filter((s) => stage.rules(s.rule)).map((s) => s.name),
     run: stage.needs.some((name) => declared[name] !== undefined),
     files: stage.scan === null ? files.map((f) => f.path) : files.filter((f) => f.hits.some((h) => stage.scan!.includes(h))).map((f) => f.path),
   }));
@@ -162,7 +139,9 @@ export default async function main({ params }: { params: { mode?: string; verify
 
   if (verify) await lint("Lint with eslint-plugin-solid v2 (before)", "lintBefore");
 
-  for (const stage of plan) {
+  // Migrate mode only rewrites, as the old transform workflow did: findings
+  // computed before the rewrites would list sites the rewrites just fixed.
+  for (const stage of migrate ? [] : plan) {
     if (!stage.run || stage.files.length === 0) continue;
     for (const rule of stage.analyses) {
       const label = `${stage.name}: ${rule}`;
@@ -170,7 +149,7 @@ export default async function main({ params }: { params: { mode?: string; verify
       failures.push(...result.failures.map((f) => ({ step: label, ...f })));
     }
   }
-  const findings = (getState(FINDINGS) ?? []) as any[];
+  const findings = byLocation((getState(FINDINGS) ?? []) as any[]);
 
   if (migrate) {
     if (blocked.length > 0) {
@@ -187,7 +166,7 @@ export default async function main({ params }: { params: { mode?: string; verify
     if (verify) await lint("Lint with eslint-plugin-solid v2 (after)", "lintAfter");
   }
 
-  const rewrites = (getState(REWRITES) ?? []) as any[];
+  const rewrites = byLocation((getState(REWRITES) ?? []) as any[]);
   const before = getState("lintBefore") as any;
   const after = getState("lintAfter") as any;
 
@@ -198,7 +177,10 @@ export default async function main({ params }: { params: { mode?: string; verify
   const withLint = findings.filter((f) => f.lint.length > 0);
   const unconfirmed = withLint.filter((f) => !f.lint.some((rule: string) => lintSites.has(`${f.file}:solid/${rule}`)));
 
-  console.log(renderText({ findings, rewrites, solidVersion: SOLID_TARGET_VERSION }));
+  if (params.report !== "none") {
+    const text = renderText({ findings, rewrites, solidVersion: SOLID_TARGET_VERSION });
+    if (text !== "") console.log(text);
+  }
   if (failures.length > 0) console.log(`${failures.length} file(s) failed in jssg steps; see failures in the run output.`);
   if (verify) console.log(`eslint-plugin-solid v2: ${before?.total ?? "?"} messages before${after ? `, ${after.total} after` : ""}; ${withLint.length - unconfirmed.length} of ${withLint.length} findings confirmed by the linter.`);
 
@@ -208,10 +190,10 @@ export default async function main({ params }: { params: { mode?: string; verify
     dependencies: dependencyPlan,
     blocked,
     unknownSolidPackages: unknown,
-    findings: findings.length,
     findingsByRule: tally(findings.map((f) => f.rule)),
-    rewrites: rewrites.length,
     rewritesByRule: tally(rewrites.map((r) => r.rule)),
+    findings,
+    rewrites,
     failures: [...manifests.failures.map((f) => ({ step: "Read dependencies", ...f })), ...failures],
     lint: verify ? {
       before: before?.byRule,

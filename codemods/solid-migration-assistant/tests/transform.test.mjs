@@ -4,7 +4,7 @@ import { cpSync, existsSync, mkdirSync, mkdtempSync, readFileSync, rmSync, write
 import { tmpdir } from "node:os";
 import { dirname, join, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
-import { buildCodemodArguments, resolveCodemodLauncher } from "../shared/run-workflow.mjs";
+import { resolveCodemodLauncher } from "../shared/run-workflow.mjs";
 import { output, treeSnapshot } from "./helpers.mjs";
 
 /**
@@ -57,7 +57,7 @@ try {
   const directTarget = fresh("direct");
   const direct = spawnSync(
     process.execPath,
-    [resolveCodemodLauncher(), ...buildCodemodArguments(directTarget, "transform").filter((argument) => argument !== "--param" && argument !== "format=json")],
+    [resolveCodemodLauncher(), "--disable-analytics", "workflow", "run", "-w", packageDirectory, "-t", directTarget, "--allow-dirty", "--no-interactive", "--param", "mode=migrate", "--param", "verify=false"],
     { cwd: packageDirectory, encoding: "utf8", maxBuffer: 64 * 1024 * 1024, env: { ...process.env, NO_COLOR: "1" } },
   );
   assert.equal(direct.status, 0, output(direct));
@@ -95,12 +95,11 @@ function normalize(text, target) {
   return text.replace(/\u001b\[[0-?]*[ -/]*[@-~]/g, "").replaceAll(target, "<target>");
 }
 
-/** The workflow steps' console output: the lines Codemod indents by two spaces. */
+/** The workflow's console output: everything but Codemod's run and step progress lines. */
 function stepOutput(text) {
   return `${text
     .split("\n")
-    .filter((line) => line.startsWith("  "))
-    .map((line) => line.slice(2))
+    .filter((line) => !/^(?:[▸✓◐✗] |Run [0-9a-f-]{36}$|Done\b)/.test(line))
     .join("\n")
     .trim()}\n`;
 }

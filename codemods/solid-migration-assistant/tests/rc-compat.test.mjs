@@ -30,7 +30,6 @@ import { output, skipOrFail, treeSnapshot } from "./helpers.mjs";
  */
 const packageDirectory = resolve(dirname(fileURLToPath(import.meta.url)), "..");
 const codemodLauncher = resolve(packageDirectory, "node_modules/codemod/codemod");
-const workflowPath = resolve(packageDirectory, "transform.yaml");
 const projectDirectory = resolve(packageDirectory, "tests/rc-compat/project");
 const expectedDirectory = resolve(packageDirectory, "tests/rc-compat/expected");
 
@@ -118,12 +117,16 @@ test(
           "workflow",
           "run",
           "-w",
-          workflowPath,
+          packageDirectory,
           "-t",
           target,
           "--allow-dirty",
           "--no-interactive",
           "--no-color",
+          "--param",
+          "mode=migrate",
+          "--param",
+          "verify=false",
         ],
         packageDirectory,
       );

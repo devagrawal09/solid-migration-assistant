@@ -11,9 +11,8 @@
   "files": [
     "LICENSE",
     "README.md",
-    "benchmarks/workspace-pass.ts",
-    "benchmarks/workspace-passes.mjs",
     "bin/solid-migration-assistant.mjs",
+    "codemod.yaml",
     "rules/analysis/imports/beta32-subpaths/beta32-subpaths.ts",
     "rules/analysis/imports/ecosystem-apis/ecosystem-apis.ts",
     "rules/analysis/imports/jsx-types/jsx-types.ts",
@@ -102,7 +101,6 @@
     "scripts/analysis/analyzeUseTransition.ts",
     "scripts/analysis/analyzeWebImport.ts",
     "scripts/analysis/analyzeWriteSignal.ts",
-    "scripts/emit-report.ts",
     "scripts/transformations/relocateJsxTypes.ts",
     "scripts/transformations/relocateLegacySubpaths.ts",
     "scripts/transformations/relocateWebPackage.ts",
@@ -123,10 +121,13 @@
     "shared/provenance.ts",
     "shared/run-workflow.mjs",
     "shared/semantic.ts",
+    "shared/steps.generated.ts",
     "shared/target.ts",
     "shared/transform.ts",
-    "transform.yaml",
-    "workflow.yaml"
+    "verify/eslint-solid-v2.sh",
+    "verify/eslint.config.mjs",
+    "verify/summarize.mjs",
+    "workflow.ts"
   ],
   "repository": {
     "type": "git",
@@ -157,26 +158,26 @@
   "packageManager": "pnpm@11.20.0",
   "scripts": {
     "analyze": "node ./bin/solid-migration-assistant.mjs",
-    "test": "pnpm test:architecture && pnpm test:package && pnpm test:rules && pnpm test:workflow && pnpm test:transform",
+    "test": "pnpm test:architecture && pnpm test:package && pnpm test:rules && pnpm test:guards && pnpm test:workflow && pnpm test:transform",
     "test:architecture": "node --test ./tests/architecture.test.mjs",
     "test:package": "node --test ./tests/cli.test.mjs ./tests/packaging.test.mjs",
     "test:workflow": "node ./tests/workflow.test.mjs",
     "check-types": "tsc --noEmit",
-    "validate": "node ./node_modules/codemod/codemod --disable-analytics workflow validate -w workflow.yaml && node ./node_modules/codemod/codemod --disable-analytics workflow validate -w transform.yaml",
+    "validate": "node ./node_modules/codemod/codemod --disable-analytics workflow validate -w .",
     "verify": "pnpm test && pnpm check-types && pnpm validate",
     "test:rules": "node ./tests/rule-fixtures.test.mjs",
     "transform": "node ./bin/solid-migration-assistant.mjs transform --allow-dirty",
     "test:transform": "node ./tests/transform.test.mjs",
-    "benchmark:workspace-passes": "node ./benchmarks/workspace-passes.mjs",
     "test:rc-compat": "node --test ./tests/rc-compat.test.mjs",
     "test:corpus": "node --test ./tests/corpus.test.mjs",
     "corpus:update-baseline": "node ./tests/corpus.test.mjs --update-baseline",
     "test:release": "pnpm test:rc-compat && pnpm test:corpus",
     "fixtures:update": "node ./tests/rule-fixtures.test.mjs --update && node ./tests/workflow.test.mjs --update && node ./tests/transform.test.mjs --update",
-    "generate": "node ./tools/generate.mjs"
+    "generate": "node ./tools/generate.mjs",
+    "test:guards": "node --test ./tests/guards.test.mjs"
   },
   "dependencies": {
-    "codemod": "1.12.13"
+    "codemod": "2.0.0-alpha.3"
   },
   "devDependencies": {
     "@codemod.com/jssg-types": "1.6.2",
