@@ -1,6 +1,6 @@
 // Specs for the guards in workflow.ts, the code-first (codemod/codemod#2485)
 // version of the assistant. They need a codemod CLI built from that branch:
-// CODEMOD_V2_BIN=/path/to/codemod node --test tests/workflow-v2.test.mjs
+// CODEMOD_V2_BIN=/path/to/codemod (2.0.0-alpha.3 or later) node --test tests/workflow-v2.test.mjs
 // Lint is off (verify=false), so no run touches the network.
 import { execFileSync } from "node:child_process";
 import { mkdtempSync, readFileSync, readdirSync, writeFileSync, mkdirSync } from "node:fs";
@@ -19,11 +19,12 @@ const Theme = createContext("light");
 export const App = () => <Theme.Provider value="dark"><div /></Theme.Provider>;
 `;
 
-function project(dependencies, source = APP) {
+function project(dependencies, { file = "App.tsx", lockfile } = {}) {
   const dir = mkdtempSync(join(tmpdir(), "sma-v2-"));
   writeFileSync(join(dir, "package.json"), JSON.stringify({ name: "fixture", dependencies }));
-  mkdirSync(join(dir, "src"));
-  writeFileSync(join(dir, "src", "App.tsx"), source);
+  if (lockfile) writeFileSync(join(dir, "package-lock.json"), JSON.stringify(lockfile));
+  mkdirSync(dirname(join(dir, "src", file)), { recursive: true });
+  writeFileSync(join(dir, "src", file), APP);
   execFileSync("git", ["init", "-q"], { cwd: dir });
   execFileSync("git", ["add", "-A"], { cwd: dir });
   execFileSync("git", ["-c", "user.email=t@t", "-c", "user.name=t", "commit", "-qm", "fixture"], { cwd: dir });
@@ -41,7 +42,7 @@ function run(dir, mode = "analyze") {
   return JSON.parse(readFileSync(join(store, id, "run.json"), "utf8"));
 }
 
-const source = (dir) => readFileSync(join(dir, "src", "App.tsx"), "utf8");
+const source = (dir, file = "App.tsx") => readFileSync(join(dir, "src", file), "utf8");
 
 test("skips a project that does not depend on solid-js", { skip }, () => {
   const out = run(project({ react: "^19.0.0" })).output;
@@ -70,4 +71,19 @@ test("rewrites source when every dependency has a Solid 2 path", { skip }, () =>
   const dir = project({ "solid-js": "^1.9.5", "@solidjs/router": "^0.15.3" });
   run(dir, "migrate");
   assert.match(source(dir), /<Theme value="dark">/);
+});
+
+test("rewrites a route file whose name has brackets", { skip }, () => {
+  const dir = project({ "solid-js": "^1.9.5" }, { file: "routes/[id].tsx" });
+  run(dir, "migrate");
+  assert.match(source(dir, "routes/[id].tsx"), /<Theme value="dark">/);
+});
+
+test("reads a lockfile that has linked packages", { skip }, () => {
+  const lockfile = { packages: {
+    "node_modules/solid-js": { version: "1.9.5" },
+    "node_modules/local-editor": { resolved: "../editor", link: true },
+  } };
+  const out = run(project({ "solid-js": "^1.9.5" }, { lockfile })).output;
+  assert.deepEqual(out.failures, []);
 });

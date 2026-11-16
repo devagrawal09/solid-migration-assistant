@@ -1,11 +1,10 @@
-import { approval, forEachFile, getState, jssg, shell, step } from "codemod:workflow";
+import { approval, forEachFile, getState, jssg, shell, step } from "codemod/workflow";
 import { DEPENDENCY_MAP } from "./shared/dependencies.mjs";
 import { renderText } from "./shared/format.mjs";
 import { SOLID_TARGET_VERSION } from "./shared/target.ts";
 
 // The Solid 1.9 -> 2 RC assistant on the code-first engine
-// (codemod/codemod#2485 at 5a33930): the launcher's dependency table and the
-// report renderer are imported from shared/ instead of copied.
+// (codemod/codemod#2485, engine/code-first 9c91ebf, published as 2.0.0-alpha.3).
 
 const SOURCES = {
   include: ["**/*.js", "**/*.jsx", "**/*.ts", "**/*.tsx"],
@@ -89,7 +88,10 @@ function readDependencies(path: string, text: string) {
     const resolved: Record<string, string> = {};
     for (const [key, entry] of Object.entries<any>(json.packages ?? {})) {
       const name = key.replace(/^.*node_modules\//, "");
-      if (key.startsWith("node_modules/") && !(name in resolved)) resolved[name] = entry.version;
+      // Linked and workspace entries have no version.
+      if (key.startsWith("node_modules/") && typeof entry.version === "string" && !(name in resolved)) {
+        resolved[name] = entry.version;
+      }
     }
     return { path, resolved };
   }
@@ -147,16 +149,25 @@ export default async function main({ params }: { params: { mode?: string; verify
   }));
 
   const lint = async (label: string, key: string) =>
-    step(label, shell(`sh "$CODEMOD_PATH/verify/eslint-solid-v2.sh" ${key}`));
+    step(label, shell`sh ${import.meta.dirname}/verify/eslint-solid-v2.sh ${key}`);
+
+  // jssg rules run on exactly the stage's files. Paths are passed as globs, so
+  // brackets in route files like src/routes/[id].tsx are escaped.
+  const runRule = (label: string, script: string, files: string[]) =>
+    step(label, forEachFile(
+      { include: files.map(literalGlob), language: "tsx" },
+      jssg(script, { semanticAnalysis: "workspace" }),
+    ));
+  const failures: { step: string; path: string; error: string }[] = [];
 
   if (verify) await lint("Lint with eslint-plugin-solid v2 (before)", "lintBefore");
 
   for (const stage of plan) {
     if (!stage.run || stage.files.length === 0) continue;
     for (const rule of stage.analyses) {
-      await step(`${stage.name}: ${rule}`, jssg(`./scripts/analysis/${rule}.ts`, {
-        files: stage.files, language: "tsx", semanticAnalysis: "workspace",
-      }));
+      const label = `${stage.name}: ${rule}`;
+      const result = await runRule(label, `./scripts/analysis/${rule}.ts`, stage.files);
+      failures.push(...result.failures.map((f) => ({ step: label, ...f })));
     }
   }
   const findings = (getState(FINDINGS) ?? []) as any[];
@@ -168,9 +179,9 @@ export default async function main({ params }: { params: { mode?: string; verify
     for (const stage of plan) {
       if (!stage.run || stage.files.length === 0) continue;
       for (const rule of stage.rewrites) {
-        await step(`${stage.name}: ${rule}`, jssg(`./scripts/transformations/${rule}.ts`, {
-          files: stage.files, language: "tsx", semanticAnalysis: "workspace",
-        }));
+        const label = `${stage.name}: ${rule}`;
+        const result = await runRule(label, `./scripts/transformations/${rule}.ts`, stage.files);
+        failures.push(...result.failures.map((f) => ({ step: label, ...f })));
       }
     }
     if (verify) await lint("Lint with eslint-plugin-solid v2 (after)", "lintAfter");
@@ -188,6 +199,7 @@ export default async function main({ params }: { params: { mode?: string; verify
   const unconfirmed = withLint.filter((f) => !f.lint.some((rule: string) => lintSites.has(`${f.file}:solid/${rule}`)));
 
   console.log(renderText({ findings, rewrites, solidVersion: SOLID_TARGET_VERSION }));
+  if (failures.length > 0) console.log(`${failures.length} file(s) failed in jssg steps; see failures in the run output.`);
   if (verify) console.log(`eslint-plugin-solid v2: ${before?.total ?? "?"} messages before${after ? `, ${after.total} after` : ""}; ${withLint.length - unconfirmed.length} of ${withLint.length} findings confirmed by the linter.`);
 
   return {
@@ -200,6 +212,7 @@ export default async function main({ params }: { params: { mode?: string; verify
     findingsByRule: tally(findings.map((f) => f.rule)),
     rewrites: rewrites.length,
     rewritesByRule: tally(rewrites.map((r) => r.rule)),
+    failures: [...manifests.failures.map((f) => ({ step: "Read dependencies", ...f })), ...failures],
     lint: verify ? {
       before: before?.byRule,
       after: after?.byRule,
@@ -207,6 +220,10 @@ export default async function main({ params }: { params: { mode?: string; verify
       findingsTheLinterMisses: tally(unconfirmed.map((f) => `${f.rule} (expects ${f.lint.join(", ")})`)),
     } : "skipped",
   };
+}
+
+function literalGlob(path: string): string {
+  return path.replace(/[[\]*?{}]/g, (c) => `[${c}]`);
 }
 
 function tally(values: string[]): Record<string, number> {
