@@ -145,6 +145,8 @@ test(
           "mode=migrate",
           "--param",
           "verify=false",
+          "--param",
+          "install=false",
         ],
         packageDirectory,
       );

@@ -98,7 +98,15 @@ After the source rewrites, migrate mode moves the target's own `package.json` an
 - each `upgrade` entry of the dependency table (`@solidjs/router`, `@solidjs/testing-library`, the `@solid-primitives` packages, TanStack Query and Router) moves to its verified Solid 2 version;
 - `"jsxImportSource": "solid-js"` becomes `"@solidjs/web"`.
 
-Packages that need replacing or have no Solid 2 release stay as they are and keep their analyzer finding. A range that isn't plain semver (`workspace:`, `catalog:`, git, `link:`, tags) and a `solid-js` peer range are left alone and listed under **Next**, with the install command for the project's lockfile (pnpm, yarn, bun, else npm). Nothing is installed and no lockfile is written. Analyze mode never edits either file.
+Packages that need replacing or have no Solid 2 release stay as they are and keep their analyzer finding. A range that isn't plain semver (`workspace:`, `catalog:`, git, `link:`, tags) and a `solid-js` peer range are left alone and listed under **Next**.
+
+Migrate then reports what the rewrites left and checks the result:
+
+1. It analyzes the rewritten source, `package.json` and `tsconfig.json` files and prints every remaining finding as **Still to do**, so a dependency it could not move is listed with the rest, in the analyzer's format, with the summary grouped by rule.
+2. It installs the project's dependencies so the new versions take effect. The package manager comes from the nearest lockfile between the target and the git root (pnpm, yarn, bun, npm), else the `packageManager` field, else npm, and the install runs where that lockfile is, so a workspace package installs at the workspace root. This runs the project's install scripts and updates its lockfile and `node_modules`; a package manager may also write its own settings (pnpm 10 adds the RC packages to `minimumReleaseAgeExclude` in `pnpm-workspace.yaml`).
+3. After a successful install it typechecks each tracked `tsconfig.json` with the project's own `tsc --noEmit` and prints each config's error count and first ten errors. A config that only lists project references is replaced by the configs it references, and a workspace root's config is skipped when its packages have their own.
+
+When the install fails (a peer conflict, a private registry, no network), migrate prints the last lines of its output and the command to run again, and skips the typecheck, because `node_modules` would still hold Solid 1's types. Pass `--no-install` (`--param install=false` to the workflow) to skip the install and the typecheck. Analyze mode never edits either file and runs nothing in the target.
 
 ### Literal store path setters → draft writes
 
@@ -219,7 +227,7 @@ Because this workflow rewrites files in place, the launcher first runs `git stat
 node ./node_modules/codemod/codemod --disable-analytics workflow run -w . -t /path/to/a/solid-project --allow-dirty --no-interactive --param mode=migrate
 ```
 
-When a dependency has no Solid 2 release, the workflow pauses for approval before any rewrite. Under the launcher, `transform` then exits with status 2 and rewrites nothing; pass `--allow-blocked` to apply the source rewrites anyway.
+When a dependency has no Solid 2 release, the workflow pauses for approval before any rewrite. Under the launcher, `transform` then exits with status 2 and rewrites nothing; pass `--allow-blocked` to apply the source rewrites anyway. Pass `--no-install` to leave dependencies, the lockfile and `node_modules` alone; migrate then skips the typecheck too.
 
 ## Deliberate limits
 

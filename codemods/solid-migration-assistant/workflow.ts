@@ -76,12 +76,18 @@ type Params = {
   verify?: boolean | string;
   /** none skips the text report (the CLI renders its own from the run output). */
   report?: string;
+  /**
+   * After migrate, install with the project's package manager and typecheck
+   * with its own TypeScript (default true).
+   */
+  install?: boolean | string;
 };
 
 export default async function main({ params }: { params: Params }) {
   const migrate = params.mode === "migrate";
   // --param values arrive as JSON when they parse as JSON, so false is a boolean.
   const verify = params.verify !== false && params.verify !== "false";
+  const install = params.install !== false && params.install !== "false";
 
   const manifests = await step(
     "Read dependencies",
@@ -142,17 +148,19 @@ export default async function main({ params }: { params: Params }) {
 
   if (verify) await lint("Lint with eslint-plugin-solid v2 (before)", "lintBefore");
 
-  // Migrate mode only rewrites, as the old transform workflow did: findings
-  // computed before the rewrites would list sites the rewrites just fixed.
-  for (const stage of migrate ? [] : plan) {
-    if (!stage.run || stage.files.length === 0) continue;
-    for (const rule of stage.analyses) {
-      const label = `${stage.name}: ${rule}`;
-      const result = await runRule(label, `./scripts/analysis/${rule}.ts`, stage.files);
-      failures.push(...result.failures.map((f) => ({ step: label, ...f })));
+  const analyze = async () => {
+    for (const stage of plan) {
+      if (!stage.run || stage.files.length === 0) continue;
+      for (const rule of stage.analyses) {
+        const label = `${stage.name}: ${rule}`;
+        const result = await runRule(label, `./scripts/analysis/${rule}.ts`, stage.files);
+        failures.push(...result.failures.map((f) => ({ step: label, ...f })));
+      }
     }
-  }
-  const findings = byLocation((getState(FINDINGS) ?? []) as any[]);
+  };
+
+  // Migrate analyzes after the rewrites, so its findings are what they left.
+  if (!migrate) await analyze();
 
   const projectRewrites: any[] = [];
   const dependencySkips: any[] = [];
@@ -210,8 +218,16 @@ export default async function main({ params }: { params: Params }) {
       dependencySkips.push(...output.skipped);
     }
     failures.push(...project.failures.map((f) => ({ step: "Move package.json and tsconfig.json to Solid 2", ...f })));
+    await analyze();
+    await step(
+      install ? "Install and typecheck" : "Typecheck",
+      shell({ cwd: "." })`node ${import.meta.dirname}/verify/after-migrate.mjs ${install ? "install" : "no-install"} afterMigrate`,
+    );
     if (verify) await lint("Lint with eslint-plugin-solid v2 (after)", "lintAfter");
   }
+
+  const findings = byLocation((getState(FINDINGS) ?? []) as any[]);
+  const afterMigrate = migrate ? (getState("afterMigrate") as any) : undefined;
 
   const rewrites = byLocation([...((getState(REWRITES) ?? []) as any[]), ...projectRewrites]);
   const before = getState("lintBefore") as any;
@@ -225,14 +241,11 @@ export default async function main({ params }: { params: Params }) {
   const unconfirmed = withLint.filter((f) => !f.lint.some((rule: string) => lintSites.has(`${f.file}:solid/${rule}`)));
 
   if (params.report !== "none") {
-    const text = renderText({ findings, rewrites, solidVersion: SOLID_TARGET_VERSION });
+    const text = renderText({ findings, rewrites, afterMigrate, solidVersion: SOLID_TARGET_VERSION });
     if (text !== "") console.log(text);
   }
   if (params.report !== "none" && dependencySkips.length > 0) {
     console.log(`Left these dependency ranges as they are; move them by hand:\n${dependencySkips.map((s) => `  ${s.file}: ${s.name} ${JSON.stringify(s.range)} (${s.reason})`).join("\n")}`);
-  }
-  if (params.report !== "none" && projectRewrites.some((r) => r.rule === "project/dependencies")) {
-    console.log("package.json changed, but nothing was installed and no lockfile was touched. Run your package manager's install next (npm install, pnpm install, yarn or bun install).");
   }
   if (failures.length > 0) console.log(`${failures.length} file(s) failed in jssg steps; see failures in the run output.`);
   if (verify) console.log(`eslint-plugin-solid v2: ${before?.total ?? "?"} messages before${after ? `, ${after.total} after` : ""}; ${withLint.length - unconfirmed.length} of ${withLint.length} findings confirmed by the linter.`);
@@ -248,6 +261,7 @@ export default async function main({ params }: { params: Params }) {
     rewritesByRule: tally(rewrites.map((r) => r.rule)),
     findings,
     rewrites,
+    ...(afterMigrate ? { afterMigrate } : {}),
     failures: [...manifests.failures.map((f) => ({ step: "Read dependencies", ...f })), ...failures],
     lint: verify ? {
       before: before?.byRule,

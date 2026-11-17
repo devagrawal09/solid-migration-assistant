@@ -37,27 +37,27 @@ try {
   };
 
   const target = fresh("text");
-  const text = runLauncher(["transform", "--allow-dirty", "--target", target]);
+  const text = runLauncher(["transform", "--allow-dirty", "--no-install", "--target", target]);
   assert.equal(text.status, 0, output(text));
   assert.doesNotMatch(text.stderr, /codemod::runtime|Error:/, "a rule reported a runtime error");
   assert.deepEqual(treeSnapshot(target), treeSnapshot(expectedTree), "the rewritten tree differs from tests/transform-expected");
   compare("transform.txt", normalize(text.stdout, target));
 
-  const second = runLauncher(["transform", "--allow-dirty", "--target", target, "--format", "json"]);
+  const second = runLauncher(["transform", "--allow-dirty", "--no-install", "--target", target, "--format", "json"]);
   assert.equal(second.status, 0, output(second));
   assert.deepEqual(treeSnapshot(target), treeSnapshot(expectedTree), "a second transform run changed the target (not idempotent)");
   assert.deepEqual(JSON.parse(second.stdout).rewrites, [], "a second transform run re-reported rewrites (not idempotent)");
   assertNoPersistentArtifacts(target);
 
   const jsonTarget = fresh("json");
-  const json = runLauncher(["transform", "--allow-dirty", "--target", jsonTarget, "--format", "json"]);
+  const json = runLauncher(["transform", "--allow-dirty", "--no-install", "--target", jsonTarget, "--format", "json"]);
   assert.equal(json.status, 0, output(json));
   compare("transform.json", normalize(json.stdout, jsonTarget));
 
   const directTarget = fresh("direct");
   const direct = spawnSync(
     process.execPath,
-    [resolveCodemodLauncher(), "--disable-analytics", "workflow", "run", "-w", packageDirectory, "-t", directTarget, "--allow-dirty", "--no-interactive", "--param", "mode=migrate", "--param", "verify=false"],
+    [resolveCodemodLauncher(), "--disable-analytics", "workflow", "run", "-w", packageDirectory, "-t", directTarget, "--allow-dirty", "--no-interactive", "--param", "mode=migrate", "--param", "verify=false", "--param", "install=false"],
     { cwd: packageDirectory, encoding: "utf8", maxBuffer: 64 * 1024 * 1024, env: { ...process.env, NO_COLOR: "1" } },
   );
   assert.equal(direct.status, 0, output(direct));

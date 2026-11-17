@@ -32,7 +32,7 @@ function run(dir, mode = "analyze") {
   const store = mkdtempSync(join(tmpdir(), "sma-v2-runs-"));
   execFileSync(process.execPath, [
     resolveCodemodLauncher(), "workflow", "run", "-w", pkg, "-t", dir,
-    "--param", `mode=${mode}`, "--param", "verify=false",
+    "--param", `mode=${mode}`, "--param", "verify=false", "--param", "install=false",
     "--no-interactive", "--disable-analytics",
   ], { env: { ...process.env, CODEMOD_RUN_STORE_DIR: store }, stdio: "pipe" });
   const [id] = readdirSync(store);

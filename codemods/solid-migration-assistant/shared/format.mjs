@@ -70,15 +70,8 @@ export function renderRewrite(rewrite) {
  * so a long run can be surveyed without reading every block. Empty when
  * there is nothing to report.
  */
-export function renderText({ findings = [], rewrites = [], solidVersion }) {
+export function renderText({ findings = [], rewrites = [], afterMigrate, solidVersion }) {
   const blocks = [];
-  if (findings.length > 0) {
-    blocks.push(
-      `${PREFIX} ${count(findings.length, "finding")} for Solid ${solidVersion}. Each is a manual edit for you (or your agent) to make and validate; this analyzer never edits or runs the target project.`,
-      ...byLocation(findings).map(renderFinding),
-      summarize(findings, "finding", (finding) => finding.headline, true),
-    );
-  }
   if (rewrites.length > 0) {
     blocks.push(
       `${PREFIX} ${count(rewrites.length, "rewrite")} applied. Review the diff and run the project's own checks.`,
@@ -86,7 +79,42 @@ export function renderText({ findings = [], rewrites = [], solidVersion }) {
       summarize(rewrites, "rewrite", (rewrite) => rewrite.message, false),
     );
   }
+  if (findings.length > 0) {
+    // After a migrate run the findings are what the rewrites left.
+    const header = rewrites.length > 0 || afterMigrate !== undefined
+      ? `${PREFIX} Still to do: ${count(findings.length, "finding")} the rewrites could not make. Each is a manual edit for you (or your agent) to make and validate.`
+      : `${PREFIX} ${count(findings.length, "finding")} for Solid ${solidVersion}. Each is a manual edit for you (or your agent) to make and validate; this analyzer never edits or runs the target project.`;
+    blocks.push(header, ...byLocation(findings).map(renderFinding), summarize(findings, "finding", (finding) => finding.headline, true));
+  }
+  if (afterMigrate !== undefined) blocks.push(renderAfterMigrate(afterMigrate));
   return blocks.join("\n\n");
+}
+
+/** The install and typecheck that follow a migrate run. */
+export function renderAfterMigrate({ install, typecheck }) {
+  const lines = [];
+  if (install.skipped) lines.push(`${PREFIX} Nothing was installed (${install.skipped}), so the project wasn't typechecked against Solid 2.`);
+  else if (!install.ok) {
+    lines.push(
+      `${PREFIX} \`${install.command}\` failed in ${placeOf(install.directory)}, so the project wasn't typechecked. Fix the install and run it again:`,
+      ...install.error.split("\n").map((line) => `  ${line}`),
+    );
+  } else lines.push(`${PREFIX} Installed with \`${install.command}\` in ${placeOf(install.directory)}.`);
+  for (const check of typecheck) {
+    if (check.skipped) {
+      lines.push(`TypeScript (${check.config}): skipped, ${check.skipped}.`);
+      continue;
+    }
+    lines.push(`TypeScript (${check.config}): ${count(check.errors, "error")}${check.errors > 0 ? ` in ${count(check.files, "file")}` : ""}.`);
+    for (const error of check.first) lines.push(`  ${error.file}:${error.line}:${error.column} ${error.code} ${error.message}`);
+    if (check.errors > check.first.length) lines.push(`  ...and ${check.errors - check.first.length} more; run tsc for the full list.`);
+  }
+  return lines.join("\n");
+}
+
+/** An install directory relative to the target, as words. */
+export function placeOf(directory) {
+  return directory === "." ? "the project root" : directory;
 }
 
 const HEADLINES_PER_RULE = 3;

@@ -4,7 +4,7 @@ import { createRequire } from "node:module";
 import { tmpdir } from "node:os";
 import { basename, dirname, join, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
-import { byLocation, renderAgentReport, renderText, summaryOf } from "./format.mjs";
+import { byLocation, placeOf, renderAgentReport, renderText, summaryOf } from "./format.mjs";
 import { DEPENDENCY_MAP, DEPENDENCY_VERIFIED_ON, dependencyHeadline } from "./dependencies.mjs";
 import { allowsSolid2 } from "./peers.mjs";
 
@@ -26,7 +26,7 @@ Analyzer: ${packageMetadata.name}@${packageMetadata.version}
 Reviewed migration destination: ${SOLID_TARGET} (source commit ${SOLID_SOURCE_COMMIT})
 Immutable migration guide: ${MIGRATION_GUIDE}
 Scope: This source-only analyzer covers project-owned .js, .jsx, .ts, and .tsx source. Coverage is incomplete and advisory, makes no migration-readiness claim, and supports only the exact destination above; other Solid versions are unsupported.
-Execution: Read-only. The analyzer does not run target typechecks, builds, tests, scripts, or applications and creates no target report.
+Execution: analyze is read-only and runs nothing in the target. transform rewrites source, package.json and tsconfig.json, then installs with the project's package manager, which runs the project's install scripts and updates its lockfile and node_modules (--no-install skips it), and typechecks with the project's own TypeScript. Neither runs builds, tests, or applications, or creates a target report.
 Privacy and output: Analyzer telemetry is disabled and no analyzer telemetry or generated report is emitted. Codemod may retain normal workflow or task state outside the target in platform user-data directories; consult Codemod's privacy and state behavior.
 Feedback: ${FEEDBACK_URL}
 [solid-migration-assistant] End final disclosure`;
@@ -245,17 +245,18 @@ export const WORKFLOWS = Object.freeze({
 export const FORMATS = Object.freeze(["text", "json", "agent"]);
 
 /**
- * `[workflow] [--target <dir>] [--allow-dirty] [--allow-blocked] [--format text|json|agent]`.
+ * `[workflow] [--target <dir>] [--allow-dirty] [--allow-blocked] [--no-install] [--format text|json|agent]`.
  * The workflow defaults to `analyze` and the format to `text`, so every
- * pre-existing invocation keeps its meaning; `--allow-dirty` and
- * `--allow-blocked` are accepted only with `transform`, the one workflow that
- * writes to the target.
+ * pre-existing invocation keeps its meaning; `--allow-dirty`,
+ * `--allow-blocked` and `--no-install` are accepted only with `transform`,
+ * the one workflow that writes to the target.
  */
 export function parseArguments(argumentsList) {
   let workflow = "analyze";
   let target = ".";
   let allowDirty = false;
   let allowBlocked = false;
+  let install = true;
   let format = "text";
   let hasExplicitTarget = false;
   let hasExplicitFormat = false;
@@ -280,6 +281,13 @@ export function parseArguments(argumentsList) {
         throw new CliUsageError("--allow-blocked is only accepted with the transform workflow");
       }
       allowBlocked = true;
+      continue;
+    }
+    if (argument === "--no-install") {
+      if (workflow !== "transform") {
+        throw new CliUsageError("--no-install is only accepted with the transform workflow");
+      }
+      install = false;
       continue;
     }
     if (argument === "--format") {
@@ -314,7 +322,7 @@ export function parseArguments(argumentsList) {
   if (format === "agent" && workflow !== "analyze") {
     throw new CliUsageError("--format agent is only accepted with the analyze workflow");
   }
-  return { workflow, target, allowDirty, allowBlocked, format };
+  return { workflow, target, allowDirty, allowBlocked, install, format };
 }
 
 /** Backwards-compatible view of `parseArguments` for the analyze workflow. */
@@ -348,7 +356,7 @@ export function resolveCodemodLauncher() {
   return resolve(dirname(require.resolve("codemod/package.json")), "codemod");
 }
 
-export function buildCodemodArguments(target, workflow = "analyze", { allowBlocked = false } = {}) {
+export function buildCodemodArguments(target, workflow = "analyze", { allowBlocked = false, install = true } = {}) {
   return [
     "--disable-analytics",
     "workflow",
@@ -364,10 +372,11 @@ export function buildCodemodArguments(target, workflow = "analyze", { allowBlock
     "--no-interactive",
     "--param",
     `mode=${WORKFLOWS[workflow]}`,
-    // The eslint-plugin-solid check installs packages, so the launcher, which
-    // runs nothing in or for the target, leaves it off.
+    // The eslint-plugin-solid check installs its own tools, so the launcher
+    // leaves it off.
     "--param",
     "verify=false",
+    ...(install ? [] : ["--param", "install=false"]),
     // The launcher renders every format from the run output (`shared/format.mjs`).
     "--param",
     "report=none",
@@ -390,13 +399,13 @@ const PAUSE_LINE = /^\s*(Waiting for approval:|Resume with:)/;
  */
 export async function runCodemod(
   target,
-  { spawnImpl = spawn, workflow = "analyze", allowBlocked = false, progress = process.stderr } = {},
+  { spawnImpl = spawn, workflow = "analyze", allowBlocked = false, install = true, progress = process.stderr } = {},
 ) {
   const runStore = mkdtempSync(join(tmpdir(), "solid-migration-assistant-run-"));
   try {
     const child = spawnImpl(
       process.execPath,
-      [resolveCodemodLauncher(), ...buildCodemodArguments(target, workflow, { allowBlocked })],
+      [resolveCodemodLauncher(), ...buildCodemodArguments(target, workflow, { allowBlocked, install })],
       {
         cwd: packageDirectory,
         env: { ...process.env, CODEMOD_RUN_STORE_DIR: runStore },
@@ -451,22 +460,22 @@ export function parseRunOutput({ output, runStatus }) {
     findings: output?.findings ?? [],
     rewrites: output?.rewrites ?? [],
     dependencySkips: output?.dependencySkips ?? [],
+    afterMigrate: output?.afterMigrate,
     diagnostics,
   };
 }
 
 /**
- * What the user runs after a transform: the install command for the
- * project's package manager (by lockfile) when package.json changed, and
- * every dependency range the transform left alone.
+ * What the user does after a transform: the install when it was skipped or
+ * failed, and every dependency range the transform left alone.
  */
-export function nextSteps(target, { rewrites = [], dependencySkips = [] }) {
+export function nextSteps({ dependencySkips = [], afterMigrate }) {
   const steps = [];
-  if (rewrites.some((rewrite) => rewrite.rule === "project/dependencies")) {
-    const manager =
-      [["pnpm-lock.yaml", "pnpm install"], ["yarn.lock", "yarn install"], ["bun.lock", "bun install"], ["bun.lockb", "bun install"]]
-        .find(([lockfile]) => existsSync(resolve(target, lockfile)))?.[1] ?? "npm install";
-    steps.push(`Run ${manager}: package.json now targets Solid ${SOLID_VERSION}, and nothing was installed or written to the lockfile.`);
+  const install = afterMigrate?.install;
+  if (install?.skipped) {
+    steps.push(`Install with your package manager, then typecheck: package.json now targets Solid ${SOLID_VERSION}.`);
+  } else if (install && !install.ok) {
+    steps.push(`Run ${install.command} in ${placeOf(install.directory)} once the install error above is fixed, then typecheck.`);
   }
   for (const skip of dependencySkips) {
     steps.push(`Move ${skip.name} ${JSON.stringify(skip.range)} in ${skip.file} by hand: ${skip.reason}.`);
@@ -479,7 +488,7 @@ export function nextSteps(target, { rewrites = [], dependencySkips = [] }) {
  * for findings), and every finding or rewrite, sorted by file, line, and
  * column.
  */
-export function buildJsonReport({ workflow, target, findings = [], rewrites = [], next = [], status }) {
+export function buildJsonReport({ workflow, target, findings = [], rewrites = [], afterMigrate, next = [], status }) {
   const report = {
     tool: packageMetadata.name,
     version: packageMetadata.version,
@@ -493,7 +502,15 @@ export function buildJsonReport({ workflow, target, findings = [], rewrites = []
     return { ...report, summary: summaryOf({ findings: sorted }), findings: sorted };
   }
   const sorted = byLocation(rewrites);
-  return { ...report, summary: summaryOf({ rewrites: sorted }), rewrites: sorted, ...(next.length > 0 ? { nextSteps: next } : {}) };
+  const leftovers = byLocation(findings);
+  return {
+    ...report,
+    summary: summaryOf({ rewrites: sorted }),
+    rewrites: sorted,
+    leftovers: { summary: summaryOf({ findings: leftovers }), findings: leftovers },
+    ...(afterMigrate ? { afterMigrate } : {}),
+    ...(next.length > 0 ? { nextSteps: next } : {}),
+  };
 }
 
 export async function main(
@@ -551,22 +568,26 @@ async function run(argumentsList, invocationDirectory, runImpl, dirtyImpl, proje
     if (reason !== null) return fail(reason);
   }
 
-  const project = parsed.workflow === "analyze" ? projectImpl(target) : [];
-  const result = await runImpl(target, parsed.workflow, { allowBlocked: parsed.allowBlocked });
+  const analyzed = parsed.workflow === "analyze" ? projectImpl(target) : [];
+  const result = await runImpl(target, parsed.workflow, { allowBlocked: parsed.allowBlocked, install: parsed.install });
   if (result.runStatus === "awaiting-approval") {
     const blocked =
       /^(.+?) Apply the source rewrites anyway\?$/.exec(result.awaiting ?? "")?.[1] ?? "A dependency has no Solid 2 release.";
     return fail(`nothing was rewritten. ${blocked} Pass --allow-blocked to apply the source rewrites anyway.`);
   }
+  // A transform's leftovers read package.json and tsconfig.json as it left
+  // them, so a dependency it could not move is still listed.
+  const project = parsed.workflow === "analyze" ? analyzed : projectImpl(target);
   const status = result.status ?? 1;
-  const { findings, rewrites, dependencySkips, diagnostics } = parseRunOutput(result);
-  const next = parsed.workflow === "analyze" ? [] : nextSteps(target, { rewrites, dependencySkips });
+  const { findings, rewrites, dependencySkips, afterMigrate, diagnostics } = parseRunOutput(result);
+  const next = parsed.workflow === "analyze" ? [] : nextSteps({ dependencySkips, afterMigrate });
   if (diagnostics.length > 0) console.error(diagnostics.join("\n"));
   const report = buildJsonReport({
     workflow: parsed.workflow,
     target,
     findings: [...project, ...findings],
     rewrites,
+    afterMigrate,
     next,
     status,
   });
@@ -575,7 +596,12 @@ async function run(argumentsList, invocationDirectory, runImpl, dirtyImpl, proje
   } else if (parsed.format === "agent") {
     console.log(renderAgentReport(report));
   } else {
-    const text = renderText({ findings: report.findings ?? [], rewrites: report.rewrites ?? [], solidVersion: SOLID_VERSION });
+    const text = renderText({
+      findings: report.findings ?? report.leftovers.findings,
+      rewrites: report.rewrites ?? [],
+      afterMigrate,
+      solidVersion: SOLID_VERSION,
+    });
     console.log(
       text !== ""
         ? text

@@ -42,6 +42,7 @@ const STATIC_FILES = [
   "README.md",
   "bin/solid-migration-assistant.mjs",
   "codemod.yaml",
+  "verify/after-migrate.mjs",
   "verify/eslint-solid-v2.sh",
   "verify/eslint.config.mjs",
   "verify/summarize.mjs",

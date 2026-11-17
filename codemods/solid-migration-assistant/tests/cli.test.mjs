@@ -31,11 +31,11 @@ test("defaults the target to the invocation directory", async () => {
 });
 
 test("parses the optional workflow and the transform-only --allow-dirty flag", async () => {
-  assert.deepEqual(parseArguments([]), { workflow: "analyze", target: ".", allowDirty: false, allowBlocked: false, format: "text" });
-  assert.deepEqual(parseArguments(["analyze", "--target", "p"]), { workflow: "analyze", target: "p", allowDirty: false, allowBlocked: false, format: "text" });
-  assert.deepEqual(parseArguments(["transform"]), { workflow: "transform", target: ".", allowDirty: false, allowBlocked: false, format: "text" });
-  assert.deepEqual(parseArguments(["transform", "--allow-dirty", "--target", "p"]), { workflow: "transform", target: "p", allowDirty: true, allowBlocked: false, format: "text" });
-  assert.deepEqual(parseArguments(["--format", "json"]), { workflow: "analyze", target: ".", allowDirty: false, allowBlocked: false, format: "json" });
+  assert.deepEqual(parseArguments([]), { workflow: "analyze", target: ".", allowDirty: false, allowBlocked: false, install: true, format: "text" });
+  assert.deepEqual(parseArguments(["analyze", "--target", "p"]), { workflow: "analyze", target: "p", allowDirty: false, allowBlocked: false, install: true, format: "text" });
+  assert.deepEqual(parseArguments(["transform"]), { workflow: "transform", target: ".", allowDirty: false, allowBlocked: false, install: true, format: "text" });
+  assert.deepEqual(parseArguments(["transform", "--allow-dirty", "--target", "p"]), { workflow: "transform", target: "p", allowDirty: true, allowBlocked: false, install: true, format: "text" });
+  assert.deepEqual(parseArguments(["--format", "json"]), { workflow: "analyze", target: ".", allowDirty: false, allowBlocked: false, install: true, format: "json" });
   assert.throws(() => parseArguments(["--format", "xml"]), /--format requires one of: text, json/);
   assert.throws(() => parseArguments(["--format"]), /--format requires one of/);
   assert.throws(() => parseArguments(["--format", "json", "--format", "text"]), /--format may only be specified once/);
@@ -45,6 +45,12 @@ test("parses the optional workflow and the transform-only --allow-dirty flag", a
   assert.equal(parseArguments(["transform", "--allow-blocked"]).allowBlocked, true);
   assert.throws(() => parseArguments(["--allow-blocked"]), /only accepted with the transform workflow/);
   assert.equal(buildCodemodArguments("/t", "transform", { allowBlocked: true }).at(-1), "--approve");
+});
+
+test("--no-install, accepted only with transform, tells the workflow not to install", () => {
+  assert.equal(parseArguments(["transform", "--no-install"]).install, false);
+  assert.throws(() => parseArguments(["--no-install"]), /only accepted with the transform workflow/);
+  assert.equal(buildCodemodArguments("/t", "transform", { install: false }).join(" ").includes("--param install=false"), true);
 });
 
 test("refuses to transform a dirty or non-git target unless --allow-dirty", async () => {
@@ -154,15 +160,30 @@ test("reports Solid 1 manifests and jsxImportSource read-only, before the analyz
     assert.match(printed[0], /\n\ntsconfig\.json:1:1 /);
     assert.match(printed[0], /\[solid-migration-assistant\] Summary: 6 findings in 2 files\nWill not build or run on Solid 2: 6 findings\n/);
 
-    const transformRun = await captureMain(["transform", "--allow-dirty", "--target", legacy], {
-      cwd: surface,
-      projectImpl: () => assert.fail("transform must not print manifest findings"),
-      runImpl: () => ({ status: 0 }),
-    });
-    assert.equal(transformRun.status, 0);
   } finally {
     rmSync(surface, { recursive: true, force: true });
   }
+});
+
+test("transform lists the dependencies it could not move as leftovers, read after its rewrites", async () => {
+  const root = projectTree({ "package.json": { dependencies: { "solid-js": "^1.9.0", "solid-icons": "^1.1.0" } } });
+  const printed = [];
+  const originalLog = console.log;
+  console.log = (...values) => printed.push(values.join(" "));
+  try {
+    await captureMain(["transform", "--allow-dirty", "--no-install", "--target", root], {
+      cwd: root,
+      runImpl: () => {
+        writeFileSync(join(root, "package.json"), JSON.stringify({ dependencies: { "solid-js": "2.0.0-rc.23", "@solidjs/web": "2.0.0-rc.23", "solid-icons": "^1.1.0" } }));
+        return { status: 0, output: { findings: [], rewrites: [] } };
+      },
+    });
+  } finally {
+    console.log = originalLog;
+    rmSync(root, { recursive: true, force: true });
+  }
+  const headlines = [...printed.join("\n").matchAll(/^package\.json:\d+:\d+ \[\w+\] (.*)$/gm)].map((match) => match[1]);
+  assert.deepEqual(headlines, ["Resolve solid-icons, which has no Solid 2 release yet."]);
 });
 
 const GUIDE = "https://github.com/solidjs/solid/blob/8c34a505a853fcc894fcc8dad150d62f0d007fa2/documentation/solid-2.0/MIGRATION.md";
@@ -181,7 +202,7 @@ test("--format json re-emits the workflow's report as one sorted, tiered JSON do
   assert.deepEqual(parsed.findings, output.findings);
   assert.deepEqual(parsed.diagnostics, ["JSX: analyzeExample: src/c.tsx: TypeError: boom"]);
   assert.deepEqual(parseRunOutput({ output: { skipped: "solid-js is not a dependency of this project" } }), {
-    findings: [], rewrites: [], dependencySkips: [], diagnostics: ["[solid-migration-assistant] skipped: solid-js is not a dependency of this project"],
+    findings: [], rewrites: [], dependencySkips: [], afterMigrate: undefined, diagnostics: ["[solid-migration-assistant] skipped: solid-js is not a dependency of this project"],
   });
 
   const report = buildJsonReport({ workflow: "analyze", target: "/t", findings: parsed.findings, status: 0 });
@@ -378,11 +399,8 @@ test("publishes exact immutable public-preview disclosure", async () => {
     DISCLOSURE,
     /source-only.*incomplete.*no migration-readiness claim/is,
   );
-  assert.match(
-    DISCLOSURE,
-    /does not run target typechecks, builds, tests, scripts, or applications/,
-  );
-  assert.match(DISCLOSURE, /Read-only/);
+  assert.match(DISCLOSURE, /analyze is read-only and runs nothing in the target/);
+  assert.match(DISCLOSURE, /transform .* installs with the project's package manager.*--no-install skips it.*typechecks/);
   assert.match(
     DISCLOSURE,
     /only the exact destination above; other Solid versions are unsupported/,
@@ -496,14 +514,13 @@ test("names the blocked dependency and not the resume hint when a transform paus
   );
 });
 
-test("after a dependency bump, tells the user to install with the package manager its lockfile names", async () => {
-  const target = mkdtempSync(join(tmpdir(), "sma-next-"));
-  writeFileSync(join(target, "pnpm-lock.yaml"), "");
-  try {
-    assert.match(nextSteps(target, { rewrites: [{ rule: "project/dependencies" }] })[0], /^Run pnpm install:/);
-  } finally {
-    rmSync(target, { recursive: true, force: true });
-  }
+test("after a skipped install, tells the user to install and then typecheck", () => {
+  assert.match(nextSteps({ afterMigrate: { install: { skipped: "--no-install" }, typecheck: [] } })[0], /^Install with your package manager, then typecheck/);
+});
+
+test("after a failed install, names the command and where to run it again", () => {
+  const afterMigrate = { install: { command: "pnpm install", directory: ".", ok: false, error: "ERR_PNPM_PEER_DEP_ISSUES" }, typecheck: [] };
+  assert.match(nextSteps({ afterMigrate })[0], /^Run pnpm install in the project root once the install error above is fixed/);
 });
 
 function projectTree(files) {
