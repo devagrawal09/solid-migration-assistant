@@ -15,6 +15,7 @@ import { analyzeDomEventNamespaces } from "../rules/analysis/jsx/dom-event-names
 import { analyzeDomLowercaseEvents } from "../rules/analysis/jsx/dom-lowercase-events/dom-lowercase-events.ts";
 import { analyzeDomUseDirective } from "../rules/analysis/jsx/dom-use-directive/dom-use-directive.ts";
 import { analyzeDynamicComponent } from "../rules/analysis/jsx/dynamic-component/dynamic-component.ts";
+import { analyzeHandlerReads } from "../rules/analysis/jsx/handler-reads/handler-reads.ts";
 import { analyzeOnceMarker } from "../rules/analysis/jsx/once-marker/once-marker.ts";
 import { analyzeRefCallbackScope } from "../rules/analysis/jsx/ref-callback-scope/ref-callback-scope.ts";
 import { analyzeOnCleanup } from "../rules/analysis/lifecycle/on-cleanup/on-cleanup.ts";
@@ -70,6 +71,7 @@ export const ANALYSIS_RULES = {
   "jsx/dom-lowercase-events": [analyzeDomLowercaseEvents],
   "jsx/dom-use-directive": [analyzeDomUseDirective],
   "jsx/dynamic-component": [analyzeDynamicComponent],
+  "jsx/handler-reads": [analyzeHandlerReads],
   "jsx/once-marker": [analyzeOnceMarker],
   "jsx/ref-callback-scope": [analyzeRefCallbackScope],
   "lifecycle/on-cleanup": [analyzeOnCleanup],

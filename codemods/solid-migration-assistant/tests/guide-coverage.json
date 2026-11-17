@@ -169,6 +169,7 @@
     }
   ],
   "beyondGuide": [
+    { "rule": "jsx/handler-reads", "reason": "A STRICT_READ_UNTRACKED dev warning from the 2.0 compiler changelog and the diagnostics reference; the guide does not mention it." },
     { "rule": "imports/ecosystem-apis", "reason": "Router, Start and Meta APIs, which the guide leaves to those packages." },
     { "rule": "project/solid-version", "reason": "The guide does not cover moving the dependency itself." },
     { "rule": "project/dependencies", "reason": "Ecosystem packages' Solid 2 lines, which the guide does not cover." }

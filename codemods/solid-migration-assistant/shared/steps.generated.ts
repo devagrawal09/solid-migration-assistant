@@ -16,6 +16,7 @@ export const ANALYSIS_STEPS = [
   { rule: "jsx/dom-lowercase-events", name: "analyzeDomLowercaseEvents" },
   { rule: "jsx/dom-use-directive", name: "analyzeDomUseDirective" },
   { rule: "jsx/dynamic-component", name: "analyzeDynamicComponent" },
+  { rule: "jsx/handler-reads", name: "analyzeHandlerReads" },
   { rule: "jsx/once-marker", name: "analyzeOnceMarker" },
   { rule: "jsx/ref-callback-scope", name: "analyzeRefCallbackScope" },
   { rule: "lifecycle/on-cleanup", name: "analyzeOnCleanup" },
