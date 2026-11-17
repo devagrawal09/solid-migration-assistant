@@ -27,6 +27,7 @@ export function App(props: { items: string[] }) {
         <For keyed={false} each={props.items} fallback={<li>empty</li>}>
           {(item, index) => <Item label={item()} index={index} />}
         </For>
+        <li><input tabindex={0} readonly={true} spellcheck="false" /></li>
       </ul>
     </ThemeContext>
   );

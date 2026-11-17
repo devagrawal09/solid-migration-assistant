@@ -27,6 +27,7 @@ export function App(props: { items: string[] }) {
         <Index each={props.items} fallback={<li>empty</li>}>
           {(item, index) => <Item label={item()} index={index} />}
         </Index>
+        <li><input tabIndex={0} readOnly={true} spellCheck={false} /></li>
       </ul>
     </ThemeContext.Provider>
   );

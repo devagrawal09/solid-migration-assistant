@@ -229,7 +229,7 @@ test(
 );
 
 const EXPECTED_HTML =
-  '<ul data-server="true" aria-busy="false" data-empty="false"><li data-index="0" data-theme="dark" class="themed"><b class="badge">a</b></li><li data-index="1" data-theme="dark" class="themed"><b class="badge">b</b></li></ul>';
+  '<ul data-server="true" aria-busy="false" data-empty="false"><li data-index="0" data-theme="dark" class="themed"><b class="badge">a</b></li><li data-index="1" data-theme="dark" class="themed"><b class="badge">b</b></li><li><input tabindex="0" readonly spellcheck="false"></li></ul>';
 
 const COMPILE_SCRIPT = `import { transformAsync } from "@babel/core";
 import { readFileSync, writeFileSync } from "node:fs";
