@@ -3,6 +3,7 @@ import { analyzeBeta32SubpathImports } from "../rules/analysis/imports/beta32-su
 import { analyzeEcosystemImports } from "../rules/analysis/imports/ecosystem-apis/ecosystem-apis.ts";
 import { analyzeJsxTypeImports } from "../rules/analysis/imports/jsx-types/jsx-types.ts";
 import { analyzeWebImport } from "../rules/analysis/imports/web-import/web-import.ts";
+import { analyzeBooleanAttributeValues } from "../rules/analysis/jsx/boolean-attribute-values/boolean-attribute-values.ts";
 import { analyzeJsxClassListAttributes } from "../rules/analysis/jsx/class-list/class-list.ts";
 import { analyzeJsxComponentRenames } from "../rules/analysis/jsx/component-renames/component-renames.ts";
 import { analyzeContextProvider } from "../rules/analysis/jsx/context-provider/context-provider.ts";
@@ -37,6 +38,7 @@ import { analyzeUnwrap } from "../rules/analysis/store/unwrap/unwrap.ts";
 import { relocateJsxTypes } from "../rules/transformations/imports/jsx-type-relocation/jsx-type-relocation.ts";
 import { relocateLegacySubpaths } from "../rules/transformations/imports/legacy-subpath-relocation/legacy-subpath-relocation.ts";
 import { relocateWebPackage } from "../rules/transformations/imports/web-package-relocation/web-package-relocation.ts";
+import { rewriteBooleanAttributeValues } from "../rules/transformations/jsx/boolean-attribute-values/boolean-attribute-values.ts";
 import { rewriteClassListToClass } from "../rules/transformations/jsx/class-list-to-class/class-list-to-class.ts";
 import { rewriteContextProvider } from "../rules/transformations/jsx/context-provider-to-context/context-provider-to-context.ts";
 import { rewriteIndexToFor } from "../rules/transformations/jsx/index-to-for/index-to-for.ts";
@@ -49,6 +51,7 @@ export const ANALYSIS_RULES = {
   "imports/ecosystem-apis": [analyzeEcosystemImports],
   "imports/jsx-types": [analyzeJsxTypeImports],
   "imports/web-import": [analyzeWebImport],
+  "jsx/boolean-attribute-values": [analyzeBooleanAttributeValues],
   "jsx/class-list": [analyzeJsxClassListAttributes],
   "jsx/component-renames": [analyzeJsxComponentRenames],
   "jsx/context-provider": [analyzeContextProvider],
@@ -86,6 +89,7 @@ export const TRANSFORM_RULES = {
   "imports/jsx-type-relocation": [relocateJsxTypes],
   "imports/legacy-subpath-relocation": [relocateLegacySubpaths],
   "imports/web-package-relocation": [relocateWebPackage],
+  "jsx/boolean-attribute-values": [rewriteBooleanAttributeValues],
   "jsx/class-list-to-class": [rewriteClassListToClass],
   "jsx/context-provider-to-context": [rewriteContextProvider],
   "jsx/index-to-for": [rewriteIndexToFor],

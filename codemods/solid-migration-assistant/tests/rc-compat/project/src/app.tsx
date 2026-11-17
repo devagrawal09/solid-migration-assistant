@@ -23,7 +23,7 @@ export function App(props: { items: string[] }) {
   const [count, setCount] = createSignal(0);
   return (
     <ThemeContext.Provider value="dark">
-      <ul onclick={() => setCount(count() + 1)} data-server={String(isServer)}>
+      <ul onclick={() => setCount(count() + 1)} data-server={String(isServer)} aria-busy={false} data-empty={props.items.length === 0}>
         <Index each={props.items} fallback={<li>empty</li>}>
           {(item, index) => <Item label={item()} index={index} />}
         </Index>

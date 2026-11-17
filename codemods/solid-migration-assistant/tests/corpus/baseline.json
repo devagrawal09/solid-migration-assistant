@@ -194,6 +194,7 @@
       "imports/jsx-types: Move this JSXElement type import off solid-js.": 15,
       "imports/jsx-types: Move this ValidComponent type import off solid-js.": 2,
       "imports/web-import: Move this Solid web renderer static import.": 5,
+      "jsx/boolean-attribute-values: Write the boolean value of aria-readonly as \"true\" or \"false\".": 1,
       "jsx/component-renames: Migrate this imported ErrorBoundary JSX site to Errored.": 5,
       "jsx/component-renames: Migrate this imported Index JSX site to For keyed={false}.": 1,
       "jsx/component-renames: Migrate this imported Suspense JSX site to Loading.": 20,
@@ -245,6 +246,7 @@
       "imports/jsx-type-relocation: Move ValidComponent from solid-js to @solidjs/web.": 1,
       "imports/web-package-relocation: Relocate solid-js/web to @solidjs/web for proven bindings Dynamic. Note: Dynamic is deprecated in Solid 2 in favor of the dynamic(source) factory; it keeps working without a runtime warning.": 2,
       "imports/web-package-relocation: Relocate solid-js/web to @solidjs/web for proven bindings render.": 1,
+      "jsx/boolean-attribute-values: Write aria-readonly on <div> as the string \"true\", which Solid 1 rendered and Solid 2 would turn into an empty value.": 1,
       "jsx/index-to-for: Remove the Index import from solid-js; For is already imported.": 1,
       "jsx/index-to-for: Rewrite <Index> to <For keyed={false}>, keeping its each, fallback, and child callback unchanged.": 1,
       "project/dependencies: Move @solid-primitives/event-listener from ^2.4.5 to 3.0.0-next.9.": 1,
@@ -253,7 +255,7 @@
       "reactivity/on-helper-split: Remove the on import from solid-js; every use is now a split createEffect.": 3,
       "reactivity/on-helper-split: Rewrite createEffect(on(dep, fn)) as createEffect(compute, apply), keeping the callback unchanged.": 4
     },
-    "changedFiles": 29,
+    "changedFiles": 30,
     "transformedAnalyzerFindings": 201
   },
   "tasks-md": {
@@ -262,6 +264,7 @@
       "imports/beta32-subpaths: Move this Solid 2 legacy subpath static import.": 1,
       "imports/ecosystem-apis: Migrate this Router import from @solidjs/router, which Solid 2 removes or moves.": 1,
       "imports/web-import: Move this Solid web renderer static import.": 4,
+      "jsx/boolean-attribute-values: Write the boolean value of draggable as \"true\" or \"false\".": 1,
       "jsx/context-provider: Migrate this Context.Provider JSX site to direct context provider syntax.": 3,
       "jsx/dom-use-directive: Migrate this use: directive to a ref directive factory.": 2,
       "lifecycle/on-cleanup: Move this onCleanup out of the onMount callback into onSettled's returned cleanup.": 1,
@@ -282,6 +285,7 @@
     },
     "rewrites": {
       "imports/web-package-relocation: Relocate solid-js/web to @solidjs/web for proven bindings render.": 1,
+      "jsx/boolean-attribute-values: Write draggable on <div> as the string \"true\", which Solid 1 rendered and Solid 2 would turn into an empty value.": 1,
       "jsx/context-provider-to-context: Rewrite <DragAndDropContext.Provider> to <DragAndDropContext>, keeping its value attribute and children unchanged.": 1,
       "jsx/context-provider-to-context: Rewrite <I18nContext.Provider> to <I18nContext>, keeping its value attribute and children unchanged.": 1,
       "project/dependencies: Add @solidjs/web 2.0.0-rc.23.": 1,
@@ -290,7 +294,7 @@
       "project/dependencies: Move @solidjs/router from ^0.15.3 to 2.0.0-next.44.": 1,
       "project/dependencies: Move solid-js from ^1.6.10 to 2.0.0-rc.23.": 1
     },
-    "changedFiles": 4,
+    "changedFiles": 5,
     "transformedAnalyzerFindings": 46
   },
   "teardown": {
@@ -299,6 +303,13 @@
       "imports/beta32-subpaths: Move this Solid 2 legacy subpath static import.": 3,
       "imports/jsx-types: Move this JSX type import off solid-js.": 18,
       "imports/web-import: Move this Solid web renderer static import.": 5,
+      "jsx/boolean-attribute-values: Check whether the value of aria-checked can be a boolean.": 1,
+      "jsx/boolean-attribute-values: Check whether the value of aria-disabled can be a boolean.": 2,
+      "jsx/boolean-attribute-values: Check whether the value of aria-expanded can be a boolean.": 1,
+      "jsx/boolean-attribute-values: Check whether the value of aria-invalid can be a boolean.": 2,
+      "jsx/boolean-attribute-values: Check whether the value of aria-required can be a boolean.": 2,
+      "jsx/boolean-attribute-values: Check whether the value of aria-selected can be a boolean.": 1,
+      "jsx/boolean-attribute-values: Write the boolean value of aria-selected as \"true\" or \"false\".": 1,
       "jsx/class-list: Migrate this intrinsic JSX classList attribute to class.": 5,
       "jsx/ref-callback-scope: Move owner-dependent work out of this ref callback.": 7,
       "lifecycle/on-cleanup: Move this onCleanup out of the createEffect callback into the apply callback's returned cleanup.": 5,
@@ -316,6 +327,7 @@
       "imports/jsx-type-relocation: Move JSX from solid-js to @solidjs/web.": 18,
       "imports/legacy-subpath-relocation: Relocate solid-js/jsx-runtime to @solidjs/web/jsx-runtime.": 3,
       "imports/web-package-relocation: Relocate solid-js/web to @solidjs/web for proven bindings render.": 1,
+      "jsx/boolean-attribute-values: Wrap the boolean value of aria-selected on <div> in String(), so it renders \"true\" or \"false\" as in Solid 1.": 1,
       "jsx/class-list-to-class: Merge the class and classList attributes on <button> into the class array form, preserving the static string and the object literal.": 1,
       "jsx/class-list-to-class: Merge the class and classList attributes on <div> into the class array form, preserving the static string and the object literal.": 3,
       "jsx/class-list-to-class: Rewrite the classList attribute on <tr> to class, preserving its value expression.": 1,
@@ -392,6 +404,11 @@
       "imports/jsx-types: Move this JSX type import off solid-js.": 4,
       "imports/jsx-types: Move this JSXElement type import off solid-js.": 1,
       "imports/web-import: Move this Solid web renderer static import.": 4,
+      "jsx/boolean-attribute-values: Check whether the value of aria-current can be a boolean.": 1,
+      "jsx/boolean-attribute-values: Check whether the value of aria-expanded can be a boolean.": 1,
+      "jsx/boolean-attribute-values: Check whether the value of aria-hidden can be a boolean.": 1,
+      "jsx/boolean-attribute-values: Check whether the value of aria-pressed can be a boolean.": 1,
+      "jsx/boolean-attribute-values: Write the boolean value of aria-checked as \"true\" or \"false\".": 3,
       "jsx/class-list: Migrate this intrinsic JSX classList attribute to class.": 32,
       "jsx/context-provider: Migrate this Context.Provider JSX site to direct context provider syntax.": 6,
       "lifecycle/on-cleanup: Move this onCleanup out of the createEffect callback into the apply callback's returned cleanup.": 1,
@@ -421,6 +438,7 @@
     "rewrites": {
       "imports/jsx-type-relocation: Move JSX from solid-js to @solidjs/web.": 4,
       "imports/web-package-relocation: Relocate solid-js/web to @solidjs/web for proven bindings render.": 1,
+      "jsx/boolean-attribute-values: Wrap the boolean value of aria-checked on <button> in String(), so it renders \"true\" or \"false\" as in Solid 1.": 3,
       "jsx/class-list-to-class: Merge the class and classList attributes on <button> into the class array form, preserving the static string and the object literal.": 8,
       "jsx/class-list-to-class: Merge the class and classList attributes on <circle> into the class array form, preserving the static string and the object literal.": 2,
       "jsx/class-list-to-class: Merge the class and classList attributes on <div> into the class array form, preserving the static string and the object literal.": 8,
@@ -499,6 +517,7 @@
     "analyzerFindings": {
       "imports/beta32-subpaths: Move this Solid 2 legacy subpath static import.": 5,
       "imports/web-import: Move this Solid web renderer static import.": 1,
+      "jsx/boolean-attribute-values: Write the boolean value of draggable as \"true\" or \"false\".": 2,
       "lifecycle/on-cleanup: Move this onCleanup out of the onMount callback into onSettled's returned cleanup.": 4,
       "lifecycle/on-mount: Migrate this onMount lifecycle callback.": 7,
       "project/dependencies: Replace vite-plugin-solid with its Solid 2 successor.": 1,
@@ -512,10 +531,12 @@
     },
     "rewrites": {
       "imports/web-package-relocation: Relocate solid-js/web to @solidjs/web for proven bindings render.": 1,
+      "jsx/boolean-attribute-values: Write draggable on <button> as the string \"true\", which Solid 1 rendered and Solid 2 would turn into an empty value.": 1,
+      "jsx/boolean-attribute-values: Write draggable on <div> as the string \"true\", which Solid 1 rendered and Solid 2 would turn into an empty value.": 1,
       "project/dependencies: Add @solidjs/web 2.0.0-rc.23.": 1,
       "project/dependencies: Move solid-js from 1.9.10 to 2.0.0-rc.23.": 1
     },
-    "changedFiles": 2,
+    "changedFiles": 4,
     "transformedAnalyzerFindings": 1
   },
   "kiwitalk": {
@@ -581,6 +602,13 @@
       "imports/beta32-subpaths: Move this Solid 2 legacy subpath static import.": 1,
       "imports/jsx-types: Move this JSX type import off solid-js.": 6,
       "imports/web-import: Move this Solid web renderer static import.": 42,
+      "jsx/boolean-attribute-values: Check whether the value of aria-busy can be a boolean.": 1,
+      "jsx/boolean-attribute-values: Check whether the value of aria-hidden can be a boolean.": 1,
+      "jsx/boolean-attribute-values: Check whether the value of aria-pressed can be a boolean.": 2,
+      "jsx/boolean-attribute-values: Write the boolean value of aria-expanded as \"true\" or \"false\".": 1,
+      "jsx/boolean-attribute-values: Write the boolean value of aria-hidden as \"true\" or \"false\".": 1,
+      "jsx/boolean-attribute-values: Write the boolean value of draggable as \"true\" or \"false\".": 3,
+      "jsx/boolean-attribute-values: Write the boolean value of spellcheck as \"true\" or \"false\".": 1,
       "jsx/class-list: Migrate this intrinsic JSX classList attribute to class.": 8,
       "jsx/component-renames: Migrate this imported ErrorBoundary JSX site to Errored.": 1,
       "jsx/component-renames: Migrate this imported Index JSX site to For keyed={false}.": 9,
@@ -607,6 +635,10 @@
     "rewrites": {
       "imports/jsx-type-relocation: Move JSX from solid-js to @solidjs/web.": 6,
       "imports/web-package-relocation: Relocate solid-js/web to @solidjs/web for proven bindings render.": 21,
+      "jsx/boolean-attribute-values: Wrap the boolean value of aria-expanded on <button> in String(), so it renders \"true\" or \"false\" as in Solid 1.": 1,
+      "jsx/boolean-attribute-values: Wrap the boolean value of aria-hidden on <button> in String(), so it renders \"true\" or \"false\" as in Solid 1.": 1,
+      "jsx/boolean-attribute-values: Write draggable on <img> as the string \"false\", which Solid 1 rendered and Solid 2 would turn into a removed attribute.": 3,
+      "jsx/boolean-attribute-values: Write spellcheck on <textarea> as the string \"false\", which Solid 1 rendered and Solid 2 would turn into a removed attribute.": 1,
       "jsx/class-list-to-class: Merge the class and classList attributes on <button> into the class array form, preserving the static string and the object literal.": 2,
       "jsx/class-list-to-class: Merge the class and classList attributes on <div> into the class array form, preserving the static string and the object literal.": 4,
       "jsx/class-list-to-class: Merge the class and classList attributes on <label> into the class array form, preserving the static string and the object literal.": 1,
@@ -619,7 +651,7 @@
       "reactivity/on-helper-split: Remove the on import from solid-js; every use is now a split createEffect.": 5,
       "reactivity/on-helper-split: Rewrite createEffect(on(dep, fn)) as createEffect(compute, apply), keeping the callback unchanged.": 11
     },
-    "changedFiles": 40,
+    "changedFiles": 41,
     "transformedAnalyzerFindings": 3
   }
 }
