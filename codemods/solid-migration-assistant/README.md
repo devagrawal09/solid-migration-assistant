@@ -82,14 +82,13 @@ Migrate mode (the launcher's `transform` subcommand) applies nine deterministic 
 
 ### JSX type imports and pragmas
 
-Solid 1.9.13 exported the `JSX` namespace and the `JSXElement` alias (`type JSXElement = JSX.Element`) from `solid-js`; at rc.21 `solid-js` exports neither and `@solidjs/web` declares `export type { JSX }`. All of these rewrites are type-level, with no runtime semantics to prove:
+Solid 1.9.13 exported the `JSX` namespace and the `JSXElement` alias from `solid-js`; at the target, `solid-js` exports neither, and its `ComponentProps` and `ValidComponent` accept components only, while `@solidjs/web` exports `JSX` and versions of both that also accept tag names (`ComponentProps<"button">`). All of these rewrites are type-level:
 
-- an import statement whose **only** specifier is the type `JSX` (`import type { JSX } from "solid-js"` or `import { type JSX } from "solid-js"`, aliases allowed) moves to `@solidjs/web`;
-- a type-only `JSX` specifier in a statement that also imports other `solid-js` bindings is removed from it, with one adjacent comma, and re-imported on the next line as `import type { JSX } from "@solidjs/web"`, keeping its alias, the quote style, and the presence or absence of a semicolon;
-- an unaliased, type-only `JSXElement` import becomes `JSX` from `@solidjs/web`, and each of its type references becomes `JSX.Element`, but only when every other `JSXElement` in the file is a type reference (never a value, an export, or a `typeof` query) and the file binds no `JSX` of its own; and
+- `JSX`, `ComponentProps` and `ValidComponent` move to `@solidjs/web`: a statement holding only these is repointed, and otherwise they are split into one `import type { … } from "@solidjs/web"` on the next line. A specifier imported without `type` moves only when every use is in a type position;
+- an unaliased, type-only `JSXElement` import becomes `JSX` from `@solidjs/web`, and each of its type references becomes `JSX.Element`, when the file binds no `JSX` of its own; and
 - the token `solid-js` in a `@jsxImportSource solid-js` comment pragma becomes `@solidjs/web`.
 
-A named-import list containing comments, a value import of `JSX`, an aliased or value `JSXElement`, `JSXElement` in a file that already binds `JSX`, namespace imports, import attributes, and `tsconfig.json` are left to the analyzer.
+Import lists with comments, value uses or re-exports of these names, namespace imports, import attributes, and `tsconfig.json` are left to the analyzer.
 
 ### Literal store path setters → draft writes
 

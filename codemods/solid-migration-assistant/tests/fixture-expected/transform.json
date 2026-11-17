@@ -490,7 +490,7 @@
       "file": "src/types-element.tsx",
       "line": 3,
       "column": 10,
-      "message": "Replace the JSXElement type import from solid-js with JSX from @solidjs/web and rewrite its 3 type reference(s) to JSX.Element.",
+      "message": "Move JSXElement from solid-js to @solidjs/web. JSXElement becomes JSX, and its 3 type reference(s) become JSX.Element.",
       "guide": "https://github.com/solidjs/solid/blob/8c34a505a853fcc894fcc8dad150d62f0d007fa2/documentation/solid-2.0/MIGRATION.md#typescript-jsx-solid-js--renderer-package"
     },
     {
@@ -505,8 +505,8 @@
       "rule": "imports/jsx-type-relocation",
       "file": "src/types.tsx",
       "line": 4,
-      "column": 26,
-      "message": "Relocate the JSX type import from solid-js to @solidjs/web.",
+      "column": 15,
+      "message": "Move JSX from solid-js to @solidjs/web.",
       "guide": "https://github.com/solidjs/solid/blob/8c34a505a853fcc894fcc8dad150d62f0d007fa2/documentation/solid-2.0/MIGRATION.md#typescript-jsx-solid-js--renderer-package"
     },
     {
@@ -514,7 +514,7 @@
       "file": "src/types.tsx",
       "line": 5,
       "column": 15,
-      "message": "Move the JSX type specifier out of this solid-js import into a separate @solidjs/web type import.",
+      "message": "Move JSX from solid-js to @solidjs/web.",
       "guide": "https://github.com/solidjs/solid/blob/8c34a505a853fcc894fcc8dad150d62f0d007fa2/documentation/solid-2.0/MIGRATION.md#typescript-jsx-solid-js--renderer-package"
     }
   ]

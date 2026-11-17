@@ -118,13 +118,13 @@ src/store.ts:7:1 Rewrite this path-style store setter call with a literal value 
   Rule: store/setter-literal-paths  Guide: https://github.com/solidjs/solid/blob/8c34a505a853fcc894fcc8dad150d62f0d007fa2/documentation/solid-2.0/MIGRATION.md#draft-first-setters
 src/theme-provider.tsx:7:10 Rewrite <ThemeContext.Provider> to <ThemeContext>, keeping its value attribute and children unchanged.
   Rule: jsx/context-provider-to-context  Guide: https://github.com/solidjs/solid/blob/8c34a505a853fcc894fcc8dad150d62f0d007fa2/documentation/solid-2.0/MIGRATION.md#context-providers-contextprovider--context-is-the-provider
-src/types-element.tsx:3:10 Replace the JSXElement type import from solid-js with JSX from @solidjs/web and rewrite its 3 type reference(s) to JSX.Element.
+src/types-element.tsx:3:10 Move JSXElement from solid-js to @solidjs/web. JSXElement becomes JSX, and its 3 type reference(s) become JSX.Element.
   Rule: imports/jsx-type-relocation  Guide: https://github.com/solidjs/solid/blob/8c34a505a853fcc894fcc8dad150d62f0d007fa2/documentation/solid-2.0/MIGRATION.md#typescript-jsx-solid-js--renderer-package
 src/types.tsx:1:1 Rewrite the @jsxImportSource pragma from solid-js to @solidjs/web.
   Rule: imports/jsx-type-relocation  Guide: https://github.com/solidjs/solid/blob/8c34a505a853fcc894fcc8dad150d62f0d007fa2/documentation/solid-2.0/MIGRATION.md#typescript-jsx-solid-js--renderer-package
-src/types.tsx:4:26 Relocate the JSX type import from solid-js to @solidjs/web.
+src/types.tsx:4:15 Move JSX from solid-js to @solidjs/web.
   Rule: imports/jsx-type-relocation  Guide: https://github.com/solidjs/solid/blob/8c34a505a853fcc894fcc8dad150d62f0d007fa2/documentation/solid-2.0/MIGRATION.md#typescript-jsx-solid-js--renderer-package
-src/types.tsx:5:15 Move the JSX type specifier out of this solid-js import into a separate @solidjs/web type import.
+src/types.tsx:5:15 Move JSX from solid-js to @solidjs/web.
   Rule: imports/jsx-type-relocation  Guide: https://github.com/solidjs/solid/blob/8c34a505a853fcc894fcc8dad150d62f0d007fa2/documentation/solid-2.0/MIGRATION.md#typescript-jsx-solid-js--renderer-package
 
 [solid-migration-assistant] Summary: 63 rewrites in 16 files
@@ -144,6 +144,8 @@ src/types.tsx:5:15 Move the JSX type specifier out of this solid-js import into 
       sites: src/combined.tsx:3:39, src/lists.tsx:2:24, src/real-world/active-element.tsx:9:40
    3  Rewrite this path-style store setter call with a literal value as a draft write.
       sites: src/store-merge.ts:6:1, src/store.ts:6:1, src/store.ts:7:1
+   2  Move JSX from solid-js to @solidjs/web.
+      sites: src/types.tsx:4:15, src/types.tsx:5:15
    2  Relocate solid-js/jsx-dev-runtime to @solidjs/web/jsx-dev-runtime.
       sites: src/relocations.tsx:5:24, src/relocations.tsx:13:37
    2  Rewrite the classList attribute on <div> to class, preserving its value expression.
@@ -154,8 +156,8 @@ src/types.tsx:5:15 Move the JSX type specifier out of this solid-js import into 
       sites: src/real-world/active-element.tsx:21:7
    1  Merge the class and classList attributes on <div> into the class array form, preserving the static string and the object literal.
       sites: src/class-list.tsx:20:12
-   1  Move the JSX type specifier out of this solid-js import into a separate @solidjs/web type import.
-      sites: src/types.tsx:5:15
+   1  Move JSXElement from solid-js to @solidjs/web. JSXElement becomes JSX, and its 3 type reference(s) become JSX.Element.
+      sites: src/types-element.tsx:3:10
    1  Relocate solid-js/store to solid-js for createStore: every setter call in this file is now a draft write.
       sites: src/store.ts:3:29
    1  Relocate solid-js/web to @solidjs/web for proven bindings Dynamic, render. Note: Dynamic is deprecated in Solid 2 in favor of the dynamic(source) factory; it keeps working without a runtime warning.
@@ -172,12 +174,8 @@ src/types.tsx:5:15 Move the JSX type specifier out of this solid-js import into 
       sites: src/nested/deep.jsx:6:34
    1  Relocate solid-js/web to @solidjs/web for proven bindings render.
       sites: src/relocations.tsx:30:47
-   1  Relocate the JSX type import from solid-js to @solidjs/web.
-      sites: src/types.tsx:4:26
    1  Remove the on import from solid-js; every use is now a split createEffect.
       sites: src/effects.ts:2:38
-   1  Replace the JSXElement type import from solid-js with JSX from @solidjs/web and rewrite its 3 type reference(s) to JSX.Element.
-      sites: src/types-element.tsx:3:10
    1  Rewrite <LocaleContext.Provider> to <LocaleContext>, keeping its value attribute and children unchanged.
       sites: src/legacy/locale-provider.jsx:4:3
    1  Rewrite createEffect(on(dep, fn)) as createEffect(compute, apply), keeping the callback unchanged.

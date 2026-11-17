@@ -10,6 +10,10 @@ export const JSX_TYPE_MIGRATION_GUIDE = `${MIGRATION_GUIDE_URL}#typescript-jsx-s
 export const SOLID_CORE_MODULE = "solid-js";
 export const WEB_RENDERER_MODULE = "@solidjs/web";
 const JSX_TYPE_NAME = "JSX";
+/** Types Solid 2 moved from `solid-js` to the renderer. `@solidjs/web`'s
+ * `ComponentProps` and `ValidComponent` also accept intrinsic tag names, which
+ * the `solid-js` versions no longer do. */
+const RENDERER_TYPES = new Set([JSX_TYPE_NAME, "ComponentProps", "ValidComponent"]);
 const LEGACY_ELEMENT_ALIAS = "JSXElement";
 const PRAGMA = /^(\/\*\*?[\s\S]*?@jsxImportSource\s+)solid-js(\s[\s\S]*?\*\/|\*\/)$/;
 
@@ -26,44 +30,30 @@ export type JsxTypeRelocation = {
  * (`packages/solid/src/index.ts`: `export type { JSXElement, JSX }`). At
  * 2.0.0-rc.23 `solid-js` exports no `JSX` at all; the renderer owns it:
  * `packages/web/src/index.ts` declares `export type { JSX } from
- * "../jsx/jsx.js"`. The migration guide prescribes the two rewrites this rule
- * applies, each a pure type-level relocation with no runtime semantics to
- * prove:
+ * "../jsx/jsx.js"`, and `solid-js`'s `ComponentProps` and `ValidComponent`
+ * accept components only, while the `@solidjs/web` versions also accept
+ * intrinsic tag names. Every rewrite here is type-level, with no runtime
+ * semantics to prove:
  *
- * - `import type { JSX } from "solid-js"` (or `import { type JSX } from
- *   "solid-js"`) becomes the same statement from `@solidjs/web`, but only when
- *   `JSX` is the statement's **only** specifier; a statement that also names
- *   `Component`, `Accessor`, or any other binding keeps those in `solid-js`,
- *   so it would have to be split, which this rule leaves to the analyzer.
- *   Aliases (`JSX as SolidJSX`) and quote style survive untouched.
- * - A `@jsxImportSource solid-js` pragma comment becomes
- *   `@jsxImportSource @solidjs/web`, because `solid-js` no longer ships the
- *   `jsx-runtime` type entries the pragma points TypeScript at. Only the exact
- *   token `solid-js` is rewritten; `@solidjs/h` or custom renderer sources are
- *   never touched.
+ * - `JSX`, `ComponentProps` and `ValidComponent` move to `@solidjs/web`. When
+ *   they are a statement's only specifiers, its source string is rewritten;
+ *   otherwise they are removed from it and re-imported on the next line as one
+ *   `import type { … } from "@solidjs/web"` (aliases, quote style, and
+ *   semicolon preserved). A specifier imported without `type` moves only when
+ *   every use of its local name is a type reference or a qualified type's
+ *   namespace (`JSX.Element`).
+ * - `JSXElement`, which no Solid 2 package exports, becomes `JSX` from
+ *   `@solidjs/web`, and each of its type references becomes `JSX.Element`,
+ *   when the specifier is unaliased and type-only, every other `JSXElement`
+ *   is a type reference, and the file binds no `JSX`.
+ * - A `@jsxImportSource solid-js` pragma becomes `@jsxImportSource
+ *   @solidjs/web`; only that exact token is rewritten.
  *
- * - A type-only `JSX` specifier inside a statement that also imports other
- *   `solid-js` bindings (`import type { JSX, Component } from "solid-js"` or
- *   `import { type JSX, createSignal } from "solid-js"`) is removed from that
- *   statement, with one adjacent comma, and re-imported on the next line as
- *   `import type { JSX } from "@solidjs/web"` (alias, quote style, and
- *   semicolon preserved), so every other binding stays in `solid-js`.
- * - `JSXElement`, which Solid 1.9.13 declared as `type JSXElement =
- *   JSX.Element` and which no Solid 2 package exports, is replaced by `JSX`
- *   from `@solidjs/web`, and each of its type references becomes
- *   `JSX.Element`. This applies only when the specifier is unaliased and
- *   type-only, every other `JSXElement` occurrence in the file is a type
- *   reference (never a value, an export, or a `typeof` query), `JSXElement`
- *   is bound nowhere else, and the file binds no `JSX` of its own, so the
- *   new name cannot collide.
- *
- * Every split requires a named-import list without comments, a single local
- * binding of the moved name in the file, and no import attributes. Everything
- * else is left to the read-only analyzer: value imports of `JSX` (a type
- * namespace), aliased or value `JSXElement` imports, `JSXElement` in a file
- * that already binds `JSX`, namespace imports, and `tsconfig.json`'s
- * `jsxImportSource`, which is outside the JavaScript and TypeScript surface
- * this workflow scans.
+ * Every move requires a named-import list without comments or import
+ * attributes, and a single local binding of the moved name. Everything else
+ * is left to the read-only analyzer: value uses, `typeof` queries and
+ * re-exports of a moved name, aliased or value `JSXElement` imports,
+ * namespace and default imports, and `tsconfig.json`'s `jsxImportSource`.
  */
 export function relocateJsxTypes(
   rootNode: SgNode<TSX>,
@@ -76,19 +66,7 @@ export function relocateJsxTypes(
   })) {
     const source = statement.children().find((child) => child.is("string"));
     if (!source || stringLiteralValue(source) !== SOLID_CORE_MODULE) continue;
-    if (!isSoleJsxTypeImport(statement)) {
-      relocations.push(...splitStatement(rootNode, statement, source, filename));
-      continue;
-    }
-    const start = source.range().start;
-    const quote = source.text()[0];
-    relocations.push({
-      node: source,
-      entry: {
-        edit: source.replace(`${quote}${WEB_RENDERER_MODULE}${quote}`),
-        report: rewrite(filename, start, `Relocate the JSX type import from ${SOLID_CORE_MODULE} to ${WEB_RENDERER_MODULE}.`, JSX_TYPE_MIGRATION_GUIDE),
-      },
-    });
+    relocations.push(...relocateStatement(rootNode, statement, source, filename));
   }
 
   for (const comment of rootNode.findAll({ rule: { kind: "comment" } })) {
@@ -109,56 +87,17 @@ export function relocateJsxTypes(
     .map(({ entry }) => entry);
 }
 
-/**
- * True when the statement imports exactly one binding, `JSX`, as a type:
- * either `import type { JSX … }` or `import { type JSX … }`, with no default
- * or namespace clause, no other specifier, and no import attributes.
- */
-function isSoleJsxTypeImport(statement: SgNode<TSX>): boolean {
-  const statementTypeOnly = statement
-    .children()
-    .some((child) => child.kind() === "type");
-  let clause: SgNode<TSX> | null = null;
-  for (const child of statement.children()) {
-    if (child.kind() === "import_attribute") return false;
-    if (child.kind() === "import_clause") {
-      if (clause !== null) return false;
-      clause = child;
-    }
-  }
-  if (clause === null) return false;
-
-  let named: SgNode<TSX> | null = null;
-  for (const child of clause.children()) {
-    if (!child.isNamed() || child.kind() === "comment") continue;
-    if (child.kind() !== "named_imports" || named !== null) return false;
-    named = child;
-  }
-  if (named === null) return false;
-
-  const specifiers = named
-    .children()
-    .filter((child) => child.isNamed() && child.kind() !== "comment");
-  const specifier = specifiers.length === 1 ? specifiers[0] : undefined;
-  if (specifier === undefined || specifier.kind() !== "import_specifier") {
-    return false;
-  }
-  const name = specifier.field("name");
-  if (name === null || name.kind() !== "identifier" || name.text() !== JSX_TYPE_NAME) {
-    return false;
-  }
-  const specifierTypeOnly = specifier
-    .children()
-    .some((child) => child.kind() === "type");
-  return statementTypeOnly || specifierTypeOnly;
-}
+type Move = { specifier: SgNode<TSX>; imported: string; extra: Edit[] };
 
 /**
- * The split and `JSXElement` rewrites for a `solid-js` import statement that
- * is not a sole `JSX` type import. Returns no entries when the statement is
- * not a plain named-import list or nothing in it qualifies.
+ * The relocations for one `solid-js` import statement: every specifier in
+ * `RENDERER_TYPES` (plus a qualifying `JSXElement`) moves to `@solidjs/web`.
+ * When every specifier moves, the source string is rewritten in place;
+ * otherwise the moved specifiers are removed and re-imported on the next line
+ * as one `import type { … } from "@solidjs/web"`. Returns no entries when the
+ * statement is not a plain, comment-free named-import list.
  */
-function splitStatement(
+function relocateStatement(
   rootNode: SgNode<TSX>,
   statement: SgNode<TSX>,
   source: SgNode<TSX>,
@@ -173,105 +112,127 @@ function splitStatement(
 
   const statementTypeOnly = statement.children().some((child) => child.kind() === "type");
   const specifiers = list.children().filter((child) => child.kind() === "import_specifier");
-  const typeOnly = (specifier: SgNode<TSX>) =>
-    statementTypeOnly || specifier.children().some((child) => child.kind() === "type");
   const nameOf = (specifier: SgNode<TSX>) => specifier.field("name")?.text() ?? "";
   const localOf = (specifier: SgNode<TSX>) => (specifier.field("alias") ?? specifier.field("name"))?.text() ?? "";
+  const typeOnly = (specifier: SgNode<TSX>) =>
+    statementTypeOnly ||
+    specifier.children().some((child) => child.kind() === "type") ||
+    onlyTypeUses(rootNode, specifier, localOf(specifier));
+
+  const moves: Move[] = [];
+  for (const specifier of specifiers) {
+    const name = nameOf(specifier);
+    if (RENDERER_TYPES.has(name)) {
+      if (!typeOnly(specifier) || findBindings(rootNode, localOf(specifier)).length !== 1) continue;
+      const alias = specifier.field("alias");
+      moves.push({ specifier, imported: alias === null ? name : `${name} as ${alias.text()}`, extra: [] });
+    } else if (name === LEGACY_ELEMENT_ALIAS) {
+      const move = legacyElementMove(rootNode, specifier, specifiers, statementTypeOnly);
+      if (move !== null) moves.push(move);
+    }
+  }
+  if (moves.length === 0) return [];
 
   const quote = source.text()[0];
-  const semicolon = statement.text().trimEnd().endsWith(";") ? ";" : "";
-  const indent = " ".repeat(statement.range().start.column);
-  const insertAt = statement.range().end.index;
-  const entries: { node: SgNode<TSX>; entry: JsxTypeRelocation }[] = [];
+  const first = moves[0]!.specifier;
+  const names = moves.map((move) => nameOf(move.specifier)).join(", ");
+  const legacy = moves.find((move) => nameOf(move.specifier) === LEGACY_ELEMENT_ALIAS);
+  const legacyNote = legacy === undefined ? "" : ` JSXElement becomes JSX, and its ${legacy.extra.length} type reference(s) become JSX.Element.`;
+  const report = rewrite(filename, first.range().start, `Move ${names} from ${SOLID_CORE_MODULE} to ${WEB_RENDERER_MODULE}.${legacyNote}`, JSX_TYPE_MIGRATION_GUIDE);
+  const edits: Edit[] = moves.flatMap((move) => move.extra);
 
-  const jsx = specifiers.find((specifier) => nameOf(specifier) === JSX_TYPE_NAME);
-  if (
-    jsx !== undefined &&
-    specifiers.length > 1 &&
-    typeOnly(jsx) &&
-    findBindings(rootNode, localOf(jsx)).length === 1
-  ) {
-    const removal = removeSpecifier(list, jsx);
-    if (removal !== null) {
-      const alias = jsx.field("alias");
-      const imported = alias === null ? JSX_TYPE_NAME : `${JSX_TYPE_NAME} as ${alias.text()}`;
-      const start = jsx.range().start;
-      const report = rewrite(filename, start, `Move the JSX type specifier out of this ${SOLID_CORE_MODULE} import into a separate ${WEB_RENDERER_MODULE} type import.`, JSX_TYPE_MIGRATION_GUIDE);
-      entries.push(
-        { node: jsx, entry: { edit: removal, report } },
-        {
-          node: jsx,
-          entry: {
-            edit: {
-              startPos: insertAt,
-              endPos: insertAt,
-              insertedText: `\n${indent}import type { ${imported} } from ${quote}${WEB_RENDERER_MODULE}${quote}${semicolon}`,
-            },
-            report,
-          },
-        },
-      );
+  if (moves.length === specifiers.length) {
+    edits.push(source.replace(`${quote}${WEB_RENDERER_MODULE}${quote}`));
+    for (const move of moves) {
+      if (nameOf(move.specifier) === LEGACY_ELEMENT_ALIAS) edits.push(move.specifier.field("name")!.replace(JSX_TYPE_NAME));
     }
+  } else {
+    const removals = removeSpecifiers(specifiers, new Set(moves.map((move) => move.specifier.id())));
+    const semicolon = statement.text().trimEnd().endsWith(";") ? ";" : "";
+    const indent = " ".repeat(statement.range().start.column);
+    const insertAt = statement.range().end.index;
+    const imported = [...new Set(moves.map((move) => move.imported))].join(", ");
+    edits.push(...removals, {
+      startPos: insertAt,
+      endPos: insertAt,
+      insertedText: `\n${indent}import type { ${imported} } from ${quote}${WEB_RENDERER_MODULE}${quote}${semicolon}`,
+    });
   }
-
-  const element = specifiers.find((specifier) => nameOf(specifier) === LEGACY_ELEMENT_ALIAS);
-  if (
-    element !== undefined &&
-    element.field("alias") === null &&
-    typeOnly(element) &&
-    findBindings(rootNode, LEGACY_ELEMENT_ALIAS).length === 1 &&
-    findBindings(rootNode, JSX_TYPE_NAME).length === 0
-  ) {
-    const elementName = element.field("name")!;
-    const values = rootNode
-      .findAll({ rule: { kind: "identifier", regex: `^${LEGACY_ELEMENT_ALIAS}$` } })
-      .filter((node) => node.id() !== elementName.id());
-    const shorthand = rootNode.findAll({ rule: { kind: "shorthand_property_identifier", regex: `^${LEGACY_ELEMENT_ALIAS}$` } });
-    const references = rootNode.findAll({ rule: { kind: "type_identifier", regex: `^${LEGACY_ELEMENT_ALIAS}$` } });
-    if (values.length === 0 && shorthand.length === 0) {
-      const start = element.range().start;
-      const report = rewrite(filename, start, `Replace the JSXElement type import from ${SOLID_CORE_MODULE} with JSX from ${WEB_RENDERER_MODULE} and rewrite its ${references.length} type reference(s) to JSX.Element.`, JSX_TYPE_MIGRATION_GUIDE);
-      const edits: Edit[] = [];
-      if (specifiers.length === 1) {
-        edits.push(elementName.replace(JSX_TYPE_NAME), source.replace(`${quote}${WEB_RENDERER_MODULE}${quote}`));
-      } else {
-        const removal = removeSpecifier(list, element);
-        if (removal !== null) {
-          edits.push(removal, {
-            startPos: insertAt,
-            endPos: insertAt,
-            insertedText: `\n${indent}import type { ${JSX_TYPE_NAME} } from ${quote}${WEB_RENDERER_MODULE}${quote}${semicolon}`,
-          });
-        }
-      }
-      if (edits.length > 0) {
-        for (const reference of references) edits.push(reference.replace(`${JSX_TYPE_NAME}.Element`));
-        for (const edit of edits) entries.push({ node: element, entry: { edit, report } });
-      }
-    }
-  }
-
-  return entries;
+  return edits.map((edit) => ({ node: first, entry: { edit, report } }));
 }
 
 /**
- * Removes one specifier from a comment-free named-import list together with
- * one adjacent comma: the following one when another specifier follows,
- * otherwise the preceding one. Returns null when neither neighbor is a
- * specifier.
+ * `JSXElement`, which no Solid 2 package exports, becomes `JSX` from
+ * `@solidjs/web`, with each type reference rewritten to `JSX.Element`. Only
+ * an unaliased, type-only specifier whose name is used solely as a type
+ * reference, in a file that binds no `JSX`, qualifies.
  */
-function removeSpecifier(list: SgNode<TSX>, specifier: SgNode<TSX>): Edit | null {
-  const siblings = list.children();
-  const position = siblings.findIndex((child) => child.id() === specifier.id());
-  const next = siblings[position + 1];
-  const afterNext = siblings[position + 2];
-  const previous = siblings[position - 1];
-  const beforePrevious = siblings[position - 2];
-  if (next?.kind() === "," && afterNext?.kind() === "import_specifier") {
-    return { startPos: specifier.range().start.index, endPos: afterNext.range().start.index, insertedText: "" };
-  }
-  if (previous?.kind() === "," && beforePrevious?.kind() === "import_specifier") {
-    return { startPos: beforePrevious.range().end.index, endPos: specifier.range().end.index, insertedText: "" };
-  }
-  return null;
+function legacyElementMove(
+  rootNode: SgNode<TSX>,
+  element: SgNode<TSX>,
+  specifiers: SgNode<TSX>[],
+  statementTypeOnly: boolean,
+): Move | null {
+  const typeOnly = statementTypeOnly || element.children().some((child) => child.kind() === "type");
+  if (element.field("alias") !== null || !typeOnly) return null;
+  if (findBindings(rootNode, LEGACY_ELEMENT_ALIAS).length !== 1) return null;
+  if (findBindings(rootNode, JSX_TYPE_NAME).length !== 0) return null;
+  if (specifiers.some((specifier) => specifier.field("name")?.text() === JSX_TYPE_NAME)) return null;
+  const elementName = element.field("name")!;
+  const values = rootNode
+    .findAll({ rule: { kind: "identifier", regex: `^${LEGACY_ELEMENT_ALIAS}$` } })
+    .filter((node) => node.id() !== elementName.id());
+  const shorthand = rootNode.findAll({ rule: { kind: "shorthand_property_identifier", regex: `^${LEGACY_ELEMENT_ALIAS}$` } });
+  if (values.length > 0 || shorthand.length > 0) return null;
+  const references = rootNode.findAll({ rule: { kind: "type_identifier", regex: `^${LEGACY_ELEMENT_ALIAS}$` } });
+  return {
+    specifier: element,
+    imported: JSX_TYPE_NAME,
+    extra: references.map((reference) => reference.replace(`${JSX_TYPE_NAME}.Element`)),
+  };
 }
+
+/**
+ * True when every other occurrence of `local` in the file is in a type
+ * position: a type reference (`ComponentProps<"div">`) or the namespace of a
+ * qualified type (`JSX.Element`). Another specifier's imported name
+ * (`JSX as J`) is not a use. A value use, `typeof` query, re-export or
+ * shorthand property keeps a value-imported specifier in place.
+ */
+function onlyTypeUses(rootNode: SgNode<TSX>, specifier: SgNode<TSX>, local: string): boolean {
+  const own = (specifier.field("alias") ?? specifier.field("name"))!;
+  const pattern = `^${local.replace(/[$]/g, "\\$")}$`;
+  for (const kind of ["identifier", "shorthand_property_identifier"] as const) {
+    for (const node of rootNode.findAll({ rule: { kind, regex: pattern } })) {
+      if (node.id() === own.id()) continue;
+      const parent = node.parent()?.kind();
+      if (kind === "identifier" && (parent === "nested_type_identifier" || parent === "import_specifier")) continue;
+      return false;
+    }
+  }
+  return true;
+}
+
+/**
+ * Removes the given specifiers from a comment-free named-import list that
+ * keeps at least one specifier. Each removed specifier takes the following
+ * comma with it; a run of removed specifiers at the end of the list instead
+ * takes the comma after the last kept one, so no two removals overlap.
+ */
+function removeSpecifiers(specifiers: SgNode<TSX>[], removed: Set<number>): Edit[] {
+  let lastKept = -1;
+  specifiers.forEach((specifier, index) => {
+    if (!removed.has(specifier.id())) lastKept = index;
+  });
+  const edits: Edit[] = [];
+  for (let index = 0; index < lastKept; index++) {
+    const specifier = specifiers[index]!;
+    if (!removed.has(specifier.id())) continue;
+    edits.push({ startPos: specifier.range().start.index, endPos: specifiers[index + 1]!.range().start.index, insertedText: "" });
+  }
+  if (lastKept < specifiers.length - 1) {
+    edits.push({ startPos: specifiers[lastKept]!.range().end.index, endPos: specifiers[specifiers.length - 1]!.range().end.index, insertedText: "" });
+  }
+  return edits;
+}
+

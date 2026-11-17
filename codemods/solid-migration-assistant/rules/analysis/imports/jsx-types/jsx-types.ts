@@ -5,13 +5,16 @@ import { migrationGuide, SOLID_TARGET_VERSION } from "../../../../shared/target.
 import { finding, type RuleFinding } from "../../../../shared/finding.ts";
 
 const MIGRATION_GUIDE = migrationGuide("typescript-jsx-solid-js--renderer-package");
-const MOVED_TYPES = new Set(["JSX", "JSXElement"]);
+const MOVED_TYPES = new Set(["JSX", "JSXElement", "ComponentProps", "ValidComponent"]);
 
 /**
- * Reports every import specifier that takes `JSX` or `JSXElement` from
- * `solid-js`, and every `@jsxImportSource solid-js` pragma. Solid 2 moves the
- * JSX namespace to the renderer package (`@solidjs/web` for web projects) and
- * removes the `JSXElement` alias.
+ * Reports every import specifier that takes `JSX`, `JSXElement`,
+ * `ComponentProps` or `ValidComponent` from `solid-js`, and every
+ * `@jsxImportSource solid-js` pragma. Solid 2 moves the JSX namespace to the
+ * renderer package (`@solidjs/web` for web projects), removes the
+ * `JSXElement` alias, and narrows `solid-js`'s `ComponentProps` and
+ * `ValidComponent` to components only, so `ComponentProps<"button">` needs
+ * the `@solidjs/web` versions.
  */
 export function analyzeJsxTypeImports(
   rootNode: SgNode<TSX>,
@@ -33,14 +36,19 @@ export function analyzeJsxTypeImports(
       if (!MOVED_TYPES.has(text)) continue;
       const start = specifier.range().start;
       const replacement =
-        text === "JSX"
-          ? "Move this specifier to a separate import type { JSX } from \"@solidjs/web\" statement (or set jsxImportSource to @solidjs/web and use the global JSX namespace), leaving every other solid-js binding in place."
-          : "Replace JSXElement with JSX.Element from @solidjs/web, or with Element from solid-js for renderer-neutral component code.";
+        text === "JSXElement"
+          ? "Replace JSXElement with JSX.Element from @solidjs/web, or with Element from solid-js for renderer-neutral component code."
+          : text === "JSX"
+            ? "Move this specifier to a separate import type { JSX } from \"@solidjs/web\" statement (or set jsxImportSource to @solidjs/web and use the global JSX namespace), leaving every other solid-js binding in place."
+            : `Move this specifier to a separate import type { ${text} } from "@solidjs/web" statement, leaving every other solid-js binding in place.`;
       findings.push(
         finding(context.filename, start, {
         severity: "build",
         headline: `Move this ${text} type import off solid-js.`,
-        why: `Solid ${SOLID_TARGET_VERSION} no longer exports the JSX namespace or the JSXElement alias from solid-js; renderer packages own JSX types, and web projects import JSX from @solidjs/web.`,
+        why:
+          text === "ComponentProps" || text === "ValidComponent"
+            ? `Solid ${SOLID_TARGET_VERSION}'s solid-js ${text} accepts components only; the @solidjs/web version also accepts intrinsic tag names such as "button", which ${text}<"button"> needs.`
+            : `Solid ${SOLID_TARGET_VERSION} no longer exports the JSX namespace or the JSXElement alias from solid-js; renderer packages own JSX types, and web projects import JSX from @solidjs/web.`,
         guidance: `${replacement} Also set compilerOptions.jsxImportSource to @solidjs/web in tsconfig.json, which this analyzer does not scan.`,
         guide: MIGRATION_GUIDE,
       }),
