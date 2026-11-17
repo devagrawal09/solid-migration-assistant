@@ -66,6 +66,10 @@ test("reports a catalog range as one to move in the workspace catalog", () => {
   assert.match(result.skipped[0].reason, /workspace catalog/);
 });
 
+test("takes @solidjs/web from the catalog solid-js comes from", () => {
+  assert.equal(bumped(manifest({ "solid-js": "catalog:legacy" })).dependencies["@solidjs/web"], "catalog:legacy");
+});
+
 test("adds no @solidjs/web beside a solid-js it left alone", () => {
-  assert.equal(bumped(manifest({ "solid-js": "catalog:" })).dependencies["@solidjs/web"], undefined);
+  assert.equal(bumped(manifest({ "solid-js": "link:../solid" })).dependencies["@solidjs/web"], undefined);
 });

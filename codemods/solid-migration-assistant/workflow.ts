@@ -1,6 +1,7 @@
 import { approval, forEachFile, getState, jssg, shell, step } from "codemod/workflow";
 import { DEPENDENCY_MAP } from "./shared/dependencies.mjs";
 import { bumpManifest, bumpTsconfig } from "./shared/manifest.mjs";
+import { bumpCatalogs } from "./shared/catalog.mjs";
 import { byLocation, renderText } from "./shared/format.mjs";
 import { ANALYSIS_STEPS, TRANSFORM_STEPS } from "./shared/steps.generated.ts";
 import { MIGRATION_GUIDE_URL, SOLID_TARGET_VERSION } from "./shared/target.ts";
@@ -178,7 +179,25 @@ export default async function main({ params }: { params: Params }) {
     }
     const project = await step(
       "Move package.json and tsconfig.json to Solid 2",
-      forEachFile({ include: ["package.json", "tsconfig.json"] }, (file) => {
+      forEachFile({ include: ["package.json", "tsconfig.json", "pnpm-workspace.yaml"] }, (file) => {
+        if (file.path.endsWith("pnpm-workspace.yaml")) {
+          const bumped = bumpCatalogs(file.text);
+          if (bumped === null) return undefined;
+          if (bumped.changes.length > 0) file.write(bumped.text);
+          return {
+            rewrites: bumped.changes.map((change: any) => ({
+              rule: "project/dependencies",
+              file: file.path,
+              line: change.line,
+              column: 1,
+              message: `${change.from === null ? `Add ${change.name} ${change.to}` : `Move ${change.name} from ${change.from} to ${change.to}`} in the ${change.catalog === "" ? "default catalog" : `${change.catalog} catalog`}.`,
+              guide: `${MIGRATION_GUIDE_URL}#imports-where-things-live-now`,
+              catalog: change.catalog,
+              name: change.name,
+            })),
+            skipped: bumped.skipped.map((skip: any) => ({ file: file.path, ...skip })),
+          };
+        }
         if (file.path.endsWith("package.json")) {
           const bumped = bumpManifest(file.text);
           if (bumped === null) return undefined;
@@ -213,9 +232,18 @@ export default async function main({ params }: { params: Params }) {
         };
       }),
     );
+    // A package.json range like "catalog:" is moved where the catalog lives,
+    // so it is only left to the user when no pnpm catalog moved that package.
+    const movedInCatalog = new Set(
+      (project.outputs as any[]).flatMap((output) => output.rewrites).filter((rewrite: any) => rewrite.catalog !== undefined)
+        .map((rewrite: any) => `${rewrite.catalog}:${rewrite.name}`),
+    );
     for (const output of project.outputs as any[]) {
-      projectRewrites.push(...output.rewrites);
-      dependencySkips.push(...output.skipped);
+      projectRewrites.push(...output.rewrites.map(({ catalog, name, ...rewrite }: any) => rewrite));
+      dependencySkips.push(...output.skipped.filter((skip: any) => {
+        const catalog = /^catalog:(.*)$/.exec(skip.range)?.[1];
+        return catalog === undefined || !movedInCatalog.has(`${catalog === "default" ? "" : catalog}:${skip.name}`);
+      }));
     }
     failures.push(...project.failures.map((f) => ({ step: "Move package.json and tsconfig.json to Solid 2", ...f })));
     // Shell steps come before the analysis: with a large project's findings in

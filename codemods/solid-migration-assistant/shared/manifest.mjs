@@ -73,18 +73,23 @@ export function bumpManifest(text) {
   }
 
   // @solidjs/web only goes in beside a solid-js this edit moved, so the two
-  // never end up on different majors.
+  // never end up on different majors. A solid-js taken from a pnpm catalog
+  // moves in pnpm-workspace.yaml (`shared/catalog.mjs`), which adds
+  // @solidjs/web to the same catalog, so the package takes it from there too.
   const hasWeb = SECTIONS.some((name) => manifest[name]?.["@solidjs/web"] !== undefined);
-  if (!hasWeb && changes.some((change) => change.name === "solid-js")) {
-    const anchor = valueEdit(text, section, "solid-js", manifest[section]["solid-js"], SOLID_RANGE);
+  const solidRange = manifest[section]["solid-js"];
+  const fromCatalog = solidRange.startsWith("catalog:");
+  if (!hasWeb && (fromCatalog || changes.some((change) => change.name === "solid-js"))) {
+    const webRange = fromCatalog ? solidRange : SOLID_RANGE;
+    const anchor = valueEdit(text, section, "solid-js", solidRange, webRange);
     if (anchor !== null) {
       // Insert right after the solid-js value; any comma that followed it
       // now follows the new entry. Multi-line objects get their own line.
       const lineStart = text.lastIndexOf("\n", anchor.start) + 1;
       const multiline = text.slice(lineStart, anchor.start).trim().startsWith('"solid-js"');
       const separator = multiline ? `\n${/^\s*/.exec(text.slice(lineStart))[0]}` : " ";
-      edits.push({ start: anchor.end, end: anchor.end, text: `,${separator}"@solidjs/web": "${SOLID_RANGE}"` });
-      changes.push({ name: "@solidjs/web", from: null, to: SOLID_RANGE, line: anchor.line + 1 });
+      edits.push({ start: anchor.end, end: anchor.end, text: `,${separator}"@solidjs/web": "${webRange}"` });
+      changes.push({ name: "@solidjs/web", from: null, to: webRange, line: anchor.line + 1 });
     }
   }
 

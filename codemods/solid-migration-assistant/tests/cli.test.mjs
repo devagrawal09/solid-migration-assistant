@@ -548,6 +548,13 @@ test("reports the Solid version of every workspace package, not only the root", 
   }), ["packages/app/package.json Move this project's Solid dependencies to solid-js@2.0.0."]);
 });
 
+test("reads solid-js through the pnpm catalog", async () => {
+  assert.deepEqual(projectSites({
+    "pnpm-workspace.yaml": "packages:\n  - packages/*\ncatalog:\n  solid-js: ^2.0.0\n  \"@solidjs/web\": ^2.0.0\n",
+    "packages/app/package.json": { dependencies: { "solid-js": "catalog:", "@solidjs/web": "catalog:" } },
+  }), []);
+});
+
 test("reports jsxImportSource in a workspace package's tsconfig.json", async () => {
   assert.deepEqual(projectSites({ "packages/app/tsconfig.json": { compilerOptions: { jsxImportSource: "solid-js" } } }), [
     "packages/app/tsconfig.json Point jsxImportSource at the Solid 2 renderer package.",

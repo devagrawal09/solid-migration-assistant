@@ -8,6 +8,7 @@ import { byLocation, placeOf, renderAgentReport, renderText, summaryOf } from ".
 import { DEPENDENCY_MAP, DEPENDENCY_VERIFIED_ON, dependencyHeadline } from "./dependencies.mjs";
 import { allowsSolid2 } from "./peers.mjs";
 import { settleUnknownDependencies } from "./registry.mjs";
+import { catalogName, readCatalogs } from "./catalog.mjs";
 
 const packageDirectory = resolve(dirname(fileURLToPath(import.meta.url)), "..");
 const require = createRequire(import.meta.url);
@@ -45,8 +46,9 @@ export function projectFindings(target) {
   const files = projectFiles(target);
   const manifests = files.filter((file) => basename(file) === "package.json");
   const workspaceNames = new Set(manifests.map((file) => readJsonLike(resolve(target, file))?.name).filter(Boolean));
+  const catalogs = readCatalogs(readText(resolve(target, "pnpm-workspace.yaml")) ?? "");
   const findings = [];
-  for (const file of manifests) findings.push(...manifestFindings(target, file, workspaceNames));
+  for (const file of manifests) findings.push(...manifestFindings(target, file, workspaceNames, catalogs));
   for (const file of files.filter((file) => basename(file) === "tsconfig.json")) {
     const jsxImportSource = readJsonLike(resolve(target, file))?.compilerOptions?.jsxImportSource;
     if (jsxImportSource !== "solid-js") continue;
@@ -92,7 +94,7 @@ function projectFiles(target) {
   return files.sort();
 }
 
-function manifestFindings(target, file, workspaceNames) {
+function manifestFindings(target, file, workspaceNames, catalogs) {
   const manifest = readJsonLike(resolve(target, file));
   if (!manifest || typeof manifest !== "object") return [];
   const text = readFileSync(resolve(target, file), "utf8");
@@ -100,10 +102,17 @@ function manifestFindings(target, file, workspaceNames) {
   const declared = { ...(manifest.dependencies ?? {}), ...(manifest.devDependencies ?? {}) };
   const solid = declared["solid-js"];
   const web = declared["@solidjs/web"];
-  const onSolid2 = typeof solid === "string" && /(^|[^0-9.])2\.\d/.test(solid);
+  const catalog = catalogName(solid);
+  const resolved = catalog === null ? solid : catalogs.get(catalog)?.get("solid-js")?.range;
+  const where = catalog === null ? "" : catalog === "" ? "the default catalog in pnpm-workspace.yaml" : `the ${catalog} catalog in pnpm-workspace.yaml`;
+  const onSolid2 = typeof resolved === "string" && /(^|[^0-9.])2\.\d/.test(resolved);
   const problems = [];
-  if (typeof solid === "string" && !onSolid2) {
-    problems.push(`solid-js is declared as ${JSON.stringify(solid)}, a Solid 1 range`);
+  if (typeof solid === "string" && catalog !== null && resolved === undefined) {
+    problems.push(`solid-js comes from ${JSON.stringify(solid)}, a workspace catalog this analyzer couldn't read, so check that it moves to ${SOLID_VERSION} there`);
+  } else if (typeof solid === "string" && !onSolid2) {
+    problems.push(catalog === null
+      ? `solid-js is declared as ${JSON.stringify(solid)}, a Solid 1 range`
+      : `solid-js comes from ${where} at ${JSON.stringify(resolved)}, a Solid 1 range`);
   }
   if (typeof solid === "string" && web === undefined) {
     problems.push("@solidjs/web, the Solid 2 web renderer package, is not declared");
@@ -117,7 +126,7 @@ function manifestFindings(target, file, workspaceNames) {
       severity: "build",
       headline: `Move this project's Solid dependencies to ${SOLID_TARGET}.`,
       why: `${problems.join("; ")}. Solid 2 splits the web renderer into @solidjs/web, versions it in lockstep with solid-js, and compiles JSX through @solidjs/vite-plugin (or @solidjs/babel-plugin), which is what the official solid-v2 templates use.`,
-      guidance: `Move solid-js to ^${SOLID_VERSION} and add @solidjs/web at the same range (the two release in lockstep), move the other Solid dependencies as the per-package findings describe, and run this analyzer before installing, since Solid 1 source is the input this version understands.`,
+      guidance: `Move solid-js to ^${SOLID_VERSION}${catalog === null ? "" : ` in ${where || "the workspace catalog"} (migrate edits pnpm catalogs)`} and add @solidjs/web at the same range (the two release in lockstep), move the other Solid dependencies as the per-package findings describe, and run this analyzer before installing, since Solid 1 source is the input this version understands.`,
       lint: [],
       guide: `${MIGRATION_GUIDE}#imports-where-things-live-now`,
     });
@@ -217,13 +226,17 @@ function dependencyFindings(manifest, text, file) {
  * Parses a JSON file that may carry comments and trailing commas (tsconfig
  * does); returns undefined when the file is missing or still unparsable.
  */
-function readJsonLike(path) {
-  let text;
+function readText(path) {
   try {
-    text = readFileSync(path, "utf8");
+    return readFileSync(path, "utf8");
   } catch {
     return undefined;
   }
+}
+
+function readJsonLike(path) {
+  const text = readText(path);
+  if (text === undefined) return undefined;
   try {
     return JSON.parse(text);
   } catch {

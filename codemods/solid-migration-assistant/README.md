@@ -104,9 +104,10 @@ After the source rewrites, migrate mode moves the target's own `package.json` an
 
 - `solid-js` moves to `^2.0.0`, and `@solidjs/web` is added at the same range right after it when missing (a dependency whose Solid 2 release is still a prerelease is pinned exactly);
 - each `upgrade` entry of the dependency table (`@solidjs/router`, `@solidjs/testing-library`, the `@solid-primitives` packages, TanStack Query and Router) moves to its verified Solid 2 version;
-- `"jsxImportSource": "solid-js"` becomes `"@solidjs/web"`.
+- `"jsxImportSource": "solid-js"` becomes `"@solidjs/web"`;
+- in a root `pnpm-workspace.yaml`, every catalog (`catalog:` or a named one under `catalogs:`) that holds a Solid 1 `solid-js` gets the same moves, plus `@solidjs/web` right after `solid-js`, and a package that takes `solid-js` from a catalog gets `"@solidjs/web"` from that same catalog (`shared/catalog.mjs`).
 
-Packages that need replacing or have no Solid 2 release stay as they are and keep their analyzer finding. A range that isn't plain semver (`workspace:`, `catalog:`, git, `link:`, tags) and a `solid-js` peer range are left alone and listed under **Next**.
+Packages that need replacing or have no Solid 2 release stay as they are and keep their analyzer finding. A range that isn't plain semver (`workspace:`, git, `link:`, tags, and a `catalog:` no pnpm catalog moved, such as Bun's catalogs in package.json) and a `solid-js` peer range are left alone and listed under **Next**. Analyze mode reads a `catalog:` range through `pnpm-workspace.yaml` too, so a package already on a Solid 2 catalog gets no version finding.
 
 Migrate then reports what the rewrites left and checks the result:
 
