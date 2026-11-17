@@ -64,6 +64,9 @@ Pass `--format json` (with `analyze` or `transform`) to get one JSON document on
 - **`createDynamic` / `from` / `observable`** — `createDynamic` is replaced by the `dynamic(source)` factory (the `<Dynamic>` wrapper is kept but deprecated); `from` now returns an async iterable for a memo to consume; `observable` is replaced by an effect that pushes to the subscriber.
 - **`equalFn` / `getListener` / `writeSignal` / `enableScheduling`** — renamed (`isEqual`, `getObserver`) or removed.
 
+### Context
+- **`useContext` on a default-less context** — an undefined check on `useContext(Ctx)` where `Ctx` is `createContext()` with no default. Solid 2 throws instead of returning undefined, so a wrapper that throws is a cleanup and any other fallback never runs.
+
 ### Lifecycle & props
 - **`onMount`** — removed; closest replacement is `onSettled`.
 - **`onCleanup`** — still exported and still valid in owned scopes, so it is reported only directly inside the callback of a legacy one-argument `createEffect` / `createRenderEffect` / `createComputed` or of an `onMount`, whose Solid 2 forms take cleanup as a returned function. Component bodies, custom hooks, `createRoot`, and memos are not reported; ref callbacks are covered by the ref-callback finding; a cleanup registered by a helper that an effect calls is not traced.

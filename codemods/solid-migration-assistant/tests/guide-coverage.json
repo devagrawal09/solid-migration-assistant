@@ -105,7 +105,7 @@
     },
     {
       "anchor": "usecontext-on-a-default-less-context-returns-t-not-t--undefined",
-      "gap": "Code that relies on useContext returning undefined outside a provider now throws; no rule reports it."
+      "rules": ["context/default-less-context"]
     },
     {
       "anchor": "new-in-20",
