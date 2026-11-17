@@ -7,6 +7,8 @@ import { DISCLOSURE, projectFindings } from "../shared/run-workflow.mjs";
 import { SEVERITY_TIERS } from "../shared/format.mjs";
 import { dependencyHeadline } from "../shared/dependencies.mjs";
 import { discoverRules, staleFiles } from "../tools/generate.mjs";
+import { SOLID_VERSION } from "../shared/manifest.mjs";
+import { replaceTargetVersion } from "../tools/target-version.mjs";
 
 const packageDirectory = resolve(dirname(fileURLToPath(import.meta.url)), "..");
 const analysisDirectory = resolve(packageDirectory, "rules/analysis");
@@ -230,6 +232,7 @@ test("cites one pinned upstream Solid commit everywhere", () => {
   assert.equal(/SOLID_SOURCE_COMMIT =\n\s+"([0-9a-f]{40})"/.exec(target)?.[1], pinned);
   assert.ok(version, "shared/target.ts must declare SOLID_TARGET_VERSION");
   assert.match(DISCLOSURE, new RegExp(`solid-js@${version.replace(/\./g, "\\.")} `));
+  assert.equal(SOLID_VERSION, version, "migrate writes shared/manifest.mjs's SOLID_VERSION");
   for (const rule of [
     ...ruleFiles(analysisDirectory, (name) => name.endsWith(".ts") && !name.endsWith(".test.ts")).map((path) => resolve(analysisDirectory, path)),
     ...ruleFiles(transformationsDirectory, (name) => name.endsWith(".ts") && !name.endsWith(".test.ts")).map((path) => resolve(transformationsDirectory, path)),
@@ -239,6 +242,22 @@ test("cites one pinned upstream Solid commit everywhere", () => {
     assert.doesNotMatch(source, /blob\/[0-9a-f]{40}\/documentation/, relative(packageDirectory, rule));
   }
   assert.equal(existsSync(resolve(packageDirectory, "tools/bump-target.mjs")), true);
+});
+
+test("a target bump moves Solid's version and leaves other packages at the same number alone", () => {
+  const before = [
+    '"codemod": "2.0.0-alpha.3", "solid-js": "^2.0.0", "@solidjs/router": "^2.0.0"',
+    "Move solid-js from ^1.9.3 to ^2.0.0. Solid 2.0.0's setter; @solidjs/web@2.0.0 and @solidjs/router@2.0.0.",
+    'export const SOLID_VERSION = "2.0.0";',
+  ].join("\n");
+  assert.equal(
+    replaceTargetVersion(before, "2.0.0", "2.0.1"),
+    [
+      '"codemod": "2.0.0-alpha.3", "solid-js": "^2.0.1", "@solidjs/router": "^2.0.0"',
+      "Move solid-js from ^1.9.3 to ^2.0.1. Solid 2.0.1's setter; @solidjs/web@2.0.1 and @solidjs/router@2.0.0.",
+      'export const SOLID_VERSION = "2.0.1";',
+    ].join("\n"),
+  );
 });
 
 /** Every shipped or reviewed text file: rules, scripts, shared, workflows, READMEs, and tests. */
