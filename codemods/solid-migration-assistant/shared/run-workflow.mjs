@@ -7,6 +7,7 @@ import { fileURLToPath } from "node:url";
 import { byLocation, placeOf, renderAgentReport, renderText, summaryOf } from "./format.mjs";
 import { DEPENDENCY_MAP, DEPENDENCY_VERIFIED_ON, dependencyHeadline } from "./dependencies.mjs";
 import { allowsSolid2 } from "./peers.mjs";
+import { settleUnknownDependencies } from "./registry.mjs";
 
 const packageDirectory = resolve(dirname(fileURLToPath(import.meta.url)), "..");
 const require = createRequire(import.meta.url);
@@ -26,7 +27,7 @@ Analyzer: ${packageMetadata.name}@${packageMetadata.version}
 Reviewed migration destination: ${SOLID_TARGET} (source commit ${SOLID_SOURCE_COMMIT})
 Immutable migration guide: ${MIGRATION_GUIDE}
 Scope: This source-only analyzer covers project-owned .js, .jsx, .ts, and .tsx source. Coverage is incomplete and advisory, makes no migration-readiness claim, and supports only the exact destination above; other Solid versions are unsupported.
-Execution: analyze is read-only and runs nothing in the target. transform rewrites source, package.json and tsconfig.json, then installs with the project's package manager, which runs the project's install scripts and updates its lockfile and node_modules (--no-install skips it), and typechecks with the project's own TypeScript. Neither runs builds, tests, or applications, or creates a target report.
+Execution: analyze is read-only and runs nothing in the target; it asks the public npm registry about Solid libraries its dependency table doesn't list (--offline skips that). transform rewrites source, package.json and tsconfig.json, then installs with the project's package manager, which runs the project's install scripts and updates its lockfile and node_modules (--no-install skips it), and typechecks with the project's own TypeScript. Neither runs builds, tests, or applications, or creates a target report.
 Privacy and output: Analyzer telemetry is disabled and no analyzer telemetry or generated report is emitted. Codemod may retain normal workflow or task state outside the target in platform user-data directories; consult Codemod's privacy and state behavior.
 Feedback: ${FEEDBACK_URL}
 [solid-migration-assistant] End final disclosure`;
@@ -128,7 +129,9 @@ function manifestFindings(target, file, workspaceNames) {
 
 /**
  * One finding per Solid library the dependency table doesn't know, unless
- * its installed copy's solid-js peer range already allows Solid 2. A library
+ * its installed copy's solid-js peer range already allows Solid 2. Each
+ * carries a `package` field so the launcher can settle it against the npm
+ * registry (`shared/registry.mjs`). A library
  * counts when its installed manifest names solid-js, or, when it isn't
  * installed, when its name contains "solid". Workspace packages, local
  * ranges and lint tooling are skipped.
@@ -146,6 +149,7 @@ function peerFindings(target, file, manifest, text, workspaceNames) {
     if (installed === undefined ? !/solid/i.test(name) : peer === undefined || allowsSolid2(peer)) continue;
     const lineIndex = lines.findIndex((line) => line.includes(`"${name}"`));
     findings.push({
+      package: name,
       rule: "project/dependencies",
       file,
       line: lineIndex === -1 ? 1 : lineIndex + 1,
@@ -245,11 +249,12 @@ export const WORKFLOWS = Object.freeze({
 export const FORMATS = Object.freeze(["text", "json", "agent"]);
 
 /**
- * `[workflow] [--target <dir>] [--allow-dirty] [--allow-blocked] [--no-install] [--format text|json|agent]`.
+ * `[workflow] [--target <dir>] [--allow-dirty] [--allow-blocked] [--no-install] [--offline] [--format text|json|agent]`.
  * The workflow defaults to `analyze` and the format to `text`, so every
  * pre-existing invocation keeps its meaning; `--allow-dirty`,
  * `--allow-blocked` and `--no-install` are accepted only with `transform`,
- * the one workflow that writes to the target.
+ * the one workflow that writes to the target. `--offline` skips the npm
+ * registry lookups for Solid libraries the dependency table doesn't know.
  */
 export function parseArguments(argumentsList) {
   let workflow = "analyze";
@@ -257,6 +262,7 @@ export function parseArguments(argumentsList) {
   let allowDirty = false;
   let allowBlocked = false;
   let install = true;
+  let offline = false;
   let format = "text";
   let hasExplicitTarget = false;
   let hasExplicitFormat = false;
@@ -288,6 +294,10 @@ export function parseArguments(argumentsList) {
         throw new CliUsageError("--no-install is only accepted with the transform workflow");
       }
       install = false;
+      continue;
+    }
+    if (argument === "--offline") {
+      offline = true;
       continue;
     }
     if (argument === "--format") {
@@ -322,7 +332,7 @@ export function parseArguments(argumentsList) {
   if (format === "agent" && workflow !== "analyze") {
     throw new CliUsageError("--format agent is only accepted with the analyze workflow");
   }
-  return { workflow, target, allowDirty, allowBlocked, install, format };
+  return { workflow, target, allowDirty, allowBlocked, install, offline, format };
 }
 
 /** Backwards-compatible view of `parseArguments` for the analyze workflow. */
@@ -520,12 +530,13 @@ export async function main(
     runImpl = (target, workflow, options) => runCodemod(target, { workflow, ...options }),
     dirtyImpl = dirtyTreeReason,
     projectImpl = projectFindings,
+    fetchImpl = fetch,
   } = {},
 ) {
   let status = 1;
 
   try {
-    status = await run(argumentsList, cwd ?? process.cwd(), runImpl, dirtyImpl, projectImpl);
+    status = await run(argumentsList, cwd ?? process.cwd(), runImpl, dirtyImpl, projectImpl, fetchImpl);
   } catch (error) {
     console.error(
       `[solid-migration-assistant] analyzer execution failed: ${error instanceof Error ? error.message : String(error)}`,
@@ -537,7 +548,7 @@ export async function main(
   return status;
 }
 
-async function run(argumentsList, invocationDirectory, runImpl, dirtyImpl, projectImpl) {
+async function run(argumentsList, invocationDirectory, runImpl, dirtyImpl, projectImpl, fetchImpl) {
   let parsed;
   try {
     parsed = parseArguments(argumentsList);
@@ -568,7 +579,8 @@ async function run(argumentsList, invocationDirectory, runImpl, dirtyImpl, proje
     if (reason !== null) return fail(reason);
   }
 
-  const analyzed = parsed.workflow === "analyze" ? projectImpl(target) : [];
+  const settle = (findings) => settleUnknownDependencies(findings, { fetchImpl, offline: parsed.offline });
+  const analyzed = parsed.workflow === "analyze" ? await settle(projectImpl(target)) : [];
   const result = await runImpl(target, parsed.workflow, { allowBlocked: parsed.allowBlocked, install: parsed.install });
   if (result.runStatus === "awaiting-approval") {
     const blocked =
@@ -577,7 +589,7 @@ async function run(argumentsList, invocationDirectory, runImpl, dirtyImpl, proje
   }
   // A transform's leftovers read package.json and tsconfig.json as it left
   // them, so a dependency it could not move is still listed.
-  const project = parsed.workflow === "analyze" ? analyzed : projectImpl(target);
+  const project = parsed.workflow === "analyze" ? analyzed : await settle(projectImpl(target));
   const status = result.status ?? 1;
   const { findings, rewrites, dependencySkips, afterMigrate, diagnostics } = parseRunOutput(result);
   const next = parsed.workflow === "analyze" ? [] : nextSteps({ dependencySkips, afterMigrate });

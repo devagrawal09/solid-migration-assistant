@@ -31,11 +31,11 @@ test("defaults the target to the invocation directory", async () => {
 });
 
 test("parses the optional workflow and the transform-only --allow-dirty flag", async () => {
-  assert.deepEqual(parseArguments([]), { workflow: "analyze", target: ".", allowDirty: false, allowBlocked: false, install: true, format: "text" });
-  assert.deepEqual(parseArguments(["analyze", "--target", "p"]), { workflow: "analyze", target: "p", allowDirty: false, allowBlocked: false, install: true, format: "text" });
-  assert.deepEqual(parseArguments(["transform"]), { workflow: "transform", target: ".", allowDirty: false, allowBlocked: false, install: true, format: "text" });
-  assert.deepEqual(parseArguments(["transform", "--allow-dirty", "--target", "p"]), { workflow: "transform", target: "p", allowDirty: true, allowBlocked: false, install: true, format: "text" });
-  assert.deepEqual(parseArguments(["--format", "json"]), { workflow: "analyze", target: ".", allowDirty: false, allowBlocked: false, install: true, format: "json" });
+  assert.deepEqual(parseArguments([]), { workflow: "analyze", target: ".", allowDirty: false, allowBlocked: false, install: true, offline: false, format: "text" });
+  assert.deepEqual(parseArguments(["analyze", "--target", "p"]), { workflow: "analyze", target: "p", allowDirty: false, allowBlocked: false, install: true, offline: false, format: "text" });
+  assert.deepEqual(parseArguments(["transform"]), { workflow: "transform", target: ".", allowDirty: false, allowBlocked: false, install: true, offline: false, format: "text" });
+  assert.deepEqual(parseArguments(["transform", "--allow-dirty", "--target", "p"]), { workflow: "transform", target: "p", allowDirty: true, allowBlocked: false, install: true, offline: false, format: "text" });
+  assert.deepEqual(parseArguments(["--format", "json"]), { workflow: "analyze", target: ".", allowDirty: false, allowBlocked: false, install: true, offline: false, format: "json" });
   assert.throws(() => parseArguments(["--format", "xml"]), /--format requires one of: text, json/);
   assert.throws(() => parseArguments(["--format"]), /--format requires one of/);
   assert.throws(() => parseArguments(["--format", "json", "--format", "text"]), /--format may only be specified once/);

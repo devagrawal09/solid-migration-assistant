@@ -180,6 +180,7 @@ test("uses normal analyzer end-to-end fixtures", () => {
     "rc-check.mjs",
     "rc-compat",
     "rc-compat.test.mjs",
+    "registry.test.mjs",
     "rule-fixtures.test.mjs",
     "rules.generated.ts",
     "transform-expected",
