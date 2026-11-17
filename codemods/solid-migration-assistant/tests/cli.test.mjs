@@ -31,11 +31,11 @@ test("defaults the target to the invocation directory", async () => {
 });
 
 test("parses the optional workflow and the transform-only --allow-dirty flag", async () => {
-  assert.deepEqual(parseArguments([]), { workflow: "analyze", target: ".", allowDirty: false, allowBlocked: false, install: true, offline: false, format: "text" });
-  assert.deepEqual(parseArguments(["analyze", "--target", "p"]), { workflow: "analyze", target: "p", allowDirty: false, allowBlocked: false, install: true, offline: false, format: "text" });
-  assert.deepEqual(parseArguments(["transform"]), { workflow: "transform", target: ".", allowDirty: false, allowBlocked: false, install: true, offline: false, format: "text" });
-  assert.deepEqual(parseArguments(["transform", "--allow-dirty", "--target", "p"]), { workflow: "transform", target: "p", allowDirty: true, allowBlocked: false, install: true, offline: false, format: "text" });
-  assert.deepEqual(parseArguments(["--format", "json"]), { workflow: "analyze", target: ".", allowDirty: false, allowBlocked: false, install: true, offline: false, format: "json" });
+  assert.deepEqual(parseArguments([]), { workflow: "analyze", target: ".", allowDirty: false, allowBlocked: false, install: true, offline: false, verbose: false, format: "text" });
+  assert.deepEqual(parseArguments(["analyze", "--target", "p"]), { workflow: "analyze", target: "p", allowDirty: false, allowBlocked: false, install: true, offline: false, verbose: false, format: "text" });
+  assert.deepEqual(parseArguments(["transform"]), { workflow: "transform", target: ".", allowDirty: false, allowBlocked: false, install: true, offline: false, verbose: false, format: "text" });
+  assert.deepEqual(parseArguments(["transform", "--allow-dirty", "--target", "p"]), { workflow: "transform", target: "p", allowDirty: true, allowBlocked: false, install: true, offline: false, verbose: false, format: "text" });
+  assert.deepEqual(parseArguments(["--format", "json"]), { workflow: "analyze", target: ".", allowDirty: false, allowBlocked: false, install: true, offline: false, verbose: false, format: "json" });
   assert.throws(() => parseArguments(["--format", "xml"]), /--format requires one of: text, json/);
   assert.throws(() => parseArguments(["--format"]), /--format requires one of/);
   assert.throws(() => parseArguments(["--format", "json", "--format", "text"]), /--format may only be specified once/);
@@ -43,6 +43,7 @@ test("parses the optional workflow and the transform-only --allow-dirty flag", a
   assert.throws(() => parseArguments(["analyze", "--allow-dirty"]), /only accepted with the transform workflow/);
   assert.ok(buildCodemodArguments("/t", "transform").includes("mode=migrate"));
   assert.equal(parseArguments(["transform", "--allow-blocked"]).allowBlocked, true);
+  assert.equal(parseArguments(["transform", "--verbose"]).verbose, true);
   assert.throws(() => parseArguments(["--allow-blocked"]), /only accepted with the transform workflow/);
   assert.equal(buildCodemodArguments("/t", "transform", { allowBlocked: true }).at(-1), "--approve");
 });
@@ -356,10 +357,29 @@ test("delegates runtime availability to the pinned Codemod launcher", async () =
   assert.equal(existsSync(env.CODEMOD_RUN_STORE_DIR), false);
 });
 
-test("streams Codemod's step progress while the run is going", async () => {
+const stepLog = ["Run 61a770f9-71d9\n▸ jsx/cla", "ss-list\n✓ jsx/class-list (2.1s)\n▸ Stores: unwrap\n✓ Stores: unwrap (0.0s)\nDone\n"];
+const clock = (...times) => () => times.shift();
+
+const colored = (chunks) => chunks.map((chunk) => chunk.replace(/^(▸|✓|Run|Done)/gm, "\u001b[2m$1\u001b[0m"));
+
+for (const [name, log] of [["plain", stepLog], ["colored", colored(stepLog)]]) {
+  test(`folds Codemod's ${name} step lines into one closing line`, async () => {
+    const progress = progressSink();
+    await runCodemod(packageDirectory, { progress, now: clock(1000, 3400), spawnImpl: () => fakeChild(log, 0) });
+    assert.equal(progress.text, "[solid-migration-assistant] Ran 2 workflow steps in 2.4s.\n");
+  });
+}
+
+test("shows the running step in place on a terminal and clears it before other output", async () => {
+  const progress = Object.assign(progressSink(), { isTTY: true });
+  await runCodemod(packageDirectory, { progress, now: clock(0, 100), spawnImpl: () => fakeChild(["▸ Install\nnpm ERR! 404\n✓ Install (9.0s)\n"], 0) });
+  assert.equal(progress.text, "\r\x1b[K▸ Install\r\x1b[Knpm ERR! 404\n[solid-migration-assistant] Ran 1 workflow step in 0.1s.\n");
+});
+
+test("streams every Codemod line with --verbose", async () => {
   const progress = progressSink();
-  await runCodemod(packageDirectory, { progress, spawnImpl: () => fakeChild(["▸ jsx/cla", "ss-list\n✓ jsx/class-list (2.1s)\n"], 0) });
-  assert.equal(progress.text, "▸ jsx/class-list\n✓ jsx/class-list (2.1s)\n");
+  await runCodemod(packageDirectory, { progress, verbose: true, spawnImpl: () => fakeChild(stepLog, 0) });
+  assert.equal(progress.text, stepLog.join(""));
 });
 
 test("drops Codemod's resume hint, whose run store is gone after the run", async () => {

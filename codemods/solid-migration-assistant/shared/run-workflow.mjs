@@ -262,12 +262,13 @@ export const WORKFLOWS = Object.freeze({
 export const FORMATS = Object.freeze(["text", "json", "agent"]);
 
 /**
- * `[workflow] [--target <dir>] [--allow-dirty] [--allow-blocked] [--no-install] [--offline] [--format text|json|agent]`.
+ * `[workflow] [--target <dir>] [--allow-dirty] [--allow-blocked] [--no-install] [--offline] [--verbose] [--format text|json|agent]`.
  * The workflow defaults to `analyze` and the format to `text`, so every
  * pre-existing invocation keeps its meaning; `--allow-dirty`,
  * `--allow-blocked` and `--no-install` are accepted only with `transform`,
  * the one workflow that writes to the target. `--offline` skips the npm
- * registry lookups for Solid libraries the dependency table doesn't know.
+ * registry lookups for Solid libraries the dependency table doesn't know;
+ * `--verbose` prints every Codemod step line instead of one closing line.
  */
 export function parseArguments(argumentsList) {
   let workflow = "analyze";
@@ -276,6 +277,7 @@ export function parseArguments(argumentsList) {
   let allowBlocked = false;
   let install = true;
   let offline = false;
+  let verbose = false;
   let format = "text";
   let hasExplicitTarget = false;
   let hasExplicitFormat = false;
@@ -313,6 +315,10 @@ export function parseArguments(argumentsList) {
       offline = true;
       continue;
     }
+    if (argument === "--verbose") {
+      verbose = true;
+      continue;
+    }
     if (argument === "--format") {
       if (hasExplicitFormat) {
         throw new CliUsageError("--format may only be specified once");
@@ -345,7 +351,7 @@ export function parseArguments(argumentsList) {
   if (format === "agent" && workflow !== "analyze") {
     throw new CliUsageError("--format agent is only accepted with the analyze workflow");
   }
-  return { workflow, target, allowDirty, allowBlocked, install, offline, format };
+  return { workflow, target, allowDirty, allowBlocked, install, offline, verbose, format };
 }
 
 /** Backwards-compatible view of `parseArguments` for the analyze workflow. */
@@ -412,20 +418,30 @@ export function buildCodemodArguments(target, workflow = "analyze", { allowBlock
 // Codemod's own pause lines name a run store that is removed after the run,
 // so they are dropped; the launcher states the approval question itself.
 const PAUSE_LINE = /^\s*(Waiting for approval:|Resume with:)/;
+// Codemod's run banner and its per-step start and finish lines: two lines
+// for each of the workflow's ~60 steps, most of them under a millisecond.
+const RUN_LINE = /^(Run [0-9a-f-]+|Done)$/;
+const STEP_START = /^▸ (.+)$/;
+const STEP_END = /^✓ .+ \(\d+(\.\d+)?m?s\)$/;
+// Codemod colors these lines when it sees a terminal or FORCE_COLOR.
+const ANSI = /\u001b\[[0-9;]*m/g;
 
 /**
  * Runs workflow.ts with its run record in a temporary directory, so no state
- * outlives the run. Codemod's step progress streams to `progress` while it
- * runs. Resolves with the exit status, the run status, the approval question
- * when the run paused, and the workflow's return value as `output`
- * (undefined when the run produced none).
+ * outlives the run. Codemod's step lines are folded into one closing line on
+ * `progress` (with the running step shown in place on a terminal); with
+ * `verbose` they stream as Codemod prints them. Any other line Codemod
+ * writes to standard error is passed through. Resolves with the exit status,
+ * the run status, the approval question when the run paused, and the
+ * workflow's return value as `output` (undefined when the run produced none).
  */
 export async function runCodemod(
   target,
-  { spawnImpl = spawn, workflow = "analyze", allowBlocked = false, install = true, progress = process.stderr } = {},
+  { spawnImpl = spawn, workflow = "analyze", allowBlocked = false, install = true, verbose = false, progress = process.stderr, now = Date.now } = {},
 ) {
   const runStore = mkdtempSync(join(tmpdir(), "solid-migration-assistant-run-"));
   try {
+    const started = now();
     const child = spawnImpl(
       process.execPath,
       [resolveCodemodLauncher(), ...buildCodemodArguments(target, workflow, { allowBlocked, install })],
@@ -435,11 +451,37 @@ export async function runCodemod(
         stdio: [0, 2, "pipe"],
       },
     );
+    let steps = 0;
+    let live = false;
+    const clearLive = () => {
+      if (live) progress.write("\r\x1b[K");
+      live = false;
+    };
+    const relay = (line) => {
+      if (PAUSE_LINE.test(line)) return;
+      if (verbose) {
+        progress.write(`${line}\n`);
+        return;
+      }
+      const plain = line.replace(ANSI, "").trimEnd();
+      if (RUN_LINE.test(plain)) return;
+      if (STEP_END.test(plain)) {
+        steps += 1;
+        return;
+      }
+      const start = STEP_START.exec(plain);
+      if (start !== null) {
+        if (progress.isTTY) {
+          progress.write(`\r\x1b[K▸ ${start[1]}`);
+          live = true;
+        }
+        return;
+      }
+      clearLive();
+      progress.write(`${line}\n`);
+    };
     const status = await new Promise((resolveStatus, reject) => {
       let partial = "";
-      const relay = (line) => {
-        if (!PAUSE_LINE.test(line)) progress.write(`${line}\n`);
-      };
       child.stderr.setEncoding("utf8");
       child.stderr.on("data", (chunk) => {
         const lines = (partial + chunk).split("\n");
@@ -452,6 +494,10 @@ export async function runCodemod(
         resolveStatus(code);
       });
     });
+    clearLive();
+    if (!verbose && steps > 0) {
+      progress.write(`[solid-migration-assistant] Ran ${steps} workflow ${steps === 1 ? "step" : "steps"} in ${((now() - started) / 1000).toFixed(1)}s.\n`);
+    }
     return { status, ...readRun(runStore) };
   } finally {
     rmSync(runStore, { recursive: true, force: true });
@@ -594,7 +640,7 @@ async function run(argumentsList, invocationDirectory, runImpl, dirtyImpl, proje
 
   const settle = (findings) => settleUnknownDependencies(findings, { fetchImpl, offline: parsed.offline });
   const analyzed = parsed.workflow === "analyze" ? await settle(projectImpl(target)) : [];
-  const result = await runImpl(target, parsed.workflow, { allowBlocked: parsed.allowBlocked, install: parsed.install });
+  const result = await runImpl(target, parsed.workflow, { allowBlocked: parsed.allowBlocked, install: parsed.install, verbose: parsed.verbose });
   if (result.runStatus === "awaiting-approval") {
     const blocked =
       /^(.+?) Apply the source rewrites anyway\?$/.exec(result.awaiting ?? "")?.[1] ?? "A dependency has no Solid 2 release.";

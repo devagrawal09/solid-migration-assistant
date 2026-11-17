@@ -243,20 +243,13 @@ test(
         "complete analyzer-owned guidance bytes changed between packed runs",
       );
       const comparableRuns = smokeRuns.map((smoke, index) => {
-        // Codemod colors its envelope only when stderr is a terminal (or the
-        // platform forces color), so both the colored and the plain spelling
-        // of each line are accepted; only the generated values are masked.
-        const runId =
-          /^((?:\u001b\[[0-9;]*m)*Run (?:\u001b\[[0-9;]*m)*)([0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12})((?:\u001b\[[0-9;]*m)*\r?)$/gm;
-        const stepDuration = /\(([0-9]+(?:\.[0-9]+)?(?:ms|s))\)/g;
+        const closing = /^\[solid-migration-assistant\] Ran \d+ workflow steps in ([0-9.]+)s\.$/gm;
         assert.equal(
-          [...smoke.stderr.matchAll(runId)].length,
+          [...smoke.stderr.matchAll(closing)].length,
           1,
-          `packed run ${index + 1} run UUID envelope`,
+          `packed run ${index + 1} closing progress line`,
         );
-        const stableProgress = smoke.stderr
-          .replace(runId, "$1<generated-run-uuid>$3")
-          .replace(stepDuration, "(<generated-duration>)");
+        const stableProgress = smoke.stderr.replace(closing, (line, time) => line.replace(time, "<generated-duration>"));
         return Buffer.concat([
           Buffer.from(stableProgress, "utf8"),
           Buffer.from([0]),
@@ -266,7 +259,7 @@ test(
       assert.deepEqual(
         comparableRuns[0],
         comparableRuns[1],
-        "packed runtime output changed outside Codemod's generated UUID/timing values",
+        "packed runtime output changed outside the run's time",
       );
     } finally {
       rmSync(temporaryRoot, { recursive: true, force: true });
