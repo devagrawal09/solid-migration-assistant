@@ -5,7 +5,7 @@ import { tmpdir } from "node:os";
 import { dirname, join, resolve } from "node:path";
 import { test } from "node:test";
 import { fileURLToPath } from "node:url";
-import { output, skipOrFail, treeSnapshot } from "./helpers.mjs";
+import { guideAnchors, output, skipOrFail, treeSnapshot } from "./helpers.mjs";
 
 /**
  * Opt-in (`pnpm test:rc-compat`): proves the transform's output against the
@@ -88,6 +88,24 @@ test("the pinned Solid RC is still the newest published one and matches its sour
       `${name}@${PINNED_VERSION} was published from a different commit than the one every guidance link cites`,
     );
   }
+});
+
+test("the guide coverage map lists exactly the pinned migration guide's sections", (t) => {
+  const guide = spawnSync(
+    "curl",
+    ["-sSfL", `https://raw.githubusercontent.com/solidjs/solid/${PINNED_COMMIT}/documentation/solid-2.0/MIGRATION.md`],
+    { encoding: "utf8" },
+  );
+  if (guide.status !== 0) {
+    skipOrFail(t, `the pinned guide is unavailable: ${guide.stderr.trim().split("\n")[0]}`);
+    return;
+  }
+  const coverage = JSON.parse(readFileSync(resolve(packageDirectory, "tests/guide-coverage.json"), "utf8"));
+  assert.deepEqual(
+    coverage.sections.map((section) => section.anchor),
+    guideAnchors(guide.stdout),
+    "tests/guide-coverage.json must map every section of the pinned guide, in order",
+  );
 });
 
 test(

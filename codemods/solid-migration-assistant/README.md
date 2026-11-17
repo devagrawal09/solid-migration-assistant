@@ -239,6 +239,8 @@ Verification checks that every generated file matches `pnpm generate`, runs ever
 
 Each fixture `rules/<kind>/<domain>/<rule>/fixtures/<name>.fixture.tsx` has a committed `<name>.expected.json` (the findings or rewrites as data) and, for a transform fixture the rule changes, `<name>.expected.tsx` (the exact rewritten text). All fixtures run in one `codemod jssg run` with a workspace semantic provider, so cross-file fixtures resolve each other, and every transform output must be settled: a second pass of the rule over it must find nothing to rewrite. After an intended change, `pnpm fixtures:update` rewrites every expected file (rule fixtures and `tests/fixture-expected/`) from the current rules; review the diff and commit it with the change.
 
+`tests/guide-coverage.json` maps every section of the pinned migration guide to the rules that find it, or says why none does: `excluded` when there is nothing to migrate, `gap` when there is and no rule finds it yet. `pnpm test:architecture` fails when the map names a rule that doesn't exist, leaves a rule out, or a rule's guidance links to a section the map doesn't list; `pnpm test:rc-compat` fails when the map's sections differ from the pinned guide's.
+
 Testing runs in three tiers:
 
 1. **Every change:** `pnpm verify`, described above. It needs no network.

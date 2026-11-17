@@ -171,6 +171,8 @@ test("uses normal analyzer end-to-end fixtures", () => {
     "fixture-expected",
     "fixture-runner.ts",
     "guards.test.mjs",
+    "guide-coverage.json",
+    "guide-coverage.test.mjs",
     "helpers.mjs",
     "manifest.test.mjs",
     "packaging.test.mjs",

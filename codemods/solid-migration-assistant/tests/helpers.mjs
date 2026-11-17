@@ -50,3 +50,15 @@ export function skipOrFail(t, reason) {
   }
   t.skip(reason);
 }
+
+/** The anchors GitHub gives a Markdown file's `##`–`####` headings, in order. */
+export function guideAnchors(markdown) {
+  const anchors = [];
+  let fenced = false;
+  for (const line of markdown.split("\n")) {
+    if (line.startsWith("```")) fenced = !fenced;
+    const heading = fenced ? null : /^#{2,4} (.+)$/.exec(line);
+    if (heading) anchors.push(heading[1].toLowerCase().replace(/[^\p{L}\p{N}\s_-]/gu, "").replace(/ /g, "-"));
+  }
+  return anchors;
+}

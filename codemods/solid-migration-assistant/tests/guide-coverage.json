@@ -1,0 +1,177 @@
+{
+  "about": "Every section of the pinned Solid 2 migration guide, by anchor, in guide order. Each section or point names the rules that find it, or says why none does: `excluded` when there is nothing to migrate, `gap` when there is and no rule finds it yet. tests/guide-coverage.test.mjs keeps this in step with the rule folders; the release suite checks the anchors against the pinned guide.",
+  "sections": [
+    { "anchor": "quick-checklist-start-here", "excluded": "Summarizes the sections below." },
+    { "anchor": "core-behavior-changes", "excluded": "Groups the sections below." },
+    {
+      "anchor": "imports-where-things-live-now",
+      "rules": ["imports/beta32-subpaths", "imports/legacy-subpath-relocation", "imports/web-import", "imports/web-package-relocation"]
+    },
+    {
+      "anchor": "typescript-jsx-solid-js--renderer-package",
+      "rules": ["imports/jsx-types", "imports/jsx-type-relocation", "project/jsx-import-source"]
+    },
+    {
+      "anchor": "batching--reads-values-update-after-flush",
+      "points": [
+        { "point": "explicit batch() wrappers", "rules": ["reactivity/batch"] },
+        {
+          "point": "a read right after a write still returns the old value until flush",
+          "gap": "Needs to know that later code depends on the synchronous read; no rule looks for a setter followed by a read of the same signal."
+        }
+      ]
+    },
+    {
+      "anchor": "effects-lifecycle-and-cleanup",
+      "points": [
+        { "point": "createEffect splits into compute and apply", "rules": ["reactivity/create-effect"] },
+        { "point": "createEffect initial value becomes a default parameter", "rules": ["reactivity/create-effect"] },
+        { "point": "createMemo second argument is options, not an initial value", "rules": ["reactivity/create-memo"] },
+        { "point": "cleanup moves to the apply callback's return", "rules": ["lifecycle/on-cleanup"] },
+        { "point": "onMount becomes onSettled", "rules": ["lifecycle/on-mount"] }
+      ]
+    },
+    { "anchor": "nested-createroot-is-owned-by-its-parent", "rules": ["reactivity/nested-create-root"] },
+    { "anchor": "dev-warnings-youll-likely-see-and-how-to-fix-them", "excluded": "Groups the two warnings below." },
+    {
+      "anchor": "top-level-reactive-read-in-a-component",
+      "excluded": "Not a behavior change: a top-level read or destructured prop was not reactive in 1.x either; 2.0 adds a dev warning."
+    },
+    {
+      "anchor": "write-inside-reactive-scope-owned-scope",
+      "points": [
+        { "point": "writes from createComputed and one-argument createEffect", "rules": ["reactivity/create-computed", "reactivity/create-effect"] },
+        { "point": "writes from inside createMemo or another owned computation", "gap": "Throws in dev; no rule looks for setter calls inside a memo." }
+      ]
+    },
+    {
+      "anchor": "once-jsx-marker",
+      "gap": "The marker is a comment, so the RC compiler accepts it and the value silently becomes reactive; no rule reports it."
+    },
+    { "anchor": "async-data--transitions", "excluded": "Groups the sections below." },
+    { "anchor": "suspense--errorboundary--loading--errored", "rules": ["jsx/component-renames"] },
+    { "anchor": "createresource--async-computations--loading", "rules": ["reactivity/create-resource"] },
+    {
+      "anchor": "initial-loading-vs-in-flight-changes-loading-vs-ispending",
+      "rules": ["reactivity/create-resource", "reactivity/transition-apis"]
+    },
+    { "anchor": "peeking-in-flight-values-latestfn", "excluded": "New API; no 1.x code to change." },
+    { "anchor": "refetchrefresh-patterns--refresh", "rules": ["reactivity/create-resource"] },
+    { "anchor": "mutations-action--optimistic-helpers", "rules": ["reactivity/create-resource", "imports/ecosystem-apis"] },
+    { "anchor": "stores", "excluded": "Groups the sections below." },
+    { "anchor": "draft-first-setters", "rules": ["store/setter-calls", "store/setter-literal-paths"] },
+    { "anchor": "unwrapstore--snapshotstore", "rules": ["store/unwrap"] },
+    { "anchor": "mergeprops--splitprops--merge--omit", "rules": ["props/merge-props", "props/split-props"] },
+    {
+      "anchor": "new-function-forms-createsignalfn-and-createstorefn",
+      "gap": "1.x code that keeps a function as a signal's value, createSignal(fn), gets a derived signal in 2.0; no rule reports it."
+    },
+    { "anchor": "control-flow", "excluded": "Groups the sections below." },
+    {
+      "anchor": "list-rendering-index-is-gone-and-for-handles-each-keying-mode",
+      "rules": ["jsx/component-renames", "jsx/index-to-for", "reactivity/index-array"]
+    },
+    {
+      "anchor": "function-children-may-receive-accessors",
+      "excluded": "Non-keyed Show and Match already passed accessors in 1.x; the Index case is the list rule's."
+    },
+    {
+      "anchor": "dynamic-components-createdynamic--dynamic--dynamic-factory",
+      "rules": ["jsx/dynamic-component", "reactivity/create-dynamic"]
+    },
+    { "anchor": "coordinating-loading-boundaries-suspenselist--reveal", "rules": ["jsx/component-renames"] },
+    { "anchor": "dom", "excluded": "Groups the sections below." },
+    {
+      "anchor": "attributes--events-closer-to-html-and-fewer-namespaces",
+      "points": [
+        { "point": "built-in attribute names are lowercase", "rules": ["jsx/attribute-names"] },
+        { "point": "boolean attributes are presence or absence", "rules": ["jsx/boolean-attribute-values"] },
+        { "point": "attr: and bool: are removed", "rules": ["jsx/dom-attr-namespaces"] },
+        { "point": "lowercase on* names are attributes, not events", "rules": ["jsx/dom-lowercase-events", "jsx/lowercase-event-handlers"] },
+        { "point": "on: and oncapture: are removed", "rules": ["jsx/dom-event-namespaces"] },
+        {
+          "point": "delegated events belong to render roots; remove clearDelegatedEvents()",
+          "rules": ["imports/web-import"],
+          "gap": "The import is reported as one to move; nothing says to delete the call."
+        }
+      ]
+    },
+    { "anchor": "ref-callbacks-no-longer-owned", "rules": ["jsx/ref-callback-scope"] },
+    { "anchor": "directives-use--ref-directive-factories-two-phase-pattern", "rules": ["jsx/dom-use-directive"] },
+    { "anchor": "classlist--class-objectarray-forms", "rules": ["jsx/class-list", "jsx/class-list-to-class"] },
+    { "anchor": "context", "excluded": "Groups the sections below." },
+    {
+      "anchor": "context-providers-contextprovider--context-is-the-provider",
+      "rules": ["jsx/context-provider", "jsx/context-provider-to-context"]
+    },
+    {
+      "anchor": "usecontext-on-a-default-less-context-returns-t-not-t--undefined",
+      "gap": "Code that relies on useContext returning undefined outside a provider now throws; no rule reports it."
+    },
+    {
+      "anchor": "new-in-20",
+      "excluded": "New APIs with no 1.x code to change; clientOnly moving out of SolidStart is the ecosystem rule's."
+    },
+    { "anchor": "detailed-removal-guide", "excluded": "Groups the sections below." },
+    { "anchor": "batch--default-microtask-batching--flush", "rules": ["reactivity/batch"] },
+    { "anchor": "createcomputed--creatememo-createeffect-or-derived-createsignal", "rules": ["reactivity/create-computed"] },
+    { "anchor": "on-helper--split-effects", "rules": ["reactivity/on-helper", "reactivity/on-helper-split"] },
+    { "anchor": "onerror--catcherror--errored--effect-error-option", "rules": ["reactivity/error-handling"] },
+    { "anchor": "produce--now-the-default-setter-behavior", "rules": ["store/produce"] },
+    { "anchor": "createmutable--modifymutable--createstore-with-draft-setters", "rules": ["store/mutable"] },
+    { "anchor": "from--observable--from-returns-an-async-iterable--effects", "rules": ["reactivity/from-observable"] },
+    { "anchor": "quick-rename--removal-map", "excluded": "Groups the lists below." },
+    {
+      "anchor": "import-paths",
+      "points": [
+        { "point": "solid-js/web", "rules": ["imports/web-import", "imports/web-package-relocation"] },
+        { "point": "solid-js/store", "rules": ["imports/beta32-subpaths", "imports/legacy-subpath-relocation"] },
+        { "point": "solid-js/h", "rules": ["imports/beta32-subpaths", "imports/legacy-subpath-relocation"] },
+        { "point": "solid-js/html", "rules": ["imports/beta32-subpaths", "imports/legacy-subpath-relocation"] },
+        { "point": "solid-js/universal", "rules": ["imports/beta32-subpaths", "imports/legacy-subpath-relocation"] },
+        { "point": "jsxImportSource", "rules": ["project/jsx-import-source"] }
+      ]
+    },
+    {
+      "anchor": "renames",
+      "points": [
+        { "point": "Suspense, SuspenseList, ErrorBoundary", "rules": ["jsx/component-renames"] },
+        { "point": "mergeProps", "rules": ["props/merge-props"] },
+        { "point": "splitProps", "rules": ["props/split-props"] },
+        { "point": "createSelector", "rules": ["reactivity/create-selector"] },
+        { "point": "createDynamic and Dynamic", "rules": ["reactivity/create-dynamic", "jsx/dynamic-component"] },
+        { "point": "unwrap", "rules": ["store/unwrap"] },
+        { "point": "onMount", "rules": ["lifecycle/on-mount"] },
+        { "point": "equalFn, getListener", "rules": ["reactivity/utility-renames"] },
+        { "point": "classList", "rules": ["jsx/class-list", "jsx/class-list-to-class"] }
+      ]
+    },
+    {
+      "anchor": "removals",
+      "points": [
+        { "point": "createResource", "rules": ["reactivity/create-resource"] },
+        { "point": "startTransition, useTransition, createDeferred", "rules": ["reactivity/transition-apis"] },
+        { "point": "batch", "rules": ["reactivity/batch"] },
+        { "point": "createComputed", "rules": ["reactivity/create-computed"] },
+        { "point": "on", "rules": ["reactivity/on-helper", "reactivity/on-helper-split"] },
+        { "point": "onError, catchError, resetErrorBoundaries", "rules": ["reactivity/error-handling"] },
+        { "point": "produce", "rules": ["store/produce"] },
+        { "point": "createMutable, modifyMutable", "rules": ["store/mutable"] },
+        { "point": "from, observable", "rules": ["reactivity/from-observable"] },
+        { "point": "indexArray", "rules": ["reactivity/index-array"] },
+        { "point": "enableScheduling, writeSignal", "rules": ["reactivity/utility-renames"] },
+        { "point": "sharedConfig, $DEVCOMP", "gap": "Moved to solid-js/internal; no rule reports imports of them." },
+        { "point": "use: directives", "rules": ["jsx/dom-use-directive"] },
+        { "point": "attr: and bool:", "rules": ["jsx/dom-attr-namespaces"] },
+        { "point": "on: and oncapture:", "rules": ["jsx/dom-event-namespaces"] },
+        { "point": "Context.Provider", "rules": ["jsx/context-provider", "jsx/context-provider-to-context"] },
+        { "point": "solid-js/jsx-runtime", "rules": ["imports/jsx-types", "imports/legacy-subpath-relocation"] }
+      ]
+    }
+  ],
+  "beyondGuide": [
+    { "rule": "imports/ecosystem-apis", "reason": "Router, Start and Meta APIs, which the guide leaves to those packages." },
+    { "rule": "project/solid-version", "reason": "The guide does not cover moving the dependency itself." },
+    { "rule": "project/dependencies", "reason": "Ecosystem packages' Solid 2 lines, which the guide does not cover." }
+  ]
+}

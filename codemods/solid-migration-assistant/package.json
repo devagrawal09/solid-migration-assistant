@@ -171,7 +171,7 @@
   "scripts": {
     "analyze": "node ./bin/solid-migration-assistant.mjs",
     "test": "pnpm test:architecture && pnpm test:package && pnpm test:rules && pnpm test:guards && pnpm test:workflow && pnpm test:transform",
-    "test:architecture": "node --test ./tests/architecture.test.mjs",
+    "test:architecture": "node --test ./tests/architecture.test.mjs ./tests/guide-coverage.test.mjs",
     "test:package": "node --test ./tests/cli.test.mjs ./tests/packaging.test.mjs ./tests/manifest.test.mjs",
     "test:workflow": "node ./tests/workflow.test.mjs",
     "check-types": "tsc --noEmit",
