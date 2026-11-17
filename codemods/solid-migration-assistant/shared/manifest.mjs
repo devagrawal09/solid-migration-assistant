@@ -1,0 +1,123 @@
+import { DEPENDENCY_MAP } from "./dependencies.mjs";
+
+export const SOLID_VERSION = "2.0.0-rc.23";
+const SECTIONS = ["dependencies", "devDependencies"];
+const PLAIN_RANGE = /^[\s^~<>=v]*\d/;
+
+/**
+ * The Solid 2 version each package moves to in migrate mode: solid-js and
+ * @solidjs/web at the pinned RC, and every `upgrade` entry of the dependency
+ * table at its verified version. `replace`, `use-core` and `blocked` entries
+ * need code or config changes, so they are reported and never edited.
+ */
+export const BUMPS = Object.freeze({
+  "solid-js": SOLID_VERSION,
+  "@solidjs/web": SOLID_VERSION,
+  ...Object.fromEntries(
+    DEPENDENCY_MAP.filter((entry) => entry.status === "upgrade" && entry.replacement?.startsWith(`${entry.name}@`))
+      .map((entry) => [entry.name, entry.replacement.slice(entry.name.length + 1)]),
+  ),
+});
+
+/**
+ * Moves a Solid 1 package.json to Solid 2 by editing only the version strings
+ * it changes, so formatting, key order and every other line stay as written.
+ *
+ * In `dependencies` and `devDependencies`, solid-js and each package in
+ * `BUMPS` move to their Solid 2 version, and @solidjs/web is added right after
+ * solid-js when it is missing. A range that is not plain semver (workspace:,
+ * catalog:, git, link:, npm: aliases, tags) is left alone and reported in
+ * `skipped`, as are peerDependencies, whose range is the library author's
+ * call. Returns null when the manifest declares no Solid 1 solid-js.
+ */
+export function bumpManifest(text) {
+  let manifest;
+  try {
+    manifest = JSON.parse(text);
+  } catch {
+    return null;
+  }
+  const section = SECTIONS.find((name) => typeof manifest[name]?.["solid-js"] === "string");
+  if (section === undefined || /(^|[^0-9.])2\.0\.0/.test(manifest[section]["solid-js"])) return null;
+
+  const edits = [];
+  const changes = [];
+  const skipped = [];
+  for (const name of SECTIONS) {
+    for (const [dependency, range] of Object.entries(manifest[name] ?? {})) {
+      const target = BUMPS[dependency];
+      if (target === undefined || typeof range !== "string" || range === target) continue;
+      if (!PLAIN_RANGE.test(range)) {
+        skipped.push({ name: dependency, range, reason: "not a plain semver range" });
+        continue;
+      }
+      const edit = valueEdit(text, name, dependency, range, target);
+      if (edit === null) {
+        skipped.push({ name: dependency, range, reason: "could not be located in the file" });
+        continue;
+      }
+      edits.push(edit);
+      changes.push({ name: dependency, from: range, to: target, line: edit.line });
+    }
+  }
+  if (typeof manifest.peerDependencies?.["solid-js"] === "string") {
+    skipped.push({ name: "solid-js", range: manifest.peerDependencies["solid-js"], reason: "peerDependencies range is the library author's call" });
+  }
+
+  const hasWeb = SECTIONS.some((name) => manifest[name]?.["@solidjs/web"] !== undefined);
+  if (!hasWeb) {
+    const anchor = valueEdit(text, section, "solid-js", manifest[section]["solid-js"], SOLID_VERSION);
+    if (anchor !== null) {
+      // Insert right after the solid-js value; any comma that followed it
+      // now follows the new entry. Multi-line objects get their own line.
+      const lineStart = text.lastIndexOf("\n", anchor.start) + 1;
+      const multiline = text.slice(lineStart, anchor.start).trim().startsWith('"solid-js"');
+      const separator = multiline ? `\n${/^\s*/.exec(text.slice(lineStart))[0]}` : " ";
+      edits.push({ start: anchor.end, end: anchor.end, text: `,${separator}"@solidjs/web": "${SOLID_VERSION}"` });
+      changes.push({ name: "@solidjs/web", from: null, to: SOLID_VERSION, line: anchor.line + 1 });
+    }
+  }
+
+  let result = text;
+  for (const edit of edits.sort((left, right) => right.start - left.start)) {
+    result = result.slice(0, edit.start) + edit.text + result.slice(edit.end);
+  }
+  return { text: result, changes, skipped };
+}
+
+/**
+ * Points tsconfig's `jsxImportSource` at @solidjs/web when it is exactly
+ * "solid-js", editing only that string. Returns null when nothing changes.
+ */
+export function bumpTsconfig(text) {
+  const match = /("jsxImportSource"\s*:\s*)"solid-js"/.exec(text);
+  if (match === null) return null;
+  const at = match.index + match[1].length;
+  return {
+    text: `${text.slice(0, at)}"@solidjs/web"${text.slice(at + '"solid-js"'.length)}`,
+    line: text.slice(0, match.index).split("\n").length,
+  };
+}
+
+/**
+ * The span of `"dependency": "range"`'s value inside the `section` object of
+ * the raw manifest text, or null when it cannot be found unambiguously.
+ */
+function valueEdit(text, section, dependency, range, target) {
+  const sectionMatch = new RegExp(`"${escape(section)}"\\s*:\\s*\\{`).exec(text);
+  if (sectionMatch === null) return null;
+  const open = sectionMatch.index + sectionMatch[0].length;
+  const close = text.indexOf("}", open);
+  if (close === -1) return null;
+  const pattern = new RegExp(`("${escape(dependency)}"\\s*:\\s*)"${escape(range)}"`, "g");
+  const body = text.slice(open, close);
+  const matches = [...body.matchAll(pattern)];
+  if (matches.length !== 1) return null;
+  const start = open + matches[0].index + matches[0][1].length;
+  const end = start + JSON.stringify(range).length;
+  return { start, end, text: JSON.stringify(target), line: text.slice(0, start).split("\n").length };
+}
+
+function escape(value) {
+  return value.replace(/[.*+?^${}()|[\]\\/]/g, "\\$&");
+}

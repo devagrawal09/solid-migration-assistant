@@ -1,5 +1,9 @@
-[solid-migration-assistant] 63 rewrites applied. Review the diff and run the project's own checks.
+[solid-migration-assistant] 65 rewrites applied. Review the diff and run the project's own checks.
 
+package.json:7:1 Move solid-js from 1.9.14 to 2.0.0-rc.23.
+  Rule: project/dependencies  Guide: https://github.com/solidjs/solid/blob/8c34a505a853fcc894fcc8dad150d62f0d007fa2/documentation/solid-2.0/MIGRATION.md#imports-where-things-live-now
+package.json:8:1 Add @solidjs/web 2.0.0-rc.23.
+  Rule: project/dependencies  Guide: https://github.com/solidjs/solid/blob/8c34a505a853fcc894fcc8dad150d62f0d007fa2/documentation/solid-2.0/MIGRATION.md#imports-where-things-live-now
 src/class-list.tsx:14:14 Rewrite the classList attribute on <section> to class, preserving its value expression.
   Rule: jsx/class-list-to-class  Guide: https://github.com/solidjs/solid/blob/8c34a505a853fcc894fcc8dad150d62f0d007fa2/documentation/solid-2.0/MIGRATION.md#classlist--class-objectarray-forms
 src/class-list.tsx:15:23 Rewrite the classList attribute on <div> to class, preserving its value expression.
@@ -127,7 +131,7 @@ src/types.tsx:4:15 Move JSX from solid-js to @solidjs/web.
 src/types.tsx:5:15 Move JSX from solid-js to @solidjs/web.
   Rule: imports/jsx-type-relocation  Guide: https://github.com/solidjs/solid/blob/8c34a505a853fcc894fcc8dad150d62f0d007fa2/documentation/solid-2.0/MIGRATION.md#typescript-jsx-solid-js--renderer-package
 
-[solid-migration-assistant] Summary: 63 rewrites in 16 files
+[solid-migration-assistant] Summary: 65 rewrites in 17 files
    7  Relocate solid-js/html to @solidjs/html.
       sites: src/nested/deep.jsx:17:24, src/plain.js:3:22, src/relocations.tsx:2:18, src/relocations.tsx:7:36, src/relocations.tsx:10:36, src/relocations.tsx:17:15, src/relocations.tsx:19:28
    6  Relocate solid-js/universal to @solidjs/universal.
@@ -152,12 +156,16 @@ src/types.tsx:5:15 Move JSX from solid-js to @solidjs/web.
       sites: src/class-list.tsx:15:23, src/nested/deep.jsx:11:41
    2  Rewrite the onclick event handler attribute on <button> to onClick, preserving its value expression.
       sites: src/events.tsx:12:15, src/real-world/active-element.tsx:49:9
+   1  Add @solidjs/web 2.0.0-rc.23.
+      sites: package.json:8:1
    1  Merge the class and classList attributes on <button> into the class array form, preserving the static string and the object literal.
       sites: src/real-world/active-element.tsx:21:7
    1  Merge the class and classList attributes on <div> into the class array form, preserving the static string and the object literal.
       sites: src/class-list.tsx:20:12
    1  Move JSXElement from solid-js to @solidjs/web. JSXElement becomes JSX, and its 3 type reference(s) become JSX.Element.
       sites: src/types-element.tsx:3:10
+   1  Move solid-js from 1.9.14 to 2.0.0-rc.23.
+      sites: package.json:7:1
    1  Relocate solid-js/store to solid-js for createStore: every setter call in this file is now a draft write.
       sites: src/store.ts:3:29
    1  Relocate solid-js/web to @solidjs/web for proven bindings Dynamic, render. Note: Dynamic is deprecated in Solid 2 in favor of the dynamic(source) factory; it keeps working without a runtime warning.
@@ -194,3 +202,6 @@ src/types.tsx:5:15 Move JSX from solid-js to @solidjs/web.
       sites: src/events.tsx:12:33
    1  Rewrite the onpointerdown event handler attribute on <my-element> to onPointerDown, preserving its value expression.
       sites: src/events.tsx:15:19
+
+Next:
+- Run npm install: package.json now targets Solid 2.0.0-rc.23, and nothing was installed or written to the lockfile.

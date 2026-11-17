@@ -78,7 +78,7 @@ Findings for APIs that `eslint-plugin-solid`'s `v2` config keeps reporting after
 
 ## Transform
 
-Migrate mode (the launcher's `transform` subcommand) applies nine deterministic rewrites and changes nothing else. Each rule is a separate JSSG entrypoint and sequential workflow step, so later rules see earlier output. The rules operate on disjoint syntax: two rewrite module source strings for disjoint specifier sets; the `classList` and event-handler rules rewrite JSX attribute name nodes; the `Context.Provider` rule rewrites JSX element name nodes; and the `Index` rule rewrites JSX element name nodes plus one `solid-js` import specifier. Each edit is reported with its location, rule, what changed, and the migration-guide link. Exact combined-output and second-run tests cover ordering, idempotency, and a fixture in which all six rules edit one file in a single pass. The workflow writes no report files or other artifacts in the target.
+Migrate mode (the launcher's `transform` subcommand) applies nine deterministic source rewrites plus the `package.json` and `tsconfig.json` edits below, and changes nothing else. Each rule is a separate JSSG entrypoint and sequential workflow step, so later rules see earlier output. The rules operate on disjoint syntax: two rewrite module source strings for disjoint specifier sets; the `classList` and event-handler rules rewrite JSX attribute name nodes; the `Context.Provider` rule rewrites JSX element name nodes; and the `Index` rule rewrites JSX element name nodes plus one `solid-js` import specifier. Each edit is reported with its location, rule, what changed, and the migration-guide link. Exact combined-output and second-run tests cover ordering, idempotency, and a fixture in which all six rules edit one file in a single pass. The workflow writes no report files or other artifacts in the target.
 
 ### JSX type imports and pragmas
 
@@ -88,7 +88,17 @@ Solid 1.9.13 exported the `JSX` namespace and the `JSXElement` alias from `solid
 - an unaliased, type-only `JSXElement` import becomes `JSX` from `@solidjs/web`, and each of its type references becomes `JSX.Element`, when the file binds no `JSX` of its own; and
 - the token `solid-js` in a `@jsxImportSource solid-js` comment pragma becomes `@solidjs/web`.
 
-Import lists with comments, value uses or re-exports of these names, namespace imports, import attributes, and `tsconfig.json` are left to the analyzer.
+Import lists with comments, value uses or re-exports of these names, namespace imports and import attributes are left to the analyzer.
+
+### `package.json` and `tsconfig.json`
+
+After the source rewrites, migrate mode moves the target's own `package.json` and `tsconfig.json` to Solid 2 (`shared/manifest.mjs`), editing only the version strings it changes so formatting and key order stay as written:
+
+- `solid-js` moves to the pinned RC, and `@solidjs/web` is added at the same RC right after it when missing;
+- each `upgrade` entry of the dependency table (`@solidjs/router`, `@solidjs/testing-library`, the `@solid-primitives` packages, TanStack Query and Router) moves to its verified Solid 2 version;
+- `"jsxImportSource": "solid-js"` becomes `"@solidjs/web"`.
+
+Packages that need replacing or have no Solid 2 release stay as they are and keep their analyzer finding. A range that isn't plain semver (`workspace:`, `catalog:`, git, `link:`, tags) and a `solid-js` peer range are left alone and listed under **Next**, with the install command for the project's lockfile (pnpm, yarn, bun, else npm). Nothing is installed and no lockfile is written. Analyze mode never edits either file.
 
 ### Literal store path setters → draft writes
 

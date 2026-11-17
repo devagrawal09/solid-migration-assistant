@@ -1,5 +1,5 @@
 import { spawnSync } from "node:child_process";
-import { mkdtempSync, readFileSync, readdirSync, rmSync, statSync } from "node:fs";
+import { existsSync, mkdtempSync, readFileSync, readdirSync, rmSync, statSync } from "node:fs";
 import { createRequire } from "node:module";
 import { tmpdir } from "node:os";
 import { dirname, join, resolve } from "node:path";
@@ -345,7 +345,31 @@ export function parseRunOutput({ output, stderr, runStatus }) {
   if (output === undefined && runStatus !== undefined && runStatus !== "succeeded") {
     diagnostics.push(`[solid-migration-assistant] the run stopped with status ${runStatus}`);
   }
-  return { findings: output?.findings ?? [], rewrites: output?.rewrites ?? [], diagnostics };
+  return {
+    findings: output?.findings ?? [],
+    rewrites: output?.rewrites ?? [],
+    dependencySkips: output?.dependencySkips ?? [],
+    diagnostics,
+  };
+}
+
+/**
+ * What the user runs after a transform: the install command for the
+ * project's package manager (by lockfile) when package.json changed, and
+ * every dependency range the transform left alone.
+ */
+export function nextSteps(target, { rewrites = [], dependencySkips = [] }) {
+  const steps = [];
+  if (rewrites.some((rewrite) => rewrite.rule === "project/dependencies")) {
+    const manager =
+      [["pnpm-lock.yaml", "pnpm install"], ["yarn.lock", "yarn install"], ["bun.lock", "bun install"], ["bun.lockb", "bun install"]]
+        .find(([lockfile]) => existsSync(resolve(target, lockfile)))?.[1] ?? "npm install";
+    steps.push(`Run ${manager}: package.json now targets Solid ${SOLID_VERSION}, and nothing was installed or written to the lockfile.`);
+  }
+  for (const skip of dependencySkips) {
+    steps.push(`Move ${skip.name} ${JSON.stringify(skip.range)} in ${skip.file} by hand: ${skip.reason}.`);
+  }
+  return steps;
 }
 
 /**
@@ -353,7 +377,7 @@ export function parseRunOutput({ output, stderr, runStatus }) {
  * for findings), and every finding or rewrite, sorted by file, line, and
  * column.
  */
-export function buildJsonReport({ workflow, target, findings = [], rewrites = [], status }) {
+export function buildJsonReport({ workflow, target, findings = [], rewrites = [], next = [], status }) {
   const report = {
     tool: packageMetadata.name,
     version: packageMetadata.version,
@@ -367,7 +391,7 @@ export function buildJsonReport({ workflow, target, findings = [], rewrites = []
     return { ...report, summary: summaryOf({ findings: sorted }), findings: sorted };
   }
   const sorted = byLocation(rewrites);
-  return { ...report, summary: summaryOf({ rewrites: sorted }), rewrites: sorted };
+  return { ...report, summary: summaryOf({ rewrites: sorted }), rewrites: sorted, ...(next.length > 0 ? { nextSteps: next } : {}) };
 }
 
 export function main(
@@ -437,13 +461,15 @@ function run(argumentsList, invocationDirectory, runImpl, dirtyImpl, projectImpl
     return fail(`nothing was rewritten. ${blocked} Pass --allow-blocked to apply the source rewrites anyway.`);
   }
   const status = result.status ?? 1;
-  const { findings, rewrites, diagnostics } = parseRunOutput(result);
+  const { findings, rewrites, dependencySkips, diagnostics } = parseRunOutput(result);
+  const next = parsed.workflow === "analyze" ? [] : nextSteps(target, { rewrites, dependencySkips });
   if (diagnostics.length > 0) console.error(diagnostics.join("\n"));
   const report = buildJsonReport({
     workflow: parsed.workflow,
     target,
     findings: [...project, ...findings],
     rewrites,
+    next,
     status,
   });
   if (parsed.format === "json") {
@@ -457,6 +483,7 @@ function run(argumentsList, invocationDirectory, runImpl, dirtyImpl, projectImpl
         ? text
         : `[solid-migration-assistant] ${parsed.workflow === "analyze" ? "No supported migration sites found. This is not proof that the project is ready for Solid 2; run its own type, build, and test checks." : "Nothing to rewrite."}`,
     );
+    if (next.length > 0) console.log(`\nNext:\n${next.map((line) => `- ${line}`).join("\n")}`);
   }
   return status;
 }

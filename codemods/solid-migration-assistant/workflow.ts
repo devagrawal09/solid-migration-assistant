@@ -1,8 +1,9 @@
 import { approval, forEachFile, getState, jssg, shell, step } from "codemod/workflow";
 import { DEPENDENCY_MAP } from "./shared/dependencies.mjs";
+import { bumpManifest, bumpTsconfig } from "./shared/manifest.mjs";
 import { byLocation, renderText } from "./shared/format.mjs";
 import { ANALYSIS_STEPS, TRANSFORM_STEPS } from "./shared/steps.generated.ts";
-import { SOLID_TARGET_VERSION } from "./shared/target.ts";
+import { MIGRATION_GUIDE_URL, SOLID_TARGET_VERSION } from "./shared/target.ts";
 
 // The Solid 1.9 -> 2 RC assistant on the code-first engine
 // (codemod/codemod#2485, engine/code-first 9c91ebf, published as 2.0.0-alpha.3).
@@ -151,6 +152,8 @@ export default async function main({ params }: { params: Params }) {
   }
   const findings = byLocation((getState(FINDINGS) ?? []) as any[]);
 
+  const projectRewrites: any[] = [];
+  const dependencySkips: any[] = [];
   if (migrate) {
     if (blocked.length > 0) {
       await step(approval(`${blocked.join(", ")} ${blocked.length === 1 ? "has" : "have"} no Solid 2 release. Apply the source rewrites anyway?`));
@@ -163,10 +166,52 @@ export default async function main({ params }: { params: Params }) {
         failures.push(...result.failures.map((f) => ({ step: label, ...f })));
       }
     }
+    const project = await step(
+      "Move package.json and tsconfig.json to Solid 2",
+      forEachFile({ include: ["package.json", "tsconfig.json"] }, (file) => {
+        if (file.path.endsWith("package.json")) {
+          const bumped = bumpManifest(file.text);
+          if (bumped === null) return undefined;
+          if (bumped.changes.length > 0) file.write(bumped.text);
+          return {
+            rewrites: bumped.changes.map((change: any) => ({
+              rule: "project/dependencies",
+              file: file.path,
+              line: change.line,
+              column: 1,
+              message: change.from === null
+                ? `Add ${change.name} ${change.to}.`
+                : `Move ${change.name} from ${change.from} to ${change.to}.`,
+              guide: `${MIGRATION_GUIDE_URL}#imports-where-things-live-now`,
+            })),
+            skipped: bumped.skipped.map((skip: any) => ({ file: file.path, ...skip })),
+          };
+        }
+        const bumped = bumpTsconfig(file.text);
+        if (bumped === null) return undefined;
+        file.write(bumped.text);
+        return {
+          rewrites: [{
+            rule: "project/jsx-import-source",
+            file: file.path,
+            line: bumped.line,
+            column: 1,
+            message: "Point jsxImportSource at @solidjs/web.",
+            guide: `${MIGRATION_GUIDE_URL}#typescript-jsx-solid-js--renderer-package`,
+          }],
+          skipped: [],
+        };
+      }),
+    );
+    for (const output of project.outputs as any[]) {
+      projectRewrites.push(...output.rewrites);
+      dependencySkips.push(...output.skipped);
+    }
+    failures.push(...project.failures.map((f) => ({ step: "Move package.json and tsconfig.json to Solid 2", ...f })));
     if (verify) await lint("Lint with eslint-plugin-solid v2 (after)", "lintAfter");
   }
 
-  const rewrites = byLocation((getState(REWRITES) ?? []) as any[]);
+  const rewrites = byLocation([...((getState(REWRITES) ?? []) as any[]), ...projectRewrites]);
   const before = getState("lintBefore") as any;
   const after = getState("lintAfter") as any;
 
@@ -181,6 +226,12 @@ export default async function main({ params }: { params: Params }) {
     const text = renderText({ findings, rewrites, solidVersion: SOLID_TARGET_VERSION });
     if (text !== "") console.log(text);
   }
+  if (params.report !== "none" && dependencySkips.length > 0) {
+    console.log(`Left these dependency ranges as they are; move them by hand:\n${dependencySkips.map((s) => `  ${s.file}: ${s.name} ${JSON.stringify(s.range)} (${s.reason})`).join("\n")}`);
+  }
+  if (params.report !== "none" && projectRewrites.some((r) => r.rule === "project/dependencies")) {
+    console.log("package.json changed, but nothing was installed and no lockfile was touched. Run your package manager's install next (npm install, pnpm install, yarn or bun install).");
+  }
   if (failures.length > 0) console.log(`${failures.length} file(s) failed in jssg steps; see failures in the run output.`);
   if (verify) console.log(`eslint-plugin-solid v2: ${before?.total ?? "?"} messages before${after ? `, ${after.total} after` : ""}; ${withLint.length - unconfirmed.length} of ${withLint.length} findings confirmed by the linter.`);
 
@@ -189,6 +240,7 @@ export default async function main({ params }: { params: Params }) {
     stages: plan.map((s) => ({ name: s.name, ran: s.run && s.files.length > 0, files: s.files.length })),
     dependencies: dependencyPlan,
     blocked,
+    dependencySkips,
     unknownSolidPackages: unknown,
     findingsByRule: tally(findings.map((f) => f.rule)),
     rewritesByRule: tally(rewrites.map((r) => r.rule)),

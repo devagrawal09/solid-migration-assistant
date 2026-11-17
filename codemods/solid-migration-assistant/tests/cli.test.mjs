@@ -12,6 +12,7 @@ import {
   parseRunOutput,
   dirtyTreeReason,
   main,
+  nextSteps,
   parseArguments,
   parseTarget,
   projectFindings,
@@ -178,7 +179,7 @@ test("--format json re-emits the workflow's report as one sorted, tiered JSON do
   assert.deepEqual(parsed.findings, output.findings);
   assert.deepEqual(parsed.diagnostics, ["  some rule printed this diagnostic", "JSX: analyzeExample: src/c.tsx: TypeError: boom"]);
   assert.deepEqual(parseRunOutput({ output: { skipped: "solid-js is not a dependency of this project" } }), {
-    findings: [], rewrites: [], diagnostics: ["[solid-migration-assistant] skipped: solid-js is not a dependency of this project"],
+    findings: [], rewrites: [], dependencySkips: [], diagnostics: ["[solid-migration-assistant] skipped: solid-js is not a dependency of this project"],
   });
 
   const report = buildJsonReport({ workflow: "analyze", target: "/t", findings: parsed.findings, status: 0 });
@@ -467,4 +468,14 @@ test("names the blocked dependency and not the resume hint when a transform paus
     result.diagnostics[0],
     "[solid-migration-assistant] nothing was rewritten. @kobalte/core has no Solid 2 release. Pass --allow-blocked to apply the source rewrites anyway.",
   );
+});
+
+test("after a dependency bump, tells the user to install with the package manager its lockfile names", () => {
+  const target = mkdtempSync(join(tmpdir(), "sma-next-"));
+  writeFileSync(join(target, "pnpm-lock.yaml"), "");
+  try {
+    assert.match(nextSteps(target, { rewrites: [{ rule: "project/dependencies" }] })[0], /^Run pnpm install:/);
+  } finally {
+    rmSync(target, { recursive: true, force: true });
+  }
 });
