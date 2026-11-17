@@ -1,4 +1,4 @@
-import { spawnSync } from "node:child_process";
+import { spawn, spawnSync } from "node:child_process";
 import { existsSync, mkdtempSync, readFileSync, readdirSync, rmSync, statSync } from "node:fs";
 import { createRequire } from "node:module";
 import { tmpdir } from "node:os";
@@ -377,28 +377,50 @@ export function buildCodemodArguments(target, workflow = "analyze", { allowBlock
   ];
 }
 
+// Codemod's own pause lines name a run store that is removed after the run,
+// so they are dropped; the launcher states the approval question itself.
+const PAUSE_LINE = /^\s*(Waiting for approval:|Resume with:)/;
+
 /**
  * Runs workflow.ts with its run record in a temporary directory, so no state
- * outlives the run, and returns the spawn result with the workflow's return
- * value as `output` (undefined when the run produced none).
+ * outlives the run. Codemod's step progress streams to `progress` while it
+ * runs. Resolves with the exit status, the run status, the approval question
+ * when the run paused, and the workflow's return value as `output`
+ * (undefined when the run produced none).
  */
-export function runCodemod(target, { spawnImpl = spawnSync, workflow = "analyze", allowBlocked = false } = {}) {
+export async function runCodemod(
+  target,
+  { spawnImpl = spawn, workflow = "analyze", allowBlocked = false, progress = process.stderr } = {},
+) {
   const runStore = mkdtempSync(join(tmpdir(), "solid-migration-assistant-run-"));
   try {
-    const result = spawnImpl(
+    const child = spawnImpl(
       process.execPath,
       [resolveCodemodLauncher(), ...buildCodemodArguments(target, workflow, { allowBlocked })],
       {
         cwd: packageDirectory,
         env: { ...process.env, CODEMOD_RUN_STORE_DIR: runStore },
-        // Codemod writes progress and rule errors to stderr; it is captured
-        // and re-emitted as diagnostics after the run.
         stdio: [0, 2, "pipe"],
-        encoding: "utf8",
-        maxBuffer: 256 * 1024 * 1024,
       },
     );
-    return { ...result, ...readRun(runStore) };
+    const status = await new Promise((resolveStatus, reject) => {
+      let partial = "";
+      const relay = (line) => {
+        if (!PAUSE_LINE.test(line)) progress.write(`${line}\n`);
+      };
+      child.stderr.setEncoding("utf8");
+      child.stderr.on("data", (chunk) => {
+        const lines = (partial + chunk).split("\n");
+        partial = lines.pop();
+        lines.forEach(relay);
+      });
+      child.on("error", reject);
+      child.on("close", (code) => {
+        if (partial !== "") relay(partial);
+        resolveStatus(code);
+      });
+    });
+    return { status, ...readRun(runStore) };
   } finally {
     rmSync(runStore, { recursive: true, force: true });
   }
@@ -408,16 +430,16 @@ function readRun(runStore) {
   const [id] = readdirSync(runStore);
   if (id === undefined) return { output: undefined, runStatus: undefined };
   const run = JSON.parse(readFileSync(join(runStore, id, "run.json"), "utf8"));
-  return { output: run.output ?? undefined, runStatus: run.status };
+  return { output: run.output ?? undefined, runStatus: run.status, awaiting: run.awaiting ?? undefined };
 }
 
 /**
  * The findings and rewrites the workflow returned, and the diagnostics to
- * pass through to stderr: Codemod's own stderr, files a rule step failed on,
- * and why the workflow skipped the target or paused.
+ * print after the run: files a rule step failed on, and why the workflow
+ * skipped the target or stopped. Codemod's own stderr was already streamed.
  */
-export function parseRunOutput({ output, stderr, runStatus }) {
-  const diagnostics = String(stderr ?? "").split("\n").filter((line) => line.trim() !== "");
+export function parseRunOutput({ output, runStatus }) {
+  const diagnostics = [];
   for (const failure of output?.failures ?? []) {
     diagnostics.push(`${failure.step}: ${failure.path}: ${failure.error}`);
   }
@@ -474,7 +496,7 @@ export function buildJsonReport({ workflow, target, findings = [], rewrites = []
   return { ...report, summary: summaryOf({ rewrites: sorted }), rewrites: sorted, ...(next.length > 0 ? { nextSteps: next } : {}) };
 }
 
-export function main(
+export async function main(
   argumentsList = process.argv.slice(2),
   {
     cwd,
@@ -486,7 +508,7 @@ export function main(
   let status = 1;
 
   try {
-    status = run(argumentsList, cwd ?? process.cwd(), runImpl, dirtyImpl, projectImpl);
+    status = await run(argumentsList, cwd ?? process.cwd(), runImpl, dirtyImpl, projectImpl);
   } catch (error) {
     console.error(
       `[solid-migration-assistant] analyzer execution failed: ${error instanceof Error ? error.message : String(error)}`,
@@ -498,7 +520,7 @@ export function main(
   return status;
 }
 
-function run(argumentsList, invocationDirectory, runImpl, dirtyImpl, projectImpl) {
+async function run(argumentsList, invocationDirectory, runImpl, dirtyImpl, projectImpl) {
   let parsed;
   try {
     parsed = parseArguments(argumentsList);
@@ -530,14 +552,10 @@ function run(argumentsList, invocationDirectory, runImpl, dirtyImpl, projectImpl
   }
 
   const project = parsed.workflow === "analyze" ? projectImpl(target) : [];
-  const result = runImpl(target, parsed.workflow, { allowBlocked: parsed.allowBlocked });
-  if (result.error) throw result.error;
+  const result = await runImpl(target, parsed.workflow, { allowBlocked: parsed.allowBlocked });
   if (result.runStatus === "awaiting-approval") {
-    // Codemod's own "Resume with" hint names the temporary run store, which is
-    // gone by now, so only the approval question is passed on.
     const blocked =
-      /^Waiting for approval: (.+?) Apply the source rewrites anyway\?$/m.exec(String(result.stderr ?? ""))?.[1] ??
-      "A dependency has no Solid 2 release.";
+      /^(.+?) Apply the source rewrites anyway\?$/.exec(result.awaiting ?? "")?.[1] ?? "A dependency has no Solid 2 release.";
     return fail(`nothing was rewritten. ${blocked} Pass --allow-blocked to apply the source rewrites anyway.`);
   }
   const status = result.status ?? 1;

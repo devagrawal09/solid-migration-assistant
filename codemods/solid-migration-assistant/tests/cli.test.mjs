@@ -4,6 +4,8 @@ import { existsSync, mkdirSync, mkdtempSync, rmSync, writeFileSync } from "node:
 import { tmpdir } from "node:os";
 import { dirname, join, resolve } from "node:path";
 import { test } from "node:test";
+import { EventEmitter } from "node:events";
+import { PassThrough } from "node:stream";
 import {
   buildCodemodArguments,
   buildAgentReport,
@@ -23,12 +25,12 @@ import {
 const packageDirectory = resolve(import.meta.dirname, "..");
 const require = createRequire(import.meta.url);
 
-test("defaults the target to the invocation directory", () => {
+test("defaults the target to the invocation directory", async () => {
   assert.equal(parseTarget([]), ".");
   assert.equal(parseTarget(["--target", "project"]), "project");
 });
 
-test("parses the optional workflow and the transform-only --allow-dirty flag", () => {
+test("parses the optional workflow and the transform-only --allow-dirty flag", async () => {
   assert.deepEqual(parseArguments([]), { workflow: "analyze", target: ".", allowDirty: false, allowBlocked: false, format: "text" });
   assert.deepEqual(parseArguments(["analyze", "--target", "p"]), { workflow: "analyze", target: "p", allowDirty: false, allowBlocked: false, format: "text" });
   assert.deepEqual(parseArguments(["transform"]), { workflow: "transform", target: ".", allowDirty: false, allowBlocked: false, format: "text" });
@@ -45,14 +47,14 @@ test("parses the optional workflow and the transform-only --allow-dirty flag", (
   assert.equal(buildCodemodArguments("/t", "transform", { allowBlocked: true }).at(-1), "--approve");
 });
 
-test("refuses to transform a dirty or non-git target unless --allow-dirty", () => {
+test("refuses to transform a dirty or non-git target unless --allow-dirty", async () => {
   const spawnFor = (result) => () => result;
   assert.equal(dirtyTreeReason("/t", { spawnImpl: spawnFor({ status: 0, stdout: "" }) }), null);
   assert.match(dirtyTreeReason("/t", { spawnImpl: spawnFor({ status: 0, stdout: " M a.ts\n?? b.ts\n" }) }), /2 uncommitted change/);
   assert.match(dirtyTreeReason("/t", { spawnImpl: spawnFor({ status: 128, stdout: "" }) }), /not inside a git repository/);
   assert.match(dirtyTreeReason("/t", { spawnImpl: spawnFor({ error: new Error("ENOENT") }) }), /not inside a git repository/);
 
-  const blocked = captureMain(["transform"], {
+  const blocked = await captureMain(["transform"], {
     cwd: packageDirectory,
     dirtyImpl: () => "target has 1 uncommitted change(s)",
     runImpl: () => assert.fail("must not launch Codemod on a dirty tree"),
@@ -64,7 +66,7 @@ test("refuses to transform a dirty or non-git target unless --allow-dirty", () =
   ]);
 
   let launched;
-  const allowed = captureMain(["transform", "--allow-dirty"], {
+  const allowed = await captureMain(["transform", "--allow-dirty"], {
     cwd: packageDirectory,
     dirtyImpl: () => assert.fail("--allow-dirty must skip the git check"),
     runImpl: (target, workflow) => {
@@ -75,7 +77,7 @@ test("refuses to transform a dirty or non-git target unless --allow-dirty", () =
   assert.equal(allowed.status, 0);
   assert.deepEqual(launched, { target: packageDirectory, workflow: "transform" });
 
-  const clean = captureMain(["transform"], {
+  const clean = await captureMain(["transform"], {
     cwd: packageDirectory,
     dirtyImpl: () => null,
     runImpl: (target, workflow) => ({ status: workflow === "transform" ? 0 : 9 }),
@@ -83,7 +85,7 @@ test("refuses to transform a dirty or non-git target unless --allow-dirty", () =
   assert.equal(clean.status, 0);
 });
 
-test("reports Solid 1 manifests and jsxImportSource read-only, before the analyzer runs", () => {
+test("reports Solid 1 manifests and jsxImportSource read-only, before the analyzer runs", async () => {
   const surface = mkdtempSync(join(tmpdir(), "sma-project-findings-"));
   try {
     const legacy = join(surface, "legacy");
@@ -129,7 +131,7 @@ test("reports Solid 1 manifests and jsxImportSource read-only, before the analyz
     console.log = (...values) => printed.push(values.join(" "));
     let order = [];
     try {
-      const result = captureMain(["--target", legacy], {
+      const result = await captureMain(["--target", legacy], {
         cwd: surface,
         projectImpl: (target) => {
           order.push("findings");
@@ -152,7 +154,7 @@ test("reports Solid 1 manifests and jsxImportSource read-only, before the analyz
     assert.match(printed[0], /\n\ntsconfig\.json:1:1 /);
     assert.match(printed[0], /\[solid-migration-assistant\] Summary: 6 findings in 2 files\nWill not build or run on Solid 2: 6 findings\n/);
 
-    const transformRun = captureMain(["transform", "--allow-dirty", "--target", legacy], {
+    const transformRun = await captureMain(["transform", "--allow-dirty", "--target", legacy], {
       cwd: surface,
       projectImpl: () => assert.fail("transform must not print manifest findings"),
       runImpl: () => ({ status: 0 }),
@@ -169,22 +171,22 @@ function fakeFinding(file, line, headline, severity, rule = "jsx/example") {
   return { rule, file, line, column: 1, severity, headline, why: "Because.", guidance: "Do it.", lint: [], guide: `${GUIDE}#x` };
 }
 
-test("--format json re-emits the workflow's report as one sorted, tiered JSON document", () => {
+test("--format json re-emits the workflow's report as one sorted, tiered JSON document", async () => {
   const output = {
     findings: [fakeFinding("src/b.tsx", 4, "Behavior headline.", "behavior"), fakeFinding("src/a.tsx", 2, "Build headline.", "build")],
     rewrites: [],
     failures: [{ step: "JSX: analyzeExample", path: "src/c.tsx", error: "TypeError: boom" }],
   };
-  const parsed = parseRunOutput({ output, stderr: "  some rule printed this diagnostic\n" });
+  const parsed = parseRunOutput({ output });
   assert.deepEqual(parsed.findings, output.findings);
-  assert.deepEqual(parsed.diagnostics, ["  some rule printed this diagnostic", "JSX: analyzeExample: src/c.tsx: TypeError: boom"]);
+  assert.deepEqual(parsed.diagnostics, ["JSX: analyzeExample: src/c.tsx: TypeError: boom"]);
   assert.deepEqual(parseRunOutput({ output: { skipped: "solid-js is not a dependency of this project" } }), {
     findings: [], rewrites: [], dependencySkips: [], diagnostics: ["[solid-migration-assistant] skipped: solid-js is not a dependency of this project"],
   });
 
   const report = buildJsonReport({ workflow: "analyze", target: "/t", findings: parsed.findings, status: 0 });
   assert.equal(report.solid.target, "solid-js@2.0.0-rc.23");
-  assert.deepEqual(report.summary, { findings: 2, files: 2, bySeverity: { build: 1, behavior: 1, deprecated: 0 } });
+  assert.deepEqual(report.summary, { findings: 2, files: 2, bySeverity: { build: 1, behavior: 1, deprecated: 0 }, byRule: { "jsx/example": 2 } });
   assert.deepEqual(report.findings.map((finding) => [finding.file, finding.severity]), [["src/a.tsx", "build"], ["src/b.tsx", "behavior"]]);
 
   const rewrite = (file, line, message) => ({ rule: "imports/example", file, line, column: 1, message, guide: `${GUIDE}#imports` });
@@ -194,7 +196,7 @@ test("--format json re-emits the workflow's report as one sorted, tiered JSON do
     rewrites: [rewrite("src/x.tsx", 3, "Second."), rewrite("src/x.tsx", 1, "First.")],
     status: 0,
   });
-  assert.deepEqual(transformReport.summary, { rewrites: 2, files: 1 });
+  assert.deepEqual(transformReport.summary, { rewrites: 2, files: 1, byRule: { "imports/example": 2 } });
   assert.deepEqual(transformReport.rewrites.map((entry) => entry.message), ["First.", "Second."]);
 
   const printed = [];
@@ -202,22 +204,22 @@ test("--format json re-emits the workflow's report as one sorted, tiered JSON do
   console.log = (...values) => printed.push(values.join(" "));
   let result;
   try {
-    result = captureMain(["--format", "json"], {
+    result = await captureMain(["--format", "json"], {
       cwd: packageDirectory,
       projectImpl: () => [],
-      runImpl: () => ({ status: 0, output, stderr: "  some rule printed this diagnostic\n" }),
+      runImpl: () => ({ status: 0, output }),
     });
   } finally {
     console.log = originalLog;
   }
   assert.equal(result.status, 0);
-  // Codemod's stderr and failed files are passed through to stderr.
+  // Failed files are printed to stderr after the run.
   assert.deepEqual(result.diagnostics, [parsed.diagnostics.join("\n"), DISCLOSURE]);
   assert.equal(printed.length, 1, "JSON mode prints exactly one document on stdout");
   assert.equal(JSON.parse(printed[0]).summary.findings, 2);
 });
 
-test("--format agent prints a fix-ordered Markdown work list and is analyze-only", () => {
+test("--format agent prints a fix-ordered Markdown work list and is analyze-only", async () => {
   assert.throws(() => parseArguments(["transform", "--format", "agent"]), /--format agent is only accepted with the analyze workflow/);
   const markdown = buildAgentReport({
     tool: "solid-migration-assistant",
@@ -243,7 +245,7 @@ test("--format agent prints a fix-ordered Markdown work list and is analyze-only
   assert.ok(markdown.indexOf("## `src/a.tsx`") < markdown.indexOf("## `src/b.tsx`"), "files with build-tier tasks come first");
 });
 
-test("rejects unknown, missing, and duplicate options", () => {
+test("rejects unknown, missing, and duplicate options", async () => {
   assert.throws(() => parseTarget(["project"]), /unknown argument: project/);
   assert.throws(
     () => parseTarget(["--unknown"]),
@@ -256,7 +258,7 @@ test("rejects unknown, missing, and duplicate options", () => {
   );
 });
 
-test("runs the pinned package-local Codemod launcher with safe flags", () => {
+test("runs the pinned package-local Codemod launcher with safe flags", async () => {
   const launcher = resolveCodemodLauncher();
   assert.equal(
     launcher,
@@ -294,13 +296,30 @@ test("runs the pinned package-local Codemod launcher with safe flags", () => {
   ]);
 });
 
-test("delegates runtime availability to the pinned Codemod launcher", () => {
+function fakeChild(stderrChunks, status) {
+  const child = new EventEmitter();
+  child.stderr = new PassThrough();
+  setImmediate(() => {
+    for (const chunk of stderrChunks) child.stderr.write(chunk);
+    child.stderr.end();
+    child.emit("close", status);
+  });
+  return child;
+}
+
+const progressSink = () => {
+  const sink = { text: "", write: (chunk) => { sink.text += chunk; } };
+  return sink;
+};
+
+test("delegates runtime availability to the pinned Codemod launcher", async () => {
   const target = resolve(packageDirectory, "example");
   let invocation;
-  const result = runCodemod(target, {
+  const result = await runCodemod(target, {
+    progress: progressSink(),
     spawnImpl: (executable, argumentsList, options) => {
       invocation = { executable, argumentsList, options };
-      return { status: 23 };
+      return fakeChild([], 23);
     },
   });
 
@@ -310,21 +329,28 @@ test("delegates runtime availability to the pinned Codemod launcher", () => {
     resolveCodemodLauncher(),
     ...buildCodemodArguments(target),
   ]);
-  // Progress goes to our stderr; the run record goes to a temporary
-  // directory that is removed after the run.
+  // The run record goes to a temporary directory that is removed after the run.
   const { env, ...options } = invocation.options;
-  assert.deepEqual(options, {
-    cwd: packageDirectory,
-    stdio: [0, 2, "pipe"],
-    encoding: "utf8",
-    maxBuffer: 256 * 1024 * 1024,
-  });
+  assert.deepEqual(options, { cwd: packageDirectory, stdio: [0, 2, "pipe"] });
   assert.equal(existsSync(env.CODEMOD_RUN_STORE_DIR), false);
 });
 
-test("does not reject platforms before invoking Codemod", () => {
+test("streams Codemod's step progress while the run is going", async () => {
+  const progress = progressSink();
+  await runCodemod(packageDirectory, { progress, spawnImpl: () => fakeChild(["▸ jsx/cla", "ss-list\n✓ jsx/class-list (2.1s)\n"], 0) });
+  assert.equal(progress.text, "▸ jsx/class-list\n✓ jsx/class-list (2.1s)\n");
+});
+
+test("drops Codemod's resume hint, whose run store is gone after the run", async () => {
+  const progress = progressSink();
+  const pause = "Waiting for approval: @kobalte/core has no Solid 2 release. Apply the source rewrites anyway?\n  Resume with: codemod workflow resume --id 1 --approve\n";
+  await runCodemod(packageDirectory, { progress, spawnImpl: () => fakeChild([pause], 0) });
+  assert.equal(progress.text, "");
+});
+
+test("does not reject platforms before invoking Codemod", async () => {
   let receivedTarget;
-  const result = captureMain([], {
+  const result = await captureMain([], {
     cwd: packageDirectory,
     platform: "assistant-does-not-preflight-this",
     architecture: "assistant-does-not-preflight-this",
@@ -340,7 +366,7 @@ test("does not reject platforms before invoking Codemod", () => {
   assertFinalDisclosure(result.diagnostics);
 });
 
-test("publishes exact immutable public-preview disclosure", () => {
+test("publishes exact immutable public-preview disclosure", async () => {
   const packageJson = require("../package.json");
   assert.match(DISCLOSURE, /Final disclosure/);
   assert.ok(
@@ -371,9 +397,9 @@ test("publishes exact immutable public-preview disclosure", () => {
   assert.match(DISCLOSURE, /End final disclosure$/);
 });
 
-test("ends successful, nonzero, and thrown engine invocations with disclosure", () => {
+test("ends successful, nonzero, and thrown engine invocations with disclosure", async () => {
   for (const childStatus of [0, 23]) {
-    const result = captureMain([], {
+    const result = await captureMain([], {
       cwd: packageDirectory,
       runImpl: () => ({ status: childStatus }),
     });
@@ -382,7 +408,7 @@ test("ends successful, nonzero, and thrown engine invocations with disclosure", 
     assertFinalDisclosure(result.diagnostics);
   }
 
-  const thrown = captureMain([], {
+  const thrown = await captureMain([], {
     cwd: packageDirectory,
     runImpl: () => {
       throw new Error("engine unavailable");
@@ -396,7 +422,7 @@ test("ends successful, nonzero, and thrown engine invocations with disclosure", 
   assertFinalDisclosure(thrown.diagnostics);
 });
 
-test("ends usage and target failures with disclosure", () => {
+test("ends usage and target failures with disclosure", async () => {
   const surface = mkdtempSync(join(tmpdir(), "sma-cli-target-test-"));
   const fileTarget = join(surface, "file-target");
   writeFileSync(fileTarget, "not a directory\n");
@@ -418,7 +444,7 @@ test("ends usage and target failures with disclosure", () => {
     ];
 
     for (const { argumentsList, expected } of cases) {
-      const result = captureMain(argumentsList, {
+      const result = await captureMain(argumentsList, {
         cwd: surface,
         runImpl: () => assert.fail("must not launch Codemod"),
       });
@@ -431,12 +457,12 @@ test("ends usage and target failures with disclosure", () => {
   }
 });
 
-function captureMain(argumentsList, options) {
+async function captureMain(argumentsList, options) {
   const diagnostics = [];
   const originalError = console.error;
   console.error = (...values) => diagnostics.push(values.join(" "));
   try {
-    return { status: main(argumentsList, options), diagnostics };
+    return { status: await main(argumentsList, options), diagnostics };
   } finally {
     console.error = originalError;
   }
@@ -454,23 +480,23 @@ const paused = {
   status: 0,
   runStatus: "awaiting-approval",
   output: undefined,
-  stderr: "Waiting for approval: @kobalte/core has no Solid 2 release. Apply the source rewrites anyway?\n  Resume with: codemod workflow resume --id 1 --approve\n",
+  awaiting: "@kobalte/core has no Solid 2 release. Apply the source rewrites anyway?",
 };
 
-test("stops a transform that a dependency without a Solid 2 release paused", () => {
-  const result = captureMain(["transform", "--allow-dirty"], { cwd: packageDirectory, runImpl: () => paused });
+test("stops a transform that a dependency without a Solid 2 release paused", async () => {
+  const result = await captureMain(["transform", "--allow-dirty"], { cwd: packageDirectory, runImpl: () => paused });
   assert.equal(result.status, 2);
 });
 
-test("names the blocked dependency and not the resume hint when a transform pauses", () => {
-  const result = captureMain(["transform", "--allow-dirty"], { cwd: packageDirectory, runImpl: () => paused });
+test("names the blocked dependency and not the resume hint when a transform pauses", async () => {
+  const result = await captureMain(["transform", "--allow-dirty"], { cwd: packageDirectory, runImpl: () => paused });
   assert.equal(
     result.diagnostics[0],
     "[solid-migration-assistant] nothing was rewritten. @kobalte/core has no Solid 2 release. Pass --allow-blocked to apply the source rewrites anyway.",
   );
 });
 
-test("after a dependency bump, tells the user to install with the package manager its lockfile names", () => {
+test("after a dependency bump, tells the user to install with the package manager its lockfile names", async () => {
   const target = mkdtempSync(join(tmpdir(), "sma-next-"));
   writeFileSync(join(target, "pnpm-lock.yaml"), "");
   try {
@@ -498,34 +524,34 @@ const projectSites = (files) => {
   }
 };
 
-test("reports the Solid version of every workspace package, not only the root", () => {
+test("reports the Solid version of every workspace package, not only the root", async () => {
   assert.deepEqual(projectSites({
     "package.json": { private: true, workspaces: ["packages/*"] },
     "packages/app/package.json": { dependencies: { "solid-js": "^1.9.5", "@solidjs/web": "2.0.0-rc.23" } },
   }), ["packages/app/package.json Move this project's Solid dependencies to solid-js@2.0.0-rc.23."]);
 });
 
-test("reports jsxImportSource in a workspace package's tsconfig.json", () => {
+test("reports jsxImportSource in a workspace package's tsconfig.json", async () => {
   assert.deepEqual(projectSites({ "packages/app/tsconfig.json": { compilerOptions: { jsxImportSource: "solid-js" } } }), [
     "packages/app/tsconfig.json Point jsxImportSource at the Solid 2 renderer package.",
   ]);
 });
 
-test("reports an installed library whose solid-js peer range rules out Solid 2", () => {
+test("reports an installed library whose solid-js peer range rules out Solid 2", async () => {
   assert.deepEqual(projectSites({
     "package.json": { dependencies: { "solid-navigator": "^0.4.0" } },
     "node_modules/solid-navigator/package.json": { version: "0.4.2", peerDependencies: { "solid-js": "^1.6.0" } },
   }), ["package.json Check that solid-navigator supports Solid 2."]);
 });
 
-test("trusts an installed library whose solid-js peer range allows Solid 2", () => {
+test("trusts an installed library whose solid-js peer range allows Solid 2", async () => {
   assert.deepEqual(projectSites({
     "package.json": { dependencies: { "solid-navigator": "^1.0.0" } },
     "node_modules/solid-navigator/package.json": { peerDependencies: { "solid-js": "^1.8.0 || ^2.0.0-0" } },
   }), []);
 });
 
-test("skips a dependency on another workspace package", () => {
+test("skips a dependency on another workspace package", async () => {
   assert.deepEqual(projectSites({
     "packages/ui/package.json": { name: "@app/solid-ui" },
     "packages/app/package.json": { dependencies: { "@app/solid-ui": "^1.0.0" } },

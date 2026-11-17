@@ -15,6 +15,25 @@
       "build": 32,
       "behavior": 3,
       "deprecated": 0
+    },
+    "byRule": {
+      "imports/web-import": 6,
+      "jsx/component-renames": 4,
+      "imports/jsx-types": 3,
+      "props/merge-props": 3,
+      "reactivity/create-effect": 3,
+      "jsx/class-list": 2,
+      "reactivity/create-computed": 2,
+      "reactivity/create-memo": 2,
+      "store/mutable": 2,
+      "imports/beta32-subpaths": 1,
+      "jsx/dom-lowercase-events": 1,
+      "lifecycle/on-mount": 1,
+      "project/jsx-import-source": 1,
+      "project/solid-version": 1,
+      "props/split-props": 1,
+      "store/produce": 1,
+      "store/unwrap": 1
     }
   },
   "findings": [

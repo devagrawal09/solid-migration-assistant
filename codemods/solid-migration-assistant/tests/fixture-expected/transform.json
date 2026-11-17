@@ -10,7 +10,20 @@
   "status": 0,
   "summary": {
     "rewrites": 66,
-    "files": 17
+    "files": 17,
+    "byRule": {
+      "imports/legacy-subpath-relocation": 22,
+      "jsx/index-to-for": 8,
+      "imports/web-package-relocation": 7,
+      "jsx/class-list-to-class": 7,
+      "jsx/lowercase-event-handlers": 5,
+      "imports/jsx-type-relocation": 4,
+      "jsx/context-provider-to-context": 4,
+      "store/setter-literal-paths": 4,
+      "project/dependencies": 2,
+      "reactivity/on-helper-split": 2,
+      "jsx/attribute-names": 1
+    }
   },
   "rewrites": [
     {

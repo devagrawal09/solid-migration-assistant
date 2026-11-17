@@ -89,6 +89,9 @@ export function renderText({ findings = [], rewrites = [], solidVersion }) {
   return blocks.join("\n\n");
 }
 
+const HEADLINES_PER_RULE = 3;
+const SITES_PER_RULE = 10;
+
 function summarize(entries, noun, headlineOf, tiered) {
   const files = new Set(entries.map((entry) => entry.file));
   const lines = [`${PREFIX} Summary: ${count(entries.length, noun)} in ${count(files.size, "file")}`];
@@ -98,17 +101,27 @@ function summarize(entries, noun, headlineOf, tiered) {
   for (const group of groups) {
     if (group.entries.length === 0) continue;
     if (group.label !== null) lines.push(`${group.label}: ${count(group.entries.length, noun)}`);
-    const byHeadline = new Map();
-    for (const entry of byLocation(group.entries)) {
-      const headline = headlineOf(entry);
-      byHeadline.set(headline, [...(byHeadline.get(headline) ?? []), `${entry.file}:${entry.line}:${entry.column}`]);
-    }
-    const rows = [...byHeadline].sort(([left, leftSites], [right, rightSites]) =>
-      rightSites.length - leftSites.length || (left < right ? -1 : left > right ? 1 : 0),
+    // Grouped by rule, largest first, so a report with thousands of entries
+    // reads as a short list of kinds of work. Each rule lists its three most
+    // common headlines and its first sites; the full list is above.
+    const byRule = new Map();
+    for (const entry of byLocation(group.entries)) byRule.set(entry.rule, [...(byRule.get(entry.rule) ?? []), entry]);
+    const rows = [...byRule].sort(([left, leftEntries], [right, rightEntries]) =>
+      rightEntries.length - leftEntries.length || (left < right ? -1 : left > right ? 1 : 0),
     );
-    for (const [headline, sites] of rows) {
-      lines.push(`${String(sites.length).padStart(4)}  ${headline}`);
-      lines.push(`      sites: ${sites.join(", ")}`);
+    for (const [rule, ruleEntries] of rows) {
+      const ruleFiles = new Set(ruleEntries.map((entry) => entry.file)).size;
+      lines.push(`${String(ruleEntries.length).padStart(4)}  ${rule} in ${count(ruleFiles, "file")}`);
+      const headlines = new Map();
+      for (const entry of ruleEntries) headlines.set(headlineOf(entry), (headlines.get(headlineOf(entry)) ?? 0) + 1);
+      const common = [...headlines].sort(([left, leftCount], [right, rightCount]) =>
+        rightCount - leftCount || (left < right ? -1 : left > right ? 1 : 0),
+      );
+      for (const [headline, times] of common.slice(0, HEADLINES_PER_RULE)) lines.push(`      ${String(times).padStart(4)}  ${headline}`);
+      if (common.length > HEADLINES_PER_RULE) lines.push(`            and ${count(common.length - HEADLINES_PER_RULE, "other headline")}`);
+      const sites = ruleEntries.map((entry) => `${entry.file}:${entry.line}:${entry.column}`);
+      const more = sites.length > SITES_PER_RULE ? `, and ${sites.length - SITES_PER_RULE} more` : "";
+      lines.push(`      sites: ${sites.slice(0, SITES_PER_RULE).join(", ")}${more}`);
     }
   }
   return lines.join("\n");
@@ -118,14 +131,20 @@ function count(value, noun) {
   return `${value} ${noun}${value === 1 ? "" : "s"}`;
 }
 
-/** Totals for a JSON report: findings per tier, or rewrites. */
+function countByRule(entries) {
+  const counts = {};
+  for (const entry of entries) counts[entry.rule] = (counts[entry.rule] ?? 0) + 1;
+  return Object.fromEntries(Object.entries(counts).sort(([left, a], [right, b]) => b - a || (left < right ? -1 : 1)));
+}
+
+/** Totals for a JSON report: findings per tier and per rule, or rewrites per rule. */
 export function summaryOf({ findings, rewrites }) {
   if (findings !== undefined) {
     const bySeverity = Object.fromEntries(SEVERITY_TIERS.map((tier) => [tier.id, 0]));
     for (const finding of findings) bySeverity[finding.severity] += 1;
-    return { findings: findings.length, files: new Set(findings.map((finding) => finding.file)).size, bySeverity };
+    return { findings: findings.length, files: new Set(findings.map((finding) => finding.file)).size, bySeverity, byRule: countByRule(findings) };
   }
-  return { rewrites: rewrites.length, files: new Set(rewrites.map((rewrite) => rewrite.file)).size };
+  return { rewrites: rewrites.length, files: new Set(rewrites.map((rewrite) => rewrite.file)).size, byRule: countByRule(rewrites) };
 }
 
 /**
