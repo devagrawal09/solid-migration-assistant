@@ -1,9 +1,9 @@
 import { DEPENDENCY_MAP } from "./dependencies.mjs";
+import { allowsSolid2, isSolid2Only } from "./peers.mjs";
 
 export const SOLID_VERSION = "2.0.0";
 /** What migrate writes for solid-js and @solidjs/web: stable releases take a caret range. */
 export const SOLID_RANGE = `^${SOLID_VERSION}`;
-const ON_SOLID_2 = /(^|[^0-9.])2\.\d/;
 const SECTIONS = ["dependencies", "devDependencies"];
 const PLAIN_RANGE = /^[\s^~<>=v]*\d/;
 
@@ -27,6 +27,14 @@ export const BUMPS = Object.freeze({
   ),
 });
 
+// A dependency already on its Solid 2 line keeps its range, so a newer
+// minor than the table's is never moved back.
+const ALREADY_MOVED = {
+  "@solidjs/web": allowsSolid2,
+  ...Object.fromEntries(DEPENDENCY_MAP.filter((entry) => entry.legacy !== null).map((entry) => [entry.name, (range) => !entry.legacy(range)])),
+};
+export const alreadyMoved = (dependency, range) => ALREADY_MOVED[dependency]?.(range) === true;
+
 /**
  * Moves a Solid 1 package.json to Solid 2 by editing only the version strings
  * it changes, so formatting, key order and every other line stay as written.
@@ -46,7 +54,7 @@ export function bumpManifest(text) {
     return null;
   }
   const section = SECTIONS.find((name) => typeof manifest[name]?.["solid-js"] === "string");
-  if (section === undefined || ON_SOLID_2.test(manifest[section]["solid-js"])) return null;
+  if (section === undefined || isSolid2Only(manifest[section]["solid-js"])) return null;
 
   const edits = [];
   const changes = [];
@@ -59,6 +67,7 @@ export function bumpManifest(text) {
         skipped.push({ name: dependency, range, reason: range.startsWith("catalog:") ? "it comes from the workspace catalog, so move it there" : "it isn't a plain semver range" });
         continue;
       }
+      if (alreadyMoved(dependency, range)) continue;
       const edit = valueEdit(text, name, dependency, range, target);
       if (edit === null) {
         skipped.push({ name: dependency, range, reason: "it couldn't be located in the file" });
@@ -119,9 +128,8 @@ export function bumpTsconfig(text) {
  * the raw manifest text, or null when it cannot be found unambiguously.
  */
 function valueEdit(text, section, dependency, range, target) {
-  const sectionMatch = new RegExp(`"${escape(section)}"\\s*:\\s*\\{`).exec(text);
-  if (sectionMatch === null) return null;
-  const open = sectionMatch.index + sectionMatch[0].length;
+  const open = topLevelObject(text, section);
+  if (open === null) return null;
   const close = text.indexOf("}", open);
   if (close === -1) return null;
   const pattern = new RegExp(`("${escape(dependency)}"\\s*:\\s*)"${escape(range)}"`, "g");
@@ -131,6 +139,34 @@ function valueEdit(text, section, dependency, range, target) {
   const start = open + matches[0].index + matches[0][1].length;
   const end = start + JSON.stringify(range).length;
   return { start, end, text: JSON.stringify(target), line: text.slice(0, start).split("\n").length };
+}
+
+/**
+ * The index just after the `{` of the top-level `"key": {`, skipping keys of
+ * the same name nested deeper (such as pnpm.packageExtensions.x.dependencies).
+ */
+function topLevelObject(text, key) {
+  let depth = 0;
+  for (let index = 0; index < text.length; index += 1) {
+    const char = text[index];
+    if (char === "{" || char === "[") depth += 1;
+    else if (char === "}" || char === "]") depth -= 1;
+    else if (char === '"') {
+      const end = stringEnd(text, index);
+      if (depth === 1 && text.slice(index + 1, end) === key) {
+        const rest = /^\s*:\s*\{/.exec(text.slice(end + 1));
+        if (rest !== null) return end + 1 + rest[0].length;
+      }
+      index = end;
+    }
+  }
+  return null;
+}
+
+function stringEnd(text, start) {
+  let index = start + 1;
+  while (index < text.length && text[index] !== '"') index += text[index] === "\\" ? 2 : 1;
+  return index;
 }
 
 function escape(value) {

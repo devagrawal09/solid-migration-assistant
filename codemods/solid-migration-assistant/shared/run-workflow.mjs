@@ -6,7 +6,7 @@ import { basename, dirname, join, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 import { byLocation, placeOf, renderAgentReport, renderText, summaryOf } from "./format.mjs";
 import { DEPENDENCY_MAP, DEPENDENCY_VERIFIED_ON, dependencyHeadline } from "./dependencies.mjs";
-import { allowsSolid2 } from "./peers.mjs";
+import { allowsSolid2, isSolid2Only } from "./peers.mjs";
 import { settleUnknownDependencies } from "./registry.mjs";
 import { catalogName, readCatalogs } from "./catalog.mjs";
 
@@ -49,7 +49,7 @@ export function projectFindings(target) {
   const catalogs = readCatalogs(readText(resolve(target, "pnpm-workspace.yaml")) ?? "");
   const findings = [];
   for (const file of manifests) findings.push(...manifestFindings(target, file, workspaceNames, catalogs));
-  for (const file of files.filter((file) => basename(file) === "tsconfig.json")) {
+  for (const file of files.filter((file) => basename(file) !== "package.json")) {
     const jsxImportSource = readJsonLike(resolve(target, file))?.compilerOptions?.jsxImportSource;
     if (jsxImportSource !== "solid-js") continue;
     findings.push({
@@ -68,14 +68,25 @@ export function projectFindings(target) {
   return byLocation(findings);
 }
 
+const PLAIN_RANGE = /^[\s^~<>=v]*\d/;
+const PROJECT_CONFIG = /^(package\.json|tsconfig(\..+)?\.json|jsconfig\.json)$/;
+const OUTSIDE_PROJECT = new Set(["node_modules", "dist", "build", "coverage"]);
+
 /**
- * Every package.json and tsconfig.json the workflow also sees: with git, the
- * tracked and untracked files git doesn't ignore; otherwise a walk that skips
- * node_modules and dot directories. Paths are relative to the target.
+ * Every package.json, tsconfig.json, tsconfig.*.json and jsconfig.json the
+ * workflow also sees: with git, the tracked and untracked files git doesn't
+ * ignore; otherwise a walk that skips dot directories and node_modules, dist,
+ * build and coverage. Paths are relative to the target.
  */
 function projectFiles(target) {
-  const listed = spawnSync("git", ["-C", target, "ls-files", "-co", "--exclude-standard", "--", "package.json", "**/package.json", "tsconfig.json", "**/tsconfig.json"], { encoding: "utf8" });
-  if (listed.status === 0) return listed.stdout.split("\n").filter(Boolean).filter((file) => existsSync(resolve(target, file))).sort();
+  const listed = spawnSync("git", ["-C", target, "ls-files", "-co", "--exclude-standard"], { encoding: "utf8", maxBuffer: 64 * 1024 * 1024 });
+  if (listed.status === 0) {
+    return listed.stdout
+      .split("\n")
+      .filter((file) => PROJECT_CONFIG.test(basename(file)) && !file.split("/").some((part) => OUTSIDE_PROJECT.has(part)))
+      .filter((file) => existsSync(resolve(target, file)))
+      .sort();
+  }
   const files = [];
   const walk = (directory) => {
     let entries;
@@ -86,8 +97,8 @@ function projectFiles(target) {
     }
     for (const entry of entries) {
       const path = directory === "" ? entry.name : `${directory}/${entry.name}`;
-      if (entry.isDirectory() && entry.name !== "node_modules" && !entry.name.startsWith(".")) walk(path);
-      else if (entry.isFile() && (entry.name === "package.json" || entry.name === "tsconfig.json")) files.push(path);
+      if (entry.isDirectory() && !OUTSIDE_PROJECT.has(entry.name) && !entry.name.startsWith(".")) walk(path);
+      else if (entry.isFile() && PROJECT_CONFIG.test(entry.name)) files.push(path);
     }
   };
   walk("");
@@ -105,14 +116,15 @@ function manifestFindings(target, file, workspaceNames, catalogs) {
   const catalog = catalogName(solid);
   const resolved = catalog === null ? solid : catalogs.get(catalog)?.get("solid-js")?.range;
   const where = catalog === null ? "" : catalog === "" ? "the default catalog in pnpm-workspace.yaml" : `the ${catalog} catalog in pnpm-workspace.yaml`;
-  const onSolid2 = typeof resolved === "string" && /(^|[^0-9.])2\.\d/.test(resolved);
+  const declaredAs = catalog === null ? `is declared as ${JSON.stringify(solid)}` : `comes from ${where} at ${JSON.stringify(resolved)}`;
   const problems = [];
   if (typeof solid === "string" && catalog !== null && resolved === undefined) {
     problems.push(`solid-js comes from ${JSON.stringify(solid)}, a workspace catalog this analyzer couldn't read, so check that it moves to ${SOLID_VERSION} there`);
-  } else if (typeof solid === "string" && !onSolid2) {
-    problems.push(catalog === null
-      ? `solid-js is declared as ${JSON.stringify(solid)}, a Solid 1 range`
-      : `solid-js comes from ${where} at ${JSON.stringify(resolved)}, a Solid 1 range`);
+  } else if (typeof resolved === "string" && PLAIN_RANGE.test(resolved) && !isSolid2Only(resolved)) {
+    problems.push(`solid-js ${declaredAs}, a Solid 1 range`);
+  } else if (typeof resolved === "string" && !PLAIN_RANGE.test(resolved) && web === undefined) {
+    // workspace:, link: and tags name no version this analyzer can read.
+    problems.push(`solid-js ${declaredAs}, which this analyzer can't compare with Solid 2`);
   }
   if (typeof solid === "string" && web === undefined) {
     problems.push("@solidjs/web, the Solid 2 web renderer package, is not declared");
@@ -538,11 +550,13 @@ export function parseRunOutput({ output, runStatus }) {
  * What the user does after a transform: the install when it was skipped or
  * failed, and every dependency range the transform left alone.
  */
-export function nextSteps({ dependencySkips = [], afterMigrate }) {
+export function nextSteps({ dependencySkips = [], afterMigrate, rewrites = [] }) {
   const steps = [];
   const install = afterMigrate?.install;
+  const movedSolid = rewrites.find((rewrite) => rewrite.rule === "project/dependencies" && rewrite.message.startsWith("Move solid-js "));
+  const moved = movedSolid === undefined ? "" : `: ${movedSolid.file?.endsWith("pnpm-workspace.yaml") ? "the workspace catalog" : "package.json"} now targets Solid ${SOLID_VERSION}`;
   if (install?.skipped) {
-    steps.push(`Install with your package manager, then typecheck: package.json now targets Solid ${SOLID_VERSION}.`);
+    steps.push(`Install with your package manager, then typecheck${moved}.`);
   } else if (install && !install.ok) {
     steps.push(`Run ${install.command} in ${placeOf(install.directory)} once the install error above is fixed, then typecheck.`);
   }
@@ -651,7 +665,7 @@ async function run(argumentsList, invocationDirectory, runImpl, dirtyImpl, proje
   const project = parsed.workflow === "analyze" ? analyzed : await settle(projectImpl(target));
   const status = result.status ?? 1;
   const { findings, rewrites, dependencySkips, afterMigrate, diagnostics } = parseRunOutput(result);
-  const next = parsed.workflow === "analyze" ? [] : nextSteps({ dependencySkips, afterMigrate });
+  const next = parsed.workflow === "analyze" ? [] : nextSteps({ dependencySkips, afterMigrate, rewrites });
   if (diagnostics.length > 0) console.error(diagnostics.join("\n"));
   const report = buildJsonReport({
     workflow: parsed.workflow,

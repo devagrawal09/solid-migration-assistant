@@ -40,7 +40,25 @@ test("reports a workspace or catalog range instead of editing it", () => {
 test("reports a solid-js peer range instead of editing it", () => {
   const result = bumpManifest(manifest({ "solid-js": "^1.9.5" }, { peerDependencies: { "solid-js": "^1.6" } }));
   assert.equal(JSON.parse(result.text).peerDependencies["solid-js"], "^1.6");
+  assert.deepEqual(result.skipped.map((skip) => `${skip.name} ${skip.range}`), ["solid-js ^1.6"]);
 });
+
+test("never moves a dependency already on its Solid 2 line back", () => {
+  const { dependencies } = bumped(manifest({ "solid-js": "^1.9.5", "@solidjs/web": "^2.1.0", "@solidjs/router": "^2.3.0" }));
+  assert.deepEqual([dependencies["@solidjs/web"], dependencies["@solidjs/router"]], ["^2.1.0", "^2.3.0"]);
+});
+
+test("edits only the top-level dependencies, not a nested object of the same name", () => {
+  const extensions = { packageExtensions: { "old-lib@1": { dependencies: { "solid-js": "^1.9.5" } } } };
+  const result = bumped(manifest({ "solid-js": "^1.9.5" }, { pnpm: extensions }));
+  assert.deepEqual([result.dependencies["solid-js"], result.pnpm.packageExtensions["old-lib@1"].dependencies["solid-js"]], [SOLID_RANGE, "^1.9.5"]);
+});
+
+for (const range of [">=1.8.0 <2.0.0", "^1.9.0 || ^2.0.0-rc.1"]) {
+  test(`moves a solid-js range that still admits Solid 1: ${range}`, () => {
+    assert.equal(bumped(manifest({ "solid-js": range })).dependencies["solid-js"], SOLID_RANGE);
+  });
+}
 
 test("changes nothing else in the file", () => {
   const text = '{\n\t"name": "app",\n\t"dependencies": { "solid-js": "~1.8.0", "zod": "^3.0.0" }\n}\n';
@@ -50,9 +68,11 @@ test("changes nothing else in the file", () => {
   );
 });
 
-test("skips a manifest already on Solid 2", () => {
-  assert.equal(bumpManifest(manifest({ "solid-js": "^2.1.0" })), null);
-});
+for (const range of ["^2.1.0", "2.0.0"]) {
+  test(`skips a manifest already on Solid 2: ${range}`, () => {
+    assert.equal(bumpManifest(manifest({ "solid-js": range })), null);
+  });
+}
 
 test("points tsconfig's jsxImportSource at @solidjs/web", () => {
   assert.equal(

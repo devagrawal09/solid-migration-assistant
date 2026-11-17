@@ -29,3 +29,8 @@ test("moves a dependency with a Solid 2 release in the same catalog, keeping its
 test("leaves a catalog already on Solid 2 alone", () => {
   assert.equal(bumpCatalogs(workspace(`catalog:\n  solid-js: ${SOLID_RANGE}\n  "@solidjs/web": ${SOLID_RANGE}\n`)), null);
 });
+
+test("never moves a catalog dependency already on its Solid 2 line back", () => {
+  const result = bumpCatalogs(workspace('catalog:\n  solid-js: ^1.9.5\n  "@solidjs/router": ^2.3.0\n'));
+  assert.deepEqual(result.changes.map(({ name }) => name), ["solid-js", "@solidjs/web"]);
+});

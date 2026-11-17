@@ -1,6 +1,6 @@
-import { BUMPS, SOLID_RANGE } from "./manifest.mjs";
+import { alreadyMoved, BUMPS, SOLID_RANGE } from "./manifest.mjs";
+import { isSolid2Only } from "./peers.mjs";
 
-const ON_SOLID_2 = /(^|[^0-9.])2\.\d/;
 const PLAIN_RANGE = /^[\s^~<>=v]*\d/;
 const ENTRY = /^(\s+)(["']?)([^"'\s:#]+)\2:\s*(["']?)([^"'#]*?)\4\s*(#.*)?$/d;
 
@@ -69,7 +69,7 @@ export function bumpCatalogs(text) {
   const skipped = [];
   for (const [name, entries] of readCatalogs(text)) {
     const solid = entries.get("solid-js");
-    if (solid === undefined || ON_SOLID_2.test(solid.range)) continue;
+    if (solid === undefined || isSolid2Only(solid.range)) continue;
     for (const [dependency, entry] of entries) {
       const target = BUMPS[dependency];
       if (target === undefined || entry.range === target) continue;
@@ -77,6 +77,7 @@ export function bumpCatalogs(text) {
         skipped.push({ name: dependency, range: entry.range, reason: "it isn't a plain semver range" });
         continue;
       }
+      if (alreadyMoved(dependency, entry.range)) continue;
       edits.push({ start: entry.valueStart, end: entry.valueEnd, text: target });
       changes.push({ catalog: name, name: dependency, from: entry.range, to: target, line: entry.line + 1 });
     }
