@@ -225,7 +225,7 @@ test(
         assert.match(smoke.stdout, /Move this Solid web renderer/);
         assert.match(
           smoke.stdout,
-          /github\.com\/solidjs\/solid\/blob\/2105ffb8.*imports-where-things-live-now/,
+          /github\.com\/solidjs\/solid\/blob\/8c34a505.*imports-where-things-live-now/,
         );
         assert.doesNotMatch(smoke.stdout, /S2-IMPORT-WEB-001/);
         assertFinalDisclosure(smoke.stderr);

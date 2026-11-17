@@ -13,9 +13,9 @@ const packageMetadata = JSON.parse(
   readFileSync(resolve(packageDirectory, "package.json"), "utf8"),
 );
 
-const SOLID_VERSION = "2.0.0-rc.21";
+const SOLID_VERSION = "2.0.0-rc.23";
 const SOLID_TARGET = `solid-js@${SOLID_VERSION}`;
-const SOLID_SOURCE_COMMIT = "2105ffb8ca2fced55f5fac0763177fc93f97c2c2";
+const SOLID_SOURCE_COMMIT = "8c34a505a853fcc894fcc8dad150d62f0d007fa2";
 const MIGRATION_GUIDE = `https://github.com/solidjs/solid/blob/${SOLID_SOURCE_COMMIT}/documentation/solid-2.0/MIGRATION.md`;
 const FEEDBACK_URL =
   "https://github.com/devagrawal09/solid-migration-assistant/issues";
@@ -311,8 +311,8 @@ export function runCodemod(target, { spawnImpl = spawnSync, workflow = "analyze"
       {
         cwd: packageDirectory,
         env: { ...process.env, CODEMOD_RUN_STORE_DIR: runStore },
-        // Progress goes straight to our stderr; anything Codemod prints on
-        // stderr (rule errors) is captured and re-emitted as diagnostics.
+        // Codemod writes progress and rule errors to stderr; it is captured
+        // and re-emitted as diagnostics after the run.
         stdio: [0, 2, "pipe"],
         encoding: "utf8",
         maxBuffer: 256 * 1024 * 1024,
@@ -429,7 +429,12 @@ function run(argumentsList, invocationDirectory, runImpl, dirtyImpl, projectImpl
   const result = runImpl(target, parsed.workflow, { allowBlocked: parsed.allowBlocked });
   if (result.error) throw result.error;
   if (result.runStatus === "awaiting-approval") {
-    return fail("nothing was rewritten: a dependency has no Solid 2 release (named above); pass --allow-blocked to apply the source rewrites anyway");
+    // Codemod's own "Resume with" hint names the temporary run store, which is
+    // gone by now, so only the approval question is passed on.
+    const blocked =
+      /^Waiting for approval: (.+?) Apply the source rewrites anyway\?$/m.exec(String(result.stderr ?? ""))?.[1] ??
+      "A dependency has no Solid 2 release.";
+    return fail(`nothing was rewritten. ${blocked} Pass --allow-blocked to apply the source rewrites anyway.`);
   }
   const status = result.status ?? 1;
   const { findings, rewrites, diagnostics } = parseRunOutput(result);

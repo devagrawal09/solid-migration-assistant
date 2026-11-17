@@ -79,9 +79,9 @@ export const DEPENDENCY_MAP = Object.freeze([
     name: "babel-preset-solid",
     legacy: null,
     status: "replace",
-    replacement: "@solidjs/babel-plugin@2.0.0-rc.21",
+    replacement: "@solidjs/babel-plugin@2.0.0-rc.23",
     guidance:
-      "Replace babel-preset-solid with @solidjs/babel-plugin@2.0.0-rc.21 in custom Babel pipelines (its npm latest tag is a stale rc.2, so pin the version), or rely on @solidjs/vite-plugin, which compiles JSX with @solidjs/compiler.",
+      "Replace babel-preset-solid with @solidjs/babel-plugin@2.0.0-rc.23 in custom Babel pipelines (its npm latest tag is a stale rc.2, so pin the version), or rely on @solidjs/vite-plugin, which compiles JSX with @solidjs/compiler.",
   },
   {
     name: "@solidjs/testing-library",
@@ -143,7 +143,7 @@ export const DEPENDENCY_MAP = Object.freeze([
       "Install @tanstack/solid-router@rc (2.0.0-rc.10), and expect npm peer warnings because it still depends on some Solid 1 helper packages.",
   },
   ...[
-    ["@kobalte/core", "its only Solid 2 build, 2.0.0-alpha.4, pins solid-js and @solidjs/web to exactly 2.0.0-rc.16 and will not install with rc.21"],
+    ["@kobalte/core", "its only Solid 2 build, 2.0.0-alpha.4, pins solid-js and @solidjs/web to exactly 2.0.0-rc.16 and will not install with the pinned RC"],
     ["@tanstack/solid-form", "its 2.0.0-alpha.3 still imports mergeProps and splitProps, which Solid 2 removes"],
     ["@tanstack/solid-virtual", "it imports solid-js/store, createComputed, and onMount, which Solid 2 removes"],
     ["@tanstack/solid-table", "its open peer range is misleading: it imports solid-js/web, batch, createComputed, and observable"],

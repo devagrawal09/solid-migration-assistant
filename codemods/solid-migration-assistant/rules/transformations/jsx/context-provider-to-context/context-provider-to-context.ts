@@ -35,7 +35,7 @@ export type ContextProviderRewrite = {
  * In Solid 1.x, `createContext()` returned `{ id, Provider, defaultValue }`
  * and the provider component was reached through `.Provider`
  * (`packages/solid/src/reactive/signal.ts` at `v1.9.13`). In Solid
- * 2.0.0-rc.21, `createContext()` in `packages/solid/src/client/core.ts`
+ * 2.0.0-rc.23, `createContext()` in `packages/solid/src/client/core.ts`
  * returns the provider function itself, carrying `id` and `defaultValue` as
  * properties, and no `Provider` property exists anywhere in the runtime:
  * `Context.Provider` evaluates to `undefined`, so `<Context.Provider>` cannot

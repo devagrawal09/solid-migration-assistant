@@ -6,9 +6,9 @@ import { rewrite, type RuleRewrite } from "../../../../shared/finding.ts";
 
 /**
  * The upstream Solid commit whose worktree was read to build the allowlist
- * below: the `gitHead` published with `@solidjs/web@2.0.0-rc.21` and
- * `solid-js@2.0.0-rc.21` on npm, where `packages/web/package.json` is
- * `@solidjs/web` `2.0.0-rc.21`. The `v1.9.13` tag in the same repository and
+ * below: the `gitHead` published with `@solidjs/web@2.0.0-rc.23` and
+ * `solid-js@2.0.0-rc.23` on npm, where `packages/web/package.json` is
+ * `@solidjs/web` `2.0.0-rc.23`. The `v1.9.13` tag in the same repository and
  * the published `solid-js@1.9.13` build supply the legacy `solid-js/web` side
  * of every comparison.
  */
@@ -22,7 +22,7 @@ export const WEB_RELOCATION_TARGET = "@solidjs/web";
 /**
  * `solid-js/web` is *not* a pure package relocation. Unlike the five subpaths
  * handled by legacy-subpath-relocation, the web entry's export surface changed
- * between Solid 1.9.13 and 2.0.0-rc.21. Comparing the published client builds
+ * between Solid 1.9.13 and 2.0.0-rc.23. Comparing the published client builds
  * (`solid-js/web/dist/web.js` at 1.9.13 against `@solidjs/web/dist/web.js` at
  * rc.21), these 1.9 exports are gone: `createDynamic`, `Index`, `Hydration`,
  * `NoHydration`, `renderToStringAsync`, `ssrClassList`, `ssrSpread`,

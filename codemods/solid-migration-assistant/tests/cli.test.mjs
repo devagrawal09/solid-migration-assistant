@@ -97,7 +97,7 @@ test("reports Solid 1 manifests and jsxImportSource read-only, before the analyz
     assert.deepEqual(
       findings.map((finding) => `${finding.file}:${finding.line}:${finding.column} [${finding.severity}] ${finding.rule} ${finding.headline}`),
       [
-        "package.json:1:1 [build] project/solid-version Move this project's Solid dependencies to solid-js@2.0.0-rc.21.",
+        "package.json:1:1 [build] project/solid-version Move this project's Solid dependencies to solid-js@2.0.0-rc.23.",
         "package.json:4:5 [build] project/dependencies Move @solidjs/router to its Solid 2 line.",
         "package.json:6:5 [build] project/dependencies Move @tanstack/solid-query to its Solid 2 line.",
         "package.json:9:5 [build] project/dependencies Replace vite-plugin-solid with its Solid 2 successor.",
@@ -108,11 +108,11 @@ test("reports Solid 1 manifests and jsxImportSource read-only, before the analyz
     assert.match(findings[0].why, /declared as "\^1\.9\.3", a Solid 1 range; @solidjs\/web, the Solid 2 web renderer package, is not declared\./);
     assert.match(findings[2].why, /"catalog:" could not be compared/);
     assert.match(findings[4].guidance, /pins solid-js and @solidjs\/web to exactly 2\.0\.0-rc\.16/);
-    assert.equal(findings[5].guide, "https://github.com/solidjs/solid/blob/2105ffb8ca2fced55f5fac0763177fc93f97c2c2/documentation/solid-2.0/MIGRATION.md#typescript-jsx-solid-js--renderer-package");
+    assert.equal(findings[5].guide, "https://github.com/solidjs/solid/blob/8c34a505a853fcc894fcc8dad150d62f0d007fa2/documentation/solid-2.0/MIGRATION.md#typescript-jsx-solid-js--renderer-package");
 
     const migrated = join(surface, "migrated");
     mkdirSync(migrated);
-    writeFileSync(join(migrated, "package.json"), JSON.stringify({ dependencies: { "solid-js": "2.0.0-rc.21", "@solidjs/web": "2.0.0-rc.21" } }));
+    writeFileSync(join(migrated, "package.json"), JSON.stringify({ dependencies: { "solid-js": "2.0.0-rc.23", "@solidjs/web": "2.0.0-rc.23" } }));
     writeFileSync(join(migrated, "tsconfig.json"), JSON.stringify({ compilerOptions: { jsxImportSource: "@solidjs/web" } }));
     assert.deepEqual(projectFindings(migrated), []);
 
@@ -145,7 +145,7 @@ test("reports Solid 1 manifests and jsxImportSource read-only, before the analyz
     }
     assert.deepEqual(order, ["findings", "codemod"]);
     assert.equal(printed.length, 1);
-    assert.match(printed[0], /^\[solid-migration-assistant\] 6 findings for Solid 2\.0\.0-rc\.21\./);
+    assert.match(printed[0], /^\[solid-migration-assistant\] 6 findings for Solid 2\.0\.0-rc\.23\./);
     assert.match(printed[0], /\n\npackage\.json:1:1 \[build\] Move this project's Solid dependencies/);
     assert.match(printed[0], /\n\npackage\.json:4:5 \[build\] Move @solidjs\/router to its Solid 2 line\.\n  Rule: project\/dependencies\n/);
     assert.match(printed[0], /\n\ntsconfig\.json:1:1 /);
@@ -162,7 +162,7 @@ test("reports Solid 1 manifests and jsxImportSource read-only, before the analyz
   }
 });
 
-const GUIDE = "https://github.com/solidjs/solid/blob/2105ffb8ca2fced55f5fac0763177fc93f97c2c2/documentation/solid-2.0/MIGRATION.md";
+const GUIDE = "https://github.com/solidjs/solid/blob/8c34a505a853fcc894fcc8dad150d62f0d007fa2/documentation/solid-2.0/MIGRATION.md";
 
 function fakeFinding(file, line, headline, severity, rule = "jsx/example") {
   return { rule, file, line, column: 1, severity, headline, why: "Because.", guidance: "Do it.", lint: [], guide: `${GUIDE}#x` };
@@ -182,7 +182,7 @@ test("--format json re-emits the workflow's report as one sorted, tiered JSON do
   });
 
   const report = buildJsonReport({ workflow: "analyze", target: "/t", findings: parsed.findings, status: 0 });
-  assert.equal(report.solid.target, "solid-js@2.0.0-rc.21");
+  assert.equal(report.solid.target, "solid-js@2.0.0-rc.23");
   assert.deepEqual(report.summary, { findings: 2, files: 2, bySeverity: { build: 1, behavior: 1, deprecated: 0 } });
   assert.deepEqual(report.findings.map((finding) => [finding.file, finding.severity]), [["src/a.tsx", "build"], ["src/b.tsx", "behavior"]]);
 
@@ -221,7 +221,7 @@ test("--format agent prints a fix-ordered Markdown work list and is analyze-only
   const markdown = buildAgentReport({
     tool: "solid-migration-assistant",
     version: "0.0.0",
-    solid: { target: "solid-js@2.0.0-rc.21", sourceCommit: "c".repeat(40) },
+    solid: { target: "solid-js@2.0.0-rc.23", sourceCommit: "c".repeat(40) },
     target: "/app",
     summary: { findings: 3, files: 2, bySeverity: { build: 1, behavior: 1, deprecated: 1 } },
     findings: [
@@ -345,8 +345,8 @@ test("publishes exact immutable public-preview disclosure", () => {
   assert.ok(
     DISCLOSURE.includes(`Analyzer: ${packageJson.name}@${packageJson.version}`),
   );
-  assert.match(DISCLOSURE, /solid-js@2\.0\.0-rc\.21/);
-  assert.match(DISCLOSURE, /2105ffb8ca2fced55f5fac0763177fc93f97c2c2/);
+  assert.match(DISCLOSURE, /solid-js@2\.0\.0-rc\.23/);
+  assert.match(DISCLOSURE, /8c34a505a853fcc894fcc8dad150d62f0d007fa2/);
   assert.match(
     DISCLOSURE,
     /source-only.*incomplete.*no migration-readiness claim/is,
@@ -362,7 +362,7 @@ test("publishes exact immutable public-preview disclosure", () => {
   );
   assert.match(DISCLOSURE, /no analyzer telemetry or generated report/);
   assert.match(DISCLOSURE, /Codemod may retain normal workflow or task state/);
-  assert.match(DISCLOSURE, /github\.com\/solidjs\/solid\/blob\/2105ffb8/);
+  assert.match(DISCLOSURE, /github\.com\/solidjs\/solid\/blob\/8c34a505/);
   assert.match(
     DISCLOSURE,
     /github\.com\/devagrawal09\/solid-migration-assistant\/issues/,
@@ -449,10 +449,22 @@ function assertFinalDisclosure(diagnostics) {
   );
 }
 
+const paused = {
+  status: 0,
+  runStatus: "awaiting-approval",
+  output: undefined,
+  stderr: "Waiting for approval: @kobalte/core has no Solid 2 release. Apply the source rewrites anyway?\n  Resume with: codemod workflow resume --id 1 --approve\n",
+};
+
 test("stops a transform that a dependency without a Solid 2 release paused", () => {
-  const result = captureMain(["transform", "--allow-dirty"], {
-    cwd: packageDirectory,
-    runImpl: () => ({ status: 0, runStatus: "awaiting-approval", output: undefined }),
-  });
+  const result = captureMain(["transform", "--allow-dirty"], { cwd: packageDirectory, runImpl: () => paused });
   assert.equal(result.status, 2);
+});
+
+test("names the blocked dependency and not the resume hint when a transform pauses", () => {
+  const result = captureMain(["transform", "--allow-dirty"], { cwd: packageDirectory, runImpl: () => paused });
+  assert.equal(
+    result.diagnostics[0],
+    "[solid-migration-assistant] nothing was rewritten. @kobalte/core has no Solid 2 release. Pass --allow-blocked to apply the source rewrites anyway.",
+  );
 });

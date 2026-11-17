@@ -24,7 +24,7 @@ export type JsxTypeRelocation = {
  *
  * Solid 1.9.13 exported the `JSX` namespace from `solid-js`
  * (`packages/solid/src/index.ts`: `export type { JSXElement, JSX }`). At
- * 2.0.0-rc.21 `solid-js` exports no `JSX` at all; the renderer owns it:
+ * 2.0.0-rc.23 `solid-js` exports no `JSX` at all; the renderer owns it:
  * `packages/web/src/index.ts` declares `export type { JSX } from
  * "../jsx/jsx.js"`. The migration guide prescribes the two rewrites this rule
  * applies, each a pure type-level relocation with no runtime semantics to

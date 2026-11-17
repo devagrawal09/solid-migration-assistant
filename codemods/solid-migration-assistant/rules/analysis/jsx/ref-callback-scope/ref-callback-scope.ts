@@ -17,17 +17,19 @@ const OWNED_APIS = new Set([
   "createSignal",
   "createResource",
   "createRoot",
-  "getOwner",
-  "useContext",
 ]);
 
 /**
  * Reports an inline function passed as a JSX `ref` on an intrinsic element
  * whose body calls an owner-dependent Solid API. Solid 1.x ran ref callbacks
  * inside the component's reactive owner, so `onCleanup` and primitives
- * registered there; at rc.21 ref callbacks are unowned (`getOwner()` is
- * `null`), so such calls no longer register or leak (dev warns with
- * `NO_OWNER_CLEANUP` / `NO_OWNER_EFFECT`). Detection is by callee name inside
+ * registered there. Since rc.22 (#4761) a ref callback runs like a render
+ * effect's callback: in the creating pass's context, so `getOwner()` and
+ * `useContext` work again and are not reported, but it owns nothing, so
+ * `onCleanup` throws `CLEANUP_IN_FORBIDDEN_SCOPE` and creating a primitive
+ * throws `PRIMITIVE_IN_EFFECT_CALLBACK` in dev. (The migration guide at the
+ * pinned commit still says `getOwner()` is `null`; `ref()` in
+ * `packages/web/src/client.ts` is authoritative.) Detection is by callee name inside
  * the inline callback; a ref bound to an identifier is not reported because
  * its body is elsewhere.
  */
@@ -60,7 +62,7 @@ export function analyzeRefCallbackScope(
           finding(context.filename, start, {
         severity: "behavior",
         headline: `Move owner-dependent work out of this ref callback.`,
-        why: `Solid ${SOLID_TARGET_VERSION} runs ref callbacks unowned, so getOwner() is null inside them and the ${names} call(s) here no longer register with the component (Solid 1.x ran the callback inside the component's owner).`,
+        why: `Solid ${SOLID_TARGET_VERSION} runs ref callbacks like an effect callback that owns nothing, so the ${names} call(s) here no longer register with the component: in dev, onCleanup throws CLEANUP_IN_FORBIDDEN_SCOPE and creating a memo, effect or root throws PRIMITIVE_IN_EFFECT_CALLBACK (Solid 1.x ran the callback inside the component's owner).`,
         guidance: `Keep only element capture in the ref callback. Move one-off setup and its cleanup into onSettled in the component body, returning the cleanup function, or into the owned setup half of a directive factory whose returned apply callback receives the element.`,
         guide: MIGRATION_GUIDE,
       }),

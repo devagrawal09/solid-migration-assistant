@@ -25,7 +25,7 @@ export type StoreSetterRewrite = {
  * final value is not a function and not an object to merge, calls
  * `setProperty`, which assigns the value, deletes the key when the value is
  * `undefined`, and does nothing when the value is unchanged. At
- * 2.0.0-rc.21 the plain store setter is
+ * 2.0.0-rc.23 the plain store setter is
  * `(fn: (state: T) => T | void) => void` (`packages/signals/src/store/
  * types.ts`): it accepts only a draft callback, and the migration guide maps
  * a 1.x path setter onto a draft write to the same path, with setting
