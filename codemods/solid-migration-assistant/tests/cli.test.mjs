@@ -479,3 +479,55 @@ test("after a dependency bump, tells the user to install with the package manage
     rmSync(target, { recursive: true, force: true });
   }
 });
+
+function projectTree(files) {
+  const root = mkdtempSync(join(tmpdir(), "sma-project-"));
+  for (const [path, value] of Object.entries(files)) {
+    mkdirSync(dirname(join(root, path)), { recursive: true });
+    writeFileSync(join(root, path), typeof value === "string" ? value : JSON.stringify(value, null, 2));
+  }
+  return root;
+}
+
+const projectSites = (files) => {
+  const root = projectTree(files);
+  try {
+    return projectFindings(root).map((finding) => `${finding.file} ${finding.headline}`);
+  } finally {
+    rmSync(root, { recursive: true, force: true });
+  }
+};
+
+test("reports the Solid version of every workspace package, not only the root", () => {
+  assert.deepEqual(projectSites({
+    "package.json": { private: true, workspaces: ["packages/*"] },
+    "packages/app/package.json": { dependencies: { "solid-js": "^1.9.5", "@solidjs/web": "2.0.0-rc.23" } },
+  }), ["packages/app/package.json Move this project's Solid dependencies to solid-js@2.0.0-rc.23."]);
+});
+
+test("reports jsxImportSource in a workspace package's tsconfig.json", () => {
+  assert.deepEqual(projectSites({ "packages/app/tsconfig.json": { compilerOptions: { jsxImportSource: "solid-js" } } }), [
+    "packages/app/tsconfig.json Point jsxImportSource at the Solid 2 renderer package.",
+  ]);
+});
+
+test("reports an installed library whose solid-js peer range rules out Solid 2", () => {
+  assert.deepEqual(projectSites({
+    "package.json": { dependencies: { "solid-navigator": "^0.4.0" } },
+    "node_modules/solid-navigator/package.json": { version: "0.4.2", peerDependencies: { "solid-js": "^1.6.0" } },
+  }), ["package.json Check that solid-navigator supports Solid 2."]);
+});
+
+test("trusts an installed library whose solid-js peer range allows Solid 2", () => {
+  assert.deepEqual(projectSites({
+    "package.json": { dependencies: { "solid-navigator": "^1.0.0" } },
+    "node_modules/solid-navigator/package.json": { peerDependencies: { "solid-js": "^1.8.0 || ^2.0.0-0" } },
+  }), []);
+});
+
+test("skips a dependency on another workspace package", () => {
+  assert.deepEqual(projectSites({
+    "packages/ui/package.json": { name: "@app/solid-ui" },
+    "packages/app/package.json": { dependencies: { "@app/solid-ui": "^1.0.0" } },
+  }), []);
+});

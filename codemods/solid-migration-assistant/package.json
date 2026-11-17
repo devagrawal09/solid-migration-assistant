@@ -119,6 +119,7 @@
     "shared/imports.ts",
     "shared/jsx.ts",
     "shared/manifest.mjs",
+    "shared/peers.mjs",
     "shared/provenance.ts",
     "shared/run-workflow.mjs",
     "shared/semantic.ts",

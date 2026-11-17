@@ -48,12 +48,12 @@ export function bumpManifest(text) {
       const target = BUMPS[dependency];
       if (target === undefined || typeof range !== "string" || range === target) continue;
       if (!PLAIN_RANGE.test(range)) {
-        skipped.push({ name: dependency, range, reason: "not a plain semver range" });
+        skipped.push({ name: dependency, range, reason: range.startsWith("catalog:") ? "it comes from the workspace catalog, so move it there" : "it isn't a plain semver range" });
         continue;
       }
       const edit = valueEdit(text, name, dependency, range, target);
       if (edit === null) {
-        skipped.push({ name: dependency, range, reason: "could not be located in the file" });
+        skipped.push({ name: dependency, range, reason: "it couldn't be located in the file" });
         continue;
       }
       edits.push(edit);
@@ -61,11 +61,13 @@ export function bumpManifest(text) {
     }
   }
   if (typeof manifest.peerDependencies?.["solid-js"] === "string") {
-    skipped.push({ name: "solid-js", range: manifest.peerDependencies["solid-js"], reason: "peerDependencies range is the library author's call" });
+    skipped.push({ name: "solid-js", range: manifest.peerDependencies["solid-js"], reason: "a peer range is the library author's call" });
   }
 
+  // @solidjs/web only goes in beside a solid-js this edit moved, so the two
+  // never end up on different majors.
   const hasWeb = SECTIONS.some((name) => manifest[name]?.["@solidjs/web"] !== undefined);
-  if (!hasWeb) {
+  if (!hasWeb && changes.some((change) => change.name === "solid-js")) {
     const anchor = valueEdit(text, section, "solid-js", manifest[section]["solid-js"], SOLID_VERSION);
     if (anchor !== null) {
       // Insert right after the solid-js value; any comma that followed it

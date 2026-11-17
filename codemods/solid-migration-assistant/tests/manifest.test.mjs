@@ -56,3 +56,12 @@ test("points tsconfig's jsxImportSource at @solidjs/web", () => {
     '{\n  // JSX\n  "compilerOptions": { "jsxImportSource": "@solidjs/web" }\n}\n',
   );
 });
+
+test("reports a catalog range as one to move in the workspace catalog", () => {
+  const result = bumpManifest(manifest({ "solid-js": "catalog:" }));
+  assert.match(result.skipped[0].reason, /workspace catalog/);
+});
+
+test("adds no @solidjs/web beside a solid-js it left alone", () => {
+  assert.equal(bumped(manifest({ "solid-js": "catalog:" })).dependencies["@solidjs/web"], undefined);
+});
