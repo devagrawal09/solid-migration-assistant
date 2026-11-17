@@ -31,7 +31,8 @@ Pass `--format json` (with `analyze` or `transform`) to get one JSON document on
 ## Supported detections
 
 ### Imports
-- **Solid web package imports** — static ES imports from `solid-js/web` → `@solidjs/web`.
+- **Solid web package imports** — static ES imports from `solid-js/web` → `@solidjs/web`; names it no longer exports (`clearDelegatedEvents`, `Suspense`, `mergeProps` and others) get their replacement instead.
+- **Internal exports** — `sharedConfig` and `$DEVCOMP` from `solid-js` or `solid-js/web` → `solid-js/internal`, the only place their types live in Solid 2.
 - **Router, meta, and SolidStart imports** — each Solid 1 import from `@solidjs/router` (for example `Router`, `Route`, `A`, `cache`, `createAsync`, `useSubmission`, `redirect`, deprecated `action`), `@solidjs/meta` (`MetaProvider`, `useHead`), `@solidjs/start` and its subpaths (`defineConfig`, `createHandler`, `StartServer`, `mount`, `FileRoutes`, `clientOnly`, `createMiddleware`), and `vinxi/http`, with its audited Solid 2 replacement. Any other import from `@solidjs/start` or `vinxi` is reported because neither has a Solid 2 release. Names that changed only in edge cases (`useNavigate` and `useResolvedPath` under a `base`, `useParams` now decoding) are not reported.
 - **JSX type imports** — `JSX` and `JSXElement` type specifiers from `solid-js`, and `@jsxImportSource solid-js` pragmas → the renderer package (`@solidjs/web`); `tsconfig.json`'s `jsxImportSource` is outside the scanned surface and is called out in the guidance.
 - **Remaining Solid import subpaths** — `solid-js/store`, `/h`, `/html`, `/universal`, `/jsx-runtime`, `/jsx-dev-runtime` → new package locations.

@@ -1,0 +1,18 @@
+{
+  "findings": [
+    {
+      "rule": "imports/web-import",
+      "file": "analysis/imports/web-import/fixtures/delegated-events-cleanup.fixture.tsx",
+      "line": 1,
+      "column": 38,
+      "severity": "build",
+      "headline": "Move this Solid web renderer static import.",
+      "why": "Solid 2 publishes the web renderer from @solidjs/web instead of the solid-js/web subpath.",
+      "guidance": "Do not move clearDelegatedEvents with the module source: delete the clearDelegatedEvents() call and dispose the render root instead, since delegated handlers now belong to each root. Nothing else in this statement moves to @solidjs/web.",
+      "lint": [
+        "removed-api"
+      ],
+      "guide": "https://github.com/solidjs/solid/blob/a8186e6738b3a6a3341c561f66e9325432d6759b/documentation/solid-2.0/MIGRATION.md#imports-where-things-live-now"
+    }
+  ]
+}

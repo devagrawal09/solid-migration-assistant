@@ -401,7 +401,7 @@ src/negative.ts:10:29 [build] Move this Solid 2 legacy subpath static import.
 src/negative.ts:11:22 [build] Move this Solid web renderer static import.
   Rule: imports/web-import
   Why: Solid 2 publishes the web renderer from @solidjs/web instead of the solid-js/web subpath.
-  Guidance: Change only this static import's module source to @solidjs/web and preserve its import form and quote style. If this code reads Suspense, ErrorBoundary, SuspenseList, mergeProps, Index, createDynamic or renderToStringAsync from the module, replace those first; @solidjs/web does not export them.
+  Guidance: Change only this static import's module source to @solidjs/web and preserve its import form and quote style. If this code reads Suspense, ErrorBoundary, SuspenseList, mergeProps, Index, createDynamic, renderToStringAsync or clearDelegatedEvents from the module, replace those first; @solidjs/web does not export them.
   Lint: eslint-plugin-solid's solid/removed-api (v2 config) keeps reporting this site after migration.
   Guide: https://github.com/solidjs/solid/blob/a8186e6738b3a6a3341c561f66e9325432d6759b/documentation/solid-2.0/MIGRATION.md#imports-where-things-live-now
 
@@ -414,7 +414,7 @@ src/negative.ts:17:26 [build] Move this Solid 2 legacy subpath require() call.
 src/negative.ts:18:29 [build] Move this Solid web renderer require() call.
   Rule: imports/web-import
   Why: Solid 2 publishes the web renderer from @solidjs/web instead of the solid-js/web subpath.
-  Guidance: Change only this require call's module source to @solidjs/web and preserve its quote style. If this code reads Suspense, ErrorBoundary, SuspenseList, mergeProps, Index, createDynamic or renderToStringAsync from the module, replace those first; @solidjs/web does not export them.
+  Guidance: Change only this require call's module source to @solidjs/web and preserve its quote style. If this code reads Suspense, ErrorBoundary, SuspenseList, mergeProps, Index, createDynamic, renderToStringAsync or clearDelegatedEvents from the module, replace those first; @solidjs/web does not export them.
   Lint: eslint-plugin-solid's solid/removed-api (v2 config) keeps reporting this site after migration.
   Guide: https://github.com/solidjs/solid/blob/a8186e6738b3a6a3341c561f66e9325432d6759b/documentation/solid-2.0/MIGRATION.md#imports-where-things-live-now
 
@@ -428,7 +428,7 @@ src/nested/deep.jsx:7:26 [build] Move this Solid web renderer static import.
 src/plain.js:4:21 [build] Move this Solid web renderer require() call.
   Rule: imports/web-import
   Why: Solid 2 publishes the web renderer from @solidjs/web instead of the solid-js/web subpath.
-  Guidance: Change only this require call's module source to @solidjs/web and preserve its quote style. If this code reads Suspense, ErrorBoundary, SuspenseList, mergeProps, Index, createDynamic or renderToStringAsync from the module, replace those first; @solidjs/web does not export them.
+  Guidance: Change only this require call's module source to @solidjs/web and preserve its quote style. If this code reads Suspense, ErrorBoundary, SuspenseList, mergeProps, Index, createDynamic, renderToStringAsync or clearDelegatedEvents from the module, replace those first; @solidjs/web does not export them.
   Lint: eslint-plugin-solid's solid/removed-api (v2 config) keeps reporting this site after migration.
   Guide: https://github.com/solidjs/solid/blob/a8186e6738b3a6a3341c561f66e9325432d6759b/documentation/solid-2.0/MIGRATION.md#imports-where-things-live-now
 
@@ -462,21 +462,21 @@ src/relocations.tsx:32:60 [build] Move this Solid web renderer static import.
 src/relocations.tsx:33:31 [build] Move this Solid web renderer static import.
   Rule: imports/web-import
   Why: Solid 2 publishes the web renderer from @solidjs/web instead of the solid-js/web subpath.
-  Guidance: Change only this static import's module source to @solidjs/web and preserve its import form and quote style. If this code reads Suspense, ErrorBoundary, SuspenseList, mergeProps, Index, createDynamic or renderToStringAsync from the module, replace those first; @solidjs/web does not export them.
+  Guidance: Change only this static import's module source to @solidjs/web and preserve its import form and quote style. If this code reads Suspense, ErrorBoundary, SuspenseList, mergeProps, Index, createDynamic, renderToStringAsync or clearDelegatedEvents from the module, replace those first; @solidjs/web does not export them.
   Lint: eslint-plugin-solid's solid/removed-api (v2 config) keeps reporting this site after migration.
   Guide: https://github.com/solidjs/solid/blob/a8186e6738b3a6a3341c561f66e9325432d6759b/documentation/solid-2.0/MIGRATION.md#imports-where-things-live-now
 
 src/relocations.tsx:34:24 [build] Move this Solid web renderer static import.
   Rule: imports/web-import
   Why: Solid 2 publishes the web renderer from @solidjs/web instead of the solid-js/web subpath.
-  Guidance: Change only this static import's module source to @solidjs/web and preserve its import form and quote style. If this code reads Suspense, ErrorBoundary, SuspenseList, mergeProps, Index, createDynamic or renderToStringAsync from the module, replace those first; @solidjs/web does not export them.
+  Guidance: Change only this static import's module source to @solidjs/web and preserve its import form and quote style. If this code reads Suspense, ErrorBoundary, SuspenseList, mergeProps, Index, createDynamic, renderToStringAsync or clearDelegatedEvents from the module, replace those first; @solidjs/web does not export them.
   Lint: eslint-plugin-solid's solid/removed-api (v2 config) keeps reporting this site after migration.
   Guide: https://github.com/solidjs/solid/blob/a8186e6738b3a6a3341c561f66e9325432d6759b/documentation/solid-2.0/MIGRATION.md#imports-where-things-live-now
 
 src/relocations.tsx:35:27 [build] Move this Solid web renderer dynamic import().
   Rule: imports/web-import
   Why: Solid 2 publishes the web renderer from @solidjs/web instead of the solid-js/web subpath.
-  Guidance: Change only this dynamic import's module source to @solidjs/web and preserve its quote style. If this code reads Suspense, ErrorBoundary, SuspenseList, mergeProps, Index, createDynamic or renderToStringAsync from the module, replace those first; @solidjs/web does not export them.
+  Guidance: Change only this dynamic import's module source to @solidjs/web and preserve its quote style. If this code reads Suspense, ErrorBoundary, SuspenseList, mergeProps, Index, createDynamic, renderToStringAsync or clearDelegatedEvents from the module, replace those first; @solidjs/web does not export them.
   Lint: eslint-plugin-solid's solid/removed-api (v2 config) keeps reporting this site after migration.
   Guide: https://github.com/solidjs/solid/blob/a8186e6738b3a6a3341c561f66e9325432d6759b/documentation/solid-2.0/MIGRATION.md#imports-where-things-live-now
 

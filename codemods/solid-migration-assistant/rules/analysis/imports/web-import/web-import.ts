@@ -41,6 +41,7 @@ const NOT_MOVED: Readonly<Record<string, string>> = {
   Index: "replace Index with For keyed={false} from solid-js",
   createDynamic: "replace createDynamic(source, props) with the dynamic(source) factory from @solidjs/web",
   renderToStringAsync: "replace renderToStringAsync(...) with await renderToStream(...) from @solidjs/web",
+  clearDelegatedEvents: "delete the clearDelegatedEvents() call and dispose the render root instead, since delegated handlers now belong to each root",
 };
 
 const UNLISTED_NAMES_CAUTION = `If this code reads ${list(Object.keys(NOT_MOVED), "or")} from the module, replace those first; @solidjs/web does not export them.`;

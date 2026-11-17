@@ -91,8 +91,7 @@
         { "point": "on: and oncapture: are removed", "rules": ["jsx/dom-event-namespaces"] },
         {
           "point": "delegated events belong to render roots; remove clearDelegatedEvents()",
-          "rules": ["imports/web-import"],
-          "gap": "The import is reported as one to move; nothing says to delete the call."
+          "rules": ["imports/web-import"]
         }
       ]
     },
@@ -160,7 +159,7 @@
         { "point": "from, observable", "rules": ["reactivity/from-observable"] },
         { "point": "indexArray", "rules": ["reactivity/index-array"] },
         { "point": "enableScheduling, writeSignal", "rules": ["reactivity/utility-renames"] },
-        { "point": "sharedConfig, $DEVCOMP", "gap": "Moved to solid-js/internal; no rule reports imports of them." },
+        { "point": "sharedConfig, $DEVCOMP", "rules": ["imports/internal-exports"] },
         { "point": "use: directives", "rules": ["jsx/dom-use-directive"] },
         { "point": "attr: and bool:", "rules": ["jsx/dom-attr-namespaces"] },
         { "point": "on: and oncapture:", "rules": ["jsx/dom-event-namespaces"] },

@@ -1,0 +1,40 @@
+{
+  "findings": [
+    {
+      "rule": "imports/internal-exports",
+      "file": "analysis/imports/internal-exports/fixtures/imports.fixture.tsx",
+      "line": 1,
+      "column": 10,
+      "severity": "build",
+      "headline": "Import sharedConfig from solid-js/internal.",
+      "why": "Solid 2.0.0 drops sharedConfig from solid-js's public types; only solid-js/internal declares it, so this import is a type error.",
+      "guidance": "Move sharedConfig into an import from solid-js/internal and keep its alias. solid-js/internal is not public API and can change in any release, so if this is application code rather than a renderer or dev tool, look for a public API instead.",
+      "guide": "https://github.com/solidjs/solid/blob/a8186e6738b3a6a3341c561f66e9325432d6759b/documentation/solid-2.0/MIGRATION.md#removals",
+      "lint": []
+    },
+    {
+      "rule": "imports/internal-exports",
+      "file": "analysis/imports/internal-exports/fixtures/imports.fixture.tsx",
+      "line": 2,
+      "column": 10,
+      "severity": "build",
+      "headline": "Import $DEVCOMP from solid-js/internal.",
+      "why": "Solid 2.0.0 drops $DEVCOMP from solid-js/web's public types; only solid-js/internal declares it, so this import is a type error.",
+      "guidance": "Move $DEVCOMP into an import from solid-js/internal and keep its alias. solid-js/internal is not public API and can change in any release, so if this is application code rather than a renderer or dev tool, look for a public API instead.",
+      "guide": "https://github.com/solidjs/solid/blob/a8186e6738b3a6a3341c561f66e9325432d6759b/documentation/solid-2.0/MIGRATION.md#removals",
+      "lint": []
+    },
+    {
+      "rule": "imports/internal-exports",
+      "file": "analysis/imports/internal-exports/fixtures/imports.fixture.tsx",
+      "line": 5,
+      "column": 10,
+      "severity": "build",
+      "headline": "Import sharedConfig from solid-js/internal.",
+      "why": "Solid 2.0.0 drops sharedConfig from solid-js's public types; only solid-js/internal declares it, so this import is a type error.",
+      "guidance": "Move sharedConfig into an import from solid-js/internal and keep its alias. solid-js/internal is not public API and can change in any release, so if this is application code rather than a renderer or dev tool, look for a public API instead.",
+      "guide": "https://github.com/solidjs/solid/blob/a8186e6738b3a6a3341c561f66e9325432d6759b/documentation/solid-2.0/MIGRATION.md#removals",
+      "lint": []
+    }
+  ]
+}

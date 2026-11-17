@@ -2,6 +2,7 @@
 export const ANALYSIS_STEPS = [
   { rule: "imports/beta32-subpaths", name: "analyzeBeta32SubpathImports" },
   { rule: "imports/ecosystem-apis", name: "analyzeEcosystemImports" },
+  { rule: "imports/internal-exports", name: "analyzeInternalExports" },
   { rule: "imports/jsx-types", name: "analyzeJsxTypeImports" },
   { rule: "imports/web-import", name: "analyzeWebImport" },
   { rule: "jsx/attribute-names", name: "analyzeAttributeNames" },
