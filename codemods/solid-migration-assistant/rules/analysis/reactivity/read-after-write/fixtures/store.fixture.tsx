@@ -15,3 +15,20 @@ export function toggle() {
     draft.open = !before;
   });
 }
+
+export function submit() {
+  setState({ open: true });
+  return state.items.join(",");
+}
+
+export function submitDraft() {
+  setState((draft) => {
+    draft.open = true;
+  });
+  return [state.items.length, state.open];
+}
+
+export function rename(next: string) {
+  setState("items", [next]);
+  return state["items"];
+}

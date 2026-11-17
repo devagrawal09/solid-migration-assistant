@@ -1,6 +1,6 @@
 import type { SgNode } from "codemod:ast-grep";
 import type TSX from "codemod:ast-grep/langs/tsx";
-import { findImportedCalls } from "../../../../shared/analysis.ts";
+import { findImportedCalls, stringLiteralValue } from "../../../../shared/analysis.ts";
 import { finding, type RuleFinding } from "../../../../shared/finding.ts";
 import { referencesOf } from "../../../../shared/semantic.ts";
 import { calleeOf, runningFunction, statePairs, type StatePair } from "../../../../shared/state-pairs.ts";
@@ -24,8 +24,10 @@ type Site = { node: SgNode<TSX>; filename: string; scope: number };
  * same function body as the write, later in the source, outside JSX (the
  * compiler defers JSX expressions), and not in the other branch of the
  * `if` or `switch` that holds the write. Callbacks given to `untrack` run in
- * place, so they count as the surrounding body. Reads through a memo or a
- * helper function are not traced.
+ * place, so they count as the surrounding body. A store read of a top-level
+ * field the write provably leaves alone (a path setter's first key, an
+ * object merge's keys, or the `draft.key` uses of a draft callback) is not
+ * reported. Reads through a memo or a helper function are not traced.
  */
 export function analyzeReadAfterWrite(
   rootNode: SgNode<TSX>,
@@ -43,9 +45,11 @@ export function analyzeReadAfterWrite(
     for (const write of writes) {
       const call = calleeOf(write.node)!;
       const end = call.range().end.index;
+      const written = pair.kind === "store" ? writtenKeys(call) : null;
       const read = reads.find(
         (candidate) =>
           candidate.filename === write.filename &&
+          (written === null || !untouched(written, candidate.node)) &&
           candidate.scope === write.scope &&
           candidate.node.range().start.index >= end &&
           !onOtherBranch(call, candidate.node) &&
@@ -119,4 +123,59 @@ function onOtherBranch(write: SgNode<TSX>, read: SgNode<TSX>): boolean {
     child = ancestor;
   }
   return false;
+}
+
+/**
+ * The top-level store fields a setter call writes, or null when they can't
+ * be read off the call: `setS("a", ...)`, `setS({ a, b })`, or a draft
+ * callback that only uses its draft as `draft.a...`.
+ */
+function writtenKeys(call: SgNode<TSX>): Set<string> | null {
+  const [first] = call.field("arguments")?.children().filter((child) => child.isNamed() && child.kind() !== "comment") ?? [];
+  if (first === undefined) return null;
+  const path = stringLiteralValue(first);
+  if (path !== null) return new Set([path]);
+  if (first.kind() === "object") {
+    const keys = new Set<string>();
+    for (const entry of first.children().filter((child) => child.isNamed() && child.kind() !== "comment")) {
+      const key = entry.kind() === "shorthand_property_identifier" ? entry : entry.kind() === "pair" ? entry.field("key") : null;
+      if (key === null) return null;
+      const name = key.kind() === "property_identifier" || key.kind() === "shorthand_property_identifier" ? key.text() : stringLiteralValue(key);
+      if (name === null) return null;
+      keys.add(name);
+    }
+    return keys;
+  }
+  if (first.kind() !== "arrow_function" && first.kind() !== "function_expression") return null;
+  const parameters = first.field("parameters")?.children().filter((child) => child.isNamed()) ?? [];
+  const draft = parameters.length === 1 ? (parameters[0]!.kind() === "identifier" ? parameters[0]! : parameters[0]!.field("pattern")) : first.field("parameter");
+  const body = first.field("body");
+  if (draft?.kind() !== "identifier" || body?.kind() !== "statement_block") return null;
+  if (body.find({ rule: { kind: "return_statement", has: { kind: "identifier" } } }) !== null) return null;
+  const keys = new Set<string>();
+  for (const use of body.findAll({ rule: { kind: "identifier", regex: `^${draft.text()}$` } })) {
+    const key = readKey(use.parent());
+    if (key === null || use.parent()!.field("object")?.id() !== use.id()) return null;
+    keys.add(key);
+  }
+  return keys;
+}
+
+/** True when `read` is a store field read of a top-level key outside `written`. */
+function untouched(written: Set<string>, read: SgNode<TSX>): boolean {
+  const key = readKey(read);
+  return key !== null && !written.has(key);
+}
+
+/** The field name of `s.a` or `s["a"]`, or null. */
+function readKey(node: SgNode<TSX> | null): string | null {
+  if (node?.kind() === "member_expression") {
+    const property = node.field("property");
+    return property?.kind() === "property_identifier" ? property.text() : null;
+  }
+  if (node?.kind() === "subscript_expression") {
+    const index = node.field("index");
+    return index === null ? null : stringLiteralValue(index);
+  }
+  return null;
 }
