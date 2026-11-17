@@ -32,6 +32,7 @@ export const ANALYSIS_STEPS = [
   { rule: "reactivity/error-handling", name: "analyzeResetErrorBoundaries" },
   { rule: "reactivity/from-observable", name: "analyzeFrom" },
   { rule: "reactivity/from-observable", name: "analyzeObservable" },
+  { rule: "reactivity/function-initial-value", name: "analyzeFunctionInitialValue" },
   { rule: "reactivity/index-array", name: "analyzeIndexArray" },
   { rule: "reactivity/nested-create-root", name: "analyzeNestedCreateRoot" },
   { rule: "reactivity/on-helper", name: "analyzeOnHelper" },

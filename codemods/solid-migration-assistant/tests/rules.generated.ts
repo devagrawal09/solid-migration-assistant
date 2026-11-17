@@ -28,6 +28,7 @@ import { analyzeCreateResource } from "../rules/analysis/reactivity/create-resou
 import { analyzeCreateSelector } from "../rules/analysis/reactivity/create-selector/create-selector.ts";
 import { analyzeOnError, analyzeCatchError, analyzeResetErrorBoundaries } from "../rules/analysis/reactivity/error-handling/error-handling.ts";
 import { analyzeFrom, analyzeObservable } from "../rules/analysis/reactivity/from-observable/from-observable.ts";
+import { analyzeFunctionInitialValue } from "../rules/analysis/reactivity/function-initial-value/function-initial-value.ts";
 import { analyzeIndexArray } from "../rules/analysis/reactivity/index-array/index-array.ts";
 import { analyzeNestedCreateRoot } from "../rules/analysis/reactivity/nested-create-root/nested-create-root.ts";
 import { analyzeOnHelper } from "../rules/analysis/reactivity/on-helper/on-helper.ts";
@@ -80,6 +81,7 @@ export const ANALYSIS_RULES = {
   "reactivity/create-selector": [analyzeCreateSelector],
   "reactivity/error-handling": [analyzeOnError, analyzeCatchError, analyzeResetErrorBoundaries],
   "reactivity/from-observable": [analyzeFrom, analyzeObservable],
+  "reactivity/function-initial-value": [analyzeFunctionInitialValue],
   "reactivity/index-array": [analyzeIndexArray],
   "reactivity/nested-create-root": [analyzeNestedCreateRoot],
   "reactivity/on-helper": [analyzeOnHelper],

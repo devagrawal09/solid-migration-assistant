@@ -64,7 +64,7 @@
     { "anchor": "mergeprops--splitprops--merge--omit", "rules": ["props/merge-props", "props/split-props"] },
     {
       "anchor": "new-function-forms-createsignalfn-and-createstorefn",
-      "gap": "1.x code that keeps a function as a signal's value, createSignal(fn), gets a derived signal in 2.0; no rule reports it."
+      "rules": ["reactivity/function-initial-value"]
     },
     { "anchor": "control-flow", "excluded": "Groups the sections below." },
     {
