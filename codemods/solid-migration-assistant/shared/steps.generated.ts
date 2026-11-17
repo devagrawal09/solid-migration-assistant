@@ -39,6 +39,7 @@ export const ANALYSIS_STEPS = [
   { rule: "reactivity/index-array", name: "analyzeIndexArray" },
   { rule: "reactivity/nested-create-root", name: "analyzeNestedCreateRoot" },
   { rule: "reactivity/on-helper", name: "analyzeOnHelper" },
+  { rule: "reactivity/owned-write", name: "analyzeOwnedWrite" },
   { rule: "reactivity/read-after-write", name: "analyzeReadAfterWrite" },
   { rule: "reactivity/transition-apis", name: "analyzeStartTransition" },
   { rule: "reactivity/transition-apis", name: "analyzeUseTransition" },

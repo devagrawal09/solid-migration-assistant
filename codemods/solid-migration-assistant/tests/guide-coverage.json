@@ -41,7 +41,7 @@
       "anchor": "write-inside-reactive-scope-owned-scope",
       "points": [
         { "point": "writes from createComputed and one-argument createEffect", "rules": ["reactivity/create-computed", "reactivity/create-effect"] },
-        { "point": "writes from inside createMemo or another owned computation", "gap": "Throws in dev; no rule looks for setter calls inside a memo." }
+        { "point": "writes from a component body, createMemo or createRoot", "rules": ["reactivity/owned-write"] }
       ]
     },
     {

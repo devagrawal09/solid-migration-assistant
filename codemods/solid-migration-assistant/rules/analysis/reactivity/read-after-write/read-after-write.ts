@@ -1,13 +1,13 @@
 import type { SgNode } from "codemod:ast-grep";
 import type TSX from "codemod:ast-grep/langs/tsx";
-import { enclosingFunction, findImportedCalls } from "../../../../shared/analysis.ts";
+import { findImportedCalls } from "../../../../shared/analysis.ts";
 import { finding, type RuleFinding } from "../../../../shared/finding.ts";
 import { referencesOf } from "../../../../shared/semantic.ts";
+import { calleeOf, runningFunction, statePairs, type StatePair } from "../../../../shared/state-pairs.ts";
 import { migrationGuide, SOLID_TARGET_VERSION } from "../../../../shared/target.ts";
 
 const MIGRATION_GUIDE = migrationGuide("batching--reads-values-update-after-flush");
 
-type Pair = { kind: "signal" | "store"; getter: SgNode<TSX>; setter: SgNode<TSX> };
 type Site = { node: SgNode<TSX>; filename: string; scope: number };
 
 /**
@@ -34,7 +34,7 @@ export function analyzeReadAfterWrite(
   const flushes = findImportedCalls(rootNode, "solid-js", "flush").map(({ call, filename }) => site(call, filename));
   const findings = new Map<string, RuleFinding>();
 
-  for (const pair of pairs(rootNode)) {
+  for (const pair of statePairs(rootNode)) {
     const writes = uses(pair.setter).filter(({ node }) => calleeOf(node) !== null);
     const reads = uses(pair.getter).flatMap((use) => {
       const node = readOf(use.node, pair.kind);
@@ -77,25 +77,6 @@ export function analyzeReadAfterWrite(
   return [...findings.values()].sort((a, b) => a.file.localeCompare(b.file) || a.line - b.line || a.column - b.column);
 }
 
-function pairs(rootNode: SgNode<TSX>): Pair[] {
-  const found: Pair[] = [];
-  const sources = [
-    { kind: "signal" as const, modules: ["solid-js"], name: "createSignal" },
-    { kind: "store" as const, modules: ["solid-js/store", "solid-js"], name: "createStore" },
-  ];
-  for (const { kind, modules, name } of sources) {
-    for (const { call } of findImportedCalls(rootNode, modules, name)) {
-      const declarator = call.parent();
-      if (declarator?.kind() !== "variable_declarator") continue;
-      const pattern = declarator.field("name");
-      if (pattern?.kind() !== "array_pattern") continue;
-      const [getter, setter] = pattern.children().filter((child) => child.isNamed() && child.kind() !== "comment");
-      if (getter?.kind() === "identifier" && setter?.kind() === "identifier") found.push({ kind, getter, setter });
-    }
-  }
-  return found;
-}
-
 function uses(binding: SgNode<TSX>): Site[] {
   return referencesOf(binding).flatMap(({ root, nodes }) => {
     const filename = root.relativeFilename().replaceAll("\\", "/");
@@ -104,17 +85,11 @@ function uses(binding: SgNode<TSX>): Site[] {
 }
 
 function site(node: SgNode<TSX>, filename: string): Site {
-  return { node, filename, scope: scopeOf(node)?.id() ?? -1 };
-}
-
-/** The call whose callee is `reference`, or null. */
-function calleeOf(reference: SgNode<TSX>): SgNode<TSX> | null {
-  const call = reference.parent();
-  return call?.kind() === "call_expression" && call.field("function")?.id() === reference.id() ? call : null;
+  return { node, filename, scope: runningFunction(node)?.id() ?? -1 };
 }
 
 /** `x()` for a signal; `s.a` or `s[k]` for a store. Null for any other use. */
-function readOf(reference: SgNode<TSX>, kind: Pair["kind"]): SgNode<TSX> | null {
+function readOf(reference: SgNode<TSX>, kind: StatePair["kind"]): SgNode<TSX> | null {
   if (kind === "signal") return calleeOf(reference);
   const parent = reference.parent();
   if (parent === null) return null;
@@ -122,20 +97,8 @@ function readOf(reference: SgNode<TSX>, kind: Pair["kind"]): SgNode<TSX> | null 
   return parent.field("object")?.id() === reference.id() ? parent : null;
 }
 
-/** The function whose body runs `node`, looking through `untrack(() => ...)`. */
-function scopeOf(node: SgNode<TSX>): SgNode<TSX> | null {
-  let fn = enclosingFunction(node);
-  while (fn !== null && runsInPlace(fn)) fn = enclosingFunction(fn);
-  return fn;
-}
-
-function runsInPlace(fn: SgNode<TSX>): boolean {
-  const call = fn.parent()?.parent();
-  return call?.kind() === "call_expression" && call.field("function")?.text() === "untrack";
-}
-
 function insideJsx(node: SgNode<TSX>): boolean {
-  const scope = scopeOf(node);
+  const scope = runningFunction(node);
   for (const ancestor of node.ancestors()) {
     if (scope !== null && ancestor.id() === scope.id()) return false;
     if (ancestor.kind() === "jsx_expression") return true;
