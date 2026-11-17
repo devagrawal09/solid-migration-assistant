@@ -8,9 +8,16 @@ import { MIGRATION_GUIDE_URL, SOLID_TARGET_VERSION } from "./shared/target.ts";
 // The Solid 1.9 -> 2 assistant on the code-first engine
 // (codemod/codemod#2485, engine/code-first 9c91ebf, published as 2.0.0-alpha.3).
 
+const OUTSIDE_PROJECT = ["**/node_modules/**", "**/dist/**", "**/build/**", "**/coverage/**"];
 const SOURCES = {
   include: ["**/*.js", "**/*.jsx", "**/*.ts", "**/*.tsx"],
-  exclude: ["**/node_modules/**", "**/dist/**", "**/build/**", "**/coverage/**", "**/*.d.ts"],
+  exclude: [...OUTSIDE_PROJECT, "**/*.d.ts"],
+};
+// create-vite's Solid TypeScript template keeps jsxImportSource in
+// tsconfig.app.json; tsconfig.json there only lists references.
+const PROJECT_CONFIGS = {
+  include: ["package.json", "tsconfig.json", "tsconfig.*.json", "jsconfig.json"],
+  exclude: OUTSIDE_PROJECT,
 };
 const FINDINGS = "solid-migration-assistant-guidance";
 const REWRITES = "solid-migration-assistant-transform-report";
@@ -92,21 +99,27 @@ export default async function main({ params }: { params: Params }) {
   const manifests = await step(
     "Read dependencies",
     forEachFile(
-      { include: ["package.json", "package-lock.json"] },
+      { include: ["package.json", "package-lock.json"], exclude: OUTSIDE_PROJECT },
       (file) => readDependencies(file.path, file.text),
     ),
   );
   const declared: Record<string, string> = {};
   const resolved: Record<string, string> = {};
+  const solidRanges: string[] = [];
   for (const m of manifests.outputs as any[]) {
     Object.assign(declared, m.declared ?? {});
     Object.assign(resolved, m.resolved ?? {});
+    if (typeof m.declared?.["solid-js"] === "string") solidRanges.push(m.declared["solid-js"]);
   }
 
-  // Guard: this workflow only knows the Solid 1 -> 2 move.
+  // Guard: this workflow only knows the Solid 1 -> 2 move. In a workspace,
+  // one package on Solid 1 is enough to run.
   const solid = resolved["solid-js"] ?? declared["solid-js"];
   if (solid === undefined) return { skipped: "solid-js is not a dependency of this project" };
-  if ((major(solid) ?? 1) >= 2) return { skipped: `solid-js is already ${solid}` };
+  // A range without a version (latest, *, workspace:) goes by the lockfile.
+  const onSolid2 = solidRanges.every((range) => (major(range) ?? major(resolved["solid-js"]) ?? 1) >= 2)
+    && (major(resolved["solid-js"]) ?? 2) >= 2;
+  if (onSolid2) return { skipped: `solid-js is already ${solid}` };
 
   const dependencyPlan = DEPENDENCIES.filter((d) => typeof declared[d.name] === "string")
     .filter((d) => d.legacy === null || d.legacy(declared[d.name]!))
@@ -178,7 +191,7 @@ export default async function main({ params }: { params: Params }) {
     }
     const project = await step(
       "Move package.json and tsconfig.json to Solid 2",
-      forEachFile({ include: ["package.json", "tsconfig.json"] }, (file) => {
+      forEachFile(PROJECT_CONFIGS, (file) => {
         if (file.path.endsWith("package.json")) {
           const bumped = bumpManifest(file.text);
           if (bumped === null) return undefined;

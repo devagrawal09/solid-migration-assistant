@@ -6,7 +6,7 @@ import { basename, dirname, join, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 import { byLocation, placeOf, renderAgentReport, renderText, summaryOf } from "./format.mjs";
 import { DEPENDENCY_MAP, DEPENDENCY_VERIFIED_ON, dependencyHeadline } from "./dependencies.mjs";
-import { allowsSolid2 } from "./peers.mjs";
+import { allowsSolid2, isSolid2Only } from "./peers.mjs";
 
 const packageDirectory = resolve(dirname(fileURLToPath(import.meta.url)), "..");
 const require = createRequire(import.meta.url);
@@ -46,7 +46,7 @@ export function projectFindings(target) {
   const workspaceNames = new Set(manifests.map((file) => readJsonLike(resolve(target, file))?.name).filter(Boolean));
   const findings = [];
   for (const file of manifests) findings.push(...manifestFindings(target, file, workspaceNames));
-  for (const file of files.filter((file) => basename(file) === "tsconfig.json")) {
+  for (const file of files.filter((file) => basename(file) !== "package.json")) {
     const jsxImportSource = readJsonLike(resolve(target, file))?.compilerOptions?.jsxImportSource;
     if (jsxImportSource !== "solid-js") continue;
     findings.push({
@@ -65,14 +65,25 @@ export function projectFindings(target) {
   return byLocation(findings);
 }
 
+const PLAIN_RANGE = /^[\s^~<>=v]*\d/;
+const PROJECT_CONFIG = /^(package\.json|tsconfig(\..+)?\.json|jsconfig\.json)$/;
+const OUTSIDE_PROJECT = new Set(["node_modules", "dist", "build", "coverage"]);
+
 /**
- * Every package.json and tsconfig.json the workflow also sees: with git, the
- * tracked and untracked files git doesn't ignore; otherwise a walk that skips
- * node_modules and dot directories. Paths are relative to the target.
+ * Every package.json, tsconfig.json, tsconfig.*.json and jsconfig.json the
+ * workflow also sees: with git, the tracked and untracked files git doesn't
+ * ignore; otherwise a walk that skips dot directories and node_modules, dist,
+ * build and coverage. Paths are relative to the target.
  */
 function projectFiles(target) {
-  const listed = spawnSync("git", ["-C", target, "ls-files", "-co", "--exclude-standard", "--", "package.json", "**/package.json", "tsconfig.json", "**/tsconfig.json"], { encoding: "utf8" });
-  if (listed.status === 0) return listed.stdout.split("\n").filter(Boolean).filter((file) => existsSync(resolve(target, file))).sort();
+  const listed = spawnSync("git", ["-C", target, "ls-files", "-co", "--exclude-standard"], { encoding: "utf8", maxBuffer: 64 * 1024 * 1024 });
+  if (listed.status === 0) {
+    return listed.stdout
+      .split("\n")
+      .filter((file) => PROJECT_CONFIG.test(basename(file)) && !file.split("/").some((part) => OUTSIDE_PROJECT.has(part)))
+      .filter((file) => existsSync(resolve(target, file)))
+      .sort();
+  }
   const files = [];
   const walk = (directory) => {
     let entries;
@@ -83,8 +94,8 @@ function projectFiles(target) {
     }
     for (const entry of entries) {
       const path = directory === "" ? entry.name : `${directory}/${entry.name}`;
-      if (entry.isDirectory() && entry.name !== "node_modules" && !entry.name.startsWith(".")) walk(path);
-      else if (entry.isFile() && (entry.name === "package.json" || entry.name === "tsconfig.json")) files.push(path);
+      if (entry.isDirectory() && !OUTSIDE_PROJECT.has(entry.name) && !entry.name.startsWith(".")) walk(path);
+      else if (entry.isFile() && PROJECT_CONFIG.test(entry.name)) files.push(path);
     }
   };
   walk("");
@@ -99,10 +110,12 @@ function manifestFindings(target, file, workspaceNames) {
   const declared = { ...(manifest.dependencies ?? {}), ...(manifest.devDependencies ?? {}) };
   const solid = declared["solid-js"];
   const web = declared["@solidjs/web"];
-  const onSolid2 = typeof solid === "string" && /(^|[^0-9.])2\.\d/.test(solid);
   const problems = [];
-  if (typeof solid === "string" && !onSolid2) {
+  if (typeof solid === "string" && PLAIN_RANGE.test(solid) && !isSolid2Only(solid)) {
     problems.push(`solid-js is declared as ${JSON.stringify(solid)}, a Solid 1 range`);
+  } else if (typeof solid === "string" && !PLAIN_RANGE.test(solid) && web === undefined) {
+    // catalog:, workspace: and tags name no version this analyzer can read.
+    problems.push(`solid-js is declared as ${JSON.stringify(solid)}, which this analyzer can't compare with Solid 2`);
   }
   if (typeof solid === "string" && web === undefined) {
     problems.push("@solidjs/web, the Solid 2 web renderer package, is not declared");
@@ -469,11 +482,12 @@ export function parseRunOutput({ output, runStatus }) {
  * What the user does after a transform: the install when it was skipped or
  * failed, and every dependency range the transform left alone.
  */
-export function nextSteps({ dependencySkips = [], afterMigrate }) {
+export function nextSteps({ dependencySkips = [], afterMigrate, rewrites = [] }) {
   const steps = [];
   const install = afterMigrate?.install;
+  const movedSolid = rewrites.some((rewrite) => rewrite.rule === "project/dependencies" && rewrite.message.startsWith("Move solid-js "));
   if (install?.skipped) {
-    steps.push(`Install with your package manager, then typecheck: package.json now targets Solid ${SOLID_VERSION}.`);
+    steps.push(`Install with your package manager, then typecheck${movedSolid ? `: package.json now targets Solid ${SOLID_VERSION}` : ""}.`);
   } else if (install && !install.ok) {
     steps.push(`Run ${install.command} in ${placeOf(install.directory)} once the install error above is fixed, then typecheck.`);
   }
@@ -580,7 +594,7 @@ async function run(argumentsList, invocationDirectory, runImpl, dirtyImpl, proje
   const project = parsed.workflow === "analyze" ? analyzed : projectImpl(target);
   const status = result.status ?? 1;
   const { findings, rewrites, dependencySkips, afterMigrate, diagnostics } = parseRunOutput(result);
-  const next = parsed.workflow === "analyze" ? [] : nextSteps({ dependencySkips, afterMigrate });
+  const next = parsed.workflow === "analyze" ? [] : nextSteps({ dependencySkips, afterMigrate, rewrites });
   if (diagnostics.length > 0) console.error(diagnostics.join("\n"));
   const report = buildJsonReport({
     workflow: parsed.workflow,

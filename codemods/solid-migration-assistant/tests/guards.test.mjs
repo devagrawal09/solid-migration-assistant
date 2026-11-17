@@ -16,9 +16,13 @@ const Theme = createContext("light");
 export const App = () => <Theme.Provider value="dark"><div /></Theme.Provider>;
 `;
 
-function project(dependencies, { file = "App.tsx", lockfile } = {}) {
+function project(dependencies, { file = "App.tsx", lockfile, packages = {} } = {}) {
   const dir = mkdtempSync(join(tmpdir(), "sma-v2-"));
   writeFileSync(join(dir, "package.json"), JSON.stringify({ name: "fixture", dependencies }));
+  for (const [name, packageDependencies] of Object.entries(packages)) {
+    mkdirSync(join(dir, "packages", name), { recursive: true });
+    writeFileSync(join(dir, "packages", name, "package.json"), JSON.stringify({ name, dependencies: packageDependencies }));
+  }
   if (lockfile) writeFileSync(join(dir, "package-lock.json"), JSON.stringify(lockfile));
   mkdirSync(dirname(join(dir, "src", file)), { recursive: true });
   writeFileSync(join(dir, "src", file), APP);
@@ -49,6 +53,11 @@ test("skips a project that does not depend on solid-js", () => {
 test("skips a project already on solid-js 2", () => {
   const out = run(project({ "solid-js": "2.0.0" })).output;
   assert.equal(out.skipped, "solid-js is already 2.0.0");
+});
+
+test("runs when one workspace package is still on Solid 1", () => {
+  const out = run(project({ "solid-js": "^1.9.5" }, { packages: { zz: { "solid-js": "^2.0.0" } } })).output;
+  assert.equal(out.skipped, undefined);
 });
 
 test("skips the router stage when no router, meta or start package is declared", () => {

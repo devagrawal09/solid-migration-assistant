@@ -518,6 +518,15 @@ test("after a skipped install, tells the user to install and then typecheck", ()
   assert.match(nextSteps({ afterMigrate: { install: { skipped: "--no-install" }, typecheck: [] } })[0], /^Install with your package manager, then typecheck/);
 });
 
+test("after a skipped install, says package.json targets Solid 2 only when it moved solid-js", () => {
+  const afterMigrate = { install: { skipped: "--no-install" }, typecheck: [] };
+  const moved = [{ rule: "project/dependencies", message: "Move solid-js from ^1.9.5 to ^2.0.0." }];
+  assert.deepEqual(
+    [nextSteps({ afterMigrate, rewrites: moved })[0], nextSteps({ afterMigrate })[0]],
+    ["Install with your package manager, then typecheck: package.json now targets Solid 2.0.0.", "Install with your package manager, then typecheck."],
+  );
+});
+
 test("after a failed install, names the command and where to run it again", () => {
   const afterMigrate = { install: { command: "pnpm install", directory: ".", ok: false, error: "ERR_PNPM_PEER_DEP_ISSUES" }, typecheck: [] };
   assert.match(nextSteps({ afterMigrate })[0], /^Run pnpm install in the project root once the install error above is fixed/);
@@ -552,6 +561,28 @@ test("reports jsxImportSource in a workspace package's tsconfig.json", async () 
   assert.deepEqual(projectSites({ "packages/app/tsconfig.json": { compilerOptions: { jsxImportSource: "solid-js" } } }), [
     "packages/app/tsconfig.json Point jsxImportSource at the Solid 2 renderer package.",
   ]);
+});
+
+test("reports jsxImportSource in any tsconfig a project splits its settings into", async () => {
+  assert.deepEqual(projectSites({ "tsconfig.app.json": { compilerOptions: { jsxImportSource: "solid-js" } } }), [
+    "tsconfig.app.json Point jsxImportSource at the Solid 2 renderer package.",
+  ]);
+});
+
+test("reads no manifest inside node_modules, even outside git", async () => {
+  assert.deepEqual(projectSites({
+    "package.json": { dependencies: { "solid-js": "^2.0.0", "@solidjs/web": "^2.0.0" } },
+    "node_modules/old-lib/package.json": { dependencies: { "solid-js": "^1.9.5" } },
+  }), []);
+});
+
+test("says when a solid-js range names no version it can compare", async () => {
+  const root = projectTree({ "package.json": { dependencies: { "solid-js": "catalog:" } } });
+  try {
+    assert.match(projectFindings(root)[0].why, /"catalog:", which this analyzer can't compare with Solid 2/);
+  } finally {
+    rmSync(root, { recursive: true, force: true });
+  }
 });
 
 test("reports an installed library whose solid-js peer range rules out Solid 2", async () => {
