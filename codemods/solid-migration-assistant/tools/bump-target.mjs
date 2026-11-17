@@ -6,15 +6,17 @@
  *
  * The commit must be the `gitHead` npm records for `solid-js@<version>`.
  * The script rewrites the two constants in `shared/target.ts` and
- * `shared/run-workflow.mjs`, then replaces the previous version and commit
- * strings everywhere else they are cited (rule adapters, end-to-end
- * expectations, both READMEs, `codemod.yaml`). It does not re-audit the
+ * `shared/run-workflow.mjs`, then replaces the previous commit everywhere
+ * and the previous version wherever the text marks it as Solid's (see
+ * `target-version.mjs`), and lists the other lines that still cite the old
+ * version for review. It does not re-audit the
  * guidance: after bumping, diff the migration guide between the two commits
  * and re-run `pnpm verify` and `pnpm test:rc-compat`.
  */
 import { readFileSync, readdirSync, writeFileSync } from "node:fs";
 import { dirname, join, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
+import { remainingMentions, replaceTargetVersion } from "./target-version.mjs";
 
 const packageDirectory = resolve(dirname(fileURLToPath(import.meta.url)), "..");
 const [version, commit] = process.argv.slice(2);
@@ -35,9 +37,6 @@ if (previousVersion === version && previousCommit === commit) {
   process.exit(0);
 }
 
-const escape = (text) => text.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
-const versionPattern = new RegExp(escape(previousVersion), "g");
-const escapedVersionPattern = new RegExp(escape(previousVersion.replace(/\./g, "\\.")), "g");
 const commitPattern = new RegExp(previousCommit, "g");
 const shortCommitPattern = new RegExp(`\\b${previousCommit.slice(0, 8)}\\b`, "g");
 
@@ -54,18 +53,23 @@ walk(packageDirectory);
 files.push(resolve(packageDirectory, "../../README.md"));
 
 const changed = [];
+const review = [];
 for (const file of files) {
   const before = readFileSync(file, "utf8");
   const after = before
     .replace(commitPattern, commit)
-    .replace(shortCommitPattern, commit.slice(0, 8))
-    .replace(escapedVersionPattern, version.replace(/\./g, "\\."))
-    .replace(versionPattern, version);
-  if (after !== before) {
-    writeFileSync(file, after);
+    .replace(shortCommitPattern, commit.slice(0, 8));
+  const replaced = replaceTargetVersion(after, previousVersion, version);
+  if (replaced !== before) {
+    writeFileSync(file, replaced);
     changed.push(file.replace(`${packageDirectory}/`, ""));
   }
+  const lines = remainingMentions(replaced, previousVersion);
+  if (lines.length > 0) review.push(`  ${file.replace(`${packageDirectory}/`, "")}: ${lines.join(", ")}`);
 }
 console.log(`solid-js@${previousVersion} (${previousCommit}) -> solid-js@${version} (${commit})`);
 console.log(`${changed.length} file(s) updated:\n${changed.map((file) => `  ${file}`).join("\n")}`);
+if (review.length > 0) {
+  console.log(`${previousVersion} is still cited where it may not be Solid's version; check these lines:\n${review.join("\n")}`);
+}
 console.log("Next: diff documentation/solid-2.0/MIGRATION.md between the commits, re-audit guidance, run pnpm verify and pnpm test:rc-compat.");
