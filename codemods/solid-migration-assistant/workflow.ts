@@ -218,16 +218,17 @@ export default async function main({ params }: { params: Params }) {
       dependencySkips.push(...output.skipped);
     }
     failures.push(...project.failures.map((f) => ({ step: "Move package.json and tsconfig.json to Solid 2", ...f })));
-    await analyze();
-    await step(
-      install ? "Install and typecheck" : "Typecheck",
-      shell({ cwd: "." })`node ${import.meta.dirname}/verify/after-migrate.mjs ${install ? "install" : "no-install"} afterMigrate`,
-    );
+    // Shell steps come before the analysis: with a large project's findings in
+    // the run's state, starting a shell step failed with "Argument list too long".
+    if (install) {
+      await step("Install and typecheck", shell({ cwd: "." })`node ${import.meta.dirname}/verify/after-migrate.mjs install afterMigrate`);
+    }
     if (verify) await lint("Lint with eslint-plugin-solid v2 (after)", "lintAfter");
+    await analyze();
   }
 
   const findings = byLocation((getState(FINDINGS) ?? []) as any[]);
-  const afterMigrate = migrate ? (getState("afterMigrate") as any) : undefined;
+  const afterMigrate = migrate ? ((getState("afterMigrate") as any) ?? { install: { skipped: "--no-install" }, typecheck: [] }) : undefined;
 
   const rewrites = byLocation([...((getState(REWRITES) ?? []) as any[]), ...projectRewrites]);
   const before = getState("lintBefore") as any;
