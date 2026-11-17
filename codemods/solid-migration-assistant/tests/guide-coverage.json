@@ -17,7 +17,7 @@
         { "point": "explicit batch() wrappers", "rules": ["reactivity/batch"] },
         {
           "point": "a read right after a write still returns the old value until flush",
-          "gap": "Needs to know that later code depends on the synchronous read; no rule looks for a setter followed by a read of the same signal."
+          "rules": ["reactivity/read-after-write"]
         }
       ]
     },

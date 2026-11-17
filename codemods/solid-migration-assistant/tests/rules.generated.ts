@@ -30,6 +30,7 @@ import { analyzeFrom, analyzeObservable } from "../rules/analysis/reactivity/fro
 import { analyzeIndexArray } from "../rules/analysis/reactivity/index-array/index-array.ts";
 import { analyzeNestedCreateRoot } from "../rules/analysis/reactivity/nested-create-root/nested-create-root.ts";
 import { analyzeOnHelper } from "../rules/analysis/reactivity/on-helper/on-helper.ts";
+import { analyzeReadAfterWrite } from "../rules/analysis/reactivity/read-after-write/read-after-write.ts";
 import { analyzeStartTransition, analyzeUseTransition, analyzeCreateDeferred } from "../rules/analysis/reactivity/transition-apis/transition-apis.ts";
 import { analyzeEqualFn, analyzeGetListener, analyzeWriteSignal, analyzeEnableScheduling } from "../rules/analysis/reactivity/utility-renames/utility-renames.ts";
 import { analyzeCreateMutable, analyzeModifyMutable } from "../rules/analysis/store/mutable/mutable.ts";
@@ -80,6 +81,7 @@ export const ANALYSIS_RULES = {
   "reactivity/index-array": [analyzeIndexArray],
   "reactivity/nested-create-root": [analyzeNestedCreateRoot],
   "reactivity/on-helper": [analyzeOnHelper],
+  "reactivity/read-after-write": [analyzeReadAfterWrite],
   "reactivity/transition-apis": [analyzeStartTransition, analyzeUseTransition, analyzeCreateDeferred],
   "reactivity/utility-renames": [analyzeEqualFn, analyzeGetListener, analyzeWriteSignal, analyzeEnableScheduling],
   "store/mutable": [analyzeCreateMutable, analyzeModifyMutable],
