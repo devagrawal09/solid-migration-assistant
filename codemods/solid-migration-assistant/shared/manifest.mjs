@@ -1,21 +1,29 @@
 import { DEPENDENCY_MAP } from "./dependencies.mjs";
 
-export const SOLID_VERSION = "2.0.0-rc.23";
+export const SOLID_VERSION = "2.0.0";
+/** What migrate writes for solid-js and @solidjs/web: stable releases take a caret range. */
+export const SOLID_RANGE = `^${SOLID_VERSION}`;
+const ON_SOLID_2 = /(^|[^0-9.])2\.\d/;
 const SECTIONS = ["dependencies", "devDependencies"];
 const PLAIN_RANGE = /^[\s^~<>=v]*\d/;
 
 /**
- * The Solid 2 version each package moves to in migrate mode: solid-js and
- * @solidjs/web at the pinned RC, and every `upgrade` entry of the dependency
- * table at its verified version. `replace`, `use-core` and `blocked` entries
+ * The Solid 2 range each package moves to in migrate mode: solid-js and
+ * @solidjs/web at the pinned version, and every `upgrade` entry of the dependency
+ * table at its verified version. A stable version gets a caret so patches
+ * install; a prerelease stays exact, since a caret on it would also accept
+ * later, possibly breaking, prereleases. `replace`, `use-core` and `blocked` entries
  * need code or config changes, so they are reported and never edited.
  */
 export const BUMPS = Object.freeze({
-  "solid-js": SOLID_VERSION,
-  "@solidjs/web": SOLID_VERSION,
+  "solid-js": SOLID_RANGE,
+  "@solidjs/web": SOLID_RANGE,
   ...Object.fromEntries(
     DEPENDENCY_MAP.filter((entry) => entry.status === "upgrade" && entry.replacement?.startsWith(`${entry.name}@`))
-      .map((entry) => [entry.name, entry.replacement.slice(entry.name.length + 1)]),
+      .map((entry) => {
+        const version = entry.replacement.slice(entry.name.length + 1);
+        return [entry.name, version.includes("-") ? version : `^${version}`];
+      }),
   ),
 });
 
@@ -38,7 +46,7 @@ export function bumpManifest(text) {
     return null;
   }
   const section = SECTIONS.find((name) => typeof manifest[name]?.["solid-js"] === "string");
-  if (section === undefined || /(^|[^0-9.])2\.0\.0/.test(manifest[section]["solid-js"])) return null;
+  if (section === undefined || ON_SOLID_2.test(manifest[section]["solid-js"])) return null;
 
   const edits = [];
   const changes = [];
@@ -68,15 +76,15 @@ export function bumpManifest(text) {
   // never end up on different majors.
   const hasWeb = SECTIONS.some((name) => manifest[name]?.["@solidjs/web"] !== undefined);
   if (!hasWeb && changes.some((change) => change.name === "solid-js")) {
-    const anchor = valueEdit(text, section, "solid-js", manifest[section]["solid-js"], SOLID_VERSION);
+    const anchor = valueEdit(text, section, "solid-js", manifest[section]["solid-js"], SOLID_RANGE);
     if (anchor !== null) {
       // Insert right after the solid-js value; any comma that followed it
       // now follows the new entry. Multi-line objects get their own line.
       const lineStart = text.lastIndexOf("\n", anchor.start) + 1;
       const multiline = text.slice(lineStart, anchor.start).trim().startsWith('"solid-js"');
       const separator = multiline ? `\n${/^\s*/.exec(text.slice(lineStart))[0]}` : " ";
-      edits.push({ start: anchor.end, end: anchor.end, text: `,${separator}"@solidjs/web": "${SOLID_VERSION}"` });
-      changes.push({ name: "@solidjs/web", from: null, to: SOLID_VERSION, line: anchor.line + 1 });
+      edits.push({ start: anchor.end, end: anchor.end, text: `,${separator}"@solidjs/web": "${SOLID_RANGE}"` });
+      changes.push({ name: "@solidjs/web", from: null, to: SOLID_RANGE, line: anchor.line + 1 });
     }
   }
 

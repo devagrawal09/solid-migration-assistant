@@ -45,7 +45,7 @@ test("ships every module a shipped file imports, and nothing test-only", () => {
   }
 });
 const expectedDescription =
-  "Solid 1.9 to Solid 2 RC migration assistant: read-only analyzer plus deterministic legacy import-path relocation and narrow intrinsic JSX rewrites (classList to class, Context.Provider to Context, Index to For keyed={false}, lowercase event handlers to camelCase) for project-owned JavaScript and TypeScript source";
+  "Solid 1.9 to Solid 2 migration assistant: read-only analyzer plus deterministic legacy import-path relocation and narrow intrinsic JSX rewrites (classList to class, Context.Provider to Context, Index to For keyed={false}, lowercase event handlers to camelCase) for project-owned JavaScript and TypeScript source";
 const expectedKeywords = [
   "solid",
   "solidjs",
@@ -225,7 +225,7 @@ test(
         assert.match(smoke.stdout, /Move this Solid web renderer/);
         assert.match(
           smoke.stdout,
-          /github\.com\/solidjs\/solid\/blob\/8c34a505.*imports-where-things-live-now/,
+          /github\.com\/solidjs\/solid\/blob\/a8186e67.*imports-where-things-live-now/,
         );
         assert.doesNotMatch(smoke.stdout, /S2-IMPORT-WEB-001/);
         assertFinalDisclosure(smoke.stderr);

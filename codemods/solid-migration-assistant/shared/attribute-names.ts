@@ -11,7 +11,7 @@ export const ATTRIBUTE_NAMES_GUIDE = migrationGuide("attributes--events-closer-t
  * attribute each one set. The 1.9 compiler (babel-preset-solid 1.9.10)
  * lowercased every one of these in DOM and SSR output, aliased className
  * and htmlFor to class and for, and set readOnly as the readonly property.
- * The rc.23 JSX types declare only the lowercase names, and its compiler
+ * The 2.0.0 JSX types declare only the lowercase names, and its compiler
  * passes the spelling through as written, so className renders a
  * "classname" attribute. acceptCharset and httpEquiv are left out: 1.9 set
  * "acceptcharset" and "httpequiv", so renaming them would change behavior.
@@ -80,9 +80,9 @@ export type AttributeNameSite = {
  *
  * - the element already has the lowercase attribute;
  * - a boolean attribute (readonly) gets a value that may not be a boolean,
- *   since 1.9 set the property by truthiness and rc.23 removes it only for
+ *   since 1.9 set the property by truthiness and 2.0.0 removes it only for
  *   false, null and undefined (readOnly={0});
- * - any other attribute gets a boolean, which 1.9 printed as text and rc.23
+ * - any other attribute gets a boolean, which 1.9 printed as text and 2.0.0
  *   treats as presence (tabIndex={true}); contenteditable and spellcheck are
  *   the exception, since the boolean-values rule then keeps their text.
  */

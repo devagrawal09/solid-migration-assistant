@@ -14,9 +14,9 @@ const packageMetadata = JSON.parse(
   readFileSync(resolve(packageDirectory, "package.json"), "utf8"),
 );
 
-const SOLID_VERSION = "2.0.0-rc.23";
+const SOLID_VERSION = "2.0.0";
 const SOLID_TARGET = `solid-js@${SOLID_VERSION}`;
-const SOLID_SOURCE_COMMIT = "8c34a505a853fcc894fcc8dad150d62f0d007fa2";
+const SOLID_SOURCE_COMMIT = "a8186e6738b3a6a3341c561f66e9325432d6759b";
 const MIGRATION_GUIDE = `https://github.com/solidjs/solid/blob/${SOLID_SOURCE_COMMIT}/documentation/solid-2.0/MIGRATION.md`;
 const FEEDBACK_URL =
   "https://github.com/devagrawal09/solid-migration-assistant/issues";
@@ -37,7 +37,7 @@ Feedback: ${FEEDBACK_URL}
  * and tsconfig.json. They are read, never written; a missing or unparsable
  * file produces no finding. The guidance mirrors the official Solid 2 templates
  * (solidjs/templates, `solid-v2` group), which depend on `solid-js` and
- * `@solidjs/web` at the same RC, build with `@solidjs/vite-plugin`, and set
+ * `@solidjs/web` at the same version, build with `@solidjs/vite-plugin`, and set
  * `jsxImportSource` to `@solidjs/web`.
  */
 export function projectFindings(target) {
@@ -99,7 +99,7 @@ function manifestFindings(target, file, workspaceNames) {
   const declared = { ...(manifest.dependencies ?? {}), ...(manifest.devDependencies ?? {}) };
   const solid = declared["solid-js"];
   const web = declared["@solidjs/web"];
-  const onSolid2 = typeof solid === "string" && /(^|[^0-9.])2\.0\.0/.test(solid);
+  const onSolid2 = typeof solid === "string" && /(^|[^0-9.])2\.\d/.test(solid);
   const problems = [];
   if (typeof solid === "string" && !onSolid2) {
     problems.push(`solid-js is declared as ${JSON.stringify(solid)}, a Solid 1 range`);
@@ -116,7 +116,7 @@ function manifestFindings(target, file, workspaceNames) {
       severity: "build",
       headline: `Move this project's Solid dependencies to ${SOLID_TARGET}.`,
       why: `${problems.join("; ")}. Solid 2 splits the web renderer into @solidjs/web, versions it in lockstep with solid-js, and compiles JSX through @solidjs/vite-plugin (or @solidjs/babel-plugin), which is what the official solid-v2 templates use.`,
-      guidance: `Pin solid-js and @solidjs/web to the exact same RC version (${SOLID_VERSION}), move the other Solid dependencies as the per-package findings describe, and run this analyzer before installing, since Solid 1 source is the input this version understands.`,
+      guidance: `Move solid-js to ^${SOLID_VERSION} and add @solidjs/web at the same range (the two release in lockstep), move the other Solid dependencies as the per-package findings describe, and run this analyzer before installing, since Solid 1 source is the input this version understands.`,
       lint: [],
       guide: `${MIGRATION_GUIDE}#imports-where-things-live-now`,
     });
@@ -155,7 +155,7 @@ function peerFindings(target, file, manifest, text, workspaceNames) {
       why: installed === undefined
         ? `${name} isn't installed and isn't in this analyzer's dependency table, so whether it runs on Solid 2 wasn't checked.`
         : `The installed ${name}${installed.version ? ` ${installed.version}` : ""} declares solid-js ${JSON.stringify(peer)}, which doesn't allow Solid 2, and it isn't in this analyzer's dependency table.`,
-      guidance: `Look for a release whose solid-js peer range includes ${SOLID_VERSION} (often under a next tag) and move to it, or replace it. A Solid 1 build of it that imports solid-js/web or solid-js/store fails the Solid 2 build inside node_modules.`,
+      guidance: `Look for a release whose solid-js peer range includes ${SOLID_VERSION} (check its latest tag first, then next, rc and beta) and move to it, or replace it. A Solid 1 build of it that imports solid-js/web or solid-js/store fails the Solid 2 build inside node_modules.`,
       lint: [],
       guide: `${MIGRATION_GUIDE}#imports-where-things-live-now`,
     });

@@ -47,8 +47,8 @@ test("skips a project that does not depend on solid-js", () => {
 });
 
 test("skips a project already on solid-js 2", () => {
-  const out = run(project({ "solid-js": "2.0.0-rc.23" })).output;
-  assert.equal(out.skipped, "solid-js is already 2.0.0-rc.23");
+  const out = run(project({ "solid-js": "2.0.0" })).output;
+  assert.equal(out.skipped, "solid-js is already 2.0.0");
 });
 
 test("skips the router stage when no router, meta or start package is declared", () => {

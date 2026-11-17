@@ -8,7 +8,7 @@ export { SOLID_SOURCE_COMMIT } from "../../../../shared/target.ts";
 /**
  * Renames React-style attribute spellings on native elements (tabIndex,
  * readOnly, className, htmlFor, …) to the lowercase attribute Solid 1.9
- * already set for them, which is the only spelling the rc.23 JSX types
+ * already set for them, which is the only spelling the 2.0.0 JSX types
  * declare. Only the name node changes. Sites where the rename wouldn't
  * render the same (see `attributeNameSites`) are left to the analyzer. This
  * rule runs before the boolean-values rule, which then keeps the "true" or

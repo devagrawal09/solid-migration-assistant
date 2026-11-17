@@ -6,7 +6,7 @@
       "line": 9,
       "column": 12,
       "message": "Merge the class and classList attributes on <div> into the class array form, preserving the static string and the object literal.",
-      "guide": "https://github.com/solidjs/solid/blob/8c34a505a853fcc894fcc8dad150d62f0d007fa2/documentation/solid-2.0/MIGRATION.md#classlist--class-objectarray-forms"
+      "guide": "https://github.com/solidjs/solid/blob/a8186e6738b3a6a3341c561f66e9325432d6759b/documentation/solid-2.0/MIGRATION.md#classlist--class-objectarray-forms"
     },
     {
       "rule": "jsx/class-list-to-class",
@@ -14,7 +14,7 @@
       "line": 10,
       "column": 15,
       "message": "Merge the class and classList attributes on <button> into the class array form, preserving the static string and the object literal.",
-      "guide": "https://github.com/solidjs/solid/blob/8c34a505a853fcc894fcc8dad150d62f0d007fa2/documentation/solid-2.0/MIGRATION.md#classlist--class-objectarray-forms"
+      "guide": "https://github.com/solidjs/solid/blob/a8186e6738b3a6a3341c561f66e9325432d6759b/documentation/solid-2.0/MIGRATION.md#classlist--class-objectarray-forms"
     },
     {
       "rule": "jsx/class-list-to-class",
@@ -22,7 +22,7 @@
       "line": 14,
       "column": 9,
       "message": "Merge the class and classList attributes on <span> into the class array form, preserving the static string and the object literal.",
-      "guide": "https://github.com/solidjs/solid/blob/8c34a505a853fcc894fcc8dad150d62f0d007fa2/documentation/solid-2.0/MIGRATION.md#classlist--class-objectarray-forms"
+      "guide": "https://github.com/solidjs/solid/blob/a8186e6738b3a6a3341c561f66e9325432d6759b/documentation/solid-2.0/MIGRATION.md#classlist--class-objectarray-forms"
     },
     {
       "rule": "jsx/class-list-to-class",
@@ -30,7 +30,7 @@
       "line": 21,
       "column": 49,
       "message": "Merge the class and classList attributes on <my-element> into the class array form, preserving the static string and the object literal.",
-      "guide": "https://github.com/solidjs/solid/blob/8c34a505a853fcc894fcc8dad150d62f0d007fa2/documentation/solid-2.0/MIGRATION.md#classlist--class-objectarray-forms"
+      "guide": "https://github.com/solidjs/solid/blob/a8186e6738b3a6a3341c561f66e9325432d6759b/documentation/solid-2.0/MIGRATION.md#classlist--class-objectarray-forms"
     }
   ]
 }

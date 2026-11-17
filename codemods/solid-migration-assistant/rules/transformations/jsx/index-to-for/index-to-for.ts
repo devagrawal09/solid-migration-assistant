@@ -30,7 +30,7 @@ export type IndexRewrite = {
  * Solid 1.x `Index` (`packages/solid/src/render/flow.ts` at `v1.9.13`) takes
  * `each`, an optional `fallback`, and a child callback
  * `(item: Accessor<T>, index: number) => U`, mapped through `indexArray`. Solid
- * 2.0.0-rc.23 removes `Index`; `For` in `packages/solid/src/client/flow.ts`
+ * 2.0.0 removes `Index`; `For` in `packages/solid/src/client/flow.ts`
  * gains a `keyed` prop whose `false` overload takes the same `each`, the same
  * optional `fallback`, and the same child callback shape
  * `(item: Accessor<T[number]>, index: number) => U`, mapped through

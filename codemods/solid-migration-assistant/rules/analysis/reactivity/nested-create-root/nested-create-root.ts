@@ -18,7 +18,7 @@ const FUNCTION_KINDS = new Set([
 /**
  * Reports `createRoot` calls that sit inside a function body, where a parent
  * owner may exist at call time. In Solid 1.x such a root lived until its own
- * `dispose()`; at rc.21 a root created under an existing owner is that
+ * `dispose()`; at 2.0.0 a root created under an existing owner is that
  * owner's child and is disposed with it. Module-level calls have no parent
  * owner and are not reported.
  */

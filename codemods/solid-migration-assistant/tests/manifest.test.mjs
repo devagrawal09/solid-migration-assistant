@@ -1,26 +1,30 @@
 // Specs for migrate mode's package.json and tsconfig.json edits.
 import assert from "node:assert/strict";
 import { test } from "node:test";
-import { bumpManifest, bumpTsconfig, SOLID_VERSION } from "../shared/manifest.mjs";
+import { bumpManifest, bumpTsconfig, SOLID_RANGE } from "../shared/manifest.mjs";
 
 const manifest = (dependencies, extra = {}) =>
   `${JSON.stringify({ name: "app", dependencies, ...extra }, null, 2)}\n`;
 const bumped = (text) => JSON.parse(bumpManifest(text).text);
 
-test("moves solid-js to the pinned RC", () => {
-  assert.equal(bumped(manifest({ "solid-js": "^1.9.5" })).dependencies["solid-js"], SOLID_VERSION);
+test("moves solid-js to the pinned version", () => {
+  assert.equal(bumped(manifest({ "solid-js": "^1.9.5" })).dependencies["solid-js"], SOLID_RANGE);
 });
 
-test("adds @solidjs/web at the same RC", () => {
-  assert.equal(bumped(manifest({ "solid-js": "^1.9.5" })).dependencies["@solidjs/web"], SOLID_VERSION);
+test("adds @solidjs/web at the same version", () => {
+  assert.equal(bumped(manifest({ "solid-js": "^1.9.5" })).dependencies["@solidjs/web"], SOLID_RANGE);
 });
 
 test("adds @solidjs/web when solid-js is not the last dependency", () => {
-  assert.equal(bumped(manifest({ "solid-js": "^1.9.5", zod: "^3.0.0" })).dependencies["@solidjs/web"], SOLID_VERSION);
+  assert.equal(bumped(manifest({ "solid-js": "^1.9.5", zod: "^3.0.0" })).dependencies["@solidjs/web"], SOLID_RANGE);
 });
 
-test("moves a dependency with a Solid 2 release to its verified version", () => {
-  assert.equal(bumped(manifest({ "solid-js": "^1.9.5", "@solidjs/router": "^0.15.3" })).dependencies["@solidjs/router"], "2.0.0-next.44");
+test("moves a dependency with a stable Solid 2 release to a caret range", () => {
+  assert.equal(bumped(manifest({ "solid-js": "^1.9.5", "@solidjs/router": "^0.15.3" })).dependencies["@solidjs/router"], "^2.0.0");
+});
+
+test("keeps a dependency whose Solid 2 release is a prerelease exact", () => {
+  assert.equal(bumped(manifest({ "solid-js": "^1.9.5", "@tanstack/solid-query": "^5.0.0" })).dependencies["@tanstack/solid-query"], "6.0.0-rc.5");
 });
 
 test("leaves a dependency that needs replacing as it is", () => {
@@ -42,12 +46,12 @@ test("changes nothing else in the file", () => {
   const text = '{\n\t"name": "app",\n\t"dependencies": { "solid-js": "~1.8.0", "zod": "^3.0.0" }\n}\n';
   assert.equal(
     bumpManifest(text).text,
-    `{\n\t"name": "app",\n\t"dependencies": { "solid-js": "${SOLID_VERSION}", "@solidjs/web": "${SOLID_VERSION}", "zod": "^3.0.0" }\n}\n`,
+    `{\n\t"name": "app",\n\t"dependencies": { "solid-js": "${SOLID_RANGE}", "@solidjs/web": "${SOLID_RANGE}", "zod": "^3.0.0" }\n}\n`,
   );
 });
 
 test("skips a manifest already on Solid 2", () => {
-  assert.equal(bumpManifest(manifest({ "solid-js": SOLID_VERSION })), null);
+  assert.equal(bumpManifest(manifest({ "solid-js": "^2.1.0" })), null);
 });
 
 test("points tsconfig's jsxImportSource at @solidjs/web", () => {

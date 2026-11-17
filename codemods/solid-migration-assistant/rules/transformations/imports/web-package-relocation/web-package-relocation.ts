@@ -6,9 +6,9 @@ import { rewrite, type RuleRewrite } from "../../../../shared/finding.ts";
 
 /**
  * The upstream Solid commit whose worktree was read to build the allowlist
- * below: the `gitHead` published with `@solidjs/web@2.0.0-rc.23` and
- * `solid-js@2.0.0-rc.23` on npm, where `packages/web/package.json` is
- * `@solidjs/web` `2.0.0-rc.23`. The `v1.9.13` tag in the same repository and
+ * below: the `gitHead` published with `@solidjs/web@2.0.0` and
+ * `solid-js@2.0.0` on npm, where `packages/web/package.json` is
+ * `@solidjs/web` `2.0.0`. The `v1.9.13` tag in the same repository and
  * the published `solid-js@1.9.13` build supply the legacy `solid-js/web` side
  * of every comparison.
  */
@@ -22,9 +22,9 @@ export const WEB_RELOCATION_TARGET = "@solidjs/web";
 /**
  * `solid-js/web` is *not* a pure package relocation. Unlike the five subpaths
  * handled by legacy-subpath-relocation, the web entry's export surface changed
- * between Solid 1.9.13 and 2.0.0-rc.23. Comparing the published client builds
+ * between Solid 1.9.13 and 2.0.0. Comparing the published client builds
  * (`solid-js/web/dist/web.js` at 1.9.13 against `@solidjs/web/dist/web.js` at
- * rc.21), these 1.9 exports are gone: `createDynamic`, `Index`, `Hydration`,
+ * 2.0.0), these 1.9 exports are gone: `createDynamic`, `Index`, `Hydration`,
  * `NoHydration`, `renderToStringAsync`, `ssrClassList`, `ssrSpread`,
  * `classList`, `addEventListener`, `clearDelegatedEvents`, `setBoolAttribute`,
  * `innerHTML`, `use`, `Aliases`, `Properties`, `SVGNamespace`, `getPropAlias`,
@@ -32,7 +32,7 @@ export const WEB_RELOCATION_TARGET = "@solidjs/web";
  * `pipeToWritable` on the server build); `Suspense`, `ErrorBoundary`,
  * `SuspenseList`, and `mergeProps` are no longer re-exported for application
  * code (`Loading`, `Errored`, `Reveal`, and `merge` replace them; the
- * `mergeProps` that rc.21 still exports is a compiler-emitted helper marked
+ * `mergeProps` that 2.0.0 still exports is a compiler-emitted helper marked
  * `@internal`); `Portal` lost `useShadow`, `isSVG`, and `ref` and renders
  * nothing on the server; and `isDev` is no longer pinned to `false` on the
  * server entry.
@@ -45,18 +45,18 @@ export const WEB_RELOCATION_TARGET = "@solidjs/web";
  * - `render`, `hydrate` — `documentation/solid-2.0/MIGRATION.md` opens the
  *   "Imports: where things live now" section by relocating exactly this pair
  *   from `solid-js/web` to `@solidjs/web` with the import unchanged.
- *   Both are declared in `packages/web/src/client.ts` at rc.21 and re-exported
+ *   Both are declared in `packages/web/src/client.ts` at 2.0.0 and re-exported
  *   from the web entry, keeping their 1.9 shapes:
  *   `render(code, element, init?, options?) => () => void` and
  *   `hydrate(code, element, options?) => () => void`.
  * - `isServer` — declared identically on all four entries: `false` in
  *   `packages/(solid/)web/src/index.ts` and `true` in the server entry, on
- *   both 1.9.13 and rc.21 (`packages/web/src/index.server.ts`).
- * - `Dynamic` is on this list because rc.21 exports it: `packages/web/src/
+ *   both 1.9.13 and 2.0.0 (`packages/web/src/index.server.ts`).
+ * - `Dynamic` is on this list because 2.0.0 exports it: `packages/web/src/
  *   index.ts` declares `export function Dynamic<T extends ValidComponent>(
  *   props: DynamicProps<T>): JSX.Element`, implemented as
  *   `createComponent(dynamic(() => props.component), omit(props,
- *   "component"))`, and both published rc.21 builds (`dist/web.js` and
+ *   "component"))`, and both published 2.0.0 builds (`dist/web.js` and
  *   `dist/server.js`) export the name. Its user-facing contract is the 1.9.13
  *   one (`packages/solid/web/src/index.ts` at `v1.9.13`: render
  *   `props.component`, a component or native tag name, with the remaining
@@ -66,7 +66,7 @@ export const WEB_RELOCATION_TARGET = "@solidjs/web";
  *   runtime warning) in favor of the `dynamic(source)` factory, so the report
  *   line for a relocation that carries `Dynamic` says so; a deprecated but
  *   exported binding is a valid relocation target, which an unexported name
- *   never was. Until rc.21 was published the identifier did not exist under
+ *   never was. Until 2.0.0 was published the identifier did not exist under
  *   `packages/` (it was absent at rc.7), and this list refused it on exactly
  *   that ground; an allowlist that promises proven bindings admits a name only
  *   against a located export site.

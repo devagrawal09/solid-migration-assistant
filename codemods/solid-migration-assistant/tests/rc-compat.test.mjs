@@ -33,12 +33,12 @@ const codemodLauncher = resolve(packageDirectory, "node_modules/codemod/codemod"
 const projectDirectory = resolve(packageDirectory, "tests/rc-compat/project");
 const expectedDirectory = resolve(packageDirectory, "tests/rc-compat/expected");
 
-/** Exact versions: the newest published Solid 2 RC and the tooling that builds it. */
+/** Exact versions: the pinned Solid 2 release and the tooling that builds it. */
 const PINNED_PACKAGES = [
-  "solid-js@2.0.0-rc.23",
-  "@solidjs/web@2.0.0-rc.23",
-  "@solidjs/h@2.0.0-rc.23",
-  "@solidjs/babel-plugin@2.0.0-rc.23",
+  "solid-js@2.0.0",
+  "@solidjs/web@2.0.0",
+  "@solidjs/h@2.0.0",
+  "@solidjs/babel-plugin@2.0.0",
   "@tsrx/core@0.1.63",
   "@babel/core@7.29.7",
   "@babel/preset-typescript@7.29.7",
@@ -60,7 +60,7 @@ const targetSource = readFileSync(resolve(packageDirectory, "shared/target.ts"),
 const PINNED_VERSION = /SOLID_TARGET_VERSION = "([^"]+)"/.exec(targetSource)?.[1];
 const PINNED_COMMIT = /SOLID_SOURCE_COMMIT =\n\s+"([0-9a-f]{40})"/.exec(targetSource)?.[1];
 
-test("the pinned Solid RC is still the newest published one and matches its source commit", (t) => {
+test("the pinned Solid version is still npm latest and matches its source commit", (t) => {
   assert.ok(PINNED_VERSION && PINNED_COMMIT, "shared/target.ts must declare the pinned version and commit");
   const lookup = (spec, field) =>
     spawnSync("npm", ["view", spec, field, "--json"], {
@@ -72,12 +72,11 @@ test("the pinned Solid RC is still the newest published one and matches its sour
     skipOrFail(t, `npm registry unavailable: ${(tags.stderr || tags.stdout).trim().split("\n")[0]}`);
     return;
   }
-  // `latest` still resolves to Solid 1, so `next` is the Solid 2 line.
-  const next = JSON.parse(tags.stdout).next;
+  const latest = JSON.parse(tags.stdout).latest;
   assert.equal(
-    next,
+    latest,
     PINNED_VERSION,
-    `npm solid-js@next is ${next} but the assistant pins ${PINNED_VERSION}; run tools/bump-target.mjs, re-audit the guidance against the new migration guide, and refresh both baselines`,
+    `npm solid-js@latest is ${latest} but the assistant pins ${PINNED_VERSION}; run tools/bump-target.mjs, re-audit the guidance against the new migration guide, and refresh both baselines`,
   );
   for (const name of ["solid-js", "@solidjs/web"]) {
     const head = lookup(`${name}@${PINNED_VERSION}`, "gitHead");
@@ -109,14 +108,14 @@ test("the guide coverage map lists exactly the pinned migration guide's sections
 });
 
 test(
-  "transformed fixture typechecks, compiles, and server-renders on the pinned Solid 2 RC while the 1.9 input does not",
+  "transformed fixture typechecks, compiles, and server-renders on the pinned Solid 2 release while the 1.9 input does not",
   async (t) => {
     const [major, minor] = process.versions.node.split(".").map(Number);
     if (
       major < MINIMUM_NODE[0] ||
       (major === MINIMUM_NODE[0] && minor < MINIMUM_NODE[1])
     ) {
-      skipOrFail(t, `solid-js@2.0.0-rc.23 requires Node ${MINIMUM_NODE.join(".")} or newer; running ${process.versions.node}`);
+      skipOrFail(t, `solid-js@2.0.0 requires Node ${MINIMUM_NODE.join(".")} or newer; running ${process.versions.node}`);
       return;
     }
 

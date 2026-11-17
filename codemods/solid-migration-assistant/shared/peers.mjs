@@ -2,7 +2,7 @@
  * Whether an npm range allows a Solid 2 release: some `||` set of the range
  * has no upper bound below 2.0.0 and no lower bound above it. Prerelease
  * matching rules are ignored on purpose: the question is whether a package
- * was built for Solid 2 at all, not whether npm would pick the RC. A range
+ * was built for Solid 2 at all, not whether npm would pick the Solid 2 release. A range
  * this can't read (tags, URLs) counts as not allowing it.
  */
 export function allowsSolid2(range) {

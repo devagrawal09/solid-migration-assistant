@@ -14,7 +14,7 @@ import { template, insert, spread, delegateEvents } from "solid-js/web";
 import { ssr, ssrClassList, ssrHydrationKey } from "solid-js/web";
 import type { DynamicProps } from "solid-js/web";
 // DynamicProps is a type whose `component` shape widened in 2.0, so it is not
-// proven and vetoes the statement; Dynamic itself is proven at rc.21 and is
+// proven and vetoes the statement; Dynamic itself is proven at 2.0.0 and is
 // covered by the dynamic-bindings fixture.
 import { Dynamic as DynamicWithProps, type DynamicProps as DynamicPropsMixed } from "solid-js/web";
 export { Portal as PortalOut } from "solid-js/web";

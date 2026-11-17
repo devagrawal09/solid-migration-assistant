@@ -16,12 +16,12 @@ type SetterSite = {
 
 /**
  * Reports every use of a `createStore` setter whose 1.x shape has no direct
- * Solid 2 meaning. At rc.21 the plain store setter is
+ * Solid 2 meaning. At 2.0.0 the plain store setter is
  * `(fn: (state: T) => T | void) => void` (`packages/signals/src/store/
  * types.ts`): it takes one draft callback. Solid 1.9.13's `setStore(...args)`
  * (`packages/solid/store/src/store.ts`) accepted a path followed by a value,
  * an object to merge, or a function whose returned object was **merged** into
- * the store; at rc.21 a wrappable object returned from the draft callback is
+ * the store; at 2.0.0 a wrappable object returned from the draft callback is
  * **adopted as the whole new state** (`packages/signals/src/store/store.ts`,
  * "A returned replacement ... adopted as the incoming truth").
  *

@@ -5,7 +5,7 @@ import { byLocation, renderText } from "./shared/format.mjs";
 import { ANALYSIS_STEPS, TRANSFORM_STEPS } from "./shared/steps.generated.ts";
 import { MIGRATION_GUIDE_URL, SOLID_TARGET_VERSION } from "./shared/target.ts";
 
-// The Solid 1.9 -> 2 RC assistant on the code-first engine
+// The Solid 1.9 -> 2 assistant on the code-first engine
 // (codemod/codemod#2485, engine/code-first 9c91ebf, published as 2.0.0-alpha.3).
 
 const SOURCES = {
@@ -103,7 +103,7 @@ export default async function main({ params }: { params: Params }) {
     Object.assign(resolved, m.resolved ?? {});
   }
 
-  // Guard: this workflow only knows the Solid 1 -> 2 RC move.
+  // Guard: this workflow only knows the Solid 1 -> 2 move.
   const solid = resolved["solid-js"] ?? declared["solid-js"];
   if (solid === undefined) return { skipped: "solid-js is not a dependency of this project" };
   if ((major(solid) ?? 1) >= 2) return { skipped: `solid-js is already ${solid}` };

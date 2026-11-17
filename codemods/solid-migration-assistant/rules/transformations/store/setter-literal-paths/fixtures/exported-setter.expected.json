@@ -6,7 +6,7 @@
       "line": 7,
       "column": 1,
       "message": "Rewrite this path-style store setter call with a literal value as a draft write.",
-      "guide": "https://github.com/solidjs/solid/blob/8c34a505a853fcc894fcc8dad150d62f0d007fa2/documentation/solid-2.0/MIGRATION.md#draft-first-setters"
+      "guide": "https://github.com/solidjs/solid/blob/a8186e6738b3a6a3341c561f66e9325432d6759b/documentation/solid-2.0/MIGRATION.md#draft-first-setters"
     }
   ]
 }

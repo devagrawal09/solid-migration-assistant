@@ -10,7 +10,7 @@ const WEB_MODULES = new Set(["solid-js/web", "@solidjs/web"]);
 
 /**
  * Reports JSX uses of `Dynamic` imported (unaliased) from `solid-js/web` or
- * `@solidjs/web`. The component still exists at rc.21 and keeps working, but
+ * `@solidjs/web`. The component still exists at 2.0.0 and keeps working, but
  * it is deprecated in favor of the `dynamic(source)` factory, which hoists
  * the tag memo instead of paying a merge, an omit, and a fresh factory per
  * instance. References are resolved by the workspace semantic provider.

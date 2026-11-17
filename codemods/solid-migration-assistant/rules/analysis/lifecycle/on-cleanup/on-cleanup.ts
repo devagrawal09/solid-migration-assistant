@@ -14,7 +14,7 @@ const MIGRATION_GUIDE =
  * from Solid. Those scopes become a split effect's apply callback or
  * `onSettled`, which take cleanup as a returned function. In a component
  * body, a custom hook, `createRoot`, or a memo, `onCleanup` is still valid in
- * the RC and is not reported. Calls inside inline ref callbacks are reported
+ * Solid 2 and is not reported. Calls inside inline ref callbacks are reported
  * by the ref-callback analyzer instead, and a cleanup registered by a helper
  * that an effect calls is not traced.
  */

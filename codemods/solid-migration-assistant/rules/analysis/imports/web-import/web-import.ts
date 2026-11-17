@@ -29,7 +29,7 @@ const FORM_GUIDANCE: Record<ModuleReference["form"], string> = {
 
 /**
  * Names a Solid 1.9 app imports from `solid-js/web` that `@solidjs/web`
- * rc.21 does not export for application code, with each one's replacement
+ * 2.0.0 does not export for application code, with each one's replacement
  * as the pinned migration guide gives it. Moving these with the module
  * source alone produces an import that does not resolve.
  */

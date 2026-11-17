@@ -7,9 +7,9 @@
       "column": 14,
       "severity": "behavior",
       "headline": "Write the boolean value of aria-hidden as \"true\" or \"false\".",
-      "why": "Solid 1 rendered a boolean aria-hidden as the text \"true\" or \"false\". Solid 2.0.0-rc.23 treats every boolean attribute value as presence: true renders aria-hidden=\"\" and false removes it, so assistive technology reads aria-hidden as unset.",
+      "why": "Solid 1 rendered a boolean aria-hidden as the text \"true\" or \"false\". Solid 2.0.0 treats every boolean attribute value as presence: true renders aria-hidden=\"\" and false removes it, so assistive technology reads aria-hidden as unset.",
       "guidance": "Write a literal as a string (aria-hidden=\"true\"), and wrap an expression in String() (aria-hidden={String(!open())}). The transform makes this edit.",
-      "guide": "https://github.com/solidjs/solid/blob/8c34a505a853fcc894fcc8dad150d62f0d007fa2/documentation/solid-2.0/MIGRATION.md#attributes--events-closer-to-html-and-fewer-namespaces",
+      "guide": "https://github.com/solidjs/solid/blob/a8186e6738b3a6a3341c561f66e9325432d6759b/documentation/solid-2.0/MIGRATION.md#attributes--events-closer-to-html-and-fewer-namespaces",
       "lint": []
     },
     {
@@ -19,9 +19,9 @@
       "column": 33,
       "severity": "behavior",
       "headline": "Write the boolean value of data-active as \"true\" or \"false\".",
-      "why": "Solid 1 rendered a boolean data-active as the text \"true\" or \"false\". Solid 2.0.0-rc.23 treats every boolean attribute value as presence: true renders data-active=\"\" and false removes it, so selectors and dataset reads that expect \"true\" or \"false\" stop matching.",
+      "why": "Solid 1 rendered a boolean data-active as the text \"true\" or \"false\". Solid 2.0.0 treats every boolean attribute value as presence: true renders data-active=\"\" and false removes it, so selectors and dataset reads that expect \"true\" or \"false\" stop matching.",
       "guidance": "Write a literal as a string (data-active=\"true\"), and wrap an expression in String() (data-active={String(!open())}). The transform makes this edit.",
-      "guide": "https://github.com/solidjs/solid/blob/8c34a505a853fcc894fcc8dad150d62f0d007fa2/documentation/solid-2.0/MIGRATION.md#attributes--events-closer-to-html-and-fewer-namespaces",
+      "guide": "https://github.com/solidjs/solid/blob/a8186e6738b3a6a3341c561f66e9325432d6759b/documentation/solid-2.0/MIGRATION.md#attributes--events-closer-to-html-and-fewer-namespaces",
       "lint": []
     },
     {
@@ -31,9 +31,9 @@
       "column": 17,
       "severity": "behavior",
       "headline": "Write the boolean value of spellcheck as \"true\" or \"false\".",
-      "why": "Solid 1 rendered a boolean spellcheck as the text \"true\" or \"false\". Solid 2.0.0-rc.23 treats every boolean attribute value as presence: true renders spellcheck=\"\" and false removes it, so the browser falls back to the attribute's default.",
+      "why": "Solid 1 rendered a boolean spellcheck as the text \"true\" or \"false\". Solid 2.0.0 treats every boolean attribute value as presence: true renders spellcheck=\"\" and false removes it, so the browser falls back to the attribute's default.",
       "guidance": "Write a literal as a string (spellcheck=\"true\"), and wrap an expression in String() (spellcheck={String(!open())}). The transform makes this edit.",
-      "guide": "https://github.com/solidjs/solid/blob/8c34a505a853fcc894fcc8dad150d62f0d007fa2/documentation/solid-2.0/MIGRATION.md#attributes--events-closer-to-html-and-fewer-namespaces",
+      "guide": "https://github.com/solidjs/solid/blob/a8186e6738b3a6a3341c561f66e9325432d6759b/documentation/solid-2.0/MIGRATION.md#attributes--events-closer-to-html-and-fewer-namespaces",
       "lint": []
     },
     {
@@ -43,9 +43,9 @@
       "column": 12,
       "severity": "behavior",
       "headline": "Write the boolean value of draggable as \"true\" or \"false\".",
-      "why": "Solid 1 rendered a boolean draggable as the text \"true\" or \"false\". Solid 2.0.0-rc.23 treats every boolean attribute value as presence: true renders draggable=\"\" and false removes it, so the browser falls back to the attribute's default.",
+      "why": "Solid 1 rendered a boolean draggable as the text \"true\" or \"false\". Solid 2.0.0 treats every boolean attribute value as presence: true renders draggable=\"\" and false removes it, so the browser falls back to the attribute's default.",
       "guidance": "Write a literal as a string (draggable=\"true\"), and wrap an expression in String() (draggable={String(!open())}). The transform makes this edit.",
-      "guide": "https://github.com/solidjs/solid/blob/8c34a505a853fcc894fcc8dad150d62f0d007fa2/documentation/solid-2.0/MIGRATION.md#attributes--events-closer-to-html-and-fewer-namespaces",
+      "guide": "https://github.com/solidjs/solid/blob/a8186e6738b3a6a3341c561f66e9325432d6759b/documentation/solid-2.0/MIGRATION.md#attributes--events-closer-to-html-and-fewer-namespaces",
       "lint": []
     },
     {
@@ -55,9 +55,9 @@
       "column": 15,
       "severity": "behavior",
       "headline": "Write the boolean value of aria-expanded as \"true\" or \"false\".",
-      "why": "Solid 1 rendered a boolean aria-expanded as the text \"true\" or \"false\". Solid 2.0.0-rc.23 treats every boolean attribute value as presence: true renders aria-expanded=\"\" and false removes it, so assistive technology reads aria-expanded as unset.",
+      "why": "Solid 1 rendered a boolean aria-expanded as the text \"true\" or \"false\". Solid 2.0.0 treats every boolean attribute value as presence: true renders aria-expanded=\"\" and false removes it, so assistive technology reads aria-expanded as unset.",
       "guidance": "Write a literal as a string (aria-expanded=\"true\"), and wrap an expression in String() (aria-expanded={String(!open())}). The transform makes this edit.",
-      "guide": "https://github.com/solidjs/solid/blob/8c34a505a853fcc894fcc8dad150d62f0d007fa2/documentation/solid-2.0/MIGRATION.md#attributes--events-closer-to-html-and-fewer-namespaces",
+      "guide": "https://github.com/solidjs/solid/blob/a8186e6738b3a6a3341c561f66e9325432d6759b/documentation/solid-2.0/MIGRATION.md#attributes--events-closer-to-html-and-fewer-namespaces",
       "lint": []
     },
     {
@@ -67,9 +67,9 @@
       "column": 39,
       "severity": "behavior",
       "headline": "Write the boolean value of aria-pressed as \"true\" or \"false\".",
-      "why": "Solid 1 rendered a boolean aria-pressed as the text \"true\" or \"false\". Solid 2.0.0-rc.23 treats every boolean attribute value as presence: true renders aria-pressed=\"\" and false removes it, so assistive technology reads aria-pressed as unset.",
+      "why": "Solid 1 rendered a boolean aria-pressed as the text \"true\" or \"false\". Solid 2.0.0 treats every boolean attribute value as presence: true renders aria-pressed=\"\" and false removes it, so assistive technology reads aria-pressed as unset.",
       "guidance": "Write a literal as a string (aria-pressed=\"true\"), and wrap an expression in String() (aria-pressed={String(!open())}). The transform makes this edit.",
-      "guide": "https://github.com/solidjs/solid/blob/8c34a505a853fcc894fcc8dad150d62f0d007fa2/documentation/solid-2.0/MIGRATION.md#attributes--events-closer-to-html-and-fewer-namespaces",
+      "guide": "https://github.com/solidjs/solid/blob/a8186e6738b3a6a3341c561f66e9325432d6759b/documentation/solid-2.0/MIGRATION.md#attributes--events-closer-to-html-and-fewer-namespaces",
       "lint": []
     },
     {
@@ -79,9 +79,9 @@
       "column": 71,
       "severity": "behavior",
       "headline": "Write the boolean value of data-open as \"true\" or \"false\".",
-      "why": "Solid 1 rendered a boolean data-open as the text \"true\" or \"false\". Solid 2.0.0-rc.23 treats every boolean attribute value as presence: true renders data-open=\"\" and false removes it, so selectors and dataset reads that expect \"true\" or \"false\" stop matching.",
+      "why": "Solid 1 rendered a boolean data-open as the text \"true\" or \"false\". Solid 2.0.0 treats every boolean attribute value as presence: true renders data-open=\"\" and false removes it, so selectors and dataset reads that expect \"true\" or \"false\" stop matching.",
       "guidance": "Write a literal as a string (data-open=\"true\"), and wrap an expression in String() (data-open={String(!open())}). The transform makes this edit.",
-      "guide": "https://github.com/solidjs/solid/blob/8c34a505a853fcc894fcc8dad150d62f0d007fa2/documentation/solid-2.0/MIGRATION.md#attributes--events-closer-to-html-and-fewer-namespaces",
+      "guide": "https://github.com/solidjs/solid/blob/a8186e6738b3a6a3341c561f66e9325432d6759b/documentation/solid-2.0/MIGRATION.md#attributes--events-closer-to-html-and-fewer-namespaces",
       "lint": []
     },
     {
@@ -91,9 +91,9 @@
       "column": 9,
       "severity": "behavior",
       "headline": "Write the boolean value of aria-busy as \"true\" or \"false\".",
-      "why": "Solid 1 rendered a boolean aria-busy as the text \"true\" or \"false\". Solid 2.0.0-rc.23 treats every boolean attribute value as presence: true renders aria-busy=\"\" and false removes it, so assistive technology reads aria-busy as unset.",
+      "why": "Solid 1 rendered a boolean aria-busy as the text \"true\" or \"false\". Solid 2.0.0 treats every boolean attribute value as presence: true renders aria-busy=\"\" and false removes it, so assistive technology reads aria-busy as unset.",
       "guidance": "Write a literal as a string (aria-busy=\"true\"), and wrap an expression in String() (aria-busy={String(!open())}). The transform makes this edit.",
-      "guide": "https://github.com/solidjs/solid/blob/8c34a505a853fcc894fcc8dad150d62f0d007fa2/documentation/solid-2.0/MIGRATION.md#attributes--events-closer-to-html-and-fewer-namespaces",
+      "guide": "https://github.com/solidjs/solid/blob/a8186e6738b3a6a3341c561f66e9325432d6759b/documentation/solid-2.0/MIGRATION.md#attributes--events-closer-to-html-and-fewer-namespaces",
       "lint": []
     },
     {
@@ -103,9 +103,9 @@
       "column": 12,
       "severity": "behavior",
       "headline": "Write the boolean value of aria-hidden as \"true\" or \"false\".",
-      "why": "Solid 1 rendered a boolean aria-hidden as the text \"true\" or \"false\". Solid 2.0.0-rc.23 treats every boolean attribute value as presence: true renders aria-hidden=\"\" and false removes it, so assistive technology reads aria-hidden as unset.",
+      "why": "Solid 1 rendered a boolean aria-hidden as the text \"true\" or \"false\". Solid 2.0.0 treats every boolean attribute value as presence: true renders aria-hidden=\"\" and false removes it, so assistive technology reads aria-hidden as unset.",
       "guidance": "Write a literal as a string (aria-hidden=\"true\"), and wrap an expression in String() (aria-hidden={String(!open())}). The transform makes this edit.",
-      "guide": "https://github.com/solidjs/solid/blob/8c34a505a853fcc894fcc8dad150d62f0d007fa2/documentation/solid-2.0/MIGRATION.md#attributes--events-closer-to-html-and-fewer-namespaces",
+      "guide": "https://github.com/solidjs/solid/blob/a8186e6738b3a6a3341c561f66e9325432d6759b/documentation/solid-2.0/MIGRATION.md#attributes--events-closer-to-html-and-fewer-namespaces",
       "lint": []
     },
     {
@@ -115,9 +115,9 @@
       "column": 16,
       "severity": "behavior",
       "headline": "Check whether the value of aria-expanded can be a boolean.",
-      "why": "Solid 1 rendered a boolean aria-expanded as the text \"true\" or \"false\". Solid 2.0.0-rc.23 treats every boolean attribute value as presence: true renders aria-expanded=\"\" and false removes it, so assistive technology reads aria-expanded as unset.",
+      "why": "Solid 1 rendered a boolean aria-expanded as the text \"true\" or \"false\". Solid 2.0.0 treats every boolean attribute value as presence: true renders aria-expanded=\"\" and false removes it, so assistive technology reads aria-expanded as unset.",
       "guidance": "If the value can be a boolean, render it as text: aria-expanded={String(value())}, or value() ? \"true\" : \"false\". Keep it as is when it is already a string, or undefined to remove the attribute.",
-      "guide": "https://github.com/solidjs/solid/blob/8c34a505a853fcc894fcc8dad150d62f0d007fa2/documentation/solid-2.0/MIGRATION.md#attributes--events-closer-to-html-and-fewer-namespaces",
+      "guide": "https://github.com/solidjs/solid/blob/a8186e6738b3a6a3341c561f66e9325432d6759b/documentation/solid-2.0/MIGRATION.md#attributes--events-closer-to-html-and-fewer-namespaces",
       "lint": []
     }
   ]

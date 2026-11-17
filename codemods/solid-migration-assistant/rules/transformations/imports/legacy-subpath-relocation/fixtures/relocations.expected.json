@@ -6,7 +6,7 @@
       "line": 2,
       "column": 15,
       "message": "Relocate solid-js/h to @solidjs/h.",
-      "guide": "https://github.com/solidjs/solid/blob/8c34a505a853fcc894fcc8dad150d62f0d007fa2/documentation/solid-2.0/MIGRATION.md#imports-where-things-live-now"
+      "guide": "https://github.com/solidjs/solid/blob/a8186e6738b3a6a3341c561f66e9325432d6759b/documentation/solid-2.0/MIGRATION.md#imports-where-things-live-now"
     },
     {
       "rule": "imports/legacy-subpath-relocation",
@@ -14,7 +14,7 @@
       "line": 3,
       "column": 18,
       "message": "Relocate solid-js/html to @solidjs/html.",
-      "guide": "https://github.com/solidjs/solid/blob/8c34a505a853fcc894fcc8dad150d62f0d007fa2/documentation/solid-2.0/MIGRATION.md#imports-where-things-live-now"
+      "guide": "https://github.com/solidjs/solid/blob/a8186e6738b3a6a3341c561f66e9325432d6759b/documentation/solid-2.0/MIGRATION.md#imports-where-things-live-now"
     },
     {
       "rule": "imports/legacy-subpath-relocation",
@@ -22,7 +22,7 @@
       "line": 4,
       "column": 32,
       "message": "Relocate solid-js/universal to @solidjs/universal.",
-      "guide": "https://github.com/solidjs/solid/blob/8c34a505a853fcc894fcc8dad150d62f0d007fa2/documentation/solid-2.0/MIGRATION.md#imports-where-things-live-now"
+      "guide": "https://github.com/solidjs/solid/blob/a8186e6738b3a6a3341c561f66e9325432d6759b/documentation/solid-2.0/MIGRATION.md#imports-where-things-live-now"
     },
     {
       "rule": "imports/legacy-subpath-relocation",
@@ -30,7 +30,7 @@
       "line": 5,
       "column": 21,
       "message": "Relocate solid-js/jsx-runtime to @solidjs/web/jsx-runtime.",
-      "guide": "https://github.com/solidjs/solid/blob/8c34a505a853fcc894fcc8dad150d62f0d007fa2/documentation/solid-2.0/MIGRATION.md#imports-where-things-live-now"
+      "guide": "https://github.com/solidjs/solid/blob/a8186e6738b3a6a3341c561f66e9325432d6759b/documentation/solid-2.0/MIGRATION.md#imports-where-things-live-now"
     },
     {
       "rule": "imports/legacy-subpath-relocation",
@@ -38,7 +38,7 @@
       "line": 6,
       "column": 24,
       "message": "Relocate solid-js/jsx-dev-runtime to @solidjs/web/jsx-dev-runtime.",
-      "guide": "https://github.com/solidjs/solid/blob/8c34a505a853fcc894fcc8dad150d62f0d007fa2/documentation/solid-2.0/MIGRATION.md#imports-where-things-live-now"
+      "guide": "https://github.com/solidjs/solid/blob/a8186e6738b3a6a3341c561f66e9325432d6759b/documentation/solid-2.0/MIGRATION.md#imports-where-things-live-now"
     },
     {
       "rule": "imports/legacy-subpath-relocation",
@@ -46,7 +46,7 @@
       "line": 8,
       "column": 36,
       "message": "Relocate solid-js/html to @solidjs/html.",
-      "guide": "https://github.com/solidjs/solid/blob/8c34a505a853fcc894fcc8dad150d62f0d007fa2/documentation/solid-2.0/MIGRATION.md#imports-where-things-live-now"
+      "guide": "https://github.com/solidjs/solid/blob/a8186e6738b3a6a3341c561f66e9325432d6759b/documentation/solid-2.0/MIGRATION.md#imports-where-things-live-now"
     },
     {
       "rule": "imports/legacy-subpath-relocation",
@@ -54,7 +54,7 @@
       "line": 10,
       "column": 50,
       "message": "Relocate solid-js/universal to @solidjs/universal.",
-      "guide": "https://github.com/solidjs/solid/blob/8c34a505a853fcc894fcc8dad150d62f0d007fa2/documentation/solid-2.0/MIGRATION.md#imports-where-things-live-now"
+      "guide": "https://github.com/solidjs/solid/blob/a8186e6738b3a6a3341c561f66e9325432d6759b/documentation/solid-2.0/MIGRATION.md#imports-where-things-live-now"
     },
     {
       "rule": "imports/legacy-subpath-relocation",
@@ -62,7 +62,7 @@
       "line": 11,
       "column": 36,
       "message": "Relocate solid-js/html to @solidjs/html.",
-      "guide": "https://github.com/solidjs/solid/blob/8c34a505a853fcc894fcc8dad150d62f0d007fa2/documentation/solid-2.0/MIGRATION.md#imports-where-things-live-now"
+      "guide": "https://github.com/solidjs/solid/blob/a8186e6738b3a6a3341c561f66e9325432d6759b/documentation/solid-2.0/MIGRATION.md#imports-where-things-live-now"
     },
     {
       "rule": "imports/legacy-subpath-relocation",
@@ -70,7 +70,7 @@
       "line": 12,
       "column": 50,
       "message": "Relocate solid-js/universal to @solidjs/universal.",
-      "guide": "https://github.com/solidjs/solid/blob/8c34a505a853fcc894fcc8dad150d62f0d007fa2/documentation/solid-2.0/MIGRATION.md#imports-where-things-live-now"
+      "guide": "https://github.com/solidjs/solid/blob/a8186e6738b3a6a3341c561f66e9325432d6759b/documentation/solid-2.0/MIGRATION.md#imports-where-things-live-now"
     },
     {
       "rule": "imports/legacy-subpath-relocation",
@@ -78,7 +78,7 @@
       "line": 13,
       "column": 41,
       "message": "Relocate solid-js/jsx-runtime to @solidjs/web/jsx-runtime.",
-      "guide": "https://github.com/solidjs/solid/blob/8c34a505a853fcc894fcc8dad150d62f0d007fa2/documentation/solid-2.0/MIGRATION.md#imports-where-things-live-now"
+      "guide": "https://github.com/solidjs/solid/blob/a8186e6738b3a6a3341c561f66e9325432d6759b/documentation/solid-2.0/MIGRATION.md#imports-where-things-live-now"
     },
     {
       "rule": "imports/legacy-subpath-relocation",
@@ -86,7 +86,7 @@
       "line": 14,
       "column": 37,
       "message": "Relocate solid-js/jsx-dev-runtime to @solidjs/web/jsx-dev-runtime.",
-      "guide": "https://github.com/solidjs/solid/blob/8c34a505a853fcc894fcc8dad150d62f0d007fa2/documentation/solid-2.0/MIGRATION.md#imports-where-things-live-now"
+      "guide": "https://github.com/solidjs/solid/blob/a8186e6738b3a6a3341c561f66e9325432d6759b/documentation/solid-2.0/MIGRATION.md#imports-where-things-live-now"
     },
     {
       "rule": "imports/legacy-subpath-relocation",
@@ -94,7 +94,7 @@
       "line": 17,
       "column": 34,
       "message": "Relocate solid-js/h to @solidjs/h.",
-      "guide": "https://github.com/solidjs/solid/blob/8c34a505a853fcc894fcc8dad150d62f0d007fa2/documentation/solid-2.0/MIGRATION.md#imports-where-things-live-now"
+      "guide": "https://github.com/solidjs/solid/blob/a8186e6738b3a6a3341c561f66e9325432d6759b/documentation/solid-2.0/MIGRATION.md#imports-where-things-live-now"
     },
     {
       "rule": "imports/legacy-subpath-relocation",
@@ -102,7 +102,7 @@
       "line": 18,
       "column": 15,
       "message": "Relocate solid-js/html to @solidjs/html.",
-      "guide": "https://github.com/solidjs/solid/blob/8c34a505a853fcc894fcc8dad150d62f0d007fa2/documentation/solid-2.0/MIGRATION.md#imports-where-things-live-now"
+      "guide": "https://github.com/solidjs/solid/blob/a8186e6738b3a6a3341c561f66e9325432d6759b/documentation/solid-2.0/MIGRATION.md#imports-where-things-live-now"
     },
     {
       "rule": "imports/legacy-subpath-relocation",
@@ -110,7 +110,7 @@
       "line": 20,
       "column": 28,
       "message": "Relocate solid-js/html to @solidjs/html.",
-      "guide": "https://github.com/solidjs/solid/blob/8c34a505a853fcc894fcc8dad150d62f0d007fa2/documentation/solid-2.0/MIGRATION.md#imports-where-things-live-now"
+      "guide": "https://github.com/solidjs/solid/blob/a8186e6738b3a6a3341c561f66e9325432d6759b/documentation/solid-2.0/MIGRATION.md#imports-where-things-live-now"
     },
     {
       "rule": "imports/legacy-subpath-relocation",
@@ -118,7 +118,7 @@
       "line": 22,
       "column": 35,
       "message": "Relocate solid-js/universal to @solidjs/universal.",
-      "guide": "https://github.com/solidjs/solid/blob/8c34a505a853fcc894fcc8dad150d62f0d007fa2/documentation/solid-2.0/MIGRATION.md#imports-where-things-live-now"
+      "guide": "https://github.com/solidjs/solid/blob/a8186e6738b3a6a3341c561f66e9325432d6759b/documentation/solid-2.0/MIGRATION.md#imports-where-things-live-now"
     },
     {
       "rule": "imports/legacy-subpath-relocation",
@@ -126,7 +126,7 @@
       "line": 23,
       "column": 28,
       "message": "Relocate solid-js/jsx-runtime to @solidjs/web/jsx-runtime.",
-      "guide": "https://github.com/solidjs/solid/blob/8c34a505a853fcc894fcc8dad150d62f0d007fa2/documentation/solid-2.0/MIGRATION.md#imports-where-things-live-now"
+      "guide": "https://github.com/solidjs/solid/blob/a8186e6738b3a6a3341c561f66e9325432d6759b/documentation/solid-2.0/MIGRATION.md#imports-where-things-live-now"
     }
   ]
 }

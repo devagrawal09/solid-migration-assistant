@@ -41,7 +41,7 @@ export type OnHelperRewrite = {
  * Solid 1.9.13's `on(deps, fn)` (`packages/solid/src/reactive/signal.ts`)
  * returns an effect function that reads `deps()` tracked and then calls
  * `fn(input, prevInput, prevValue)` untracked, returning fn's result as the
- * effect's next value. Solid 2.0.0-rc.23 removes `on` because
+ * effect's next value. Solid 2.0.0 removes `on` because
  * `createEffect(compute, apply)` (`packages/signals/src/signals.ts`) already
  * separates the tracked read from the untracked side effect: the compute
  * result is passed to `apply(value, previousValue)`. So

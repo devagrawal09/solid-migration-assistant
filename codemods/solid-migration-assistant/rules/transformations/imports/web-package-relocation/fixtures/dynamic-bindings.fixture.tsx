@@ -1,5 +1,5 @@
 // fixture: dynamic-bindings
-// Dynamic is exported by @solidjs/web at the pinned rc.21 commit and keeps its
+// Dynamic is exported by @solidjs/web at the pinned 2.0.0 commit and keeps its
 // 1.9 user-facing contract, so it relocates; every report line that carries it
 // also records that <Dynamic> is deprecated in favor of dynamic().
 import { Dynamic } from "solid-js/web";

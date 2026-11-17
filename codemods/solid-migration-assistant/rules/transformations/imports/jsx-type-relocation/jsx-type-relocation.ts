@@ -28,7 +28,7 @@ export type JsxTypeRelocation = {
  *
  * Solid 1.9.13 exported the `JSX` namespace from `solid-js`
  * (`packages/solid/src/index.ts`: `export type { JSXElement, JSX }`). At
- * 2.0.0-rc.23 `solid-js` exports no `JSX` at all; the renderer owns it:
+ * 2.0.0 `solid-js` exports no `JSX` at all; the renderer owns it:
  * `packages/web/src/index.ts` declares `export type { JSX } from
  * "../jsx/jsx.js"`, and `solid-js`'s `ComponentProps` and `ValidComponent`
  * accept components only, while the `@solidjs/web` versions also accept

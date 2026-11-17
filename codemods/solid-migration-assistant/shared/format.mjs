@@ -10,10 +10,10 @@
  *
  * - `build`: the code will not build or run on Solid 2 as written. The
  *   import path or export no longer exists, the compiler rejects the syntax,
- *   or the call no longer matches the RC signature.
+ *   or the call no longer matches the Solid 2 signature.
  * - `behavior`: the code still compiles but behaves differently, with no
  *   error to point at it.
- * - `deprecated`: the code keeps working but the RC discourages it.
+ * - `deprecated`: the code keeps working but Solid 2 discourages it.
  *
  * Fix `build` findings first: until they are gone the project cannot run, so
  * `behavior` findings cannot be observed.

@@ -111,7 +111,7 @@ test("keeps each transform rule inside its declared scope", () => {
   );
   // Dynamic was vetoed while it existed only in upstream prose and compiler
   // configuration; it is admitted now that `packages/web/src/index.ts` at the
-  // pinned rc.21 commit exports it, and the rule must still record that
+  // pinned 2.0.0 commit exports it, and the rule must still record that
   // evidence (and the deprecation) rather than widen the list silently.
   assert.match(webRule, /`Dynamic` is on this list because/);
   assert.match(webRule, /deprecated/);
