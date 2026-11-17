@@ -126,8 +126,10 @@ export default async function main({ params }: { params: Params }) {
     files: stage.scan === null ? files.map((f) => f.path) : files.filter((f) => f.hits.some((h) => stage.scan!.includes(h))).map((f) => f.path),
   }));
 
+  // A shell step runs where Codemod was started unless given a cwd, which is
+  // relative to the target.
   const lint = async (label: string, key: string) =>
-    step(label, shell`sh ${import.meta.dirname}/verify/eslint-solid-v2.sh ${key}`);
+    step(label, shell({ cwd: "." })`sh ${import.meta.dirname}/verify/eslint-solid-v2.sh ${key}`);
 
   // jssg rules run on exactly the stage's files. Paths are passed as globs, so
   // brackets in route files like src/routes/[id].tsx are escaped.
