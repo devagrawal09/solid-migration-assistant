@@ -1,19 +1,18 @@
-import { approval, forEachFile, getState, jssg, shell, step } from "codemod/workflow";
+import { approval, forEachFile, jssg, shell, step } from "codemod/workflow";
 import { DEPENDENCY_MAP } from "./shared/dependencies.mjs";
 import { bumpManifest, bumpTsconfig } from "./shared/manifest.mjs";
 import { byLocation, renderText } from "./shared/format.mjs";
 import { ANALYSIS_STEPS, TRANSFORM_STEPS } from "./shared/steps.generated.ts";
 import { MIGRATION_GUIDE_URL, SOLID_TARGET_VERSION } from "./shared/target.ts";
 
-// The Solid 1.9 -> 2 RC assistant on the code-first engine
-// (codemod/codemod#2485, engine/code-first 9c91ebf, published as 2.0.0-alpha.3).
+// The Solid 1.9 -> 2 RC assistant on the code-first engine with step-scoped
+// state (codemod/codemod#2489 at a03dc72, unpublished): rules return their
+// findings and rewrites as jssg data, and the report reads step results.
 
 const SOURCES = {
   include: ["**/*.js", "**/*.jsx", "**/*.ts", "**/*.tsx"],
   exclude: ["**/node_modules/**", "**/dist/**", "**/build/**", "**/coverage/**", "**/*.d.ts"],
 };
-const FINDINGS = "solid-migration-assistant-guidance";
-const REWRITES = "solid-migration-assistant-transform-report";
 
 type DependencyEntry = {
   name: string;
@@ -126,10 +125,10 @@ export default async function main({ params }: { params: Params }) {
     files: stage.scan === null ? files.map((f) => f.path) : files.filter((f) => f.hits.some((h) => stage.scan!.includes(h))).map((f) => f.path),
   }));
 
-  // A shell step runs where Codemod was started unless given a cwd, which is
-  // relative to the target.
+  // The shell runs in the target (a cwd is relative to it); the lint script
+  // writes its summary to STATE_OUTPUTS, which comes back as result.state.
   const lint = async (label: string, key: string) =>
-    step(label, shell({ cwd: "." })`sh ${import.meta.dirname}/verify/eslint-solid-v2.sh ${key}`);
+    (await step(label, shell({ cwd: "." })`sh ${import.meta.dirname}/verify/eslint-solid-v2.sh ${key}`)).state?.[key] as any;
 
   // jssg rules run on exactly the stage's files. Paths are passed as globs, so
   // brackets in route files like src/routes/[id].tsx are escaped.
@@ -139,8 +138,11 @@ export default async function main({ params }: { params: Params }) {
       jssg(script, { semanticAnalysis: "workspace" }),
     ));
   const failures: { step: string; path: string; error: string }[] = [];
+  const found: any[] = [];
+  const rewritten: any[] = [];
 
-  if (verify) await lint("Lint with eslint-plugin-solid v2 (before)", "lintBefore");
+  const before = verify ? await lint("Lint with eslint-plugin-solid v2 (before)", "lintBefore") : undefined;
+  let after: any;
 
   // Migrate mode only rewrites, as the old transform workflow did: findings
   // computed before the rewrites would list sites the rewrites just fixed.
@@ -149,10 +151,11 @@ export default async function main({ params }: { params: Params }) {
     for (const rule of stage.analyses) {
       const label = `${stage.name}: ${rule}`;
       const result = await runRule(label, `./scripts/analysis/${rule}.ts`, stage.files);
+      found.push(...rows(result.data?.findings).map((row) => ({ ...row, line: Number(row.line), column: Number(row.column), lint: row.lint === "" ? [] : row.lint.split(",") })));
       failures.push(...result.failures.map((f) => ({ step: label, ...f })));
     }
   }
-  const findings = byLocation((getState(FINDINGS) ?? []) as any[]);
+  const findings = byLocation(found);
 
   const projectRewrites: any[] = [];
   const dependencySkips: any[] = [];
@@ -165,6 +168,7 @@ export default async function main({ params }: { params: Params }) {
       for (const rule of stage.rewrites) {
         const label = `${stage.name}: ${rule}`;
         const result = await runRule(label, `./scripts/transformations/${rule}.ts`, stage.files);
+        rewritten.push(...rows(result.data?.rewrites).map((row) => ({ ...row, line: Number(row.line), column: Number(row.column) })));
         failures.push(...result.failures.map((f) => ({ step: label, ...f })));
       }
     }
@@ -210,12 +214,10 @@ export default async function main({ params }: { params: Params }) {
       dependencySkips.push(...output.skipped);
     }
     failures.push(...project.failures.map((f) => ({ step: "Move package.json and tsconfig.json to Solid 2", ...f })));
-    if (verify) await lint("Lint with eslint-plugin-solid v2 (after)", "lintAfter");
+    if (verify) after = await lint("Lint with eslint-plugin-solid v2 (after)", "lintAfter");
   }
 
-  const rewrites = byLocation([...((getState(REWRITES) ?? []) as any[]), ...projectRewrites]);
-  const before = getState("lintBefore") as any;
-  const after = getState("lintAfter") as any;
+  const rewrites = byLocation([...rewritten, ...projectRewrites]);
 
   // Each finding names the eslint-plugin-solid rules that keep reporting it.
   // removed-api reports the import rather than each call, so agreement is
@@ -256,6 +258,16 @@ export default async function main({ params }: { params: Params }) {
       findingsTheLinterMisses: tally(unconfirmed.map((f) => `${f.rule} (expects ${f.lint.join(", ")})`)),
     } : "skipped",
   };
+}
+
+/**
+ * A jssg step's data list as the rows the transforms returned. The step adds
+ * up rows with identical labels, which is the deduplication the report wants
+ * (an element with a closing tag reports one rewrite for two edits), and
+ * hands every label back as a string.
+ */
+function rows(data: { cardinality: Record<string, string>; count: number }[] | undefined): Record<string, string>[] {
+  return (data ?? []).map((entry) => entry.cardinality);
 }
 
 function literalGlob(path: string): string {
