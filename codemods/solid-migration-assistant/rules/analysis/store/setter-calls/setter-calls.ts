@@ -156,7 +156,6 @@ function guidance({ node, filename, shape, detail }: SetterSite): RuleFinding {
         headline: "Rewrite this path-style store setter call as a draft write.",
         why: `${detail.trim()} ${WHY}`,
         guidance: `Read the path segments and the final value. Replace the call with setStore(state => { ... }) that walks the same path on the draft: a string or number segment becomes a property access, an array of keys becomes a loop over those keys, a range becomes a loop over its indices, a filter function becomes a loop with an if, and a final function value becomes a read-modify-write of the draft property: in 1.x an object it returned was merged into the existing node, so on the draft assign only the properties it changed (assigning a whole object replaces the node). Setting undefined to remove a key becomes delete.`,
-        lint: ["no-store-mutation-outside-setter"],
         guide: MIGRATION_GUIDE,
       });
     case "merge":
@@ -165,7 +164,6 @@ function guidance({ node, filename, shape, detail }: SetterSite): RuleFinding {
         headline: "Rewrite this object-merge store setter call as draft assignments.",
         why: `${detail.trim()} ${WHY}`,
         guidance: `Read the argument and the store shape. Replace the call with setStore(state => { ... }) that assigns each top-level key of the argument onto the draft; nested objects that 1.x merged shallowly must be assigned per key too if other keys at that level must survive.`,
-        lint: ["no-store-mutation-outside-setter"],
         guide: MIGRATION_GUIDE,
       });
     case "returns":
@@ -174,7 +172,6 @@ function guidance({ node, filename, shape, detail }: SetterSite): RuleFinding {
         headline: `Review the value this store setter callback returns.`,
         why: WHY,
         guidance: `Read the callback's return value and every key it omits. If it was spreading the previous state to produce a merged object, mutate the draft in place and return nothing. If it intentionally replaces the whole store, keep the return but confirm every consumer accepts the replacement, since keys missing from the returned object no longer survive.`,
-        lint: ["no-store-mutation-outside-setter"],
         guide: MIGRATION_GUIDE,
       });
     default:
@@ -183,7 +180,6 @@ function guidance({ node, filename, shape, detail }: SetterSite): RuleFinding {
         headline: `Trace this store setter that is passed as a value.`,
         why: WHY,
         guidance: `Find every call made through this reference (an event handler, a helper, a child component prop) and classify its arguments as above: paths and object merges become draft callbacks, and returned objects replace instead of merge. Stop and ask for the call sites when the reference escapes to code outside this project.`,
-        lint: ["no-store-mutation-outside-setter"],
         guide: MIGRATION_GUIDE,
       });
   }

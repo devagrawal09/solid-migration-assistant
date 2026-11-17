@@ -498,7 +498,6 @@ src/store-merge.ts:7:1 [build] Rewrite this object-merge store setter call as dr
   Rule: store/setter-calls
   Why: The argument is an object. Solid 2.0.0's plain store setter accepts only a draft callback, setStore(state => { ... }); Solid 1.x also accepted a path followed by a value, an object to merge, and a function whose returned object was merged into the store, while a value returned from the 2.0 draft callback is adopted as the whole new state instead.
   Guidance: Read the argument and the store shape. Replace the call with setStore(state => { ... }) that assigns each top-level key of the argument onto the draft; nested objects that 1.x merged shallowly must be assigned per key too if other keys at that level must survive.
-  Lint: eslint-plugin-solid's solid/no-store-mutation-outside-setter (v2 config) keeps reporting this site after migration.
   Guide: https://github.com/solidjs/solid/blob/a8186e6738b3a6a3341c561f66e9325432d6759b/documentation/solid-2.0/MIGRATION.md#draft-first-setters
 
 src/types.tsx:7:10 [build] Move this JSXElement type import off solid-js.
