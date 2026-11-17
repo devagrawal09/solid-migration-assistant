@@ -391,9 +391,12 @@ function git(cwd, argumentsList) {
   return result;
 }
 
-/** Runs the product launcher exactly as a user would, from the package directory. */
+/**
+ * Runs the product launcher as a user would, from the package directory,
+ * offline so the baseline doesn't move when a library publishes to npm.
+ */
 function runLauncher(argumentsList) {
-  const result = spawnSync(process.execPath, [launcher, ...argumentsList], {
+  const result = spawnSync(process.execPath, [launcher, ...argumentsList, "--offline"], {
     cwd: packageDirectory,
     encoding: "utf8",
     env: { ...process.env, CI: "true", NO_COLOR: "1", FORCE_COLOR: undefined },
