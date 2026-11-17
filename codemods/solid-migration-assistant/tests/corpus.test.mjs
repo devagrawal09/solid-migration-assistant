@@ -195,7 +195,7 @@ for (const entry of corpus) {
             assert.doesNotThrow(() => JSON.parse(readFileSync(join(copy, file), "utf8")), `${file} is no longer valid JSON`);
             continue;
           }
-          if (/(?:^|\/)tsconfig\.json$/.test(file)) continue;
+          if (/(?:^|\/)(?:tsconfig(?:\..+)?|jsconfig)\.json$/.test(file)) continue;
           assert.match(file, /\.(?:js|jsx|ts|tsx)$/, `${file}: the transform edited a non-source file`);
           const diagnostics = parseDiagnostics(file, readFileSync(join(copy, file), "utf8"));
           assert.deepEqual(

@@ -290,6 +290,7 @@
       "project/dependencies: Move @solid-primitives/storage to its Solid 2 line.": 1,
       "project/dependencies: Move @solidjs/router to its Solid 2 line.": 1,
       "project/dependencies: Replace vite-plugin-solid with its Solid 2 successor.": 1,
+      "project/jsx-import-source: Point jsxImportSource at the Solid 2 renderer package.": 1,
       "project/solid-version: Move this project's Solid dependencies to solid-js@2.0.0.": 1,
       "reactivity/batch: Migrate this batch call to default batching or flush(fn).": 3,
       "reactivity/create-effect: Migrate this two-argument createEffect call.": 1,
@@ -311,9 +312,10 @@
       "project/dependencies: Move @solid-primitives/scheduled from ^1.3.0 to ^2.0.0.": 1,
       "project/dependencies: Move @solid-primitives/storage from ^2.1.2 to ^5.0.0.": 1,
       "project/dependencies: Move @solidjs/router from ^0.15.3 to ^2.0.0.": 1,
-      "project/dependencies: Move solid-js from ^1.6.10 to ^2.0.0.": 1
+      "project/dependencies: Move solid-js from ^1.6.10 to ^2.0.0.": 1,
+      "project/jsx-import-source: Point jsxImportSource at @solidjs/web.": 1
     },
-    "changedFiles": 10,
+    "changedFiles": 11,
     "transformedAnalyzerFindings": 46,
     "rcTypeErrors": 0,
     "rcCompileErrors": 2
@@ -337,6 +339,7 @@
       "lifecycle/on-cleanup: Move this onCleanup out of the createEffect callback into the apply callback's returned cleanup.": 5,
       "lifecycle/on-mount: Migrate this onMount lifecycle callback.": 2,
       "project/dependencies: Replace vite-plugin-solid with its Solid 2 successor.": 1,
+      "project/jsx-import-source: Point jsxImportSource at the Solid 2 renderer package.": 1,
       "project/solid-version: Move this project's Solid dependencies to solid-js@2.0.0.": 1,
       "props/split-props: Migrate this splitProps tuple to reviewed omit-based values.": 4,
       "reactivity/create-computed: Choose a Solid 2 replacement for this createComputed call.": 1,
@@ -355,9 +358,10 @@
       "jsx/class-list-to-class: Merge the class and classList attributes on <div> into the class array form, preserving the static string and the object literal.": 3,
       "jsx/class-list-to-class: Rewrite the classList attribute on <tr> to class, preserving its value expression.": 1,
       "project/dependencies: Add @solidjs/web ^2.0.0.": 1,
-      "project/dependencies: Move solid-js from ^1.9.17 to ^2.0.0.": 1
+      "project/dependencies: Move solid-js from ^1.9.17 to ^2.0.0.": 1,
+      "project/jsx-import-source: Point jsxImportSource at @solidjs/web.": 1
     },
-    "changedFiles": 26,
+    "changedFiles": 27,
     "transformedAnalyzerFindings": 1,
     "rcTypeErrors": 68,
     "rcCompileErrors": 0
@@ -819,7 +823,7 @@
       "reactivity/on-helper-split: Rewrite createEffect(on(dep, fn)) as createEffect(compute, apply), keeping the callback unchanged.": 1
     },
     "changedFiles": 112,
-    "transformedAnalyzerFindings": 21,
+    "transformedAnalyzerFindings": 214,
     "rcTypeErrors": 305,
     "rcCompileErrors": 0
   },
