@@ -46,7 +46,7 @@
     },
     {
       "anchor": "once-jsx-marker",
-      "gap": "The marker is a comment, so the Solid 2 compiler accepts it and the value silently becomes reactive; no rule reports it."
+      "rules": ["jsx/once-marker"]
     },
     { "anchor": "async-data--transitions", "excluded": "Groups the sections below." },
     { "anchor": "suspense--errorboundary--loading--errored", "rules": ["jsx/component-renames"] },

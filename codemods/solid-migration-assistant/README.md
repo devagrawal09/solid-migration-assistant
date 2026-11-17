@@ -45,6 +45,7 @@ Pass `--format json` (with `analyze` or `transform`) to get one JSON document on
 - **Lowercase DOM event handlers** — `onclick`-style attributes on intrinsic elements, which Solid 2 treats as plain attributes → camelCase handlers.
 - **`use:` directives** — Solid 1.x directive syntax → `ref` directive factories.
 - **`Context.Provider` JSX sites** — `<Context.Provider value={...}>` → `<Context value={...}>`; an identifier the file declares as something other than a `createContext` call (an object literal or function with its own `Provider` member) is not reported.
+- **`/*@once*/` markers** — in JSX expressions; Solid 2 ignores them, so the value becomes reactive.
 - **`<Dynamic>` elements** — kept but deprecated in Solid 2 → `dynamic(source)` factory.
 
 ### Reactivity
