@@ -16,6 +16,7 @@ import { test } from "node:test";
 import { fileURLToPath } from "node:url";
 import ts from "typescript";
 import { output, skipOrFail, treeSnapshot } from "./helpers.mjs";
+import { compileErrors, countTypeErrors, installRc, linkRc, renderOnServer } from "./rc-check.mjs";
 
 /**
  * Opt-in (`pnpm test:corpus`): proves the assistant behaves safely on real,
@@ -39,6 +40,9 @@ import { output, skipOrFail, treeSnapshot } from "./helpers.mjs";
  * - `solidVersion`: the solid-js range(s) the project declares at that commit;
  * - `subdirectory` (optional): a path inside the clone to analyze instead of
  *   the repository root, for monorepos and template collections;
+ * - `ssrSmoke` (optional): components (paths inside the target) whose
+ *   default export must server-render on the RC after the transform; for
+ *   small projects whose components import nothing but Solid and styles;
  * - `notes`: free text for the next maintainer.
  *
  * To add a project, append an entry; nothing else needs to change. Each
@@ -54,10 +58,17 @@ import { output, skipOrFail, treeSnapshot } from "./helpers.mjs";
  * 5. runs the transform again and proves it reports nothing and changes
  *    nothing (idempotency);
  * 6. runs the analyzer on the transformed copy and proves it still exits 0;
- * 7. prints one JSON line to stdout with finding and rewrite counts, the
- *    changed-file count, and elapsed milliseconds per phase; and
- * 8. compares those counts with `tests/corpus/baseline.json` and fails on any
- *    difference, so every effect a rule change has on real code becomes a
+ * 7. checks the transformed copy against the pinned RC, without installing
+ *    the project's own dependencies: type errors in its .ts and .tsx files
+ *    against the RC types (errors from unresolved modules are not counted),
+ *    files the RC compiler rejects, and a server render of each `ssrSmoke`
+ *    component, which must succeed;
+ * 8. prints one JSON line to stdout with finding and rewrite counts, the
+ *    changed-file count, the RC type and compile error counts, and elapsed
+ *    milliseconds per phase; and
+ * 9. compares those counts with `tests/corpus/baseline.json` and fails on any
+ *    difference in findings and rewrites, and on RC type or compile error
+ *    counts above the baseline, so every effect a rule change has on real code becomes a
  *    reviewed diff of that file instead of a surprise.
  *
  * Refreshing the baseline is deliberate: run
@@ -94,6 +105,9 @@ test("the corpus manifest is well-formed", () => {
     names.add(entry.name);
     if (entry.subdirectory !== undefined) {
       assert.equal(typeof entry.subdirectory, "string", `${entry.name}: subdirectory must be a string`);
+    }
+    if (entry.ssrSmoke !== undefined) {
+      assert.ok(Array.isArray(entry.ssrSmoke) && entry.ssrSmoke.every((path) => typeof path === "string"), `${entry.name}: ssrSmoke must be an array of paths`);
     }
   }
 });
@@ -219,7 +233,22 @@ for (const entry of corpus) {
         assertNoCrash(transformedAnalyze, "analyzer on the transformed copy");
         const transformedFindings = countFindings(transformedAnalyze.stdout);
 
-        // 7. One machine-readable line per entry for the run log.
+        // 7. The transformed copy against the pinned RC.
+        started = performance.now();
+        const rc = rcInstall();
+        if (rc.networkFailure) {
+          skipOrFail(t, `network unavailable while installing the RC: ${rc.networkFailure}`);
+          return;
+        }
+        linkRc(copy, rc.directory);
+        const rcTypeErrors = countTypeErrors(copy);
+        const rcCompileErrors = compileErrors(copy, rc.directory);
+        for (const component of entry.ssrSmoke ?? []) {
+          assert.notEqual(renderOnServer(join(copy, component), rc.directory).trim(), "", `${component} rendered nothing`);
+        }
+        elapsedMs.rc = Math.round(performance.now() - started);
+
+        // 8. One machine-readable line per entry for the run log.
         const rewrites = new Map();
         for (const rewrite of report) increment(rewrites, `${rewrite.rule}: ${rewrite.message}`);
         const counts = {
@@ -228,16 +257,19 @@ for (const entry of corpus) {
           rewrites: sortedObject(rewrites),
           changedFiles: changed.length,
           transformedAnalyzerFindings: total(transformedFindings.counts),
+          rcTypeErrors,
+          rcCompileErrors: rcCompileErrors.length,
         };
         console.log(JSON.stringify({ name: entry.name, ...counts, elapsedMs }));
 
-        // 8. The counts must match the reviewed baseline exactly. A rule that
-        //    starts reporting more, fewer, or different sites on real code
-        //    fails here until the baseline diff is committed on purpose.
+        // 9. Findings and rewrites must match the reviewed baseline exactly: a
+        //    rule that starts reporting more, fewer, or different sites on
+        //    real code fails here until the baseline diff is committed on
+        //    purpose. RC error counts may only go down.
         if (updateBaseline) {
           writeBaselineEntry(entry.name, counts);
         } else {
-          assertMatchesBaseline(entry.name, counts);
+          assertMatchesBaseline(entry.name, counts, rcCompileErrors);
         }
       } finally {
         rmSync(temporaryRoot, { recursive: true, force: true });
@@ -245,6 +277,24 @@ for (const entry of corpus) {
     },
     { timeout: 600_000 },
   );
+}
+
+let rcEnvironment;
+
+/** The RC packages, installed once per run into a temporary directory. */
+function rcInstall() {
+  if (rcEnvironment === undefined) {
+    const directory = mkdtempSync(join(tmpdir(), "solid-migration-assistant-rc-"));
+    const install = installRc(directory);
+    rcEnvironment =
+      install.status === 0
+        ? { directory }
+        : NETWORK_FAILURE.test(output(install))
+          ? { networkFailure: output(install).trim().split("\n")[0] }
+          : assert.fail(`installing the RC failed:\n${output(install)}`);
+    process.on("exit", () => rmSync(directory, { recursive: true, force: true }));
+  }
+  return rcEnvironment;
 }
 
 function readBaseline() {
@@ -270,7 +320,7 @@ function writeBaselineEntry(name, counts) {
  * Fails with a per-headline delta (`+3`, `-1`, `new`, `gone`) so a reviewer
  * sees what moved without diffing two JSON blobs by eye.
  */
-function assertMatchesBaseline(name, counts) {
+function assertMatchesBaseline(name, counts, rcCompileErrors) {
   const expected = readBaseline()[name];
   assert.ok(
     expected !== undefined,
@@ -296,6 +346,10 @@ function assertMatchesBaseline(name, counts) {
   for (const key of ["changedFiles", "transformedAnalyzerFindings"]) {
     if (expected[key] !== counts[key]) deltas.push(`  ${key}: ${expected[key]} -> ${counts[key]}`);
   }
+  for (const key of ["rcTypeErrors", "rcCompileErrors"]) {
+    if (counts[key] > (expected[key] ?? 0)) deltas.push(`  ${key} went up: ${expected[key]} -> ${counts[key]}`);
+  }
+  if (counts.rcCompileErrors > (expected.rcCompileErrors ?? 0)) deltas.push(...rcCompileErrors.map((error) => `    ${error}`));
   assert.ok(
     deltas.length === 0,
     `${name} differs from tests/corpus/baseline.json:\n${deltas.join("\n")}\nIf the change is intended, run \`pnpm corpus:update-baseline\` and commit the diff with it.`,

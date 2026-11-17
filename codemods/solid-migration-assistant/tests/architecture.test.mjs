@@ -174,6 +174,7 @@ test("uses normal analyzer end-to-end fixtures", () => {
     "helpers.mjs",
     "manifest.test.mjs",
     "packaging.test.mjs",
+    "rc-check.mjs",
     "rc-compat",
     "rc-compat.test.mjs",
     "rule-fixtures.test.mjs",

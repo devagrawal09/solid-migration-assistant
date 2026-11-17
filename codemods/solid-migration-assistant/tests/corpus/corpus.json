@@ -14,7 +14,13 @@
     "license": "unverified",
     "solidVersion": "^1.9.5 to ^1.9.10",
     "subdirectory": "vanilla",
-    "notes": "The official Solid 1.x Vite templates, 15 projects under vanilla/. No LICENSE file exists at this commit, so the license is recorded as unverified; 12 of the 15 template package.json files declare \"license\": \"MIT\" and the three TanStack templates declare none. solid-js ranges found: ^1.9.5 (bare, basic, with-bootstrap, with-sass, with-solid-router, with-uvu, with-vite-plugin-pages, with-vitest, with-vitest-browser-mode), ^1.9.9 (with-jest, with-tailwindcss, with-tanstack-router-config-based, with-tanstack-router-file-based, with-unocss), ^1.9.10 (with-tanstack-start)."
+    "notes": "The official Solid 1.x Vite templates, 15 projects under vanilla/. No LICENSE file exists at this commit, so the license is recorded as unverified; 12 of the 15 template package.json files declare \"license\": \"MIT\" and the three TanStack templates declare none. solid-js ranges found: ^1.9.5 (bare, basic, with-bootstrap, with-sass, with-solid-router, with-uvu, with-vite-plugin-pages, with-vitest, with-vitest-browser-mode), ^1.9.9 (with-jest, with-tailwindcss, with-tanstack-router-config-based, with-tanstack-router-file-based, with-unocss), ^1.9.10 (with-tanstack-start).",
+    "ssrSmoke": [
+      "bare/src/App.tsx",
+      "basic/src/App.tsx",
+      "with-tailwindcss/src/App.tsx",
+      "with-sass/src/App.tsx"
+    ]
   },
   {
     "name": "slippilab",
@@ -106,5 +112,29 @@
     "license": "MIT (LICENSE)",
     "solidVersion": "^1.9.3",
     "notes": "Vite + Tauri 2, TypeScript, about 26k lines. solid-js/web imports x42, Index x9, createEffect x77, onCleanup x44, 135 path-style setter calls."
+  },
+  {
+    "name": "alist-web",
+    "url": "https://github.com/AlistGo/alist-web",
+    "commit": "907756a8d5dff27d6b73036734de0a6533ace553",
+    "license": "unverified",
+    "solidVersion": "^1.4.8",
+    "notes": "Alist file manager UI, Vite SPA, TypeScript, about 24k lines. No LICENSE file exists at this commit, so the license is recorded as unverified; package.json declares \"license\": \"MIT\". Hope UI and solid-router 0.x dependencies. Added from the 2026-11 battle test."
+  },
+  {
+    "name": "corvu",
+    "url": "https://github.com/corvudev/corvu",
+    "commit": "4bd466c980588e9d02eabaa145755eb45a383f1d",
+    "license": "MIT",
+    "solidVersion": "^1.8 peer, ^1.9.17 dev",
+    "notes": "pnpm workspace of about 20 UI primitive packages plus a docs app, TypeScript, about 12k lines. ComponentProps and ValidComponent heavy: the battle test's case for type imports moving to @solidjs/web."
+  },
+  {
+    "name": "fit-launcher",
+    "url": "https://github.com/CarrotRub/Fit-Launcher",
+    "commit": "fd1e8a0308dc9c51155805167f16053f0658ccac",
+    "license": "GPL-3.0",
+    "solidVersion": "^1.9.6",
+    "notes": "Tauri game launcher frontend, Vite SPA, TypeScript, about 11k lines. Input and button attribute types in Searchbar.tsx. Added from the 2026-11 battle test."
   }
 ]
