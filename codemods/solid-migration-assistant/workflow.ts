@@ -216,7 +216,10 @@ export default async function main({ params }: { params: Params }) {
   const rewritten: any[] = [];
 
   const before = verify ? await lint("Lint with eslint-plugin-solid v2 (before)", "lintBefore") : undefined;
-  let projectFound: any[] = migrate ? [] : await checkProject(workspaceYaml);
+  // The launcher (report=none) reads package.json and tsconfig itself, with
+  // the npm lookups the workflow can't make, so the workflow skips them there.
+  const reportProject = params.report !== "none";
+  let projectFound: any[] = migrate || !reportProject ? [] : await checkProject(workspaceYaml);
   let after: any;
 
   const analyze = async () => {
@@ -342,7 +345,7 @@ export default async function main({ params }: { params: Params }) {
     }
     if (verify) after = await lint("Lint with eslint-plugin-solid v2 (after)", "lintAfter");
     await analyze();
-    projectFound = await checkProject(workspaceYaml);
+    if (reportProject) projectFound = await checkProject(workspaceYaml);
   }
 
   const findings = byLocation(found);
@@ -355,8 +358,6 @@ export default async function main({ params }: { params: Params }) {
   const withLint = findings.filter((f) => f.lint.length > 0);
   const unconfirmed = withLint.filter((f) => !f.lint.some((rule: string) => lintSites.has(`${f.file}\tsolid/${rule}`)));
 
-  // The launcher (report=none) reads package.json and tsconfig itself, with
-  // the npm lookups the workflow can't make, so only this report adds them.
   if (params.report !== "none") {
     const text = renderText({ findings: byLocation([...projectFound, ...findings]), rewrites, afterMigrate, solidVersion: SOLID_TARGET_VERSION });
     console.log(
