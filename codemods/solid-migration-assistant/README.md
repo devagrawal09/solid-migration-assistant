@@ -4,9 +4,24 @@ This package implements Solid Migration Assistant as one Codemod v2 workflow, `w
 
 The migration target is pinned to Solid `2.0.1` at upstream commit [`82f71fdd`](https://github.com/solidjs/solid/tree/82f71fddb1340cab46167db119da5702038e65ab), the `gitHead` recorded on npm for `solid-js@2.0.1`, `@solidjs/web@2.0.1`, `@solidjs/signals@2.0.1`, `@solidjs/universal@2.0.1`, and `@solidjs/babel-plugin@2.0.1` (published 2026-11-18 as npm `latest`; `@solidjs/h` and `@solidjs/html` stay at `2.0.0`, and the Solid 1 line is on the `v1-latest` tag). The 2.0.1 patch leaves `MIGRATION.md`, the public exports and the JSX types as they were in 2.0.0. Every guidance string and report line links the migration guide at that commit; the version and commit live in one place, `shared/target.ts` (mirrored for the launcher's disclosure in `shared/run-workflow.mjs`), and `node tools/bump-target.mjs <version> <commit>` moves both plus every citation that names Solid when a newer version is published, and lists the remaining mentions of the old version to check by hand. The Solid 1.9 side of each comparison is `solid-js@1.9.13` (tag `v1.9.13`), whose `solid-js/web` export surface is identical to `1.9.19`, the current `v1-latest`.
 
-## Analyze with npm
+## Run from the Codemod Registry
 
 > **Scope:** version `0.4.0` targets Solid `2.0.1` and implements only the detections and rewrites documented below. A clean run is not proof that a project is ready for Solid 2.
+
+This workflow runs on Codemod workflow v2, which is in alpha: pin `codemod@2.0.0-alpha.4`, because `codemod@latest` is still the 1.x CLI and cannot run it. From the root of a Solid 1.9 project in a clean git checkout:
+
+```sh
+# Analyze (default): prints findings and changes nothing.
+npx codemod@2.0.0-alpha.4 run solid-migration-assistant --target .
+
+# Migrate: applies the rewrites below, moves package.json and tsconfig.json
+# to Solid 2, installs with the project's package manager and typechecks.
+npx codemod@2.0.0-alpha.4 run solid-migration-assistant --target . --param mode=migrate
+```
+
+Add `--param verify=false` to skip the eslint-plugin-solid runs, and `--param install=false` to skip the install and typecheck after migrate. When a dependency has no Solid 2 release yet, migrate asks before it applies the rewrites.
+
+## Analyze with npm
 
 After npm publication, run this from the project root with Node 20 or newer and npm (pnpm is not required):
 
