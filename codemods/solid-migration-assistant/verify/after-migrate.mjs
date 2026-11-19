@@ -103,7 +103,8 @@ function install(target) {
   // pnpm 11 exits with an error when it skips a dependency's build script it
   // wasn't told to allow, after installing everything; the project can still
   // be typechecked.
-  const ignoredBuilds = result.status !== 0 && ignoredBuildsOnly(output);
+  const codes = new Set(output.match(/ERR_PNPM_[A-Z_]+/g) ?? []);
+  const ignoredBuilds = result.status !== 0 && codes.size === 1 && codes.has("ERR_PNPM_IGNORED_BUILDS");
   const ok = result.status === 0 || ignoredBuilds;
   return {
     command,
@@ -112,12 +113,6 @@ function install(target) {
     ...(ok ? {} : { error: result.error ? String(result.error.message) : installError(output) }),
     ...(ignoredBuilds ? { warning: installError(output) } : {}),
   };
-}
-
-/** Whether a failed install's only error is pnpm's ERR_PNPM_IGNORED_BUILDS. */
-export function ignoredBuildsOnly(output) {
-  const codes = new Set(output.match(/ERR_PNPM_[A-Z_]+/g) ?? []);
-  return codes.size === 1 && codes.has("ERR_PNPM_IGNORED_BUILDS");
 }
 
 /**

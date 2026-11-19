@@ -13,26 +13,19 @@ type TransformRule = (
   filename: string,
 ) => TransformChange[];
 
-/**
- * Drops entries whose JSON form repeats (an element with a closing tag
- * reports one rewrite for two edits), so the report lists each once.
- */
-function unique<T>(entries: T[]): T[] {
-  const seen = new Set<string>();
-  return entries.filter((entry) => {
-    const serialized = JSON.stringify(entry);
-    if (seen.has(serialized)) return false;
-    seen.add(serialized);
-    return true;
-  });
-}
-
 /** Rules return their findings as the file's jssg data; the workflow reads them from the step result. */
 export function createAnalysisEntrypoint(ruleId: string, rule: AnalysisRule): Codemod<TSX> {
   return async (root) => {
-    const findings: Finding[] = unique(rule(root.root(), {
-      filename: root.relativeFilename().replaceAll("\\", "/"),
-    }).map((found) => ({ rule: ruleId, ...found })));
+    const seen = new Set<string>();
+    const findings: Finding[] = [];
+    for (const found of rule(root.root(), { filename: root.relativeFilename().replaceAll("\\", "/") })) {
+      const finding = { rule: ruleId, ...found };
+      const key = JSON.stringify(finding);
+      if (!seen.has(key)) {
+        seen.add(key);
+        findings.push(finding);
+      }
+    }
     return findings.length > 0 ? { edit: null, data: { findings } } : null;
   };
 }
@@ -45,7 +38,17 @@ export function createTransformEntrypoint(ruleId: string, rule: TransformRule): 
     const changes = rule(rootNode, filename);
     if (changes.length === 0) return null;
 
-    const rewrites: Rewrite[] = unique(changes.map(({ report }) => ({ rule: ruleId, ...report })));
+    // An element with a closing tag reports one rewrite for two edits.
+    const seen = new Set<string>();
+    const rewrites: Rewrite[] = [];
+    for (const { report } of changes) {
+      const rewrite = { rule: ruleId, ...report };
+      const key = JSON.stringify(rewrite);
+      if (!seen.has(key)) {
+        seen.add(key);
+        rewrites.push(rewrite);
+      }
+    }
     return { edit: rootNode.commitEdits(changes.map(({ edit }) => edit)), data: { rewrites } };
   };
 }

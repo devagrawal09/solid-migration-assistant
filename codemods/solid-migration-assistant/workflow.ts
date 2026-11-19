@@ -148,8 +148,16 @@ export default async function main({ params }: { params: Params }) {
 
   // A shell step runs where Codemod was started unless given a cwd, which is
   // relative to the target. The script prints its summary as JSON on stdout.
-  const lint = async (label: string, key: string) =>
-    lastJsonLine((await step(label, shell({ cwd: "." })`sh ${import.meta.dirname}/verify/eslint-solid-v2.sh ${key}`)).stdout);
+  // A dry run skips shell steps, and only the last 1 MiB of output comes back,
+  // so a missing or cut-off line leaves the summary undefined.
+  const lint = async (label: string, key: string) => {
+    const linted = await step(label, shell({ cwd: "." })`sh ${import.meta.dirname}/verify/eslint-solid-v2.sh ${key}`);
+    try {
+      return JSON.parse(linted.stdout?.trimEnd().split("\n").pop() ?? "");
+    } catch {
+      return undefined;
+    }
+  };
 
   // jssg rules run on exactly the stage's files. Paths are passed as globs, so
   // brackets in route files like src/routes/[id].tsx are escaped.
@@ -171,7 +179,9 @@ export default async function main({ params }: { params: Params }) {
       for (const rule of stage.analyses) {
         const label = `${stage.name}: ${rule}`;
         const result = await runRule(label, `./scripts/analysis/${rule}.ts`, stage.files);
-        for (const entry of result.data) found.push(...((entry.data as any)?.findings ?? []));
+        for (const { data } of result.data) {
+          if (data && typeof data === "object" && !Array.isArray(data) && Array.isArray(data.findings)) found.push(...data.findings);
+        }
         failures.push(...result.failures.map((f) => ({ step: label, ...f })));
       }
     }
@@ -192,7 +202,9 @@ export default async function main({ params }: { params: Params }) {
       for (const rule of stage.rewrites) {
         const label = `${stage.name}: ${rule}`;
         const result = await runRule(label, `./scripts/transformations/${rule}.ts`, stage.files);
-        for (const entry of result.data) rewritten.push(...((entry.data as any)?.rewrites ?? []));
+        for (const { data } of result.data) {
+          if (data && typeof data === "object" && !Array.isArray(data) && Array.isArray(data.rewrites)) rewritten.push(...data.rewrites);
+        }
         failures.push(...result.failures.map((f) => ({ step: label, ...f })));
       }
     }
@@ -268,7 +280,13 @@ export default async function main({ params }: { params: Params }) {
     if (install) {
       const installed = await step("Install and typecheck", shell({ cwd: "." })`node ${import.meta.dirname}/verify/after-migrate.mjs install`);
       // A dry run skips shell steps; the report then says to install by hand.
-      if (!installed.skipped) afterMigrate = lastJsonLine(installed.stdout) ?? { install: { ok: false, error: "The install step printed no result." }, typecheck: [] };
+      if (!installed.skipped) {
+        try {
+          afterMigrate = JSON.parse(installed.stdout.trimEnd().split("\n").pop() ?? "");
+        } catch {
+          afterMigrate = { install: { ok: false, error: "The install step printed no result." }, typecheck: [] };
+        }
+      }
     }
     if (verify) after = await lint("Lint with eslint-plugin-solid v2 (after)", "lintAfter");
     await analyze();
@@ -314,21 +332,6 @@ export default async function main({ params }: { params: Params }) {
       findingsTheLinterMisses: tally(unconfirmed.map((f) => `${f.rule} (expects ${f.lint.join(", ")})`)),
     } : "skipped",
   };
-}
-
-/**
- * The JSON a shell step printed as its last line, or undefined when there is
- * none: a dry run skips shell steps, and only the last 1 MiB of output comes
- * back.
- */
-function lastJsonLine(stdout: string | undefined): any {
-  const line = stdout?.trimEnd().split("\n").pop();
-  if (!line) return undefined;
-  try {
-    return JSON.parse(line);
-  } catch {
-    return undefined;
-  }
 }
 
 function literalGlob(path: string): string {
