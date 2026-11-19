@@ -64,8 +64,16 @@ export const alreadyMoved = (dependency, range) => ALREADY_MOVED[dependency]?.(r
  * catalog:, git, link:, npm: aliases, tags) is left alone and reported in
  * `skipped`, as are peerDependencies, whose range is the library author's
  * call. Returns null when the manifest declares no Solid 1 solid-js.
+ *
+ * `catalogs` says what the workspace's pnpm catalogs will hold after migrate
+ * (`catalogPlan` in `shared/catalog.mjs`): a renamed package taken from a
+ * catalog that swaps it gets the successor's name with the same `catalog:`
+ * range, and @solidjs/web is added as `catalog:x` only when catalog x holds
+ * or gets it. With no catalog to edit (the default), both stay as they are
+ * and are reported, so the manifest never names a catalog entry that
+ * doesn't exist.
  */
-export function bumpManifest(text) {
+export function bumpManifest(text, catalogs = { web: [], renames: [] }) {
   let manifest;
   try {
     manifest = JSON.parse(text);
@@ -82,7 +90,10 @@ export function bumpManifest(text) {
     for (const [dependency, range] of Object.entries(manifest[name] ?? {})) {
       const rename = RENAMES[dependency];
       if (rename !== undefined && typeof range === "string") {
-        if (!PLAIN_RANGE.test(range)) {
+        const catalog = /^catalog:(.*)$/.exec(range)?.[1];
+        const fromCatalog = catalog === undefined ? null : catalog === "default" ? "" : catalog;
+        const swapped = catalogs.renames.some(([name, from, to]) => name === fromCatalog && from === dependency && to === rename.name);
+        if (!PLAIN_RANGE.test(range) && !swapped) {
           skipped.push({ name: dependency, range, reason: `it isn't a plain semver range; replace it with ${rename.name} ${rename.range}` });
           continue;
         }
@@ -90,14 +101,16 @@ export function bumpManifest(text) {
           skipped.push({ name: dependency, range, reason: `${rename.name} is declared too, so remove ${dependency}` });
           continue;
         }
-        const edit = valueEdit(text, name, dependency, range, rename.range);
+        // From a catalog that swaps it, only the name changes.
+        const to = swapped ? range : rename.range;
+        const edit = valueEdit(text, name, dependency, range, to);
         if (edit === null) {
           skipped.push({ name: dependency, range, reason: "it couldn't be located in the file" });
           continue;
         }
         // The whole "name": "range" pair becomes the successor's.
-        edits.push({ start: edit.pairStart, end: edit.end, text: `${JSON.stringify(rename.name)}: ${JSON.stringify(rename.range)}` });
-        changes.push({ name: dependency, from: range, to: rename.range, renamedTo: rename.name, line: edit.line });
+        edits.push({ start: edit.pairStart, end: edit.end, text: `${JSON.stringify(rename.name)}: ${JSON.stringify(to)}` });
+        changes.push({ name: dependency, from: range, to, renamedTo: rename.name, line: edit.line });
         continue;
       }
       const target = BUMPS[dependency];
@@ -126,7 +139,11 @@ export function bumpManifest(text) {
   // @solidjs/web to the same catalog, so the package takes it from there too.
   const hasWeb = SECTIONS.some((name) => manifest[name]?.["@solidjs/web"] !== undefined);
   const solidRange = manifest[section]["solid-js"];
-  const fromCatalog = solidRange.startsWith("catalog:");
+  const solidCatalog = /^catalog:(.*)$/.exec(solidRange)?.[1];
+  const fromCatalog = solidCatalog !== undefined && catalogs.web.includes(solidCatalog === "default" ? "" : solidCatalog);
+  if (!hasWeb && solidCatalog !== undefined && !fromCatalog) {
+    skipped.push({ name: "@solidjs/web", range: solidRange, reason: `solid-js comes from a workspace catalog migrate couldn't edit, so add @solidjs/web there and declare it here as ${JSON.stringify(solidRange)}` });
+  }
   if (!hasWeb && (fromCatalog || changes.some((change) => change.name === "solid-js"))) {
     const webRange = fromCatalog ? solidRange : SOLID_RANGE;
     const anchor = valueEdit(text, section, "solid-js", solidRange, webRange);

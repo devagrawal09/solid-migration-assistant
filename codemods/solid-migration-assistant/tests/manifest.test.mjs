@@ -109,8 +109,28 @@ test("reports a catalog range as one to move in the workspace catalog", () => {
   assert.match(result.skipped[0].reason, /workspace catalog/);
 });
 
-test("takes @solidjs/web from the catalog solid-js comes from", () => {
-  assert.equal(bumped(manifest({ "solid-js": "catalog:legacy" })).dependencies["@solidjs/web"], "catalog:legacy");
+test("takes @solidjs/web from the catalog solid-js comes from, when that catalog holds it", () => {
+  const text = manifest({ "solid-js": "catalog:legacy" });
+  assert.equal(JSON.parse(bumpManifest(text, { web: ["legacy"], renames: [] }).text).dependencies["@solidjs/web"], "catalog:legacy");
+});
+
+test("adds no @solidjs/web from a catalog migrate couldn't edit, and says so", () => {
+  // codeimage: the app's pnpm-workspace.yaml is above the target.
+  const result = bumpManifest(manifest({ "solid-js": "catalog:next" }));
+  assert.equal(JSON.parse(result.text).dependencies["@solidjs/web"], undefined);
+  assert.deepEqual(result.skipped.map((skip) => `${skip.name} ${skip.range}`), ["solid-js catalog:next", "@solidjs/web catalog:next"]);
+});
+
+test("renames a package taken from a catalog only when that catalog swaps it", () => {
+  const text = manifest({ "solid-js": "catalog:next" }, { devDependencies: { "vite-plugin-solid": "catalog:next" } });
+  const swapped = bumpManifest(text, { web: ["next"], renames: [["next", "vite-plugin-solid", "@solidjs/vite-plugin"]] });
+  assert.deepEqual(JSON.parse(swapped.text).devDependencies, { "@solidjs/vite-plugin": "catalog:next" });
+  assert.deepEqual(swapped.changes.find((change) => change.renamedTo !== undefined), {
+    name: "vite-plugin-solid", from: "catalog:next", to: "catalog:next", renamedTo: "@solidjs/vite-plugin", line: 7,
+  });
+  const kept = bumpManifest(text);
+  assert.deepEqual(JSON.parse(kept.text).devDependencies, { "vite-plugin-solid": "catalog:next" });
+  assert.equal(kept.changes.some((change) => change.renamedTo !== undefined), false);
 });
 
 test("adds no @solidjs/web beside a solid-js it left alone", () => {

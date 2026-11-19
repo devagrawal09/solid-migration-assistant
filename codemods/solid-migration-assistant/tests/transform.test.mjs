@@ -64,15 +64,16 @@ try {
   assert.deepEqual(treeSnapshot(directTarget), treeSnapshot(expectedTree));
   compare("transform.registry.txt", stepOutput(normalize(`${direct.stdout}\n${direct.stderr}`, directTarget)));
 
-  // A pnpm workspace whose app is create-vite's Solid template: the catalog
-  // in pnpm-workspace.yaml, the nested package.json, and the Vite plugin's
-  // package and imports (vite.config.ts and a vitest.config.mts, which
-  // SOURCES leaves out) all move.
+  // A pnpm workspace whose app is create-vite's Solid template, with
+  // solid-js and the Vite plugin in the default catalog (as codeimage keeps
+  // them): the catalog in pnpm-workspace.yaml, the nested package.json, and
+  // the Vite plugin's package and imports (vite.config.ts and a
+  // vitest.config.mts, which SOURCES leaves out) all move together.
   const workspace = join(temporaryRoot, "workspace");
   const files = {
     "package.json": `${JSON.stringify({ name: "root", private: true }, null, 2)}\n`,
-    "pnpm-workspace.yaml": "packages:\n  - packages/*\ncatalog:\n  solid-js: ^1.9.18\n",
-    "packages/app/package.json": `${JSON.stringify({ name: "app", private: true, dependencies: { "solid-js": "catalog:" }, devDependencies: { vite: "^8.3.6", "vite-plugin-solid": "^2.11.15", "solid-testing-library": "^0.5.1" } }, null, 2)}\n`,
+    "pnpm-workspace.yaml": "packages:\n  - packages/*\ncatalog:\n  solid-js: ^1.9.18\n  vite-plugin-solid: ^2.11.15 # Vite plugin\n",
+    "packages/app/package.json": `${JSON.stringify({ name: "app", private: true, dependencies: { "solid-js": "catalog:" }, devDependencies: { vite: "^8.3.6", "vite-plugin-solid": "catalog:", "solid-testing-library": "^0.5.1" } }, null, 2)}\n`,
     "packages/app/vite.config.ts": "import { defineConfig } from 'vite'\nimport solid from 'vite-plugin-solid'\n\nexport default defineConfig({\n  plugins: [solid()],\n})\n",
     "packages/app/vitest.config.mts": 'import solidPlugin from "vite-plugin-solid";\nexport default { plugins: [solidPlugin({ hot: false })], esbuild: { jsxImportSource: "solid-js" } };\n',
     "packages/app/src/App.test.tsx": 'import { render } from "solid-testing-library";\nexport const mount = () => render(() => <p />);\n',
@@ -88,12 +89,12 @@ try {
   );
   assert.equal(migrated.status, 0, output(migrated));
   const read = (path) => readFileSync(join(workspace, path), "utf8");
-  assert.equal(read("pnpm-workspace.yaml"), 'packages:\n  - packages/*\ncatalog:\n  solid-js: ^2.0.3\n  "@solidjs/web": ^2.0.3\n');
+  assert.equal(read("pnpm-workspace.yaml"), 'packages:\n  - packages/*\ncatalog:\n  solid-js: ^2.0.3\n  "@solidjs/web": ^2.0.3\n  "@solidjs/vite-plugin": ^3.0.1 # Vite plugin\n');
   assert.deepEqual(JSON.parse(read("packages/app/package.json")), {
     name: "app",
     private: true,
     dependencies: { "solid-js": "catalog:", "@solidjs/web": "catalog:" },
-    devDependencies: { vite: "^8.3.6", "@solidjs/vite-plugin": "^3.0.1", "@solidjs/testing-library": "1.0.0-rc.2" },
+    devDependencies: { vite: "^8.3.6", "@solidjs/vite-plugin": "catalog:", "@solidjs/testing-library": "1.0.0-rc.2" },
   });
   assert.equal(read("packages/app/vite.config.ts"), files["packages/app/vite.config.ts"].replace("'vite-plugin-solid'", "'@solidjs/vite-plugin'"));
   assert.equal(read("packages/app/vitest.config.mts"), files["packages/app/vitest.config.mts"].replace('"vite-plugin-solid"', '"@solidjs/vite-plugin"').replace('"solid-js"', '"@solidjs/web"'));
@@ -101,7 +102,35 @@ try {
   // What's left is the plugin option that changed, in the Still to do list.
   const report = stepOutput(normalize(`${migrated.stdout}\n${migrated.stderr}`, workspace));
   assert.match(report, /^packages\/app\/vitest\.config\.mts:2:42 \[build\] Remove the hot option; @solidjs\/vite-plugin has none\.$/m);
-  assert.doesNotMatch(report, /project\/solid-version|Replace vite-plugin-solid with its Solid 2 successor\./);
+  assert.doesNotMatch(report, /project\/solid-version|Replace vite-plugin-solid with its Solid 2 successor\.|by hand/);
+
+  // The same app as the target, with the workspace file above it (as the
+  // corpus runs codeimage): migrate can't swap the catalog, so it leaves the
+  // plugin and its imports alone and adds no @solidjs/web the catalog lacks,
+  // and says what to move. Nothing imports a package nothing installs.
+  const outside = join(temporaryRoot, "outside");
+  for (const [path, text] of Object.entries(files)) {
+    mkdirSync(dirname(join(outside, path)), { recursive: true });
+    writeFileSync(join(outside, path), text);
+  }
+  const app = join(outside, "packages/app");
+  const appRun = spawnSync(
+    process.execPath,
+    [resolveCodemodLauncher(), "--disable-analytics", "workflow", "run", "-w", packageDirectory, "-t", app, "--allow-dirty", "--no-interactive", "--param", "mode=migrate", "--param", "verify=false", "--param", "install=false"],
+    { cwd: packageDirectory, encoding: "utf8", maxBuffer: 64 * 1024 * 1024, env: { ...process.env, NO_COLOR: "1" } },
+  );
+  assert.equal(appRun.status, 0, output(appRun));
+  const appManifest = JSON.parse(readFileSync(join(app, "package.json"), "utf8"));
+  assert.deepEqual(appManifest.dependencies, { "solid-js": "catalog:" });
+  assert.equal(appManifest.devDependencies["vite-plugin-solid"], "catalog:");
+  assert.equal(readFileSync(join(app, "vite.config.ts"), "utf8"), files["packages/app/vite.config.ts"]);
+  assert.match(readFileSync(join(app, "vitest.config.mts"), "utf8"), /from "vite-plugin-solid"/);
+  // solid-testing-library has a plain range, so it moves with its import.
+  assert.equal(appManifest.devDependencies["@solidjs/testing-library"], "1.0.0-rc.2");
+  assert.match(readFileSync(join(app, "src/App.test.tsx"), "utf8"), /from "@solidjs\/testing-library"/);
+  const appReport = stepOutput(normalize(`${appRun.stdout}\n${appRun.stderr}`, app));
+  assert.match(appReport, /^  package\.json: vite-plugin-solid "catalog:" \(it isn't a plain semver range; replace it with @solidjs\/vite-plugin \^3\.0\.1\)$/m);
+  assert.match(appReport, /^  package\.json: @solidjs\/web "catalog:" \(solid-js comes from a workspace catalog migrate couldn't edit/m);
 } finally {
   rmSync(temporaryRoot, { recursive: true, force: true });
 }
@@ -110,7 +139,7 @@ if (mismatches.length > 0) {
   console.error(`${mismatches.join("\n\n")}\n\nIf intended, run \`pnpm fixtures:update\` and review the diff.`);
   process.exit(1);
 }
-console.log(update ? "Updated the transform reports in tests/fixture-expected." : "Transform passed: expected tree, 3 expected reports, idempotent second run, workspace with a catalog and build configs.");
+console.log(update ? "Updated the transform reports in tests/fixture-expected." : "Transform passed: expected tree, 3 expected reports, idempotent second run, workspace with a catalog and build configs, and an app whose catalog is out of reach.");
 
 function compare(name, actual) {
   const path = join(expectedDirectory, name);

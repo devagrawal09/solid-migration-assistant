@@ -47,7 +47,7 @@ test("derives every rule registry from the rule folders", () => {
   // use them only for positive, cross-file proofs (shared/provenance.ts): a
   // reference set is never used to prove that something has no other uses.
   const workflow = readFileSync(resolve(packageDirectory, "workflow.ts"), "utf8");
-  assert.match(workflow, /jssg\(script, \{ semanticAnalysis: "workspace" \}\)/);
+  assert.match(workflow, /jssg\(script, \{ semanticAnalysis: "workspace"(?:, params: ruleParams)? \}\)/);
   assert.doesNotMatch(workflow, /semanticAnalysis: "file"/);
 
   for (const obsolete of ["scripts/analyze.ts", "scripts/transform.ts", "shared/fixture-harness.ts", "transform.yaml", "scripts/emit-report.ts"]) {

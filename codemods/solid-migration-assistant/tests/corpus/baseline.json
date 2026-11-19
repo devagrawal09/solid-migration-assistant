@@ -308,16 +308,14 @@
       "jsx/boolean-attribute-values: Write aria-readonly on <div> as the string \"true\", which Solid 1 rendered and Solid 2 would turn into an empty value.": 1,
       "jsx/index-to-for: Remove the Index import from solid-js; For is already imported.": 1,
       "jsx/index-to-for: Rewrite <Index> to <For keyed={false}>, keeping its each, fallback, and child callback unchanged.": 1,
-      "project/dependencies: Add @solidjs/web catalog:next.": 1,
       "project/dependencies: Move @solid-primitives/event-listener from ^2.4.5 to ^3.0.0.": 1,
       "project/dependencies: Move @solidjs/router from ^0.16.1 to ^2.0.0.": 1,
       "project/jsx-import-source: Point jsxImportSource at @solidjs/web.": 1,
       "reactivity/on-helper-split: Remove the on import from solid-js; every use is now a split createEffect.": 3,
-      "reactivity/on-helper-split: Rewrite createEffect(on(dep, fn)) as createEffect(compute, apply), keeping the callback unchanged.": 4,
-      "tooling/package-renames: Import the Solid 2 Vite plugin from @solidjs/vite-plugin; its default export is still the plugin factory.": 1
+      "reactivity/on-helper-split: Rewrite createEffect(on(dep, fn)) as createEffect(compute, apply), keeping the callback unchanged.": 4
     },
-    "changedFiles": 32,
-    "transformedAnalyzerFindings": 205,
+    "changedFiles": 31,
+    "transformedAnalyzerFindings": 206,
     "rcTypeErrors": 171,
     "rcCompileErrors": 6
   },

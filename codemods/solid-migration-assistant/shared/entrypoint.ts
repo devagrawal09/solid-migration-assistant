@@ -11,6 +11,8 @@ type AnalysisRule = (
 type TransformRule = (
   rootNode: SgNode<TSX>,
   filename: string,
+  /** The step's jssg params, for a rule the workflow scopes (none in fixtures). */
+  params?: Readonly<Record<string, string>>,
 ) => TransformChange[];
 
 /** Rules return their findings as the file's jssg data; the workflow reads them from the step result. */
@@ -32,10 +34,10 @@ export function createAnalysisEntrypoint(ruleId: string, rule: AnalysisRule): Co
 
 /** Transforms return their edit and, as data, the rewrites it made. */
 export function createTransformEntrypoint(ruleId: string, rule: TransformRule): Codemod<TSX> {
-  return async (root) => {
+  return async (root, options) => {
     const rootNode = root.root();
     const filename = root.relativeFilename().replaceAll("\\", "/");
-    const changes = rule(rootNode, filename);
+    const changes = rule(rootNode, filename, options.params);
     if (changes.length === 0) return null;
 
     // An element with a closing tag reports one rewrite for two edits.

@@ -30,13 +30,27 @@ const RENAMED_PACKAGES: ReadonlyMap<string, string> = new Map([
  * Moves every module reference to a renamed package (static import,
  * re-export, dynamic `import()` and `require()` unless the file binds its own
  * `require`), keeping the import form and quote style.
+ *
+ * The workflow passes `params.renamed`, a JSON object from every package
+ * directory to the packages migrate swapped in its package.json (directly
+ * or through a pnpm catalog it edited). A file follows its nearest package
+ * directory, and an import moves only when that package now depends on the
+ * successor, so a swap migrate couldn't make (a catalog outside the target)
+ * never leaves an import of a package nothing installs. Without the param
+ * (fixtures, a plain jssg run) every reference moves.
  */
-export function relocateRenamedPackages(rootNode: SgNode<TSX>, filename: string): TransformChange[] {
+export function relocateRenamedPackages(
+  rootNode: SgNode<TSX>,
+  filename: string,
+  params?: Readonly<Record<string, string>>,
+): TransformChange[] {
+  const allowed = swappedHere(filename, params?.renamed);
   const shadowedRequire = findBindings(rootNode, "require", { ignoreAmbient: true }).length > 0;
   const changes: TransformChange[] = [];
   for (const { source, moduleName, form } of findModuleReferences(rootNode)) {
     const replacement = RENAMED_PACKAGES.get(moduleName);
     if (replacement === undefined || (form === "require" && shadowedRequire)) continue;
+    if (allowed !== null && !allowed.includes(moduleName)) continue;
     // `export default "vite-plugin-solid"` is a value, not a module source.
     if (form === "re-export" && !source.parent()?.children().some((child) => child.kind() === "from")) continue;
     const quote = source.text()[0];
@@ -53,6 +67,28 @@ export function relocateRenamedPackages(rootNode: SgNode<TSX>, filename: string)
     });
   }
   return changes;
+}
+
+/**
+ * The packages swapped for the file's nearest package directory in
+ * `renamed` (see above), or null when there is no such map: every rename
+ * applies. A directory missing from the map, or a map that doesn't parse,
+ * allows none.
+ */
+function swappedHere(filename: string, renamed: string | undefined): string[] | null {
+  if (renamed === undefined) return null;
+  let map: unknown;
+  try {
+    map = JSON.parse(renamed);
+  } catch {
+    return [];
+  }
+  if (map === null || typeof map !== "object") return [];
+  const directories = Object.keys(map)
+    .filter((directory) => directory === "." || filename.startsWith(`${directory}/`))
+    .sort((left, right) => (left === "." ? 0 : left.length) - (right === "." ? 0 : right.length));
+  const nearest = directories.length === 0 ? undefined : Object.getOwnPropertyDescriptor(map, directories[directories.length - 1]!)?.value;
+  return Array.isArray(nearest) ? nearest.filter((name): name is string => typeof name === "string") : [];
 }
 
 /**

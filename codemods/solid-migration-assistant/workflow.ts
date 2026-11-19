@@ -1,7 +1,7 @@
 import { approval, forEachFile, jssg, shell, step } from "codemod/workflow";
 import { DEPENDENCY_MAP } from "./shared/dependencies.mjs";
 import { bumpManifest, bumpTsconfig } from "./shared/manifest.mjs";
-import { bumpCatalogs } from "./shared/catalog.mjs";
+import { bumpCatalogs, catalogPlan } from "./shared/catalog.mjs";
 import { byLocation, renderText } from "./shared/format.mjs";
 import { configFindings, manifestFindings } from "./shared/project.mjs";
 import { ANALYSIS_STEPS, TRANSFORM_STEPS } from "./shared/steps.generated.ts";
@@ -206,10 +206,10 @@ export default async function main({ params }: { params: Params }) {
 
   // jssg rules run on exactly the stage's files. Paths are passed as globs, so
   // brackets in route files like src/routes/[id].tsx are escaped.
-  const runRule = (label: string, script: string, files: string[]) =>
+  const runRule = (label: string, script: string, files: string[], ruleParams: Record<string, string> = {}) =>
     step(label, forEachFile(
       { include: files.map(literalGlob), language: "tsx" },
-      jssg(script, { semanticAnalysis: "workspace" }),
+      jssg(script, { semanticAnalysis: "workspace", params: ruleParams }),
     ));
   const failures: { step: string; path: string; error: string }[] = [];
   const found: any[] = [];
@@ -246,16 +246,16 @@ export default async function main({ params }: { params: Params }) {
     if (blocked.length > 0) {
       await step(approval(`${blocked.join(", ")} ${blocked.length === 1 ? "has" : "have"} no Solid 2 release. Apply the source rewrites anyway?`));
     }
-    for (const stage of plan) {
-      if (!stage.run || stage.files.length === 0) continue;
-      for (const rule of stage.rewrites) {
-        const label = `${stage.name}: ${rule}`;
-        const result = await runRule(label, `./scripts/transformations/${rule}.ts`, stage.files);
-        for (const { data } of result.data) {
-          if (data && typeof data === "object" && !Array.isArray(data) && Array.isArray(data.rewrites)) rewritten.push(...data.rewrites);
-        }
-        failures.push(...result.failures.map((f) => ({ step: label, ...f })));
-      }
+    // What the catalogs will hold once moved, so a package.json takes
+    // @solidjs/web and renamed packages only from a catalog that has them.
+    const catalogs = catalogPlan(workspaceYaml);
+    // A renamed package's imports move only where its package.json now names
+    // the successor, so no file imports a package nothing depends on (a
+    // catalog outside the target can't be swapped). Keyed by every package
+    // directory, so a file goes by its nearest package.json.
+    const renamedIn: Record<string, string[]> = {};
+    for (const output of manifests.outputs as any[]) {
+      if (typeof output.path === "string" && output.path.endsWith("package.json")) renamedIn[directoryOf(output.path)] = [];
     }
     const project = await step(
       "Move package.json and tsconfig.json to Solid 2",
@@ -271,7 +271,7 @@ export default async function main({ params }: { params: Params }) {
               file: file.path,
               line: change.line,
               column: 1,
-              message: `${change.from === null ? `Add ${change.name} ${change.to}` : `Move ${change.name} from ${change.from} to ${change.to}`} in the ${change.catalog === "" ? "default catalog" : `${change.catalog} catalog`}.`,
+              message: `${change.from === null ? `Add ${change.name} ${change.to}` : change.renamedTo !== undefined ? `Replace ${change.name} ${change.from} with ${change.renamedTo} ${change.to}` : `Move ${change.name} from ${change.from} to ${change.to}`} in the ${change.catalog === "" ? "default catalog" : `${change.catalog} catalog`}.`,
               guide: `${MIGRATION_GUIDE_URL}#imports-where-things-live-now`,
               catalog: change.catalog,
               name: change.name,
@@ -280,7 +280,7 @@ export default async function main({ params }: { params: Params }) {
           };
         }
         if (file.path.endsWith("package.json")) {
-          const bumped = bumpManifest(file.text);
+          const bumped = bumpManifest(file.text, catalogs);
           if (bumped === null) return undefined;
           if (bumped.changes.length > 0) file.write(bumped.text);
           return {
@@ -295,6 +295,7 @@ export default async function main({ params }: { params: Params }) {
                   ? `Replace ${change.name} ${change.from} with ${change.renamedTo} ${change.to}, its Solid 2 successor.`
                   : `Move ${change.name} from ${change.from} to ${change.to}.`,
               guide: `${MIGRATION_GUIDE_URL}#imports-where-things-live-now`,
+              renamed: change.renamedTo === undefined ? null : change.name,
             })),
             skipped: bumped.skipped.map((skip: any) => ({ file: file.path, ...skip })),
           };
@@ -323,13 +324,32 @@ export default async function main({ params }: { params: Params }) {
     );
     for (const output of project.outputs as any[]) {
       if (typeof output.workspaceYaml === "string") workspaceYaml = output.workspaceYaml;
-      projectRewrites.push(...output.rewrites.map(({ catalog, name, ...rewrite }: any) => rewrite));
+      projectRewrites.push(...output.rewrites.map(({ catalog, name, renamed, ...rewrite }: any) => rewrite));
+      for (const { file, renamed } of output.rewrites) {
+        if (typeof renamed === "string" && file.endsWith("package.json")) renamedIn[directoryOf(file)]?.push(renamed);
+      }
       dependencySkips.push(...output.skipped.filter((skip: any) => {
         const catalog = /^catalog:(.*)$/.exec(skip.range)?.[1];
         return catalog === undefined || !movedInCatalog.has(`${catalog === "default" ? "" : catalog}:${skip.name}`);
       }));
     }
     failures.push(...project.failures.map((f) => ({ step: "Move package.json and tsconfig.json to Solid 2", ...f })));
+
+    // A renamed package's imports move only where its package.json now names
+    // the successor, so no file imports a package nothing depends on (a
+    // catalog outside the target can't be swapped). Keyed by every package
+    // directory, so a file goes by its nearest package.json.
+    for (const stage of plan) {
+      if (!stage.run || stage.files.length === 0) continue;
+      for (const rule of stage.rewrites) {
+        const label = `${stage.name}: ${rule}`;
+        const result = await runRule(label, `./scripts/transformations/${rule}.ts`, stage.files, { renamed: JSON.stringify(renamedIn) });
+        for (const { data } of result.data) {
+          if (data && typeof data === "object" && !Array.isArray(data) && Array.isArray(data.rewrites)) rewritten.push(...data.rewrites);
+        }
+        failures.push(...result.failures.map((f) => ({ step: label, ...f })));
+      }
+    }
     if (install) {
       // In a workspace the install is scoped to the packages migrate changed.
       const changedManifests = [...new Set(projectRewrites.map((rewrite) => rewrite.file).filter((file: string) => file.endsWith("package.json")))];
@@ -393,6 +413,10 @@ export default async function main({ params }: { params: Params }) {
       findingsTheLinterMisses: tally(unconfirmed.map((f) => `${f.rule} (expects ${f.lint.join(", ")})`)),
     } : "skipped",
   };
+}
+
+function directoryOf(path: string): string {
+  return path.includes("/") ? path.slice(0, path.lastIndexOf("/")) : ".";
 }
 
 function literalGlob(path: string): string {
