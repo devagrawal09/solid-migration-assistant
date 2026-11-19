@@ -6,7 +6,7 @@ The assistant scans project-owned `.js`, `.jsx`, `.ts`, and `.tsx` source, retur
 
 ## Run the analyzer and transform
 
-> **Scope:** version `0.4.2` targets Solid `2.0.3` and covers only the detections and rewrites documented below. A clean analyzer run is not proof that a project is ready for Solid 2.
+> **Scope:** version `0.4.3` targets Solid `2.0.3` and covers only the detections and rewrites documented below. A clean analyzer run is not proof that a project is ready for Solid 2.
 
 Run it from the Codemod Registry with `codemod@alpha`, the Codemod 2.0 alpha CLI (`2.0.0-alpha.4` at this release); plain `codemod` / `codemod@latest` is still the 1.x CLI and cannot run workflow v2 packages. From the root of a Solid 1.9 project in a clean git checkout:
 
