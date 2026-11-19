@@ -6,7 +6,7 @@ The assistant scans project-owned `.js`, `.jsx`, `.ts`, and `.tsx` source, retur
 
 ## Run the analyzer and transform
 
-> **Scope:** version `0.4.0` targets Solid `2.0.1` and covers only the detections and rewrites documented below. A clean analyzer run is not proof that a project is ready for Solid 2.
+> **Scope:** version `0.4.1` targets Solid `2.0.1` and covers only the detections and rewrites documented below. A clean analyzer run is not proof that a project is ready for Solid 2.
 
 After npm publication, run the package from a project root with Node 20 or newer and npm (no pnpm installation is needed):
 

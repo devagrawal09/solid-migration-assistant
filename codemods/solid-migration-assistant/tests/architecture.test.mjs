@@ -31,7 +31,9 @@ test("derives every rule registry from the rule folders", () => {
   // Exactly one entrypoint file per step: no strays or leftover central
   // scripts anywhere under scripts/, and one workflow file.
   assert.deepEqual(productionScripts(), []);
-  assert.deepEqual(workflowFiles(), ["workflow.ts"]);
+  // workflow.yaml is the stub codemod 2.0.0-alpha.4 requires before it starts
+  // a registry package; codemod.yaml runs workflow.ts.
+  assert.deepEqual(workflowFiles(), ["workflow.ts", "workflow.yaml"]);
   assert.deepEqual(
     readdirSync(resolve(packageDirectory, "scripts/analysis")).sort(),
     analysisSteps.map((name) => name + ".ts").sort(),
@@ -48,9 +50,11 @@ test("derives every rule registry from the rule folders", () => {
   assert.match(workflow, /jssg\(script, \{ semanticAnalysis: "workspace" \}\)/);
   assert.doesNotMatch(workflow, /semanticAnalysis: "file"/);
 
-  for (const obsolete of ["scripts/analyze.ts", "scripts/transform.ts", "shared/fixture-harness.ts", "workflow.yaml", "transform.yaml", "scripts/emit-report.ts"]) {
+  for (const obsolete of ["scripts/analyze.ts", "scripts/transform.ts", "shared/fixture-harness.ts", "transform.yaml", "scripts/emit-report.ts"]) {
     assert.equal(existsSync(resolve(packageDirectory, obsolete)), false, obsolete);
   }
+  // The old YAML workflow is gone; workflow.yaml is only the registry stub.
+  assert.match(readFileSync(resolve(packageDirectory, "workflow.yaml"), "utf8"), /^# Not this package's workflow: codemod\.yaml runs workflow\.ts\./);
   const sharedEntrypoint = readFileSync(resolve(packageDirectory, "shared/entrypoint.ts"), "utf8");
   assert.match(sharedEntrypoint, /createAnalysisEntrypoint\(ruleId: string, rule:/);
   assert.match(sharedEntrypoint, /createTransformEntrypoint\(ruleId: string, rule:/);

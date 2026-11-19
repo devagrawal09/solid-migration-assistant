@@ -1,6 +1,6 @@
 {
   "tool": "solid-migration-assistant",
-  "version": "0.4.0",
+  "version": "0.4.1",
   "workflow": "analyze",
   "solid": {
     "target": "solid-js@2.0.1",

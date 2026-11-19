@@ -1,0 +1,14 @@
+# Not this package's workflow: codemod.yaml runs workflow.ts.
+#
+# codemod 2.0.0-alpha.4 won't start a package from the registry unless it has
+# a workflow.yaml (validate_package_structure in crates/core/src/registry.rs),
+# even when codemod.yaml names a code-first workflow. This file only satisfies
+# that check; delete it once a Codemod release drops the requirement.
+version: "1"
+nodes:
+  - id: needs-workflow-v2
+    name: Needs codemod 2.0.0-alpha.4
+    type: automatic
+    steps:
+      - name: Explain
+        run: echo "solid-migration-assistant is a workflow v2 package; run it with npx codemod@2.0.0-alpha.4 run solid-migration-assistant"

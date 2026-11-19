@@ -6,7 +6,7 @@ The migration target is pinned to Solid `2.0.1` at upstream commit [`82f71fdd`](
 
 ## Run from the Codemod Registry
 
-> **Scope:** version `0.4.0` targets Solid `2.0.1` and implements only the detections and rewrites documented below. A clean run is not proof that a project is ready for Solid 2.
+> **Scope:** version `0.4.1` targets Solid `2.0.1` and implements only the detections and rewrites documented below. A clean run is not proof that a project is ready for Solid 2.
 
 This workflow runs on Codemod workflow v2, which is in alpha: pin `codemod@2.0.0-alpha.4`, because `codemod@latest` is still the 1.x CLI and cannot run it. From the root of a Solid 1.9 project in a clean git checkout:
 
