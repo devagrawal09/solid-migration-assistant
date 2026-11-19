@@ -8,7 +8,7 @@ import { SEVERITY_TIERS } from "../shared/format.mjs";
 import { dependencyHeadline } from "../shared/dependencies.mjs";
 import { discoverRules, staleFiles } from "../tools/generate.mjs";
 import { SOLID_VERSION } from "../shared/manifest.mjs";
-import { replaceTargetVersion } from "../tools/target-version.mjs";
+import { remainingMentions, replaceTargetVersion } from "../tools/target-version.mjs";
 
 const packageDirectory = resolve(dirname(fileURLToPath(import.meta.url)), "..");
 const analysisDirectory = resolve(packageDirectory, "rules/analysis");
@@ -249,19 +249,25 @@ test("cites one pinned upstream Solid commit everywhere", () => {
 });
 
 test("a target bump moves Solid's version and leaves other packages at the same number alone", () => {
+  // Versions no real target uses, so bumping the target never rewrites this test's own input.
   const before = [
-    '"codemod": "2.0.0-alpha.4", "solid-js": "^2.0.1", "@solidjs/router": "^2.0.0"',
-    "Move solid-js from ^1.9.3 to ^2.0.1. Solid 2.0.1's setter; @solidjs/web@2.0.1 and @solidjs/router@2.0.0.",
-    'export const SOLID_VERSION = "2.0.1";',
+    '"codemod": "9.8.7-alpha.4", "solid-js": "^9.8.7", "@solidjs/router": "^9.8.7"',
+    "Move solid-js from ^1.9.3 to ^9.8.7. Solid 9.8.7's setter; @solidjs/web@9.8.7, @solidjs/babel-plugin@9.8.7 and @solidjs/router@9.8.7.",
+    'export const SOLID_VERSION = "9.8.7";',
   ].join("\n");
   assert.equal(
-    replaceTargetVersion(before, "2.0.0", "2.0.1"),
+    replaceTargetVersion(before, "9.8.7", "9.8.8"),
     [
-      '"codemod": "2.0.0-alpha.4", "solid-js": "^2.0.1", "@solidjs/router": "^2.0.0"',
-      "Move solid-js from ^1.9.3 to ^2.0.1. Solid 2.0.1's setter; @solidjs/web@2.0.1 and @solidjs/router@2.0.0.",
-      'export const SOLID_VERSION = "2.0.1";',
+      '"codemod": "9.8.7-alpha.4", "solid-js": "^9.8.8", "@solidjs/router": "^9.8.7"',
+      "Move solid-js from ^1.9.3 to ^9.8.8. Solid 9.8.8's setter; @solidjs/web@9.8.8, @solidjs/babel-plugin@9.8.7 and @solidjs/router@9.8.7.",
+      'export const SOLID_VERSION = "9.8.8";',
     ].join("\n"),
   );
+});
+
+test("a target bump lists the old version where a test writes it as a regular expression", () => {
+  const text = ["assert.match(line, /Solid 9\\.8\\.7\\./);", "solid-js@9.8.7", "9.8.70", "9\\.8\\.70", "19.8.7", "9.8.8"].join("\n");
+  assert.deepEqual(remainingMentions(text, "9.8.7"), [1, 2]);
 });
 
 /** Every shipped or reviewed text file: rules, scripts, shared, workflows, READMEs, and tests. */

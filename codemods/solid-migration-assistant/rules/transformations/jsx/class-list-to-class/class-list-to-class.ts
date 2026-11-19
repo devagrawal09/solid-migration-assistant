@@ -25,7 +25,7 @@ export type ClassListRewrite = {
  * `class`, which now accepts a string, an object whose truthy keys are applied
  * as class names, or an array of those (`documentation/solid-2.0/07-dom.md`,
  * "Enhanced class prop"). The upstream `next` implementation inspected at
- * commit 82f71fddb1340cab46167db119da5702038e65ab applies an object-valued
+ * commit 68406c2077eff22c67f71db4a16bf7026ddceee1 applies an object-valued
  * `class` through `className()` in `packages/web/src/client.ts`, whose
  * `classListToObject()` helper skips falsy values, skips empty and "undefined"
  * keys, and splits whitespace inside a key — the same per-key toggling Solid
@@ -59,7 +59,7 @@ export type ClassListRewrite = {
  * `<div class="card" classList={{ active: isActive() }} />` becomes
  * `<div class={["card", { active: isActive() }]} />`. Measured against the
  * pinned builds (`solid-js@1.9.13` with `babel-plugin-jsx-dom-expressions
- * @0.40.7` on one side, `@solidjs/web@2.0.1` with
+ * @0.40.7` on one side, `@solidjs/web@2.0.3` with
  * `@solidjs/babel-plugin@2.0.1` on the other), the two forms emit the
  * same class tokens on the DOM and in SSR output **only while no object key
  * names a token of the static string**: 1.x toggles each key independently of

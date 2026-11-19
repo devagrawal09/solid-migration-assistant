@@ -23,7 +23,7 @@ export function analyzeOnceMarker(
         severity: "behavior",
         headline: `Remove this /*@once*/ marker; the expression after it is now reactive.`,
         why: `Solid 1.x compiled a /*@once*/ expression as a one-time read. Solid ${SOLID_TARGET_VERSION} ignores the marker, so the value now updates when its signals change.`,
-        guidance: `Delete the comment and keep the expression reactive where updates are fine. For an initial value on a DOM input, use the default prop instead (value to defaultValue, checked to defaultChecked). Only where the value must be read once, read it with untrack in the component body and pass the local.`,
+        guidance: `Delete the comment and keep the expression reactive where updates are fine. For an initial value on a DOM input, use the default prop instead (value to defaultValue, checked to defaultChecked); to seed local state, use a writable derived signal, createSignal(() => props.initial). Only where the value must never update and never comes from async data, read it once with untrack in the component body and pass the local; never use untrack just to silence STRICT_READ_UNTRACKED.`,
         guide: MIGRATION_GUIDE,
       }),
     );

@@ -7,9 +7,9 @@
       "column": 55,
       "severity": "behavior",
       "headline": "Keep format as createSignal's value instead of a derived computation.",
-      "why": "Solid 1.x stored a function passed to createSignal as the initial value. Solid 2.0.1 treats createSignal(fn) as a derived signal and calls fn, so the value becomes whatever fn returns.",
+      "why": "Solid 1.x stored a function passed to createSignal as the initial value. Solid 2.0.3 treats createSignal(fn) as a derived signal and calls fn, so the value becomes whatever fn returns.",
       "guidance": "If the signal holds a function (a handler, a component, a formatter), wrap it: createSignal(() => format). Setter calls that already pass () => nextFn keep working. If the intent was a value computed from other signals, this is the new derived form and nothing changes.",
-      "guide": "https://github.com/solidjs/solid/blob/82f71fddb1340cab46167db119da5702038e65ab/documentation/solid-2.0/MIGRATION.md#new-function-forms-createsignalfn-and-createstorefn",
+      "guide": "https://github.com/solidjs/solid/blob/68406c2077eff22c67f71db4a16bf7026ddceee1/documentation/solid-2.0/MIGRATION.md#new-function-forms-createsignalfn-and-createstorefn",
       "lint": []
     },
     {
@@ -19,9 +19,9 @@
       "column": 39,
       "severity": "behavior",
       "headline": "Keep onSave as createSignal's value instead of a derived computation.",
-      "why": "Solid 1.x stored a function passed to createSignal as the initial value. Solid 2.0.1 treats createSignal(fn) as a derived signal and calls fn, so the value becomes whatever fn returns.",
+      "why": "Solid 1.x stored a function passed to createSignal as the initial value. Solid 2.0.3 treats createSignal(fn) as a derived signal and calls fn, so the value becomes whatever fn returns.",
       "guidance": "If the signal holds a function (a handler, a component, a formatter), wrap it: createSignal(() => onSave). Setter calls that already pass () => nextFn keep working. If the intent was a value computed from other signals, this is the new derived form and nothing changes.",
-      "guide": "https://github.com/solidjs/solid/blob/82f71fddb1340cab46167db119da5702038e65ab/documentation/solid-2.0/MIGRATION.md#new-function-forms-createsignalfn-and-createstorefn",
+      "guide": "https://github.com/solidjs/solid/blob/68406c2077eff22c67f71db4a16bf7026ddceee1/documentation/solid-2.0/MIGRATION.md#new-function-forms-createsignalfn-and-createstorefn",
       "lint": []
     },
     {
@@ -31,9 +31,9 @@
       "column": 38,
       "severity": "behavior",
       "headline": "Keep this function as createSignal's value instead of a derived computation.",
-      "why": "Solid 1.x stored a function passed to createSignal as the initial value. Solid 2.0.1 treats createSignal(fn) as a derived signal and calls fn, so the value becomes whatever fn returns.",
+      "why": "Solid 1.x stored a function passed to createSignal as the initial value. Solid 2.0.3 treats createSignal(fn) as a derived signal and calls fn, so the value becomes whatever fn returns.",
       "guidance": "If the signal holds a function (a handler, a component, a formatter), wrap it: createSignal(() => <this function>). Setter calls that already pass () => nextFn keep working. If the intent was a value computed from other signals, this is the new derived form and nothing changes.",
-      "guide": "https://github.com/solidjs/solid/blob/82f71fddb1340cab46167db119da5702038e65ab/documentation/solid-2.0/MIGRATION.md#new-function-forms-createsignalfn-and-createstorefn",
+      "guide": "https://github.com/solidjs/solid/blob/68406c2077eff22c67f71db4a16bf7026ddceee1/documentation/solid-2.0/MIGRATION.md#new-function-forms-createsignalfn-and-createstorefn",
       "lint": []
     },
     {
@@ -43,9 +43,9 @@
       "column": 36,
       "severity": "behavior",
       "headline": "Check this createStore(fn) call, which Solid 2 runs as a derived store.",
-      "why": "Solid 1.x stored a function passed to createStore as the initial value. Solid 2.0.1 treats createStore(fn) as a derived store and calls fn, so the value becomes whatever fn returns.",
+      "why": "Solid 1.x stored a function passed to createStore as the initial value. Solid 2.0.3 treats createStore(fn) as a derived store and calls fn, so the value becomes whatever fn returns.",
       "guidance": "A store's initial value must be an object or array. If this function computes the state from other signals, this is the new derived store form and takes a seed as the second argument; otherwise pass the object itself.",
-      "guide": "https://github.com/solidjs/solid/blob/82f71fddb1340cab46167db119da5702038e65ab/documentation/solid-2.0/MIGRATION.md#new-function-forms-createsignalfn-and-createstorefn",
+      "guide": "https://github.com/solidjs/solid/blob/68406c2077eff22c67f71db4a16bf7026ddceee1/documentation/solid-2.0/MIGRATION.md#new-function-forms-createsignalfn-and-createstorefn",
       "lint": []
     }
   ]

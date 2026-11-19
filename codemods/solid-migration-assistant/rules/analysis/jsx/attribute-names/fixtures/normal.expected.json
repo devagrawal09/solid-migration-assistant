@@ -7,9 +7,9 @@
       "column": 14,
       "severity": "build",
       "headline": "Rename readOnly to readonly.",
-      "why": "Solid 1 set the readonly attribute for readOnly. Solid 2.0.1 declares only readonly in its JSX types, so readOnly is a type error, and it renders the name as written.",
+      "why": "Solid 1 set the readonly attribute for readOnly. Solid 2.0.3 declares only readonly in its JSX types, so readOnly is a type error, and it renders the name as written.",
       "guidance": "Rename the attribute to readonly. The transform leaves this one because Solid 1 set readonly by truthiness, and Solid 2 keeps it for any value but false, null and undefined, so check the value too.",
-      "guide": "https://github.com/solidjs/solid/blob/82f71fddb1340cab46167db119da5702038e65ab/documentation/solid-2.0/MIGRATION.md#attributes--events-closer-to-html-and-fewer-namespaces",
+      "guide": "https://github.com/solidjs/solid/blob/68406c2077eff22c67f71db4a16bf7026ddceee1/documentation/solid-2.0/MIGRATION.md#attributes--events-closer-to-html-and-fewer-namespaces",
       "lint": []
     },
     {
@@ -19,9 +19,9 @@
       "column": 15,
       "severity": "build",
       "headline": "Rename tabIndex to tabindex.",
-      "why": "Solid 1 set the tabindex attribute for tabIndex. Solid 2.0.1 declares only tabindex in its JSX types, so tabIndex is a type error, and it renders the name as written.",
+      "why": "Solid 1 set the tabindex attribute for tabIndex. Solid 2.0.3 declares only tabindex in its JSX types, so tabIndex is a type error, and it renders the name as written.",
       "guidance": "Rename the attribute to tabindex. The transform leaves this one because Solid 1 printed a boolean value as text, and Solid 2 treats it as presence, so check the value too.",
-      "guide": "https://github.com/solidjs/solid/blob/82f71fddb1340cab46167db119da5702038e65ab/documentation/solid-2.0/MIGRATION.md#attributes--events-closer-to-html-and-fewer-namespaces",
+      "guide": "https://github.com/solidjs/solid/blob/68406c2077eff22c67f71db4a16bf7026ddceee1/documentation/solid-2.0/MIGRATION.md#attributes--events-closer-to-html-and-fewer-namespaces",
       "lint": []
     },
     {
@@ -31,9 +31,9 @@
       "column": 12,
       "severity": "build",
       "headline": "Rename className to class.",
-      "why": "Solid 1 set the class attribute for className. Solid 2.0.1 declares only class in its JSX types, so className is a type error, and it renders the name as written, so class is no longer set.",
+      "why": "Solid 1 set the class attribute for className. Solid 2.0.3 declares only class in its JSX types, so className is a type error, and it renders the name as written, so class is no longer set.",
       "guidance": "Rename the attribute to class. The transform leaves this one because the element already has class, so check the value too.",
-      "guide": "https://github.com/solidjs/solid/blob/82f71fddb1340cab46167db119da5702038e65ab/documentation/solid-2.0/MIGRATION.md#attributes--events-closer-to-html-and-fewer-namespaces",
+      "guide": "https://github.com/solidjs/solid/blob/68406c2077eff22c67f71db4a16bf7026ddceee1/documentation/solid-2.0/MIGRATION.md#attributes--events-closer-to-html-and-fewer-namespaces",
       "lint": []
     },
     {
@@ -43,9 +43,9 @@
       "column": 14,
       "severity": "build",
       "headline": "Rename htmlFor to for.",
-      "why": "Solid 1 set the for attribute for htmlFor. Solid 2.0.1 declares only for in its JSX types, so htmlFor is a type error, and it renders the name as written, so for is no longer set.",
+      "why": "Solid 1 set the for attribute for htmlFor. Solid 2.0.3 declares only for in its JSX types, so htmlFor is a type error, and it renders the name as written, so for is no longer set.",
       "guidance": "Rename the attribute to for and keep its value. The transform makes this edit.",
-      "guide": "https://github.com/solidjs/solid/blob/82f71fddb1340cab46167db119da5702038e65ab/documentation/solid-2.0/MIGRATION.md#attributes--events-closer-to-html-and-fewer-namespaces",
+      "guide": "https://github.com/solidjs/solid/blob/68406c2077eff22c67f71db4a16bf7026ddceee1/documentation/solid-2.0/MIGRATION.md#attributes--events-closer-to-html-and-fewer-namespaces",
       "lint": []
     }
   ]

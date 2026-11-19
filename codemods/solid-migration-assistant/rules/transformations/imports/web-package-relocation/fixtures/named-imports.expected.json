@@ -6,7 +6,7 @@
       "line": 2,
       "column": 24,
       "message": "Relocate solid-js/web to @solidjs/web for proven bindings render.",
-      "guide": "https://github.com/solidjs/solid/blob/82f71fddb1340cab46167db119da5702038e65ab/documentation/solid-2.0/MIGRATION.md#imports-where-things-live-now"
+      "guide": "https://github.com/solidjs/solid/blob/68406c2077eff22c67f71db4a16bf7026ddceee1/documentation/solid-2.0/MIGRATION.md#imports-where-things-live-now"
     },
     {
       "rule": "imports/web-package-relocation",
@@ -14,7 +14,7 @@
       "line": 3,
       "column": 46,
       "message": "Relocate solid-js/web to @solidjs/web for proven bindings hydrate, render.",
-      "guide": "https://github.com/solidjs/solid/blob/82f71fddb1340cab46167db119da5702038e65ab/documentation/solid-2.0/MIGRATION.md#imports-where-things-live-now"
+      "guide": "https://github.com/solidjs/solid/blob/68406c2077eff22c67f71db4a16bf7026ddceee1/documentation/solid-2.0/MIGRATION.md#imports-where-things-live-now"
     },
     {
       "rule": "imports/web-package-relocation",
@@ -22,7 +22,7 @@
       "line": 4,
       "column": 41,
       "message": "Relocate solid-js/web to @solidjs/web for proven bindings hydrate.",
-      "guide": "https://github.com/solidjs/solid/blob/82f71fddb1340cab46167db119da5702038e65ab/documentation/solid-2.0/MIGRATION.md#imports-where-things-live-now"
+      "guide": "https://github.com/solidjs/solid/blob/68406c2077eff22c67f71db4a16bf7026ddceee1/documentation/solid-2.0/MIGRATION.md#imports-where-things-live-now"
     },
     {
       "rule": "imports/web-package-relocation",
@@ -30,7 +30,7 @@
       "line": 5,
       "column": 26,
       "message": "Relocate solid-js/web to @solidjs/web for proven bindings isServer.",
-      "guide": "https://github.com/solidjs/solid/blob/82f71fddb1340cab46167db119da5702038e65ab/documentation/solid-2.0/MIGRATION.md#imports-where-things-live-now"
+      "guide": "https://github.com/solidjs/solid/blob/68406c2077eff22c67f71db4a16bf7026ddceee1/documentation/solid-2.0/MIGRATION.md#imports-where-things-live-now"
     },
     {
       "rule": "imports/web-package-relocation",
@@ -38,7 +38,7 @@
       "line": 6,
       "column": 43,
       "message": "Relocate solid-js/web to @solidjs/web for proven bindings render.",
-      "guide": "https://github.com/solidjs/solid/blob/82f71fddb1340cab46167db119da5702038e65ab/documentation/solid-2.0/MIGRATION.md#imports-where-things-live-now"
+      "guide": "https://github.com/solidjs/solid/blob/68406c2077eff22c67f71db4a16bf7026ddceee1/documentation/solid-2.0/MIGRATION.md#imports-where-things-live-now"
     },
     {
       "rule": "imports/web-package-relocation",
@@ -46,7 +46,7 @@
       "line": 7,
       "column": 70,
       "message": "Relocate solid-js/web to @solidjs/web for proven bindings isServer, hydrate.",
-      "guide": "https://github.com/solidjs/solid/blob/82f71fddb1340cab46167db119da5702038e65ab/documentation/solid-2.0/MIGRATION.md#imports-where-things-live-now"
+      "guide": "https://github.com/solidjs/solid/blob/68406c2077eff22c67f71db4a16bf7026ddceee1/documentation/solid-2.0/MIGRATION.md#imports-where-things-live-now"
     },
     {
       "rule": "imports/web-package-relocation",
@@ -54,7 +54,7 @@
       "line": 11,
       "column": 8,
       "message": "Relocate solid-js/web to @solidjs/web for proven bindings isServer, render.",
-      "guide": "https://github.com/solidjs/solid/blob/82f71fddb1340cab46167db119da5702038e65ab/documentation/solid-2.0/MIGRATION.md#imports-where-things-live-now"
+      "guide": "https://github.com/solidjs/solid/blob/68406c2077eff22c67f71db4a16bf7026ddceee1/documentation/solid-2.0/MIGRATION.md#imports-where-things-live-now"
     },
     {
       "rule": "imports/web-package-relocation",
@@ -62,7 +62,7 @@
       "line": 12,
       "column": 64,
       "message": "Relocate solid-js/web to @solidjs/web for proven bindings render.",
-      "guide": "https://github.com/solidjs/solid/blob/82f71fddb1340cab46167db119da5702038e65ab/documentation/solid-2.0/MIGRATION.md#imports-where-things-live-now"
+      "guide": "https://github.com/solidjs/solid/blob/68406c2077eff22c67f71db4a16bf7026ddceee1/documentation/solid-2.0/MIGRATION.md#imports-where-things-live-now"
     }
   ]
 }

@@ -12,7 +12,7 @@
       "lint": [
         "no-single-arg-create-effect"
       ],
-      "guide": "https://github.com/solidjs/solid/blob/82f71fddb1340cab46167db119da5702038e65ab/documentation/solid-2.0/MIGRATION.md#effects-lifecycle-and-cleanup"
+      "guide": "https://github.com/solidjs/solid/blob/68406c2077eff22c67f71db4a16bf7026ddceee1/documentation/solid-2.0/MIGRATION.md#effects-lifecycle-and-cleanup"
     },
     {
       "rule": "reactivity/create-effect",
@@ -26,7 +26,7 @@
       "lint": [
         "no-single-arg-create-effect"
       ],
-      "guide": "https://github.com/solidjs/solid/blob/82f71fddb1340cab46167db119da5702038e65ab/documentation/solid-2.0/MIGRATION.md#effects-lifecycle-and-cleanup"
+      "guide": "https://github.com/solidjs/solid/blob/68406c2077eff22c67f71db4a16bf7026ddceee1/documentation/solid-2.0/MIGRATION.md#effects-lifecycle-and-cleanup"
     },
     {
       "rule": "reactivity/create-effect",
@@ -37,7 +37,7 @@
       "headline": "Migrate this zero-argument createEffect call.",
       "why": "Solid 2 requires separate compute and apply callbacks; a zero-argument call is likely a stub or placeholder.",
       "guidance": "Add explicit compute and apply callbacks, or remove the empty call if it is dead code.",
-      "guide": "https://github.com/solidjs/solid/blob/82f71fddb1340cab46167db119da5702038e65ab/documentation/solid-2.0/MIGRATION.md#effects-lifecycle-and-cleanup",
+      "guide": "https://github.com/solidjs/solid/blob/68406c2077eff22c67f71db4a16bf7026ddceee1/documentation/solid-2.0/MIGRATION.md#effects-lifecycle-and-cleanup",
       "lint": []
     },
     {
@@ -52,7 +52,7 @@
       "lint": [
         "no-single-arg-create-effect"
       ],
-      "guide": "https://github.com/solidjs/solid/blob/82f71fddb1340cab46167db119da5702038e65ab/documentation/solid-2.0/MIGRATION.md#effects-lifecycle-and-cleanup"
+      "guide": "https://github.com/solidjs/solid/blob/68406c2077eff22c67f71db4a16bf7026ddceee1/documentation/solid-2.0/MIGRATION.md#effects-lifecycle-and-cleanup"
     },
     {
       "rule": "reactivity/create-effect",
@@ -66,7 +66,7 @@
       "lint": [
         "no-single-arg-create-effect"
       ],
-      "guide": "https://github.com/solidjs/solid/blob/82f71fddb1340cab46167db119da5702038e65ab/documentation/solid-2.0/MIGRATION.md#effects-lifecycle-and-cleanup"
+      "guide": "https://github.com/solidjs/solid/blob/68406c2077eff22c67f71db4a16bf7026ddceee1/documentation/solid-2.0/MIGRATION.md#effects-lifecycle-and-cleanup"
     },
     {
       "rule": "reactivity/create-effect",
@@ -80,7 +80,7 @@
       "lint": [
         "no-single-arg-create-effect"
       ],
-      "guide": "https://github.com/solidjs/solid/blob/82f71fddb1340cab46167db119da5702038e65ab/documentation/solid-2.0/MIGRATION.md#effects-lifecycle-and-cleanup"
+      "guide": "https://github.com/solidjs/solid/blob/68406c2077eff22c67f71db4a16bf7026ddceee1/documentation/solid-2.0/MIGRATION.md#effects-lifecycle-and-cleanup"
     },
     {
       "rule": "reactivity/create-effect",
@@ -91,7 +91,7 @@
       "headline": "Migrate this two-argument createEffect call.",
       "why": "Solid 1 reads the second argument as the initial value, but Solid 2's signature is createEffect(compute, effectFn, options), so the second argument is the apply callback that receives each computed value.",
       "guidance": "If the second argument is a Solid 1 initial value, move it to a default parameter of the compute callback and pass the side effect as the second argument: createEffect((prev = INITIAL_VALUE) => compute(prev), (value) => { ... }). If the second argument is already the apply callback, the call is split and needs no change. Stop and ask when you cannot tell which of the two it is.",
-      "guide": "https://github.com/solidjs/solid/blob/82f71fddb1340cab46167db119da5702038e65ab/documentation/solid-2.0/MIGRATION.md#effects-lifecycle-and-cleanup",
+      "guide": "https://github.com/solidjs/solid/blob/68406c2077eff22c67f71db4a16bf7026ddceee1/documentation/solid-2.0/MIGRATION.md#effects-lifecycle-and-cleanup",
       "lint": []
     },
     {
@@ -103,7 +103,7 @@
       "headline": "Migrate this two-argument createEffect call.",
       "why": "Solid 1 reads the second argument as the initial value, but Solid 2's signature is createEffect(compute, effectFn, options), so the second argument is the apply callback that receives each computed value.",
       "guidance": "If the second argument is a Solid 1 initial value, move it to a default parameter of the compute callback and pass the side effect as the second argument: createEffect((prev = INITIAL_VALUE) => compute(prev), (value) => { ... }). If the second argument is already the apply callback, the call is split and needs no change. Stop and ask when you cannot tell which of the two it is.",
-      "guide": "https://github.com/solidjs/solid/blob/82f71fddb1340cab46167db119da5702038e65ab/documentation/solid-2.0/MIGRATION.md#effects-lifecycle-and-cleanup",
+      "guide": "https://github.com/solidjs/solid/blob/68406c2077eff22c67f71db4a16bf7026ddceee1/documentation/solid-2.0/MIGRATION.md#effects-lifecycle-and-cleanup",
       "lint": []
     },
     {
@@ -115,7 +115,7 @@
       "headline": "Migrate this zero-argument createEffect call.",
       "why": "Solid 2 requires separate compute and apply callbacks; a zero-argument call is likely a stub or placeholder.",
       "guidance": "Add explicit compute and apply callbacks, or remove the empty call if it is dead code.",
-      "guide": "https://github.com/solidjs/solid/blob/82f71fddb1340cab46167db119da5702038e65ab/documentation/solid-2.0/MIGRATION.md#effects-lifecycle-and-cleanup",
+      "guide": "https://github.com/solidjs/solid/blob/68406c2077eff22c67f71db4a16bf7026ddceee1/documentation/solid-2.0/MIGRATION.md#effects-lifecycle-and-cleanup",
       "lint": []
     },
     {
@@ -130,7 +130,7 @@
       "lint": [
         "no-single-arg-create-effect"
       ],
-      "guide": "https://github.com/solidjs/solid/blob/82f71fddb1340cab46167db119da5702038e65ab/documentation/solid-2.0/MIGRATION.md#effects-lifecycle-and-cleanup"
+      "guide": "https://github.com/solidjs/solid/blob/68406c2077eff22c67f71db4a16bf7026ddceee1/documentation/solid-2.0/MIGRATION.md#effects-lifecycle-and-cleanup"
     },
     {
       "rule": "reactivity/create-effect",
@@ -144,7 +144,7 @@
       "lint": [
         "no-single-arg-create-effect"
       ],
-      "guide": "https://github.com/solidjs/solid/blob/82f71fddb1340cab46167db119da5702038e65ab/documentation/solid-2.0/MIGRATION.md#effects-lifecycle-and-cleanup"
+      "guide": "https://github.com/solidjs/solid/blob/68406c2077eff22c67f71db4a16bf7026ddceee1/documentation/solid-2.0/MIGRATION.md#effects-lifecycle-and-cleanup"
     },
     {
       "rule": "reactivity/create-effect",
@@ -158,7 +158,7 @@
       "lint": [
         "no-single-arg-create-effect"
       ],
-      "guide": "https://github.com/solidjs/solid/blob/82f71fddb1340cab46167db119da5702038e65ab/documentation/solid-2.0/MIGRATION.md#effects-lifecycle-and-cleanup"
+      "guide": "https://github.com/solidjs/solid/blob/68406c2077eff22c67f71db4a16bf7026ddceee1/documentation/solid-2.0/MIGRATION.md#effects-lifecycle-and-cleanup"
     },
     {
       "rule": "reactivity/create-effect",
@@ -172,7 +172,7 @@
       "lint": [
         "no-single-arg-create-effect"
       ],
-      "guide": "https://github.com/solidjs/solid/blob/82f71fddb1340cab46167db119da5702038e65ab/documentation/solid-2.0/MIGRATION.md#effects-lifecycle-and-cleanup"
+      "guide": "https://github.com/solidjs/solid/blob/68406c2077eff22c67f71db4a16bf7026ddceee1/documentation/solid-2.0/MIGRATION.md#effects-lifecycle-and-cleanup"
     },
     {
       "rule": "reactivity/create-effect",
@@ -186,7 +186,7 @@
       "lint": [
         "no-single-arg-create-effect"
       ],
-      "guide": "https://github.com/solidjs/solid/blob/82f71fddb1340cab46167db119da5702038e65ab/documentation/solid-2.0/MIGRATION.md#effects-lifecycle-and-cleanup"
+      "guide": "https://github.com/solidjs/solid/blob/68406c2077eff22c67f71db4a16bf7026ddceee1/documentation/solid-2.0/MIGRATION.md#effects-lifecycle-and-cleanup"
     },
     {
       "rule": "reactivity/create-effect",
@@ -200,7 +200,7 @@
       "lint": [
         "no-single-arg-create-effect"
       ],
-      "guide": "https://github.com/solidjs/solid/blob/82f71fddb1340cab46167db119da5702038e65ab/documentation/solid-2.0/MIGRATION.md#effects-lifecycle-and-cleanup"
+      "guide": "https://github.com/solidjs/solid/blob/68406c2077eff22c67f71db4a16bf7026ddceee1/documentation/solid-2.0/MIGRATION.md#effects-lifecycle-and-cleanup"
     },
     {
       "rule": "reactivity/create-effect",
@@ -214,7 +214,7 @@
       "lint": [
         "no-single-arg-create-effect"
       ],
-      "guide": "https://github.com/solidjs/solid/blob/82f71fddb1340cab46167db119da5702038e65ab/documentation/solid-2.0/MIGRATION.md#effects-lifecycle-and-cleanup"
+      "guide": "https://github.com/solidjs/solid/blob/68406c2077eff22c67f71db4a16bf7026ddceee1/documentation/solid-2.0/MIGRATION.md#effects-lifecycle-and-cleanup"
     }
   ]
 }

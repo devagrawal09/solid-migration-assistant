@@ -4,7 +4,7 @@
   "description": "Deterministic legacy subpath relocation transform fixture",
   "type": "module",
   "dependencies": {
-    "solid-js": "^2.0.1",
-    "@solidjs/web": "^2.0.1"
+    "solid-js": "^2.0.3",
+    "@solidjs/web": "^2.0.3"
   }
 }

@@ -10,7 +10,7 @@ export const BOOLEAN_ATTRIBUTE_GUIDE = migrationGuide("attributes--events-closer
  * every aria-* and data-* attribute plus the HTML enumerated attributes that
  * take true/false. Solid 1.9 set a boolean value on any of these as its text
  * (setAttribute(el, "aria-hidden", true) wrote aria-hidden="true", and SSR
- * printed the same); Solid 2.0.1 treats every boolean as presence, so
+ * printed the same); Solid 2.0.3 treats every boolean as presence, so
  * true writes an empty value and false removes the attribute. None of these
  * names is in Solid 1's boolean-attribute or property tables, so 1.x always
  * took the setAttribute path for them.

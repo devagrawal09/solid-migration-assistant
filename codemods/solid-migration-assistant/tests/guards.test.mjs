@@ -51,12 +51,12 @@ test("skips a project that does not depend on solid-js", () => {
 });
 
 test("skips a project already on solid-js 2", () => {
-  const out = run(project({ "solid-js": "2.0.1" })).output;
-  assert.equal(out.skipped, "solid-js is already 2.0.1");
+  const out = run(project({ "solid-js": "2.0.3" })).output;
+  assert.equal(out.skipped, "solid-js is already 2.0.3");
 });
 
 test("runs when one workspace package is still on Solid 1", () => {
-  const out = run(project({ "solid-js": "^1.9.5" }, { packages: { zz: { "solid-js": "^2.0.1" } } })).output;
+  const out = run(project({ "solid-js": "^1.9.5" }, { packages: { zz: { "solid-js": "^2.0.3" } } })).output;
   assert.equal(out.skipped, undefined);
 });
 

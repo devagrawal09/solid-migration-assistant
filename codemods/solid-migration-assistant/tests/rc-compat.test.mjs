@@ -35,10 +35,10 @@ const expectedDirectory = resolve(packageDirectory, "tests/rc-compat/expected");
 
 /** Exact versions: the pinned Solid 2 release and the tooling that builds it. */
 const PINNED_PACKAGES = [
-  "solid-js@2.0.1",
-  "@solidjs/web@2.0.1",
-  "@solidjs/h@2.0.0",
-  "@solidjs/babel-plugin@2.0.1",
+  "solid-js@2.0.3",
+  "@solidjs/web@2.0.3",
+  "@solidjs/h@2.0.2",
+  "@solidjs/babel-plugin@2.0.2",
   "@tsrx/core@0.1.63",
   "@babel/core@7.29.7",
   "@babel/preset-typescript@7.29.7",
@@ -115,7 +115,7 @@ test(
       major < MINIMUM_NODE[0] ||
       (major === MINIMUM_NODE[0] && minor < MINIMUM_NODE[1])
     ) {
-      skipOrFail(t, `solid-js@2.0.1 requires Node ${MINIMUM_NODE.join(".")} or newer; running ${process.versions.node}`);
+      skipOrFail(t, `solid-js@2.0.3 requires Node ${MINIMUM_NODE.join(".")} or newer; running ${process.versions.node}`);
       return;
     }
 

@@ -12,7 +12,7 @@
       "lint": [
         "removed-api"
       ],
-      "guide": "https://github.com/solidjs/solid/blob/82f71fddb1340cab46167db119da5702038e65ab/documentation/solid-2.0/MIGRATION.md#quick-rename--removal-map"
+      "guide": "https://github.com/solidjs/solid/blob/68406c2077eff22c67f71db4a16bf7026ddceee1/documentation/solid-2.0/MIGRATION.md#quick-rename--removal-map"
     },
     {
       "rule": "reactivity/utility-renames",
@@ -26,7 +26,7 @@
       "lint": [
         "removed-api"
       ],
-      "guide": "https://github.com/solidjs/solid/blob/82f71fddb1340cab46167db119da5702038e65ab/documentation/solid-2.0/MIGRATION.md#quick-rename--removal-map"
+      "guide": "https://github.com/solidjs/solid/blob/68406c2077eff22c67f71db4a16bf7026ddceee1/documentation/solid-2.0/MIGRATION.md#quick-rename--removal-map"
     },
     {
       "rule": "reactivity/utility-renames",
@@ -40,7 +40,7 @@
       "lint": [
         "removed-api"
       ],
-      "guide": "https://github.com/solidjs/solid/blob/82f71fddb1340cab46167db119da5702038e65ab/documentation/solid-2.0/MIGRATION.md#quick-rename--removal-map"
+      "guide": "https://github.com/solidjs/solid/blob/68406c2077eff22c67f71db4a16bf7026ddceee1/documentation/solid-2.0/MIGRATION.md#quick-rename--removal-map"
     },
     {
       "rule": "reactivity/utility-renames",
@@ -54,7 +54,7 @@
       "lint": [
         "removed-api"
       ],
-      "guide": "https://github.com/solidjs/solid/blob/82f71fddb1340cab46167db119da5702038e65ab/documentation/solid-2.0/MIGRATION.md#quick-rename--removal-map"
+      "guide": "https://github.com/solidjs/solid/blob/68406c2077eff22c67f71db4a16bf7026ddceee1/documentation/solid-2.0/MIGRATION.md#quick-rename--removal-map"
     },
     {
       "rule": "reactivity/utility-renames",
@@ -68,7 +68,7 @@
       "lint": [
         "removed-api"
       ],
-      "guide": "https://github.com/solidjs/solid/blob/82f71fddb1340cab46167db119da5702038e65ab/documentation/solid-2.0/MIGRATION.md#quick-rename--removal-map"
+      "guide": "https://github.com/solidjs/solid/blob/68406c2077eff22c67f71db4a16bf7026ddceee1/documentation/solid-2.0/MIGRATION.md#quick-rename--removal-map"
     },
     {
       "rule": "reactivity/utility-renames",
@@ -80,7 +80,7 @@
       "why": "Solid 2 removes writeSignal; batching is now default — use the normal setter.",
       "guidance": "Remove this call. Replace with the signal's normal setter; updates are batched automatically.",
       "lint": [],
-      "guide": "https://github.com/solidjs/solid/blob/82f71fddb1340cab46167db119da5702038e65ab/documentation/solid-2.0/MIGRATION.md#quick-rename--removal-map"
+      "guide": "https://github.com/solidjs/solid/blob/68406c2077eff22c67f71db4a16bf7026ddceee1/documentation/solid-2.0/MIGRATION.md#quick-rename--removal-map"
     },
     {
       "rule": "reactivity/utility-renames",
@@ -92,7 +92,7 @@
       "why": "Solid 2 removes enableScheduling; the global scheduler no longer exists.",
       "guidance": "Remove this call. Solid 2 has no global scheduler toggle.",
       "lint": [],
-      "guide": "https://github.com/solidjs/solid/blob/82f71fddb1340cab46167db119da5702038e65ab/documentation/solid-2.0/MIGRATION.md#quick-rename--removal-map"
+      "guide": "https://github.com/solidjs/solid/blob/68406c2077eff22c67f71db4a16bf7026ddceee1/documentation/solid-2.0/MIGRATION.md#quick-rename--removal-map"
     }
   ]
 }

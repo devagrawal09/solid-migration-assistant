@@ -7,9 +7,9 @@
       "column": 1,
       "severity": "build",
       "headline": "Migrate this createDynamic call to the dynamic(source) factory.",
-      "why": "Solid 2.0.1 removes createDynamic(component, props) in favor of the dynamic(source) factory, which returns a stable component driven by a reactive (optionally async) source; the <Dynamic component={...}> JSX wrapper still exists but is deprecated without a runtime warning.",
+      "why": "Solid 2.0.3 removes createDynamic(component, props) in favor of the dynamic(source) factory, which returns a stable component driven by a reactive (optionally async) source; the <Dynamic component={...}> JSX wrapper still exists but is deprecated without a runtime warning.",
       "guidance": "Read the complete component and props arguments. Compose the call as createComponent(dynamic(() => Component), props), or hoist const Active = dynamic(() => Component) to the component body (or the module, for a constant source) and render <Active {...props} />.",
-      "guide": "https://github.com/solidjs/solid/blob/82f71fddb1340cab46167db119da5702038e65ab/documentation/solid-2.0/MIGRATION.md#dynamic-components-createdynamic--dynamic--dynamic-factory",
+      "guide": "https://github.com/solidjs/solid/blob/68406c2077eff22c67f71db4a16bf7026ddceee1/documentation/solid-2.0/MIGRATION.md#dynamic-components-createdynamic--dynamic--dynamic-factory",
       "lint": []
     },
     {
@@ -19,9 +19,9 @@
       "column": 1,
       "severity": "build",
       "headline": "Migrate this createDynamic call to the dynamic(source) factory.",
-      "why": "Solid 2.0.1 removes createDynamic(component, props) in favor of the dynamic(source) factory, which returns a stable component driven by a reactive (optionally async) source; the <Dynamic component={...}> JSX wrapper still exists but is deprecated without a runtime warning.",
+      "why": "Solid 2.0.3 removes createDynamic(component, props) in favor of the dynamic(source) factory, which returns a stable component driven by a reactive (optionally async) source; the <Dynamic component={...}> JSX wrapper still exists but is deprecated without a runtime warning.",
       "guidance": "Read the complete component and props arguments. Compose the call as createComponent(dynamic(() => Component), props), or hoist const Active = dynamic(() => Component) to the component body (or the module, for a constant source) and render <Active {...props} />.",
-      "guide": "https://github.com/solidjs/solid/blob/82f71fddb1340cab46167db119da5702038e65ab/documentation/solid-2.0/MIGRATION.md#dynamic-components-createdynamic--dynamic--dynamic-factory",
+      "guide": "https://github.com/solidjs/solid/blob/68406c2077eff22c67f71db4a16bf7026ddceee1/documentation/solid-2.0/MIGRATION.md#dynamic-components-createdynamic--dynamic--dynamic-factory",
       "lint": []
     },
     {
@@ -31,9 +31,9 @@
       "column": 1,
       "severity": "build",
       "headline": "Migrate this createDynamic call to the dynamic(source) factory.",
-      "why": "Solid 2.0.1 removes createDynamic(component, props) in favor of the dynamic(source) factory, which returns a stable component driven by a reactive (optionally async) source; the <Dynamic component={...}> JSX wrapper still exists but is deprecated without a runtime warning.",
+      "why": "Solid 2.0.3 removes createDynamic(component, props) in favor of the dynamic(source) factory, which returns a stable component driven by a reactive (optionally async) source; the <Dynamic component={...}> JSX wrapper still exists but is deprecated without a runtime warning.",
       "guidance": "Read the complete component and props arguments. Compose the call as createComponent(dynamic(() => Component), props), or hoist const Active = dynamic(() => Component) to the component body (or the module, for a constant source) and render <Active {...props} />.",
-      "guide": "https://github.com/solidjs/solid/blob/82f71fddb1340cab46167db119da5702038e65ab/documentation/solid-2.0/MIGRATION.md#dynamic-components-createdynamic--dynamic--dynamic-factory",
+      "guide": "https://github.com/solidjs/solid/blob/68406c2077eff22c67f71db4a16bf7026ddceee1/documentation/solid-2.0/MIGRATION.md#dynamic-components-createdynamic--dynamic--dynamic-factory",
       "lint": []
     }
   ]

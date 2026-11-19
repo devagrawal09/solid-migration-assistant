@@ -1,5 +1,7 @@
-// Packages published together from the Solid repository, so they share the pinned version.
-const LOCKSTEP = ["solid-js", "@solidjs/web", "@solidjs/signals", "@solidjs/h", "@solidjs/html", "@solidjs/universal", "@solidjs/babel-plugin"];
+// Packages every Solid release publishes, so they share the pinned version. @solidjs/h,
+// @solidjs/html, @solidjs/babel-plugin and @solidjs/compiler release only when they change
+// (solid-js 2.0.3 shipped with babel-plugin 2.0.2 and html 2.0.1), so a bump leaves them alone.
+const LOCKSTEP = ["solid-js", "@solidjs/web", "@solidjs/signals", "@solidjs/universal"];
 
 const escape = (text) => text.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
 
@@ -23,8 +25,12 @@ export function replaceTargetVersion(text, from, to) {
   return text.replace(pattern, to);
 }
 
-/** Lines that still cite `version` after replacement, for the person bumping to check. */
+/**
+ * Lines that still cite `version` after replacement, for the person bumping to check,
+ * including tests that write it as a regular expression (`2\.0\.1`).
+ */
 export function remainingMentions(text, version) {
-  const pattern = new RegExp(`(?<![\\w.])${escape(version)}(?![-\\w]|\\.\\d)`);
+  const dotted = version.split(".").map(escape).join("\\\\?\\.");
+  const pattern = new RegExp(`(?<![\\w.])${dotted}(?![-\\w]|\\\\?\\.\\d)`);
   return text.split("\n").flatMap((line, index) => (pattern.test(line) ? [index + 1] : []));
 }

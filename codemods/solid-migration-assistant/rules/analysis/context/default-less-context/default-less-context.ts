@@ -11,7 +11,7 @@ const EMPTY = new Set(["undefined", "null"]);
 /**
  * Reports `useContext(Ctx)` results that are checked for undefined, where
  * `Ctx` is a default-less `createContext()` (no argument, or `undefined`).
- * Solid 1.x returned undefined outside a Provider; Solid 2.0.1 throws
+ * Solid 1.x returned undefined outside a Provider; Solid 2.0.3 throws
  * ContextNotFoundError instead, so the check never sees undefined.
  *
  * A check is `!ctx`, a comparison with undefined or null, `ctx ?? x`,

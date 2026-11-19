@@ -6,7 +6,7 @@
       "line": 2,
       "column": 1,
       "message": "Rewrite the @jsxImportSource pragma from solid-js to @solidjs/web.",
-      "guide": "https://github.com/solidjs/solid/blob/82f71fddb1340cab46167db119da5702038e65ab/documentation/solid-2.0/MIGRATION.md#typescript-jsx-solid-js--renderer-package"
+      "guide": "https://github.com/solidjs/solid/blob/68406c2077eff22c67f71db4a16bf7026ddceee1/documentation/solid-2.0/MIGRATION.md#typescript-jsx-solid-js--renderer-package"
     },
     {
       "rule": "imports/jsx-type-relocation",
@@ -14,7 +14,7 @@
       "line": 3,
       "column": 15,
       "message": "Move JSX from solid-js to @solidjs/web.",
-      "guide": "https://github.com/solidjs/solid/blob/82f71fddb1340cab46167db119da5702038e65ab/documentation/solid-2.0/MIGRATION.md#typescript-jsx-solid-js--renderer-package"
+      "guide": "https://github.com/solidjs/solid/blob/68406c2077eff22c67f71db4a16bf7026ddceee1/documentation/solid-2.0/MIGRATION.md#typescript-jsx-solid-js--renderer-package"
     },
     {
       "rule": "imports/jsx-type-relocation",
@@ -22,7 +22,7 @@
       "line": 4,
       "column": 10,
       "message": "Move JSX from solid-js to @solidjs/web.",
-      "guide": "https://github.com/solidjs/solid/blob/82f71fddb1340cab46167db119da5702038e65ab/documentation/solid-2.0/MIGRATION.md#typescript-jsx-solid-js--renderer-package"
+      "guide": "https://github.com/solidjs/solid/blob/68406c2077eff22c67f71db4a16bf7026ddceee1/documentation/solid-2.0/MIGRATION.md#typescript-jsx-solid-js--renderer-package"
     },
     {
       "rule": "imports/jsx-type-relocation",
@@ -30,7 +30,7 @@
       "line": 6,
       "column": 15,
       "message": "Move JSX from solid-js to @solidjs/web.",
-      "guide": "https://github.com/solidjs/solid/blob/82f71fddb1340cab46167db119da5702038e65ab/documentation/solid-2.0/MIGRATION.md#typescript-jsx-solid-js--renderer-package"
+      "guide": "https://github.com/solidjs/solid/blob/68406c2077eff22c67f71db4a16bf7026ddceee1/documentation/solid-2.0/MIGRATION.md#typescript-jsx-solid-js--renderer-package"
     },
     {
       "rule": "imports/jsx-type-relocation",
@@ -38,7 +38,7 @@
       "line": 8,
       "column": 3,
       "message": "Move JSX from solid-js to @solidjs/web.",
-      "guide": "https://github.com/solidjs/solid/blob/82f71fddb1340cab46167db119da5702038e65ab/documentation/solid-2.0/MIGRATION.md#typescript-jsx-solid-js--renderer-package"
+      "guide": "https://github.com/solidjs/solid/blob/68406c2077eff22c67f71db4a16bf7026ddceee1/documentation/solid-2.0/MIGRATION.md#typescript-jsx-solid-js--renderer-package"
     }
   ]
 }

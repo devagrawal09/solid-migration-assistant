@@ -107,7 +107,7 @@ test("reports Solid 1 manifests and jsxImportSource read-only, before the analyz
     assert.deepEqual(
       findings.map((finding) => `${finding.file}:${finding.line}:${finding.column} [${finding.severity}] ${finding.rule} ${finding.headline}`),
       [
-        "package.json:1:1 [build] project/solid-version Move this project's Solid dependencies to solid-js@2.0.1.",
+        "package.json:1:1 [build] project/solid-version Move this project's Solid dependencies to solid-js@2.0.3.",
         "package.json:4:5 [build] project/dependencies Move @solidjs/router to its Solid 2 line.",
         "package.json:6:5 [build] project/dependencies Move @tanstack/solid-query to its Solid 2 line.",
         "package.json:9:5 [build] project/dependencies Replace vite-plugin-solid with its Solid 2 successor.",
@@ -118,11 +118,11 @@ test("reports Solid 1 manifests and jsxImportSource read-only, before the analyz
     assert.match(findings[0].why, /declared as "\^1\.9\.3", a Solid 1 range; @solidjs\/web, the Solid 2 web renderer package, is not declared\./);
     assert.match(findings[2].why, /"catalog:" could not be compared/);
     assert.match(findings[4].guidance, /pins solid-js and @solidjs\/web to exactly 2\.0\.0-rc\.16/);
-    assert.equal(findings[5].guide, "https://github.com/solidjs/solid/blob/82f71fddb1340cab46167db119da5702038e65ab/documentation/solid-2.0/MIGRATION.md#typescript-jsx-solid-js--renderer-package");
+    assert.equal(findings[5].guide, "https://github.com/solidjs/solid/blob/68406c2077eff22c67f71db4a16bf7026ddceee1/documentation/solid-2.0/MIGRATION.md#typescript-jsx-solid-js--renderer-package");
 
     const migrated = join(surface, "migrated");
     mkdirSync(migrated);
-    writeFileSync(join(migrated, "package.json"), JSON.stringify({ dependencies: { "solid-js": "2.0.1", "@solidjs/web": "2.0.1" } }));
+    writeFileSync(join(migrated, "package.json"), JSON.stringify({ dependencies: { "solid-js": "2.0.3", "@solidjs/web": "2.0.3" } }));
     writeFileSync(join(migrated, "tsconfig.json"), JSON.stringify({ compilerOptions: { jsxImportSource: "@solidjs/web" } }));
     assert.deepEqual(projectFindings(migrated), []);
 
@@ -155,7 +155,7 @@ test("reports Solid 1 manifests and jsxImportSource read-only, before the analyz
     }
     assert.deepEqual(order, ["findings", "codemod"]);
     assert.equal(printed.length, 1);
-    assert.match(printed[0], /^\[solid-migration-assistant\] 6 findings for Solid 2\.0\.1\./);
+    assert.match(printed[0], /^\[solid-migration-assistant\] 6 findings for Solid 2\.0\.3\./);
     assert.match(printed[0], /\n\npackage\.json:1:1 \[build\] Move this project's Solid dependencies/);
     assert.match(printed[0], /\n\npackage\.json:4:5 \[build\] Move @solidjs\/router to its Solid 2 line\.\n  Rule: project\/dependencies\n/);
     assert.match(printed[0], /\n\ntsconfig\.json:1:1 /);
@@ -167,7 +167,7 @@ test("reports Solid 1 manifests and jsxImportSource read-only, before the analyz
 });
 
 test("transform lists the dependencies it could not move as leftovers, read after its rewrites", async () => {
-  const root = projectTree({ "package.json": { dependencies: { "solid-js": "^1.9.0", "solid-icons": "^1.1.0" } } });
+  const root = projectTree({ "package.json": { dependencies: { "solid-js": "^1.9.0", "@felte/solid": "^1.2.0" } } });
   const printed = [];
   const originalLog = console.log;
   console.log = (...values) => printed.push(values.join(" "));
@@ -175,7 +175,7 @@ test("transform lists the dependencies it could not move as leftovers, read afte
     await captureMain(["transform", "--allow-dirty", "--no-install", "--target", root], {
       cwd: root,
       runImpl: () => {
-        writeFileSync(join(root, "package.json"), JSON.stringify({ dependencies: { "solid-js": "2.0.1", "@solidjs/web": "2.0.1", "solid-icons": "^1.1.0" } }));
+        writeFileSync(join(root, "package.json"), JSON.stringify({ dependencies: { "solid-js": "2.0.3", "@solidjs/web": "2.0.3", "@felte/solid": "^1.2.0" } }));
         return { status: 0, output: { findings: [], rewrites: [] } };
       },
     });
@@ -184,10 +184,10 @@ test("transform lists the dependencies it could not move as leftovers, read afte
     rmSync(root, { recursive: true, force: true });
   }
   const headlines = [...printed.join("\n").matchAll(/^package\.json:\d+:\d+ \[\w+\] (.*)$/gm)].map((match) => match[1]);
-  assert.deepEqual(headlines, ["Resolve solid-icons, which has no Solid 2 release yet."]);
+  assert.deepEqual(headlines, ["Resolve @felte/solid, which has no Solid 2 release yet."]);
 });
 
-const GUIDE = "https://github.com/solidjs/solid/blob/82f71fddb1340cab46167db119da5702038e65ab/documentation/solid-2.0/MIGRATION.md";
+const GUIDE = "https://github.com/solidjs/solid/blob/68406c2077eff22c67f71db4a16bf7026ddceee1/documentation/solid-2.0/MIGRATION.md";
 
 function fakeFinding(file, line, headline, severity, rule = "jsx/example") {
   return { rule, file, line, column: 1, severity, headline, why: "Because.", guidance: "Do it.", lint: [], guide: `${GUIDE}#x` };
@@ -207,7 +207,7 @@ test("--format json re-emits the workflow's report as one sorted, tiered JSON do
   });
 
   const report = buildJsonReport({ workflow: "analyze", target: "/t", findings: parsed.findings, status: 0 });
-  assert.equal(report.solid.target, "solid-js@2.0.1");
+  assert.equal(report.solid.target, "solid-js@2.0.3");
   assert.deepEqual(report.summary, { findings: 2, files: 2, bySeverity: { build: 1, behavior: 1, deprecated: 0 }, byRule: { "jsx/example": 2 } });
   assert.deepEqual(report.findings.map((finding) => [finding.file, finding.severity]), [["src/a.tsx", "build"], ["src/b.tsx", "behavior"]]);
 
@@ -246,7 +246,7 @@ test("--format agent prints a fix-ordered Markdown work list and is analyze-only
   const markdown = buildAgentReport({
     tool: "solid-migration-assistant",
     version: "0.0.0",
-    solid: { target: "solid-js@2.0.1", sourceCommit: "c".repeat(40) },
+    solid: { target: "solid-js@2.0.3", sourceCommit: "c".repeat(40) },
     target: "/app",
     summary: { findings: 3, files: 2, bySeverity: { build: 1, behavior: 1, deprecated: 1 } },
     findings: [
@@ -413,8 +413,8 @@ test("publishes exact immutable public-preview disclosure", async () => {
   assert.ok(
     DISCLOSURE.includes(`Analyzer: ${packageJson.name}@${packageJson.version}`),
   );
-  assert.match(DISCLOSURE, /solid-js@2\.0\.1/);
-  assert.match(DISCLOSURE, /82f71fddb1340cab46167db119da5702038e65ab/);
+  assert.match(DISCLOSURE, /solid-js@2\.0\.3/);
+  assert.match(DISCLOSURE, /68406c2077eff22c67f71db4a16bf7026ddceee1/);
   assert.match(
     DISCLOSURE,
     /source-only.*incomplete.*no migration-readiness claim/is,
@@ -427,7 +427,7 @@ test("publishes exact immutable public-preview disclosure", async () => {
   );
   assert.match(DISCLOSURE, /no analyzer telemetry or generated report/);
   assert.match(DISCLOSURE, /Codemod may retain normal workflow or task state/);
-  assert.match(DISCLOSURE, /github\.com\/solidjs\/solid\/blob\/82f71fdd/);
+  assert.match(DISCLOSURE, /github\.com\/solidjs\/solid\/blob\/68406c20/);
   assert.match(
     DISCLOSURE,
     /github\.com\/devagrawal09\/solid-migration-assistant\/issues/,
@@ -540,13 +540,13 @@ test("after a skipped install, tells the user to install and then typecheck", ()
 
 test("after a skipped install, says what targets Solid 2 only when migrate moved solid-js", () => {
   const afterMigrate = { install: { skipped: "--no-install" }, typecheck: [] };
-  const moved = [{ rule: "project/dependencies", message: "Move solid-js from ^1.9.5 to ^2.0.1." }];
-  const movedInCatalog = [{ ...moved[0], file: "pnpm-workspace.yaml", message: "Move solid-js from ^1.9.5 to ^2.0.1 in the default catalog." }];
+  const moved = [{ rule: "project/dependencies", message: "Move solid-js from ^1.9.5 to ^2.0.3." }];
+  const movedInCatalog = [{ ...moved[0], file: "pnpm-workspace.yaml", message: "Move solid-js from ^1.9.5 to ^2.0.3 in the default catalog." }];
   assert.deepEqual(
     [nextSteps({ afterMigrate, rewrites: moved })[0], nextSteps({ afterMigrate, rewrites: movedInCatalog })[0], nextSteps({ afterMigrate })[0]],
     [
-      "Install with your package manager, then typecheck: package.json now targets Solid 2.0.1.",
-      "Install with your package manager, then typecheck: the workspace catalog now targets Solid 2.0.1.",
+      "Install with your package manager, then typecheck: package.json now targets Solid 2.0.3.",
+      "Install with your package manager, then typecheck: the workspace catalog now targets Solid 2.0.3.",
       "Install with your package manager, then typecheck.",
     ],
   );
@@ -578,8 +578,8 @@ const projectSites = (files) => {
 test("reports the Solid version of every workspace package, not only the root", async () => {
   assert.deepEqual(projectSites({
     "package.json": { private: true, workspaces: ["packages/*"] },
-    "packages/app/package.json": { dependencies: { "solid-js": "^1.9.5", "@solidjs/web": "2.0.1" } },
-  }), ["packages/app/package.json Move this project's Solid dependencies to solid-js@2.0.1."]);
+    "packages/app/package.json": { dependencies: { "solid-js": "^1.9.5", "@solidjs/web": "2.0.3" } },
+  }), ["packages/app/package.json Move this project's Solid dependencies to solid-js@2.0.3."]);
 });
 
 test("reads solid-js through the pnpm catalog", async () => {
@@ -603,7 +603,7 @@ test("reports jsxImportSource in any tsconfig a project splits its settings into
 
 test("reads no manifest inside node_modules, even outside git", async () => {
   assert.deepEqual(projectSites({
-    "package.json": { dependencies: { "solid-js": "^2.0.1", "@solidjs/web": "^2.0.1" } },
+    "package.json": { dependencies: { "solid-js": "^2.0.3", "@solidjs/web": "^2.0.3" } },
     "node_modules/old-lib/package.json": { dependencies: { "solid-js": "^1.9.5" } },
   }), []);
 });

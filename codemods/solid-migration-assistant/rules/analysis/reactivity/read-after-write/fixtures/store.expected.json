@@ -7,9 +7,9 @@
       "column": 10,
       "severity": "behavior",
       "headline": "This read of state returns its value from before setState on line 6.",
-      "why": "In Solid 2.0.1 a setter queues its write, and reads keep returning the old value until the batch flushes in a microtask or flush() runs. Solid 1.x applied the write at once outside batch, so this code read the new value.",
+      "why": "In Solid 2.0.3 a setter queues its write, and reads keep returning the old value until the batch flushes in a microtask or flush() runs. Solid 1.x applied the write at once outside batch, so this code read the new value.",
       "guidance": "Read what this function does with state after the write. Where it only needs the value it just wrote, use that value (keep it in a local) instead of reading state again. Where it needs the settled state, such as a memo derived from state, call flush() between the write and the read; flush is a dev error inside an action body and is not re-entrant inside onSettled or tracked effects, so restructure there instead.",
-      "guide": "https://github.com/solidjs/solid/blob/82f71fddb1340cab46167db119da5702038e65ab/documentation/solid-2.0/MIGRATION.md#batching--reads-values-update-after-flush",
+      "guide": "https://github.com/solidjs/solid/blob/68406c2077eff22c67f71db4a16bf7026ddceee1/documentation/solid-2.0/MIGRATION.md#batching--reads-values-update-after-flush",
       "lint": []
     },
     {
@@ -19,9 +19,9 @@
       "column": 31,
       "severity": "behavior",
       "headline": "This read of state returns its value from before setState on line 25.",
-      "why": "In Solid 2.0.1 a setter queues its write, and reads keep returning the old value until the batch flushes in a microtask or flush() runs. Solid 1.x applied the write at once outside batch, so this code read the new value.",
+      "why": "In Solid 2.0.3 a setter queues its write, and reads keep returning the old value until the batch flushes in a microtask or flush() runs. Solid 1.x applied the write at once outside batch, so this code read the new value.",
       "guidance": "Read what this function does with state after the write. Where it only needs the value it just wrote, use that value (keep it in a local) instead of reading state again. Where it needs the settled state, such as a memo derived from state, call flush() between the write and the read; flush is a dev error inside an action body and is not re-entrant inside onSettled or tracked effects, so restructure there instead.",
-      "guide": "https://github.com/solidjs/solid/blob/82f71fddb1340cab46167db119da5702038e65ab/documentation/solid-2.0/MIGRATION.md#batching--reads-values-update-after-flush",
+      "guide": "https://github.com/solidjs/solid/blob/68406c2077eff22c67f71db4a16bf7026ddceee1/documentation/solid-2.0/MIGRATION.md#batching--reads-values-update-after-flush",
       "lint": []
     },
     {
@@ -31,9 +31,9 @@
       "column": 10,
       "severity": "behavior",
       "headline": "This read of state returns its value from before setState on line 32.",
-      "why": "In Solid 2.0.1 a setter queues its write, and reads keep returning the old value until the batch flushes in a microtask or flush() runs. Solid 1.x applied the write at once outside batch, so this code read the new value.",
+      "why": "In Solid 2.0.3 a setter queues its write, and reads keep returning the old value until the batch flushes in a microtask or flush() runs. Solid 1.x applied the write at once outside batch, so this code read the new value.",
       "guidance": "Read what this function does with state after the write. Where it only needs the value it just wrote, use that value (keep it in a local) instead of reading state again. Where it needs the settled state, such as a memo derived from state, call flush() between the write and the read; flush is a dev error inside an action body and is not re-entrant inside onSettled or tracked effects, so restructure there instead.",
-      "guide": "https://github.com/solidjs/solid/blob/82f71fddb1340cab46167db119da5702038e65ab/documentation/solid-2.0/MIGRATION.md#batching--reads-values-update-after-flush",
+      "guide": "https://github.com/solidjs/solid/blob/68406c2077eff22c67f71db4a16bf7026ddceee1/documentation/solid-2.0/MIGRATION.md#batching--reads-values-update-after-flush",
       "lint": []
     }
   ]

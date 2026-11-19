@@ -7,9 +7,9 @@
       "column": 9,
       "severity": "behavior",
       "headline": "Move owner-dependent work out of this ref callback.",
-      "why": "Solid 2.0.1 runs ref callbacks like an effect callback that owns nothing, so the onCleanup call(s) here no longer register with the component: in dev, onCleanup throws CLEANUP_IN_FORBIDDEN_SCOPE and creating a memo, effect or root throws PRIMITIVE_IN_EFFECT_CALLBACK (Solid 1.x ran the callback inside the component's owner).",
+      "why": "Solid 2.0.3 runs ref callbacks like an effect callback that owns nothing, so the onCleanup call(s) here no longer register with the component: in dev, onCleanup throws CLEANUP_IN_FORBIDDEN_SCOPE and creating a memo, effect or root throws PRIMITIVE_IN_EFFECT_CALLBACK (Solid 1.x ran the callback inside the component's owner).",
       "guidance": "Keep only element capture in the ref callback. Move one-off setup and its cleanup into onSettled in the component body, returning the cleanup function, or into the owned setup half of a directive factory whose returned apply callback receives the element.",
-      "guide": "https://github.com/solidjs/solid/blob/82f71fddb1340cab46167db119da5702038e65ab/documentation/solid-2.0/MIGRATION.md#ref-callbacks-no-longer-owned",
+      "guide": "https://github.com/solidjs/solid/blob/68406c2077eff22c67f71db4a16bf7026ddceee1/documentation/solid-2.0/MIGRATION.md#ref-callbacks-no-longer-owned",
       "lint": []
     },
     {
@@ -19,9 +19,9 @@
       "column": 14,
       "severity": "behavior",
       "headline": "Move owner-dependent work out of this ref callback.",
-      "why": "Solid 2.0.1 runs ref callbacks like an effect callback that owns nothing, so the createEffect call(s) here no longer register with the component: in dev, onCleanup throws CLEANUP_IN_FORBIDDEN_SCOPE and creating a memo, effect or root throws PRIMITIVE_IN_EFFECT_CALLBACK (Solid 1.x ran the callback inside the component's owner).",
+      "why": "Solid 2.0.3 runs ref callbacks like an effect callback that owns nothing, so the createEffect call(s) here no longer register with the component: in dev, onCleanup throws CLEANUP_IN_FORBIDDEN_SCOPE and creating a memo, effect or root throws PRIMITIVE_IN_EFFECT_CALLBACK (Solid 1.x ran the callback inside the component's owner).",
       "guidance": "Keep only element capture in the ref callback. Move one-off setup and its cleanup into onSettled in the component body, returning the cleanup function, or into the owned setup half of a directive factory whose returned apply callback receives the element.",
-      "guide": "https://github.com/solidjs/solid/blob/82f71fddb1340cab46167db119da5702038e65ab/documentation/solid-2.0/MIGRATION.md#ref-callbacks-no-longer-owned",
+      "guide": "https://github.com/solidjs/solid/blob/68406c2077eff22c67f71db4a16bf7026ddceee1/documentation/solid-2.0/MIGRATION.md#ref-callbacks-no-longer-owned",
       "lint": []
     }
   ]

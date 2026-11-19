@@ -1,6 +1,6 @@
 /**
  * What a Solid 1.x application's common dependencies become on Solid 2,
- * verified on 2026-11-17, the day solid-js 2.0.1 became npm `latest`, against
+ * verified on 2026-11-19, the day solid-js 2.0.3 became npm `latest`, against
  * published npm manifests (dist-tags and peerDependencies, and for the
  * blocked entries the imports in each tarball), never against peer ranges
  * alone: several packages declare open or wildcard Solid peers while
@@ -23,7 +23,7 @@
  * dependency's line in package.json. Re-verify this table the same way:
  * read the manifests, not the ranges.
  */
-export const DEPENDENCY_VERIFIED_ON = "2026-11-17";
+export const DEPENDENCY_VERIFIED_ON = "2026-11-19";
 
 const major = (pattern) => (range) => pattern.test(range);
 
@@ -80,9 +80,9 @@ export const DEPENDENCY_MAP = Object.freeze([
     name: "babel-preset-solid",
     legacy: null,
     status: "replace",
-    replacement: "@solidjs/babel-plugin@2.0.1",
+    replacement: "@solidjs/babel-plugin@2.0.2",
     guidance:
-      "Replace babel-preset-solid with @solidjs/babel-plugin@2.0.1 (npm latest) in custom Babel pipelines, or rely on @solidjs/vite-plugin, which compiles JSX with @solidjs/compiler. babel-preset-solid's own next tag is a stale 2.0.0-rc.2.",
+      "Replace babel-preset-solid with @solidjs/babel-plugin@2.0.2 (npm latest) in custom Babel pipelines, or rely on @solidjs/vite-plugin, which compiles JSX with @solidjs/compiler. babel-preset-solid's own next tag is a stale 2.0.0-rc.2.",
   },
   {
     name: "@solidjs/testing-library",
@@ -131,24 +131,31 @@ export const DEPENDENCY_MAP = Object.freeze([
     name: "@tanstack/solid-query",
     legacy: major(/(^|[^0-9.])[0-5]\./),
     status: "upgrade",
-    replacement: "@tanstack/solid-query@6.0.0-rc.5",
+    replacement: "@tanstack/solid-query@6.0.0-rc.6",
     guidance:
-      "Install @tanstack/solid-query@rc (6.0.0-rc.5), the Solid 2 major; npm latest 5.x still targets Solid 1.",
+      "Install @tanstack/solid-query@rc (6.0.0-rc.6), the Solid 2 major; npm latest 5.x still targets Solid 1.",
   },
   {
     name: "@tanstack/solid-router",
     legacy: major(/(^|[^0-9.])[01]\./),
     status: "upgrade",
-    replacement: "@tanstack/solid-router@2.0.0-rc.10",
+    replacement: "@tanstack/solid-router@2.0.0-rc.11",
     guidance:
-      "Install @tanstack/solid-router@rc (2.0.0-rc.10); npm latest 1.x still targets Solid 1. Expect npm peer warnings because it still depends on some Solid 1 helper packages.",
+      "Install @tanstack/solid-router@rc (2.0.0-rc.11, which peers on solid-js >=2.0.1); npm latest 1.x still targets Solid 1. Expect npm peer warnings because it still depends on Solid 1 helper packages (@solidjs/meta 0.29, @solid-primitives/refs 1.x, @solid-devtools/logger 0.9).",
+  },
+  {
+    name: "solid-icons",
+    legacy: major(/(^|[^0-9.])[01]\./),
+    status: "upgrade",
+    replacement: "solid-icons@2.0.0",
+    guidance:
+      "Install solid-icons@2.0.0 (npm latest), which supports Solid 1 and 2: it ships JSX source that your Solid 2 compiler builds and imports only solid-js. 1.x imports solid-js/web, which Solid 2 does not export.",
   },
   ...[
-    ["@kobalte/core", "its only Solid 2 build, 2.0.0-alpha.4, pins solid-js and @solidjs/web to exactly 2.0.0-rc.16 and will not install with Solid 2.0.1"],
+    ["@kobalte/core", "its only Solid 2 build, 2.0.0-alpha.4, pins solid-js and @solidjs/web to exactly 2.0.0-rc.16 and will not install with Solid 2.0.3"],
     ["@tanstack/solid-form", "its 2.0.0-alpha.3 still imports mergeProps and splitProps, which Solid 2 removes"],
     ["@tanstack/solid-virtual", "it imports solid-js/store, createComputed, and onMount, which Solid 2 removes"],
     ["@tanstack/solid-table", "its open peer range is misleading: it imports solid-js/web, batch, createComputed, and observable"],
-    ["solid-icons", "its wildcard peer range is misleading: it imports solid-js/web"],
     ["@modular-forms/solid", "it imports solid-js/web, batch, mergeProps, and splitProps"],
     ["@felte/solid", "it only declares solid-js ^1.2.0"],
     ["solid-transition-group", "it only declares solid-js ^1.6.12; @solid-primitives/transition-group@2.0.0 is a lower-level alternative, not a drop-in"],

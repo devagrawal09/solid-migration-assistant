@@ -12,7 +12,7 @@
       "lint": [
         "removed-api"
       ],
-      "guide": "https://github.com/solidjs/solid/blob/82f71fddb1340cab46167db119da5702038e65ab/documentation/solid-2.0/MIGRATION.md#createresource--async-computations--loading"
+      "guide": "https://github.com/solidjs/solid/blob/68406c2077eff22c67f71db4a16bf7026ddceee1/documentation/solid-2.0/MIGRATION.md#createresource--async-computations--loading"
     },
     {
       "rule": "reactivity/create-resource",
@@ -26,7 +26,7 @@
       "lint": [
         "removed-api"
       ],
-      "guide": "https://github.com/solidjs/solid/blob/82f71fddb1340cab46167db119da5702038e65ab/documentation/solid-2.0/MIGRATION.md#createresource--async-computations--loading"
+      "guide": "https://github.com/solidjs/solid/blob/68406c2077eff22c67f71db4a16bf7026ddceee1/documentation/solid-2.0/MIGRATION.md#createresource--async-computations--loading"
     },
     {
       "rule": "reactivity/create-resource",
@@ -40,7 +40,7 @@
       "lint": [
         "removed-api"
       ],
-      "guide": "https://github.com/solidjs/solid/blob/82f71fddb1340cab46167db119da5702038e65ab/documentation/solid-2.0/MIGRATION.md#createresource--async-computations--loading"
+      "guide": "https://github.com/solidjs/solid/blob/68406c2077eff22c67f71db4a16bf7026ddceee1/documentation/solid-2.0/MIGRATION.md#createresource--async-computations--loading"
     },
     {
       "rule": "reactivity/create-resource",
@@ -54,7 +54,7 @@
       "lint": [
         "removed-api"
       ],
-      "guide": "https://github.com/solidjs/solid/blob/82f71fddb1340cab46167db119da5702038e65ab/documentation/solid-2.0/MIGRATION.md#createresource--async-computations--loading"
+      "guide": "https://github.com/solidjs/solid/blob/68406c2077eff22c67f71db4a16bf7026ddceee1/documentation/solid-2.0/MIGRATION.md#createresource--async-computations--loading"
     },
     {
       "rule": "reactivity/create-resource",
@@ -68,7 +68,7 @@
       "lint": [
         "removed-api"
       ],
-      "guide": "https://github.com/solidjs/solid/blob/82f71fddb1340cab46167db119da5702038e65ab/documentation/solid-2.0/MIGRATION.md#createresource--async-computations--loading"
+      "guide": "https://github.com/solidjs/solid/blob/68406c2077eff22c67f71db4a16bf7026ddceee1/documentation/solid-2.0/MIGRATION.md#createresource--async-computations--loading"
     },
     {
       "rule": "reactivity/create-resource",
@@ -82,7 +82,7 @@
       "lint": [
         "removed-api"
       ],
-      "guide": "https://github.com/solidjs/solid/blob/82f71fddb1340cab46167db119da5702038e65ab/documentation/solid-2.0/MIGRATION.md#createresource--async-computations--loading"
+      "guide": "https://github.com/solidjs/solid/blob/68406c2077eff22c67f71db4a16bf7026ddceee1/documentation/solid-2.0/MIGRATION.md#createresource--async-computations--loading"
     },
     {
       "rule": "reactivity/create-resource",
@@ -96,7 +96,7 @@
       "lint": [
         "removed-api"
       ],
-      "guide": "https://github.com/solidjs/solid/blob/82f71fddb1340cab46167db119da5702038e65ab/documentation/solid-2.0/MIGRATION.md#createresource--async-computations--loading"
+      "guide": "https://github.com/solidjs/solid/blob/68406c2077eff22c67f71db4a16bf7026ddceee1/documentation/solid-2.0/MIGRATION.md#createresource--async-computations--loading"
     },
     {
       "rule": "reactivity/create-resource",
@@ -110,7 +110,7 @@
       "lint": [
         "removed-api"
       ],
-      "guide": "https://github.com/solidjs/solid/blob/82f71fddb1340cab46167db119da5702038e65ab/documentation/solid-2.0/MIGRATION.md#createresource--async-computations--loading"
+      "guide": "https://github.com/solidjs/solid/blob/68406c2077eff22c67f71db4a16bf7026ddceee1/documentation/solid-2.0/MIGRATION.md#createresource--async-computations--loading"
     },
     {
       "rule": "reactivity/create-resource",
@@ -124,7 +124,7 @@
       "lint": [
         "removed-api"
       ],
-      "guide": "https://github.com/solidjs/solid/blob/82f71fddb1340cab46167db119da5702038e65ab/documentation/solid-2.0/MIGRATION.md#createresource--async-computations--loading"
+      "guide": "https://github.com/solidjs/solid/blob/68406c2077eff22c67f71db4a16bf7026ddceee1/documentation/solid-2.0/MIGRATION.md#createresource--async-computations--loading"
     },
     {
       "rule": "reactivity/create-resource",
@@ -138,7 +138,7 @@
       "lint": [
         "removed-api"
       ],
-      "guide": "https://github.com/solidjs/solid/blob/82f71fddb1340cab46167db119da5702038e65ab/documentation/solid-2.0/MIGRATION.md#createresource--async-computations--loading"
+      "guide": "https://github.com/solidjs/solid/blob/68406c2077eff22c67f71db4a16bf7026ddceee1/documentation/solid-2.0/MIGRATION.md#createresource--async-computations--loading"
     },
     {
       "rule": "reactivity/create-resource",
@@ -152,7 +152,7 @@
       "lint": [
         "removed-api"
       ],
-      "guide": "https://github.com/solidjs/solid/blob/82f71fddb1340cab46167db119da5702038e65ab/documentation/solid-2.0/MIGRATION.md#createresource--async-computations--loading"
+      "guide": "https://github.com/solidjs/solid/blob/68406c2077eff22c67f71db4a16bf7026ddceee1/documentation/solid-2.0/MIGRATION.md#createresource--async-computations--loading"
     }
   ]
 }

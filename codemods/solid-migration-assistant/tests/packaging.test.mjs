@@ -64,7 +64,7 @@ test("publishes complete public npm and Codemod metadata", () => {
     readFileSync(resolve(packageDirectory, "package.json"), "utf8"),
   );
   assert.equal(packageJson.name, "solid-migration-assistant");
-  assert.equal(packageJson.version, "0.4.1");
+  assert.equal(packageJson.version, "0.4.2");
   assert.equal(packageJson.description, expectedDescription);
   assert.deepEqual(packageJson.keywords, expectedKeywords);
   assert.equal(packageJson.license, "MIT");
@@ -86,7 +86,7 @@ test("publishes complete public npm and Codemod metadata", () => {
     resolve(packageDirectory, "codemod.yaml"),
     "utf8",
   );
-  assert.match(codemod, /^version: "0\.4\.1"$/m);
+  assert.match(codemod, /^version: "0\.4\.2"$/m);
   const codemodLines = codemod.split("\n");
   assert.ok(codemodLines.includes(`description: "${expectedDescription}"`));
   assert.ok(
@@ -225,7 +225,7 @@ test(
         assert.match(smoke.stdout, /Move this Solid web renderer/);
         assert.match(
           smoke.stdout,
-          /github\.com\/solidjs\/solid\/blob\/82f71fdd.*imports-where-things-live-now/,
+          /github\.com\/solidjs\/solid\/blob\/68406c20.*imports-where-things-live-now/,
         );
         assert.doesNotMatch(smoke.stdout, /S2-IMPORT-WEB-001/);
         assertFinalDisclosure(smoke.stderr);

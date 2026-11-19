@@ -7,9 +7,9 @@
       "column": 15,
       "severity": "build",
       "headline": "Move this ComponentProps type import off solid-js.",
-      "why": "Solid 2.0.1's solid-js ComponentProps accepts components only; the @solidjs/web version also accepts intrinsic tag names such as \"button\", which ComponentProps<\"button\"> needs.",
+      "why": "Solid 2.0.3's solid-js ComponentProps accepts components only; the @solidjs/web version also accepts intrinsic tag names such as \"button\", which ComponentProps<\"button\"> needs.",
       "guidance": "Move this specifier to a separate import type { ComponentProps } from \"@solidjs/web\" statement, leaving every other solid-js binding in place. Also set compilerOptions.jsxImportSource to @solidjs/web in tsconfig.json, which this analyzer does not scan.",
-      "guide": "https://github.com/solidjs/solid/blob/82f71fddb1340cab46167db119da5702038e65ab/documentation/solid-2.0/MIGRATION.md#typescript-jsx-solid-js--renderer-package",
+      "guide": "https://github.com/solidjs/solid/blob/68406c2077eff22c67f71db4a16bf7026ddceee1/documentation/solid-2.0/MIGRATION.md#typescript-jsx-solid-js--renderer-package",
       "lint": []
     },
     {
@@ -19,9 +19,9 @@
       "column": 31,
       "severity": "build",
       "headline": "Move this ValidComponent type import off solid-js.",
-      "why": "Solid 2.0.1's solid-js ValidComponent accepts components only; the @solidjs/web version also accepts intrinsic tag names such as \"button\", which ValidComponent<\"button\"> needs.",
+      "why": "Solid 2.0.3's solid-js ValidComponent accepts components only; the @solidjs/web version also accepts intrinsic tag names such as \"button\", which ValidComponent<\"button\"> needs.",
       "guidance": "Move this specifier to a separate import type { ValidComponent } from \"@solidjs/web\" statement, leaving every other solid-js binding in place. Also set compilerOptions.jsxImportSource to @solidjs/web in tsconfig.json, which this analyzer does not scan.",
-      "guide": "https://github.com/solidjs/solid/blob/82f71fddb1340cab46167db119da5702038e65ab/documentation/solid-2.0/MIGRATION.md#typescript-jsx-solid-js--renderer-package",
+      "guide": "https://github.com/solidjs/solid/blob/68406c2077eff22c67f71db4a16bf7026ddceee1/documentation/solid-2.0/MIGRATION.md#typescript-jsx-solid-js--renderer-package",
       "lint": []
     }
   ]

@@ -9,10 +9,12 @@ import { dirname, join, relative } from "node:path";
 import ts from "typescript";
 import { SOLID_VERSION } from "../shared/manifest.mjs";
 
+// The babel plugin releases only when it changes, so it has its own version: Solid 2.0.3
+// shipped with @solidjs/babel-plugin 2.0.2. Keep it in step with tests/rc-compat.test.mjs.
 export const RC_PACKAGES = [
   `solid-js@${SOLID_VERSION}`,
   `@solidjs/web@${SOLID_VERSION}`,
-  `@solidjs/babel-plugin@${SOLID_VERSION}`,
+  "@solidjs/babel-plugin@2.0.2",
   "@babel/core@7.29.7",
   "@babel/preset-typescript@7.29.7",
 ];

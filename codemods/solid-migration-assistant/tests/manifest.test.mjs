@@ -24,7 +24,7 @@ test("moves a dependency with a stable Solid 2 release to a caret range", () => 
 });
 
 test("keeps a dependency whose Solid 2 release is a prerelease exact", () => {
-  assert.equal(bumped(manifest({ "solid-js": "^1.9.5", "@tanstack/solid-query": "^5.0.0" })).dependencies["@tanstack/solid-query"], "6.0.0-rc.5");
+  assert.equal(bumped(manifest({ "solid-js": "^1.9.5", "@tanstack/solid-query": "^5.0.0" })).dependencies["@tanstack/solid-query"], "6.0.0-rc.6");
 });
 
 test("leaves a dependency that needs replacing as it is", () => {

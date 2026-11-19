@@ -12,7 +12,7 @@
       "lint": [
         "removed-api"
       ],
-      "guide": "https://github.com/solidjs/solid/blob/82f71fddb1340cab46167db119da5702038e65ab/documentation/solid-2.0/MIGRATION.md#imports-where-things-live-now"
+      "guide": "https://github.com/solidjs/solid/blob/68406c2077eff22c67f71db4a16bf7026ddceee1/documentation/solid-2.0/MIGRATION.md#imports-where-things-live-now"
     },
     {
       "rule": "imports/beta32-subpaths",
@@ -24,7 +24,7 @@
       "why": "Solid 2 publishes solid-js/h from @solidjs/h.",
       "guidance": "Change only this static import's module source and preserve its import form and quote style.",
       "lint": [],
-      "guide": "https://github.com/solidjs/solid/blob/82f71fddb1340cab46167db119da5702038e65ab/documentation/solid-2.0/MIGRATION.md#imports-where-things-live-now"
+      "guide": "https://github.com/solidjs/solid/blob/68406c2077eff22c67f71db4a16bf7026ddceee1/documentation/solid-2.0/MIGRATION.md#imports-where-things-live-now"
     },
     {
       "rule": "imports/beta32-subpaths",
@@ -36,7 +36,7 @@
       "why": "Solid 2 publishes solid-js/html from @solidjs/html.",
       "guidance": "Change only this static import's module source and preserve its import form and quote style.",
       "lint": [],
-      "guide": "https://github.com/solidjs/solid/blob/82f71fddb1340cab46167db119da5702038e65ab/documentation/solid-2.0/MIGRATION.md#imports-where-things-live-now"
+      "guide": "https://github.com/solidjs/solid/blob/68406c2077eff22c67f71db4a16bf7026ddceee1/documentation/solid-2.0/MIGRATION.md#imports-where-things-live-now"
     },
     {
       "rule": "imports/beta32-subpaths",
@@ -48,7 +48,7 @@
       "why": "Solid 2 publishes solid-js/universal from @solidjs/universal.",
       "guidance": "Change only this static import's module source and preserve its import form and quote style.",
       "lint": [],
-      "guide": "https://github.com/solidjs/solid/blob/82f71fddb1340cab46167db119da5702038e65ab/documentation/solid-2.0/MIGRATION.md#imports-where-things-live-now"
+      "guide": "https://github.com/solidjs/solid/blob/68406c2077eff22c67f71db4a16bf7026ddceee1/documentation/solid-2.0/MIGRATION.md#imports-where-things-live-now"
     },
     {
       "rule": "imports/beta32-subpaths",
@@ -60,7 +60,7 @@
       "why": "Solid 2 publishes solid-js/jsx-runtime from @solidjs/web/jsx-runtime.",
       "guidance": "Change only this static import's module source and preserve its import form and quote style.",
       "lint": [],
-      "guide": "https://github.com/solidjs/solid/blob/82f71fddb1340cab46167db119da5702038e65ab/documentation/solid-2.0/MIGRATION.md#imports-where-things-live-now"
+      "guide": "https://github.com/solidjs/solid/blob/68406c2077eff22c67f71db4a16bf7026ddceee1/documentation/solid-2.0/MIGRATION.md#imports-where-things-live-now"
     },
     {
       "rule": "imports/beta32-subpaths",
@@ -72,7 +72,7 @@
       "why": "Solid 2 publishes solid-js/jsx-dev-runtime from @solidjs/web/jsx-dev-runtime.",
       "guidance": "Change only this static import's module source and preserve its import form and quote style.",
       "lint": [],
-      "guide": "https://github.com/solidjs/solid/blob/82f71fddb1340cab46167db119da5702038e65ab/documentation/solid-2.0/MIGRATION.md#imports-where-things-live-now"
+      "guide": "https://github.com/solidjs/solid/blob/68406c2077eff22c67f71db4a16bf7026ddceee1/documentation/solid-2.0/MIGRATION.md#imports-where-things-live-now"
     },
     {
       "rule": "imports/beta32-subpaths",
@@ -86,7 +86,7 @@
       "lint": [
         "removed-api"
       ],
-      "guide": "https://github.com/solidjs/solid/blob/82f71fddb1340cab46167db119da5702038e65ab/documentation/solid-2.0/MIGRATION.md#imports-where-things-live-now"
+      "guide": "https://github.com/solidjs/solid/blob/68406c2077eff22c67f71db4a16bf7026ddceee1/documentation/solid-2.0/MIGRATION.md#imports-where-things-live-now"
     },
     {
       "rule": "imports/beta32-subpaths",
@@ -98,7 +98,7 @@
       "why": "Solid 2 publishes solid-js/h from @solidjs/h.",
       "guidance": "Change only this static import's module source and preserve its import form and quote style.",
       "lint": [],
-      "guide": "https://github.com/solidjs/solid/blob/82f71fddb1340cab46167db119da5702038e65ab/documentation/solid-2.0/MIGRATION.md#imports-where-things-live-now"
+      "guide": "https://github.com/solidjs/solid/blob/68406c2077eff22c67f71db4a16bf7026ddceee1/documentation/solid-2.0/MIGRATION.md#imports-where-things-live-now"
     },
     {
       "rule": "imports/beta32-subpaths",
@@ -110,7 +110,7 @@
       "why": "Solid 2 publishes solid-js/html from @solidjs/html.",
       "guidance": "Change only this static import's module source and preserve its import form and quote style.",
       "lint": [],
-      "guide": "https://github.com/solidjs/solid/blob/82f71fddb1340cab46167db119da5702038e65ab/documentation/solid-2.0/MIGRATION.md#imports-where-things-live-now"
+      "guide": "https://github.com/solidjs/solid/blob/68406c2077eff22c67f71db4a16bf7026ddceee1/documentation/solid-2.0/MIGRATION.md#imports-where-things-live-now"
     },
     {
       "rule": "imports/beta32-subpaths",
@@ -122,7 +122,7 @@
       "why": "Solid 2 publishes solid-js/html from @solidjs/html.",
       "guidance": "Change only this static import's module source and preserve its import form and quote style.",
       "lint": [],
-      "guide": "https://github.com/solidjs/solid/blob/82f71fddb1340cab46167db119da5702038e65ab/documentation/solid-2.0/MIGRATION.md#imports-where-things-live-now"
+      "guide": "https://github.com/solidjs/solid/blob/68406c2077eff22c67f71db4a16bf7026ddceee1/documentation/solid-2.0/MIGRATION.md#imports-where-things-live-now"
     },
     {
       "rule": "imports/beta32-subpaths",
@@ -134,7 +134,7 @@
       "why": "Solid 2 publishes solid-js/universal from @solidjs/universal.",
       "guidance": "Change only this static import's module source and preserve its import form and quote style.",
       "lint": [],
-      "guide": "https://github.com/solidjs/solid/blob/82f71fddb1340cab46167db119da5702038e65ab/documentation/solid-2.0/MIGRATION.md#imports-where-things-live-now"
+      "guide": "https://github.com/solidjs/solid/blob/68406c2077eff22c67f71db4a16bf7026ddceee1/documentation/solid-2.0/MIGRATION.md#imports-where-things-live-now"
     },
     {
       "rule": "imports/beta32-subpaths",
@@ -146,7 +146,7 @@
       "why": "Solid 2 publishes solid-js/jsx-runtime from @solidjs/web/jsx-runtime.",
       "guidance": "Change only this static import's module source and preserve its import form and quote style.",
       "lint": [],
-      "guide": "https://github.com/solidjs/solid/blob/82f71fddb1340cab46167db119da5702038e65ab/documentation/solid-2.0/MIGRATION.md#imports-where-things-live-now"
+      "guide": "https://github.com/solidjs/solid/blob/68406c2077eff22c67f71db4a16bf7026ddceee1/documentation/solid-2.0/MIGRATION.md#imports-where-things-live-now"
     },
     {
       "rule": "imports/beta32-subpaths",
@@ -158,7 +158,7 @@
       "why": "Solid 2 publishes solid-js/jsx-dev-runtime from @solidjs/web/jsx-dev-runtime.",
       "guidance": "Change only this static import's module source and preserve its import form and quote style.",
       "lint": [],
-      "guide": "https://github.com/solidjs/solid/blob/82f71fddb1340cab46167db119da5702038e65ab/documentation/solid-2.0/MIGRATION.md#imports-where-things-live-now"
+      "guide": "https://github.com/solidjs/solid/blob/68406c2077eff22c67f71db4a16bf7026ddceee1/documentation/solid-2.0/MIGRATION.md#imports-where-things-live-now"
     },
     {
       "rule": "imports/beta32-subpaths",
@@ -172,7 +172,7 @@
       "lint": [
         "removed-api"
       ],
-      "guide": "https://github.com/solidjs/solid/blob/82f71fddb1340cab46167db119da5702038e65ab/documentation/solid-2.0/MIGRATION.md#imports-where-things-live-now"
+      "guide": "https://github.com/solidjs/solid/blob/68406c2077eff22c67f71db4a16bf7026ddceee1/documentation/solid-2.0/MIGRATION.md#imports-where-things-live-now"
     },
     {
       "rule": "imports/beta32-subpaths",
@@ -184,7 +184,7 @@
       "why": "Solid 2 publishes solid-js/h from @solidjs/h.",
       "guidance": "Change only this re-export's module source and preserve its export form and quote style.",
       "lint": [],
-      "guide": "https://github.com/solidjs/solid/blob/82f71fddb1340cab46167db119da5702038e65ab/documentation/solid-2.0/MIGRATION.md#imports-where-things-live-now"
+      "guide": "https://github.com/solidjs/solid/blob/68406c2077eff22c67f71db4a16bf7026ddceee1/documentation/solid-2.0/MIGRATION.md#imports-where-things-live-now"
     },
     {
       "rule": "imports/beta32-subpaths",
@@ -196,7 +196,7 @@
       "why": "Solid 2 publishes solid-js/html from @solidjs/html.",
       "guidance": "Change only this dynamic import's module source and preserve its quote style.",
       "lint": [],
-      "guide": "https://github.com/solidjs/solid/blob/82f71fddb1340cab46167db119da5702038e65ab/documentation/solid-2.0/MIGRATION.md#imports-where-things-live-now"
+      "guide": "https://github.com/solidjs/solid/blob/68406c2077eff22c67f71db4a16bf7026ddceee1/documentation/solid-2.0/MIGRATION.md#imports-where-things-live-now"
     },
     {
       "rule": "imports/beta32-subpaths",
@@ -208,7 +208,7 @@
       "why": "Solid 2 publishes solid-js/universal from @solidjs/universal.",
       "guidance": "Change only this require call's module source and preserve its quote style.",
       "lint": [],
-      "guide": "https://github.com/solidjs/solid/blob/82f71fddb1340cab46167db119da5702038e65ab/documentation/solid-2.0/MIGRATION.md#imports-where-things-live-now"
+      "guide": "https://github.com/solidjs/solid/blob/68406c2077eff22c67f71db4a16bf7026ddceee1/documentation/solid-2.0/MIGRATION.md#imports-where-things-live-now"
     },
     {
       "rule": "imports/beta32-subpaths",
@@ -220,7 +220,7 @@
       "why": "Solid 2 publishes solid-js/jsx-runtime from @solidjs/web/jsx-runtime.",
       "guidance": "Change only this dynamic import's module source and preserve its quote style.",
       "lint": [],
-      "guide": "https://github.com/solidjs/solid/blob/82f71fddb1340cab46167db119da5702038e65ab/documentation/solid-2.0/MIGRATION.md#imports-where-things-live-now"
+      "guide": "https://github.com/solidjs/solid/blob/68406c2077eff22c67f71db4a16bf7026ddceee1/documentation/solid-2.0/MIGRATION.md#imports-where-things-live-now"
     }
   ]
 }

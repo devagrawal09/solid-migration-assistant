@@ -1,7 +1,7 @@
 import { DEPENDENCY_MAP } from "./dependencies.mjs";
 import { allowsSolid2, isSolid2Only } from "./peers.mjs";
 
-export const SOLID_VERSION = "2.0.1";
+export const SOLID_VERSION = "2.0.3";
 /** What migrate writes for solid-js and @solidjs/web: stable releases take a caret range. */
 export const SOLID_RANGE = `^${SOLID_VERSION}`;
 const SECTIONS = ["dependencies", "devDependencies"];

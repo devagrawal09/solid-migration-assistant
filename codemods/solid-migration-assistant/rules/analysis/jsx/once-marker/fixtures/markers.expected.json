@@ -7,9 +7,9 @@
       "column": 19,
       "severity": "behavior",
       "headline": "Remove this /*@once*/ marker; the expression after it is now reactive.",
-      "why": "Solid 1.x compiled a /*@once*/ expression as a one-time read. Solid 2.0.1 ignores the marker, so the value now updates when its signals change.",
-      "guidance": "Delete the comment and keep the expression reactive where updates are fine. For an initial value on a DOM input, use the default prop instead (value to defaultValue, checked to defaultChecked). Only where the value must be read once, read it with untrack in the component body and pass the local.",
-      "guide": "https://github.com/solidjs/solid/blob/82f71fddb1340cab46167db119da5702038e65ab/documentation/solid-2.0/MIGRATION.md#once-jsx-marker",
+      "why": "Solid 1.x compiled a /*@once*/ expression as a one-time read. Solid 2.0.3 ignores the marker, so the value now updates when its signals change.",
+      "guidance": "Delete the comment and keep the expression reactive where updates are fine. For an initial value on a DOM input, use the default prop instead (value to defaultValue, checked to defaultChecked); to seed local state, use a writable derived signal, createSignal(() => props.initial). Only where the value must never update and never comes from async data, read it once with untrack in the component body and pass the local; never use untrack just to silence STRICT_READ_UNTRACKED.",
+      "guide": "https://github.com/solidjs/solid/blob/68406c2077eff22c67f71db4a16bf7026ddceee1/documentation/solid-2.0/MIGRATION.md#once-jsx-marker",
       "lint": []
     },
     {
@@ -19,9 +19,9 @@
       "column": 21,
       "severity": "behavior",
       "headline": "Remove this /*@once*/ marker; the expression after it is now reactive.",
-      "why": "Solid 1.x compiled a /*@once*/ expression as a one-time read. Solid 2.0.1 ignores the marker, so the value now updates when its signals change.",
-      "guidance": "Delete the comment and keep the expression reactive where updates are fine. For an initial value on a DOM input, use the default prop instead (value to defaultValue, checked to defaultChecked). Only where the value must be read once, read it with untrack in the component body and pass the local.",
-      "guide": "https://github.com/solidjs/solid/blob/82f71fddb1340cab46167db119da5702038e65ab/documentation/solid-2.0/MIGRATION.md#once-jsx-marker",
+      "why": "Solid 1.x compiled a /*@once*/ expression as a one-time read. Solid 2.0.3 ignores the marker, so the value now updates when its signals change.",
+      "guidance": "Delete the comment and keep the expression reactive where updates are fine. For an initial value on a DOM input, use the default prop instead (value to defaultValue, checked to defaultChecked); to seed local state, use a writable derived signal, createSignal(() => props.initial). Only where the value must never update and never comes from async data, read it once with untrack in the component body and pass the local; never use untrack just to silence STRICT_READ_UNTRACKED.",
+      "guide": "https://github.com/solidjs/solid/blob/68406c2077eff22c67f71db4a16bf7026ddceee1/documentation/solid-2.0/MIGRATION.md#once-jsx-marker",
       "lint": []
     },
     {
@@ -31,9 +31,9 @@
       "column": 24,
       "severity": "behavior",
       "headline": "Remove this /*@once*/ marker; the expression after it is now reactive.",
-      "why": "Solid 1.x compiled a /*@once*/ expression as a one-time read. Solid 2.0.1 ignores the marker, so the value now updates when its signals change.",
-      "guidance": "Delete the comment and keep the expression reactive where updates are fine. For an initial value on a DOM input, use the default prop instead (value to defaultValue, checked to defaultChecked). Only where the value must be read once, read it with untrack in the component body and pass the local.",
-      "guide": "https://github.com/solidjs/solid/blob/82f71fddb1340cab46167db119da5702038e65ab/documentation/solid-2.0/MIGRATION.md#once-jsx-marker",
+      "why": "Solid 1.x compiled a /*@once*/ expression as a one-time read. Solid 2.0.3 ignores the marker, so the value now updates when its signals change.",
+      "guidance": "Delete the comment and keep the expression reactive where updates are fine. For an initial value on a DOM input, use the default prop instead (value to defaultValue, checked to defaultChecked); to seed local state, use a writable derived signal, createSignal(() => props.initial). Only where the value must never update and never comes from async data, read it once with untrack in the component body and pass the local; never use untrack just to silence STRICT_READ_UNTRACKED.",
+      "guide": "https://github.com/solidjs/solid/blob/68406c2077eff22c67f71db4a16bf7026ddceee1/documentation/solid-2.0/MIGRATION.md#once-jsx-marker",
       "lint": []
     }
   ]

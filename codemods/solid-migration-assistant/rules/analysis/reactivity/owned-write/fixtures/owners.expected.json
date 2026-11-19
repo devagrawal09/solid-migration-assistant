@@ -7,9 +7,9 @@
       "column": 19,
       "severity": "behavior",
       "headline": "Move this setOpen call out of the Panel component body; Solid 2 throws on writes there in dev.",
-      "why": "Solid 2.0.1 treats a component body, a createMemo compute function and a createRoot callback as owned scopes. A write to a signal or store there throws REACTIVE_WRITE_IN_OWNED_SCOPE in development builds and halts the reactive system; production builds let it through. Solid 1.x allowed these writes.",
+      "why": "Solid 2.0.3 treats a component body, a createMemo compute function and a createRoot callback as owned scopes. A write to a signal or store there throws REACTIVE_WRITE_IN_OWNED_SCOPE in development builds and halts the reactive system; production builds let it through. Solid 1.x allowed these writes.",
       "guidance": "If the write sets a starting value, pass it to createSignal or createStore instead. If it derives state from props or other state, use createMemo, or createSignal(fn) when the derived value must stay writable. If it reacts to a change, move it into an event handler or the apply callback of a split createEffect. Keep the ownedWrite option for an internal signal that has to be written while rendering.",
-      "guide": "https://github.com/solidjs/solid/blob/82f71fddb1340cab46167db119da5702038e65ab/documentation/solid-2.0/MIGRATION.md#write-inside-reactive-scope-owned-scope",
+      "guide": "https://github.com/solidjs/solid/blob/68406c2077eff22c67f71db4a16bf7026ddceee1/documentation/solid-2.0/MIGRATION.md#write-inside-reactive-scope-owned-scope",
       "lint": []
     },
     {
@@ -19,9 +19,9 @@
       "column": 17,
       "severity": "behavior",
       "headline": "Move this setTheme call out of the Panel component body; Solid 2 throws on writes there in dev.",
-      "why": "Solid 2.0.1 treats a component body, a createMemo compute function and a createRoot callback as owned scopes. A write to a signal or store there throws REACTIVE_WRITE_IN_OWNED_SCOPE in development builds and halts the reactive system; production builds let it through. Solid 1.x allowed these writes.",
+      "why": "Solid 2.0.3 treats a component body, a createMemo compute function and a createRoot callback as owned scopes. A write to a signal or store there throws REACTIVE_WRITE_IN_OWNED_SCOPE in development builds and halts the reactive system; production builds let it through. Solid 1.x allowed these writes.",
       "guidance": "If the write sets a starting value, pass it to createSignal or createStore instead. If it derives state from props or other state, use createMemo, or createSignal(fn) when the derived value must stay writable. If it reacts to a change, move it into an event handler or the apply callback of a split createEffect. Keep the ownedWrite option for an internal signal that has to be written while rendering.",
-      "guide": "https://github.com/solidjs/solid/blob/82f71fddb1340cab46167db119da5702038e65ab/documentation/solid-2.0/MIGRATION.md#write-inside-reactive-scope-owned-scope",
+      "guide": "https://github.com/solidjs/solid/blob/68406c2077eff22c67f71db4a16bf7026ddceee1/documentation/solid-2.0/MIGRATION.md#write-inside-reactive-scope-owned-scope",
       "lint": []
     },
     {
@@ -31,9 +31,9 @@
       "column": 3,
       "severity": "behavior",
       "headline": "Move this setState call out of the List component body; Solid 2 throws on writes there in dev.",
-      "why": "Solid 2.0.1 treats a component body, a createMemo compute function and a createRoot callback as owned scopes. A write to a signal or store there throws REACTIVE_WRITE_IN_OWNED_SCOPE in development builds and halts the reactive system; production builds let it through. Solid 1.x allowed these writes.",
+      "why": "Solid 2.0.3 treats a component body, a createMemo compute function and a createRoot callback as owned scopes. A write to a signal or store there throws REACTIVE_WRITE_IN_OWNED_SCOPE in development builds and halts the reactive system; production builds let it through. Solid 1.x allowed these writes.",
       "guidance": "If the write sets a starting value, pass it to createSignal or createStore instead. If it derives state from props or other state, use createMemo, or createSignal(fn) when the derived value must stay writable. If it reacts to a change, move it into an event handler or the apply callback of a split createEffect. Keep the ownedWrite option for an internal signal that has to be written while rendering.",
-      "guide": "https://github.com/solidjs/solid/blob/82f71fddb1340cab46167db119da5702038e65ab/documentation/solid-2.0/MIGRATION.md#write-inside-reactive-scope-owned-scope",
+      "guide": "https://github.com/solidjs/solid/blob/68406c2077eff22c67f71db4a16bf7026ddceee1/documentation/solid-2.0/MIGRATION.md#write-inside-reactive-scope-owned-scope",
       "lint": []
     },
     {
@@ -43,9 +43,9 @@
       "column": 5,
       "severity": "behavior",
       "headline": "Move this setTheme call out of this createMemo callback; Solid 2 throws on writes there in dev.",
-      "why": "Solid 2.0.1 treats a component body, a createMemo compute function and a createRoot callback as owned scopes. A write to a signal or store there throws REACTIVE_WRITE_IN_OWNED_SCOPE in development builds and halts the reactive system; production builds let it through. Solid 1.x allowed these writes.",
+      "why": "Solid 2.0.3 treats a component body, a createMemo compute function and a createRoot callback as owned scopes. A write to a signal or store there throws REACTIVE_WRITE_IN_OWNED_SCOPE in development builds and halts the reactive system; production builds let it through. Solid 1.x allowed these writes.",
       "guidance": "Derive the value setTheme writes with its own createMemo instead of writing it from this one, or move the write into the apply callback of a split createEffect: createEffect(() => source(), (value) => setTheme(...)). Keep the ownedWrite option for an internal signal that has to be written while computing.",
-      "guide": "https://github.com/solidjs/solid/blob/82f71fddb1340cab46167db119da5702038e65ab/documentation/solid-2.0/MIGRATION.md#write-inside-reactive-scope-owned-scope",
+      "guide": "https://github.com/solidjs/solid/blob/68406c2077eff22c67f71db4a16bf7026ddceee1/documentation/solid-2.0/MIGRATION.md#write-inside-reactive-scope-owned-scope",
       "lint": []
     },
     {
@@ -55,9 +55,9 @@
       "column": 3,
       "severity": "behavior",
       "headline": "Move this setValue call out of this createRoot callback; Solid 2 throws on writes there in dev.",
-      "why": "Solid 2.0.1 treats a component body, a createMemo compute function and a createRoot callback as owned scopes. A write to a signal or store there throws REACTIVE_WRITE_IN_OWNED_SCOPE in development builds and halts the reactive system; production builds let it through. Solid 1.x allowed these writes.",
+      "why": "Solid 2.0.3 treats a component body, a createMemo compute function and a createRoot callback as owned scopes. A write to a signal or store there throws REACTIVE_WRITE_IN_OWNED_SCOPE in development builds and halts the reactive system; production builds let it through. Solid 1.x allowed these writes.",
       "guidance": "If the write sets a starting value, pass it to createSignal or createStore instead. If it derives state from props or other state, use createMemo, or createSignal(fn) when the derived value must stay writable. If it reacts to a change, move it into an event handler or the apply callback of a split createEffect. Keep the ownedWrite option for an internal signal that has to be written while rendering.",
-      "guide": "https://github.com/solidjs/solid/blob/82f71fddb1340cab46167db119da5702038e65ab/documentation/solid-2.0/MIGRATION.md#write-inside-reactive-scope-owned-scope",
+      "guide": "https://github.com/solidjs/solid/blob/68406c2077eff22c67f71db4a16bf7026ddceee1/documentation/solid-2.0/MIGRATION.md#write-inside-reactive-scope-owned-scope",
       "lint": []
     }
   ]

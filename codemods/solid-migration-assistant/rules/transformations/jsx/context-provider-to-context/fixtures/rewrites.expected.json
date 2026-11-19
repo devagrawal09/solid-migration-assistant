@@ -6,7 +6,7 @@
       "line": 11,
       "column": 5,
       "message": "Rewrite <ThemeContext.Provider> to <ThemeContext>, keeping its value attribute and children unchanged.",
-      "guide": "https://github.com/solidjs/solid/blob/82f71fddb1340cab46167db119da5702038e65ab/documentation/solid-2.0/MIGRATION.md#context-providers-contextprovider--context-is-the-provider"
+      "guide": "https://github.com/solidjs/solid/blob/68406c2077eff22c67f71db4a16bf7026ddceee1/documentation/solid-2.0/MIGRATION.md#context-providers-contextprovider--context-is-the-provider"
     },
     {
       "rule": "jsx/context-provider-to-context",
@@ -14,7 +14,7 @@
       "line": 12,
       "column": 7,
       "message": "Rewrite <UserContext.Provider> to <UserContext>, keeping its value attribute and children unchanged.",
-      "guide": "https://github.com/solidjs/solid/blob/82f71fddb1340cab46167db119da5702038e65ab/documentation/solid-2.0/MIGRATION.md#context-providers-contextprovider--context-is-the-provider"
+      "guide": "https://github.com/solidjs/solid/blob/68406c2077eff22c67f71db4a16bf7026ddceee1/documentation/solid-2.0/MIGRATION.md#context-providers-contextprovider--context-is-the-provider"
     },
     {
       "rule": "jsx/context-provider-to-context",
@@ -22,7 +22,7 @@
       "line": 13,
       "column": 9,
       "message": "Rewrite <CounterContext.Provider> to <CounterContext>, keeping its value attribute and children unchanged.",
-      "guide": "https://github.com/solidjs/solid/blob/82f71fddb1340cab46167db119da5702038e65ab/documentation/solid-2.0/MIGRATION.md#context-providers-contextprovider--context-is-the-provider"
+      "guide": "https://github.com/solidjs/solid/blob/68406c2077eff22c67f71db4a16bf7026ddceee1/documentation/solid-2.0/MIGRATION.md#context-providers-contextprovider--context-is-the-provider"
     },
     {
       "rule": "jsx/context-provider-to-context",
@@ -30,7 +30,7 @@
       "line": 27,
       "column": 10,
       "message": "Rewrite <ThemeContext.Provider> to <ThemeContext>, keeping its value attribute and children unchanged.",
-      "guide": "https://github.com/solidjs/solid/blob/82f71fddb1340cab46167db119da5702038e65ab/documentation/solid-2.0/MIGRATION.md#context-providers-contextprovider--context-is-the-provider"
+      "guide": "https://github.com/solidjs/solid/blob/68406c2077eff22c67f71db4a16bf7026ddceee1/documentation/solid-2.0/MIGRATION.md#context-providers-contextprovider--context-is-the-provider"
     },
     {
       "rule": "jsx/context-provider-to-context",
@@ -38,7 +38,7 @@
       "line": 30,
       "column": 28,
       "message": "Rewrite <ThemeContext.Provider> to <ThemeContext>, keeping its value attribute and children unchanged.",
-      "guide": "https://github.com/solidjs/solid/blob/82f71fddb1340cab46167db119da5702038e65ab/documentation/solid-2.0/MIGRATION.md#context-providers-contextprovider--context-is-the-provider"
+      "guide": "https://github.com/solidjs/solid/blob/68406c2077eff22c67f71db4a16bf7026ddceee1/documentation/solid-2.0/MIGRATION.md#context-providers-contextprovider--context-is-the-provider"
     }
   ]
 }

@@ -5,10 +5,10 @@
  * TypeScript module), and the architecture test proves the copies agree. Bump
  * both with `node tools/bump-target.mjs <version> <commit>`.
  */
-export const SOLID_TARGET_VERSION = "2.0.1";
+export const SOLID_TARGET_VERSION = "2.0.3";
 
 export const SOLID_SOURCE_COMMIT =
-  "82f71fddb1340cab46167db119da5702038e65ab";
+  "68406c2077eff22c67f71db4a16bf7026ddceee1";
 
 export const MIGRATION_GUIDE_URL = `https://github.com/solidjs/solid/blob/${SOLID_SOURCE_COMMIT}/documentation/solid-2.0/MIGRATION.md`;
 
