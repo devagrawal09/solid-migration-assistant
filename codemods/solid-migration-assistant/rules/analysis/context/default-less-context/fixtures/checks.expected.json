@@ -7,9 +7,9 @@
       "column": 15,
       "severity": "deprecated",
       "headline": "Drop the undefined check on line 11; useContext(TodosContext) now throws without a Provider.",
-      "why": "TodosContext is created without a default. Solid 1.x returned undefined from useContext outside a Provider; Solid 2.0.0 types the result as the context's type and throws ContextNotFoundError instead.",
+      "why": "TodosContext is created without a default. Solid 1.x returned undefined from useContext outside a Provider; Solid 2.0.1 types the result as the context's type and throws ContextNotFoundError instead.",
       "guidance": "Delete the check and return the useContext result directly; the hook only existed to narrow the type. If many callers use the hook, keeping it as a one-line alias is fine.",
-      "guide": "https://github.com/solidjs/solid/blob/a8186e6738b3a6a3341c561f66e9325432d6759b/documentation/solid-2.0/MIGRATION.md#usecontext-on-a-default-less-context-returns-t-not-t--undefined",
+      "guide": "https://github.com/solidjs/solid/blob/82f71fddb1340cab46167db119da5702038e65ab/documentation/solid-2.0/MIGRATION.md#usecontext-on-a-default-less-context-returns-t-not-t--undefined",
       "lint": []
     },
     {
@@ -19,9 +19,9 @@
       "column": 15,
       "severity": "behavior",
       "headline": "The undefined fallback on line 17 never runs; useContext(TodosContext) now throws without a Provider.",
-      "why": "TodosContext is created without a default. Solid 1.x returned undefined from useContext outside a Provider; Solid 2.0.0 types the result as the context's type and throws ContextNotFoundError instead.",
+      "why": "TodosContext is created without a default. Solid 1.x returned undefined from useContext outside a Provider; Solid 2.0.1 types the result as the context's type and throws ContextNotFoundError instead.",
       "guidance": "If code here must work outside a Provider, give the context an explicit empty value, createContext<T | null>(null), and check for null. undefined is never a context value in Solid 2, so createContext<T | undefined>(undefined) still throws. Otherwise remove the fallback.",
-      "guide": "https://github.com/solidjs/solid/blob/a8186e6738b3a6a3341c561f66e9325432d6759b/documentation/solid-2.0/MIGRATION.md#usecontext-on-a-default-less-context-returns-t-not-t--undefined",
+      "guide": "https://github.com/solidjs/solid/blob/82f71fddb1340cab46167db119da5702038e65ab/documentation/solid-2.0/MIGRATION.md#usecontext-on-a-default-less-context-returns-t-not-t--undefined",
       "lint": []
     },
     {
@@ -31,9 +31,9 @@
       "column": 10,
       "severity": "behavior",
       "headline": "The undefined fallback on line 21 never runs; useContext(ExplicitUndefined) now throws without a Provider.",
-      "why": "ExplicitUndefined is created without a default. Solid 1.x returned undefined from useContext outside a Provider; Solid 2.0.0 types the result as the context's type and throws ContextNotFoundError instead.",
+      "why": "ExplicitUndefined is created without a default. Solid 1.x returned undefined from useContext outside a Provider; Solid 2.0.1 types the result as the context's type and throws ContextNotFoundError instead.",
       "guidance": "If code here must work outside a Provider, give the context an explicit empty value, createContext<T | null>(null), and check for null. undefined is never a context value in Solid 2, so createContext<T | undefined>(undefined) still throws. Otherwise remove the fallback.",
-      "guide": "https://github.com/solidjs/solid/blob/a8186e6738b3a6a3341c561f66e9325432d6759b/documentation/solid-2.0/MIGRATION.md#usecontext-on-a-default-less-context-returns-t-not-t--undefined",
+      "guide": "https://github.com/solidjs/solid/blob/82f71fddb1340cab46167db119da5702038e65ab/documentation/solid-2.0/MIGRATION.md#usecontext-on-a-default-less-context-returns-t-not-t--undefined",
       "lint": []
     }
   ]

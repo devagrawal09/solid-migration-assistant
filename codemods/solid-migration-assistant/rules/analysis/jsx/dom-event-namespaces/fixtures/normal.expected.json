@@ -7,9 +7,9 @@
       "column": 15,
       "severity": "build",
       "headline": "Migrate this on:event namespace attribute to Solid 2 event handling.",
-      "why": "Solid 2.0.0 removes the on: and oncapture: event namespaces (the compiler rejects them on native elements, and through a spread they become plain attributes); use camelCase event handler attributes or ref callbacks for native listener options.",
+      "why": "Solid 2.0.1 removes the on: and oncapture: event namespaces (the compiler rejects them on native elements, and through a spread they become plain attributes); use camelCase event handler attributes or ref callbacks for native listener options.",
       "guidance": "Replace on:click with the appropriate camelCase event handler attribute (onClick, onInput, etc.). Solid 2 events are camelCase only (onClick, never onclick, which is now a plain attribute); for capture-phase listeners, custom event names, or native options like passive/once, use a ref callback that calls addEventListener directly.",
-      "guide": "https://github.com/solidjs/solid/blob/a8186e6738b3a6a3341c561f66e9325432d6759b/documentation/solid-2.0/MIGRATION.md#attributes--events-closer-to-html-and-fewer-namespaces",
+      "guide": "https://github.com/solidjs/solid/blob/82f71fddb1340cab46167db119da5702038e65ab/documentation/solid-2.0/MIGRATION.md#attributes--events-closer-to-html-and-fewer-namespaces",
       "lint": []
     },
     {
@@ -19,9 +19,9 @@
       "column": 38,
       "severity": "build",
       "headline": "Migrate this on:event namespace attribute to Solid 2 event handling.",
-      "why": "Solid 2.0.0 removes the on: and oncapture: event namespaces (the compiler rejects them on native elements, and through a spread they become plain attributes); use camelCase event handler attributes or ref callbacks for native listener options.",
+      "why": "Solid 2.0.1 removes the on: and oncapture: event namespaces (the compiler rejects them on native elements, and through a spread they become plain attributes); use camelCase event handler attributes or ref callbacks for native listener options.",
       "guidance": "Replace on:keydown with the appropriate camelCase event handler attribute (onClick, onInput, etc.). Solid 2 events are camelCase only (onClick, never onclick, which is now a plain attribute); for capture-phase listeners, custom event names, or native options like passive/once, use a ref callback that calls addEventListener directly.",
-      "guide": "https://github.com/solidjs/solid/blob/a8186e6738b3a6a3341c561f66e9325432d6759b/documentation/solid-2.0/MIGRATION.md#attributes--events-closer-to-html-and-fewer-namespaces",
+      "guide": "https://github.com/solidjs/solid/blob/82f71fddb1340cab46167db119da5702038e65ab/documentation/solid-2.0/MIGRATION.md#attributes--events-closer-to-html-and-fewer-namespaces",
       "lint": []
     },
     {
@@ -31,9 +31,9 @@
       "column": 12,
       "severity": "build",
       "headline": "Migrate this oncapture:event namespace attribute to Solid 2 event handling.",
-      "why": "Solid 2.0.0 removes the on: and oncapture: event namespaces (the compiler rejects them on native elements, and through a spread they become plain attributes); use camelCase event handler attributes or ref callbacks for native listener options.",
+      "why": "Solid 2.0.1 removes the on: and oncapture: event namespaces (the compiler rejects them on native elements, and through a spread they become plain attributes); use camelCase event handler attributes or ref callbacks for native listener options.",
       "guidance": "Replace oncapture:scroll with a ref callback with { capture: true } on the native addEventListener. Solid 2 events are camelCase only (onClick, never onclick, which is now a plain attribute); for capture-phase listeners, custom event names, or native options like passive/once, use a ref callback that calls addEventListener directly.",
-      "guide": "https://github.com/solidjs/solid/blob/a8186e6738b3a6a3341c561f66e9325432d6759b/documentation/solid-2.0/MIGRATION.md#attributes--events-closer-to-html-and-fewer-namespaces",
+      "guide": "https://github.com/solidjs/solid/blob/82f71fddb1340cab46167db119da5702038e65ab/documentation/solid-2.0/MIGRATION.md#attributes--events-closer-to-html-and-fewer-namespaces",
       "lint": []
     },
     {
@@ -43,9 +43,9 @@
       "column": 44,
       "severity": "build",
       "headline": "Migrate this oncapture:event namespace attribute to Solid 2 event handling.",
-      "why": "Solid 2.0.0 removes the on: and oncapture: event namespaces (the compiler rejects them on native elements, and through a spread they become plain attributes); use camelCase event handler attributes or ref callbacks for native listener options.",
+      "why": "Solid 2.0.1 removes the on: and oncapture: event namespaces (the compiler rejects them on native elements, and through a spread they become plain attributes); use camelCase event handler attributes or ref callbacks for native listener options.",
       "guidance": "Replace oncapture:pointerdown with a ref callback with { capture: true } on the native addEventListener. Solid 2 events are camelCase only (onClick, never onclick, which is now a plain attribute); for capture-phase listeners, custom event names, or native options like passive/once, use a ref callback that calls addEventListener directly.",
-      "guide": "https://github.com/solidjs/solid/blob/a8186e6738b3a6a3341c561f66e9325432d6759b/documentation/solid-2.0/MIGRATION.md#attributes--events-closer-to-html-and-fewer-namespaces",
+      "guide": "https://github.com/solidjs/solid/blob/82f71fddb1340cab46167db119da5702038e65ab/documentation/solid-2.0/MIGRATION.md#attributes--events-closer-to-html-and-fewer-namespaces",
       "lint": []
     },
     {
@@ -55,9 +55,9 @@
       "column": 14,
       "severity": "build",
       "headline": "Migrate this on:event namespace attribute to Solid 2 event handling.",
-      "why": "Solid 2.0.0 removes the on: and oncapture: event namespaces (the compiler rejects them on native elements, and through a spread they become plain attributes); use camelCase event handler attributes or ref callbacks for native listener options.",
+      "why": "Solid 2.0.1 removes the on: and oncapture: event namespaces (the compiler rejects them on native elements, and through a spread they become plain attributes); use camelCase event handler attributes or ref callbacks for native listener options.",
       "guidance": "Replace on:input with the appropriate camelCase event handler attribute (onClick, onInput, etc.). Solid 2 events are camelCase only (onClick, never onclick, which is now a plain attribute); for capture-phase listeners, custom event names, or native options like passive/once, use a ref callback that calls addEventListener directly.",
-      "guide": "https://github.com/solidjs/solid/blob/a8186e6738b3a6a3341c561f66e9325432d6759b/documentation/solid-2.0/MIGRATION.md#attributes--events-closer-to-html-and-fewer-namespaces",
+      "guide": "https://github.com/solidjs/solid/blob/82f71fddb1340cab46167db119da5702038e65ab/documentation/solid-2.0/MIGRATION.md#attributes--events-closer-to-html-and-fewer-namespaces",
       "lint": []
     }
   ]

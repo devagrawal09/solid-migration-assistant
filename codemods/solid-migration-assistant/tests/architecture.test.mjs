@@ -246,14 +246,14 @@ test("cites one pinned upstream Solid commit everywhere", () => {
 
 test("a target bump moves Solid's version and leaves other packages at the same number alone", () => {
   const before = [
-    '"codemod": "2.0.0-alpha.3", "solid-js": "^2.0.0", "@solidjs/router": "^2.0.0"',
-    "Move solid-js from ^1.9.3 to ^2.0.0. Solid 2.0.0's setter; @solidjs/web@2.0.0 and @solidjs/router@2.0.0.",
-    'export const SOLID_VERSION = "2.0.0";',
+    '"codemod": "2.0.0-alpha.4", "solid-js": "^2.0.1", "@solidjs/router": "^2.0.0"',
+    "Move solid-js from ^1.9.3 to ^2.0.1. Solid 2.0.1's setter; @solidjs/web@2.0.1 and @solidjs/router@2.0.0.",
+    'export const SOLID_VERSION = "2.0.1";',
   ].join("\n");
   assert.equal(
     replaceTargetVersion(before, "2.0.0", "2.0.1"),
     [
-      '"codemod": "2.0.0-alpha.3", "solid-js": "^2.0.1", "@solidjs/router": "^2.0.0"',
+      '"codemod": "2.0.0-alpha.4", "solid-js": "^2.0.1", "@solidjs/router": "^2.0.0"',
       "Move solid-js from ^1.9.3 to ^2.0.1. Solid 2.0.1's setter; @solidjs/web@2.0.1 and @solidjs/router@2.0.0.",
       'export const SOLID_VERSION = "2.0.1";',
     ].join("\n"),

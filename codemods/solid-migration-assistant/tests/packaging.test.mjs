@@ -68,7 +68,7 @@ test("publishes complete public npm and Codemod metadata", () => {
   assert.equal(packageJson.description, expectedDescription);
   assert.deepEqual(packageJson.keywords, expectedKeywords);
   assert.equal(packageJson.license, "MIT");
-  assert.equal(packageJson.dependencies.codemod, "2.0.0-alpha.3");
+  assert.equal(packageJson.dependencies.codemod, "2.0.0-alpha.4");
   assert.equal(packageJson.engines.node, ">=20.0.0");
   assert.equal(packageJson.publishConfig.access, "public");
   assert.equal(packageJson.os, undefined);
@@ -113,7 +113,7 @@ test("publishes complete public npm and Codemod metadata", () => {
     );
     assert.match(
       contents,
-      /Actual execution support depends on native runtime availability from the pinned Codemod 2\.0\.0-alpha\.3 dependency/,
+      /Actual execution support depends on native runtime availability from the pinned Codemod 2\.0\.0-alpha\.4 dependency/,
     );
     assert.match(
       contents,
@@ -225,7 +225,7 @@ test(
         assert.match(smoke.stdout, /Move this Solid web renderer/);
         assert.match(
           smoke.stdout,
-          /github\.com\/solidjs\/solid\/blob\/a8186e67.*imports-where-things-live-now/,
+          /github\.com\/solidjs\/solid\/blob\/82f71fdd.*imports-where-things-live-now/,
         );
         assert.doesNotMatch(smoke.stdout, /S2-IMPORT-WEB-001/);
         assertFinalDisclosure(smoke.stderr);

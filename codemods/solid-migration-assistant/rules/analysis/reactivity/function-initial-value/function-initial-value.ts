@@ -11,7 +11,7 @@ const FUNCTION_KINDS = new Set(["arrow_function", "function_expression", "functi
 /**
  * Reports `createSignal(fn)` and `createStore(fn)` where `fn` is a function
  * literal or a name this file binds once to a function. Solid 1.x stored the
- * function as the initial value; Solid 2.0.0 calls it as a derived
+ * function as the initial value; Solid 2.0.1 calls it as a derived
  * computation. Checked on the 2.0.0 browser build: with
  * `const handler = () => "handler"`, `createSignal(handler)` reads back the
  * string "handler", and `createSignal(() => handler)` reads back the function.

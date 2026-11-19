@@ -6,7 +6,7 @@
       "line": 8,
       "column": 11,
       "message": "Rename noValidate on <form> to novalidate, the attribute Solid 1 set for it.",
-      "guide": "https://github.com/solidjs/solid/blob/a8186e6738b3a6a3341c561f66e9325432d6759b/documentation/solid-2.0/MIGRATION.md#attributes--events-closer-to-html-and-fewer-namespaces"
+      "guide": "https://github.com/solidjs/solid/blob/82f71fddb1340cab46167db119da5702038e65ab/documentation/solid-2.0/MIGRATION.md#attributes--events-closer-to-html-and-fewer-namespaces"
     },
     {
       "rule": "jsx/attribute-names",
@@ -14,7 +14,7 @@
       "line": 8,
       "column": 22,
       "message": "Rename encType on <form> to enctype, the attribute Solid 1 set for it.",
-      "guide": "https://github.com/solidjs/solid/blob/a8186e6738b3a6a3341c561f66e9325432d6759b/documentation/solid-2.0/MIGRATION.md#attributes--events-closer-to-html-and-fewer-namespaces"
+      "guide": "https://github.com/solidjs/solid/blob/82f71fddb1340cab46167db119da5702038e65ab/documentation/solid-2.0/MIGRATION.md#attributes--events-closer-to-html-and-fewer-namespaces"
     },
     {
       "rule": "jsx/attribute-names",
@@ -22,7 +22,7 @@
       "line": 9,
       "column": 14,
       "message": "Rename htmlFor on <label> to for, the attribute Solid 1 set for it.",
-      "guide": "https://github.com/solidjs/solid/blob/a8186e6738b3a6a3341c561f66e9325432d6759b/documentation/solid-2.0/MIGRATION.md#attributes--events-closer-to-html-and-fewer-namespaces"
+      "guide": "https://github.com/solidjs/solid/blob/82f71fddb1340cab46167db119da5702038e65ab/documentation/solid-2.0/MIGRATION.md#attributes--events-closer-to-html-and-fewer-namespaces"
     },
     {
       "rule": "jsx/attribute-names",
@@ -30,7 +30,7 @@
       "line": 9,
       "column": 33,
       "message": "Rename className on <label> to class, the attribute Solid 1 set for it.",
-      "guide": "https://github.com/solidjs/solid/blob/a8186e6738b3a6a3341c561f66e9325432d6759b/documentation/solid-2.0/MIGRATION.md#attributes--events-closer-to-html-and-fewer-namespaces"
+      "guide": "https://github.com/solidjs/solid/blob/82f71fddb1340cab46167db119da5702038e65ab/documentation/solid-2.0/MIGRATION.md#attributes--events-closer-to-html-and-fewer-namespaces"
     },
     {
       "rule": "jsx/attribute-names",
@@ -38,7 +38,7 @@
       "line": 10,
       "column": 28,
       "message": "Rename readOnly on <input> to readonly, the attribute Solid 1 set for it.",
-      "guide": "https://github.com/solidjs/solid/blob/a8186e6738b3a6a3341c561f66e9325432d6759b/documentation/solid-2.0/MIGRATION.md#attributes--events-closer-to-html-and-fewer-namespaces"
+      "guide": "https://github.com/solidjs/solid/blob/82f71fddb1340cab46167db119da5702038e65ab/documentation/solid-2.0/MIGRATION.md#attributes--events-closer-to-html-and-fewer-namespaces"
     },
     {
       "rule": "jsx/attribute-names",
@@ -46,7 +46,7 @@
       "line": 10,
       "column": 49,
       "message": "Rename maxLength on <input> to maxlength, the attribute Solid 1 set for it.",
-      "guide": "https://github.com/solidjs/solid/blob/a8186e6738b3a6a3341c561f66e9325432d6759b/documentation/solid-2.0/MIGRATION.md#attributes--events-closer-to-html-and-fewer-namespaces"
+      "guide": "https://github.com/solidjs/solid/blob/82f71fddb1340cab46167db119da5702038e65ab/documentation/solid-2.0/MIGRATION.md#attributes--events-closer-to-html-and-fewer-namespaces"
     },
     {
       "rule": "jsx/attribute-names",
@@ -54,7 +54,7 @@
       "line": 10,
       "column": 72,
       "message": "Rename autoComplete on <input> to autocomplete, the attribute Solid 1 set for it.",
-      "guide": "https://github.com/solidjs/solid/blob/a8186e6738b3a6a3341c561f66e9325432d6759b/documentation/solid-2.0/MIGRATION.md#attributes--events-closer-to-html-and-fewer-namespaces"
+      "guide": "https://github.com/solidjs/solid/blob/82f71fddb1340cab46167db119da5702038e65ab/documentation/solid-2.0/MIGRATION.md#attributes--events-closer-to-html-and-fewer-namespaces"
     },
     {
       "rule": "jsx/attribute-names",
@@ -62,7 +62,7 @@
       "line": 10,
       "column": 91,
       "message": "Rename tabIndex on <input> to tabindex, the attribute Solid 1 set for it.",
-      "guide": "https://github.com/solidjs/solid/blob/a8186e6738b3a6a3341c561f66e9325432d6759b/documentation/solid-2.0/MIGRATION.md#attributes--events-closer-to-html-and-fewer-namespaces"
+      "guide": "https://github.com/solidjs/solid/blob/82f71fddb1340cab46167db119da5702038e65ab/documentation/solid-2.0/MIGRATION.md#attributes--events-closer-to-html-and-fewer-namespaces"
     },
     {
       "rule": "jsx/attribute-names",
@@ -70,7 +70,7 @@
       "line": 11,
       "column": 12,
       "message": "Rename contentEditable on <div> to contenteditable, the attribute Solid 1 set for it.",
-      "guide": "https://github.com/solidjs/solid/blob/a8186e6738b3a6a3341c561f66e9325432d6759b/documentation/solid-2.0/MIGRATION.md#attributes--events-closer-to-html-and-fewer-namespaces"
+      "guide": "https://github.com/solidjs/solid/blob/82f71fddb1340cab46167db119da5702038e65ab/documentation/solid-2.0/MIGRATION.md#attributes--events-closer-to-html-and-fewer-namespaces"
     },
     {
       "rule": "jsx/attribute-names",
@@ -78,7 +78,7 @@
       "line": 11,
       "column": 35,
       "message": "Rename spellCheck on <div> to spellcheck, the attribute Solid 1 set for it.",
-      "guide": "https://github.com/solidjs/solid/blob/a8186e6738b3a6a3341c561f66e9325432d6759b/documentation/solid-2.0/MIGRATION.md#attributes--events-closer-to-html-and-fewer-namespaces"
+      "guide": "https://github.com/solidjs/solid/blob/82f71fddb1340cab46167db119da5702038e65ab/documentation/solid-2.0/MIGRATION.md#attributes--events-closer-to-html-and-fewer-namespaces"
     },
     {
       "rule": "jsx/attribute-names",
@@ -86,7 +86,7 @@
       "line": 12,
       "column": 12,
       "message": "Rename srcSet on <img> to srcset, the attribute Solid 1 set for it.",
-      "guide": "https://github.com/solidjs/solid/blob/a8186e6738b3a6a3341c561f66e9325432d6759b/documentation/solid-2.0/MIGRATION.md#attributes--events-closer-to-html-and-fewer-namespaces"
+      "guide": "https://github.com/solidjs/solid/blob/82f71fddb1340cab46167db119da5702038e65ab/documentation/solid-2.0/MIGRATION.md#attributes--events-closer-to-html-and-fewer-namespaces"
     },
     {
       "rule": "jsx/attribute-names",
@@ -94,7 +94,7 @@
       "line": 12,
       "column": 30,
       "message": "Rename crossOrigin on <img> to crossorigin, the attribute Solid 1 set for it.",
-      "guide": "https://github.com/solidjs/solid/blob/a8186e6738b3a6a3341c561f66e9325432d6759b/documentation/solid-2.0/MIGRATION.md#attributes--events-closer-to-html-and-fewer-namespaces"
+      "guide": "https://github.com/solidjs/solid/blob/82f71fddb1340cab46167db119da5702038e65ab/documentation/solid-2.0/MIGRATION.md#attributes--events-closer-to-html-and-fewer-namespaces"
     },
     {
       "rule": "jsx/attribute-names",
@@ -102,7 +102,7 @@
       "line": 12,
       "column": 54,
       "message": "Rename referrerPolicy on <img> to referrerpolicy, the attribute Solid 1 set for it.",
-      "guide": "https://github.com/solidjs/solid/blob/a8186e6738b3a6a3341c561f66e9325432d6759b/documentation/solid-2.0/MIGRATION.md#attributes--events-closer-to-html-and-fewer-namespaces"
+      "guide": "https://github.com/solidjs/solid/blob/82f71fddb1340cab46167db119da5702038e65ab/documentation/solid-2.0/MIGRATION.md#attributes--events-closer-to-html-and-fewer-namespaces"
     }
   ]
 }

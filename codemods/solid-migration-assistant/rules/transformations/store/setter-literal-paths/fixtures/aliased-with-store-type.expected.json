@@ -6,7 +6,7 @@
       "line": 2,
       "column": 54,
       "message": "Relocate solid-js/store to solid-js for createStore: every setter call in this file is now a draft write.",
-      "guide": "https://github.com/solidjs/solid/blob/a8186e6738b3a6a3341c561f66e9325432d6759b/documentation/solid-2.0/MIGRATION.md#draft-first-setters"
+      "guide": "https://github.com/solidjs/solid/blob/82f71fddb1340cab46167db119da5702038e65ab/documentation/solid-2.0/MIGRATION.md#draft-first-setters"
     },
     {
       "rule": "store/setter-literal-paths",
@@ -14,7 +14,7 @@
       "line": 5,
       "column": 1,
       "message": "Rewrite this path-style store setter call with a literal value as a draft write.",
-      "guide": "https://github.com/solidjs/solid/blob/a8186e6738b3a6a3341c561f66e9325432d6759b/documentation/solid-2.0/MIGRATION.md#draft-first-setters"
+      "guide": "https://github.com/solidjs/solid/blob/82f71fddb1340cab46167db119da5702038e65ab/documentation/solid-2.0/MIGRATION.md#draft-first-setters"
     }
   ]
 }

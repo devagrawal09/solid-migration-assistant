@@ -1,9 +1,10 @@
 // After migrate rewrites a project: installs its dependencies with its own
 // package manager, then typechecks it with its own TypeScript. Run from the
-// target directory; `node after-migrate.mjs install <state key>`.
-// The result goes to the workflow state under the key, as one JSON line.
+// target directory; `node after-migrate.mjs install`. The result is one JSON
+// line on stdout, which the workflow reads from the step's output; progress
+// goes to stderr.
 import { spawnSync } from "node:child_process";
-import { appendFileSync, existsSync, readFileSync } from "node:fs";
+import { existsSync, readFileSync } from "node:fs";
 import { dirname, join, relative, resolve } from "node:path";
 import { pathToFileURL } from "node:url";
 
@@ -150,11 +151,10 @@ function readJson(path) {
 }
 
 if (process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href) {
-  const key = process.argv[3];
   const target = process.cwd();
   const installed = install(target);
   // After a failed install, node_modules still holds Solid 1's types, so a
   // typecheck would report against the wrong version.
   const result = { install: installed, typecheck: installed.ok ? typecheck(target) : [] };
-  appendFileSync(process.env.STATE_OUTPUTS, `${key}=${JSON.stringify(result)}\n`);
+  console.log(JSON.stringify(result));
 }

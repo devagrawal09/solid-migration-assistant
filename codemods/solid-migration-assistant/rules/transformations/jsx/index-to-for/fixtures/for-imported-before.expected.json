@@ -6,7 +6,7 @@
       "line": 2,
       "column": 15,
       "message": "Remove the Index import from solid-js; For is already imported.",
-      "guide": "https://github.com/solidjs/solid/blob/a8186e6738b3a6a3341c561f66e9325432d6759b/documentation/solid-2.0/MIGRATION.md#list-rendering-index-is-gone-and-for-handles-each-keying-mode"
+      "guide": "https://github.com/solidjs/solid/blob/82f71fddb1340cab46167db119da5702038e65ab/documentation/solid-2.0/MIGRATION.md#list-rendering-index-is-gone-and-for-handles-each-keying-mode"
     },
     {
       "rule": "jsx/index-to-for",
@@ -14,7 +14,7 @@
       "line": 10,
       "column": 7,
       "message": "Rewrite <Index> to <For keyed={false}>, keeping its each, fallback, and child callback unchanged.",
-      "guide": "https://github.com/solidjs/solid/blob/a8186e6738b3a6a3341c561f66e9325432d6759b/documentation/solid-2.0/MIGRATION.md#list-rendering-index-is-gone-and-for-handles-each-keying-mode"
+      "guide": "https://github.com/solidjs/solid/blob/82f71fddb1340cab46167db119da5702038e65ab/documentation/solid-2.0/MIGRATION.md#list-rendering-index-is-gone-and-for-handles-each-keying-mode"
     }
   ]
 }

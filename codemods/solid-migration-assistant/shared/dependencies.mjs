@@ -1,6 +1,6 @@
 /**
  * What a Solid 1.x application's common dependencies become on Solid 2,
- * verified on 2026-11-17, the day solid-js 2.0.0 became npm `latest`, against
+ * verified on 2026-11-17, the day solid-js 2.0.1 became npm `latest`, against
  * published npm manifests (dist-tags and peerDependencies, and for the
  * blocked entries the imports in each tarball), never against peer ranges
  * alone: several packages declare open or wildcard Solid peers while
@@ -80,9 +80,9 @@ export const DEPENDENCY_MAP = Object.freeze([
     name: "babel-preset-solid",
     legacy: null,
     status: "replace",
-    replacement: "@solidjs/babel-plugin@2.0.0",
+    replacement: "@solidjs/babel-plugin@2.0.1",
     guidance:
-      "Replace babel-preset-solid with @solidjs/babel-plugin@2.0.0 (npm latest) in custom Babel pipelines, or rely on @solidjs/vite-plugin, which compiles JSX with @solidjs/compiler. babel-preset-solid's own next tag is a stale 2.0.0-rc.2.",
+      "Replace babel-preset-solid with @solidjs/babel-plugin@2.0.1 (npm latest) in custom Babel pipelines, or rely on @solidjs/vite-plugin, which compiles JSX with @solidjs/compiler. babel-preset-solid's own next tag is a stale 2.0.0-rc.2.",
   },
   {
     name: "@solidjs/testing-library",
@@ -144,7 +144,7 @@ export const DEPENDENCY_MAP = Object.freeze([
       "Install @tanstack/solid-router@rc (2.0.0-rc.10); npm latest 1.x still targets Solid 1. Expect npm peer warnings because it still depends on some Solid 1 helper packages.",
   },
   ...[
-    ["@kobalte/core", "its only Solid 2 build, 2.0.0-alpha.4, pins solid-js and @solidjs/web to exactly 2.0.0-rc.16 and will not install with Solid 2.0.0"],
+    ["@kobalte/core", "its only Solid 2 build, 2.0.0-alpha.4, pins solid-js and @solidjs/web to exactly 2.0.0-rc.16 and will not install with Solid 2.0.1"],
     ["@tanstack/solid-form", "its 2.0.0-alpha.3 still imports mergeProps and splitProps, which Solid 2 removes"],
     ["@tanstack/solid-virtual", "it imports solid-js/store, createComputed, and onMount, which Solid 2 removes"],
     ["@tanstack/solid-table", "its open peer range is misleading: it imports solid-js/web, batch, createComputed, and observable"],

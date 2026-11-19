@@ -12,7 +12,7 @@
       "lint": [
         "removed-api"
       ],
-      "guide": "https://github.com/solidjs/solid/blob/a8186e6738b3a6a3341c561f66e9325432d6759b/documentation/solid-2.0/MIGRATION.md#effects-lifecycle-and-cleanup"
+      "guide": "https://github.com/solidjs/solid/blob/82f71fddb1340cab46167db119da5702038e65ab/documentation/solid-2.0/MIGRATION.md#effects-lifecycle-and-cleanup"
     },
     {
       "rule": "lifecycle/on-mount",
@@ -26,7 +26,7 @@
       "lint": [
         "removed-api"
       ],
-      "guide": "https://github.com/solidjs/solid/blob/a8186e6738b3a6a3341c561f66e9325432d6759b/documentation/solid-2.0/MIGRATION.md#effects-lifecycle-and-cleanup"
+      "guide": "https://github.com/solidjs/solid/blob/82f71fddb1340cab46167db119da5702038e65ab/documentation/solid-2.0/MIGRATION.md#effects-lifecycle-and-cleanup"
     },
     {
       "rule": "lifecycle/on-mount",
@@ -40,7 +40,7 @@
       "lint": [
         "removed-api"
       ],
-      "guide": "https://github.com/solidjs/solid/blob/a8186e6738b3a6a3341c561f66e9325432d6759b/documentation/solid-2.0/MIGRATION.md#effects-lifecycle-and-cleanup"
+      "guide": "https://github.com/solidjs/solid/blob/82f71fddb1340cab46167db119da5702038e65ab/documentation/solid-2.0/MIGRATION.md#effects-lifecycle-and-cleanup"
     },
     {
       "rule": "lifecycle/on-mount",
@@ -54,7 +54,7 @@
       "lint": [
         "removed-api"
       ],
-      "guide": "https://github.com/solidjs/solid/blob/a8186e6738b3a6a3341c561f66e9325432d6759b/documentation/solid-2.0/MIGRATION.md#effects-lifecycle-and-cleanup"
+      "guide": "https://github.com/solidjs/solid/blob/82f71fddb1340cab46167db119da5702038e65ab/documentation/solid-2.0/MIGRATION.md#effects-lifecycle-and-cleanup"
     },
     {
       "rule": "lifecycle/on-mount",
@@ -68,7 +68,7 @@
       "lint": [
         "removed-api"
       ],
-      "guide": "https://github.com/solidjs/solid/blob/a8186e6738b3a6a3341c561f66e9325432d6759b/documentation/solid-2.0/MIGRATION.md#effects-lifecycle-and-cleanup"
+      "guide": "https://github.com/solidjs/solid/blob/82f71fddb1340cab46167db119da5702038e65ab/documentation/solid-2.0/MIGRATION.md#effects-lifecycle-and-cleanup"
     },
     {
       "rule": "lifecycle/on-mount",
@@ -82,7 +82,7 @@
       "lint": [
         "removed-api"
       ],
-      "guide": "https://github.com/solidjs/solid/blob/a8186e6738b3a6a3341c561f66e9325432d6759b/documentation/solid-2.0/MIGRATION.md#effects-lifecycle-and-cleanup"
+      "guide": "https://github.com/solidjs/solid/blob/82f71fddb1340cab46167db119da5702038e65ab/documentation/solid-2.0/MIGRATION.md#effects-lifecycle-and-cleanup"
     },
     {
       "rule": "lifecycle/on-mount",
@@ -96,7 +96,7 @@
       "lint": [
         "removed-api"
       ],
-      "guide": "https://github.com/solidjs/solid/blob/a8186e6738b3a6a3341c561f66e9325432d6759b/documentation/solid-2.0/MIGRATION.md#effects-lifecycle-and-cleanup"
+      "guide": "https://github.com/solidjs/solid/blob/82f71fddb1340cab46167db119da5702038e65ab/documentation/solid-2.0/MIGRATION.md#effects-lifecycle-and-cleanup"
     },
     {
       "rule": "lifecycle/on-mount",
@@ -110,7 +110,7 @@
       "lint": [
         "removed-api"
       ],
-      "guide": "https://github.com/solidjs/solid/blob/a8186e6738b3a6a3341c561f66e9325432d6759b/documentation/solid-2.0/MIGRATION.md#effects-lifecycle-and-cleanup"
+      "guide": "https://github.com/solidjs/solid/blob/82f71fddb1340cab46167db119da5702038e65ab/documentation/solid-2.0/MIGRATION.md#effects-lifecycle-and-cleanup"
     },
     {
       "rule": "lifecycle/on-mount",
@@ -124,7 +124,7 @@
       "lint": [
         "removed-api"
       ],
-      "guide": "https://github.com/solidjs/solid/blob/a8186e6738b3a6a3341c561f66e9325432d6759b/documentation/solid-2.0/MIGRATION.md#effects-lifecycle-and-cleanup"
+      "guide": "https://github.com/solidjs/solid/blob/82f71fddb1340cab46167db119da5702038e65ab/documentation/solid-2.0/MIGRATION.md#effects-lifecycle-and-cleanup"
     }
   ]
 }

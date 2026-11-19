@@ -6,7 +6,7 @@
       "line": 8,
       "column": 70,
       "message": "Relocate solid-js/web to @solidjs/web for proven bindings render, Dynamic. Note: Dynamic is deprecated in Solid 2 in favor of the dynamic(source) factory; it keeps working without a runtime warning.",
-      "guide": "https://github.com/solidjs/solid/blob/a8186e6738b3a6a3341c561f66e9325432d6759b/documentation/solid-2.0/MIGRATION.md#imports-where-things-live-now"
+      "guide": "https://github.com/solidjs/solid/blob/82f71fddb1340cab46167db119da5702038e65ab/documentation/solid-2.0/MIGRATION.md#imports-where-things-live-now"
     },
     {
       "rule": "imports/web-package-relocation",
@@ -14,7 +14,7 @@
       "line": 9,
       "column": 65,
       "message": "Relocate solid-js/web to @solidjs/web for proven bindings render, isServer.",
-      "guide": "https://github.com/solidjs/solid/blob/a8186e6738b3a6a3341c561f66e9325432d6759b/documentation/solid-2.0/MIGRATION.md#imports-where-things-live-now"
+      "guide": "https://github.com/solidjs/solid/blob/82f71fddb1340cab46167db119da5702038e65ab/documentation/solid-2.0/MIGRATION.md#imports-where-things-live-now"
     },
     {
       "rule": "imports/web-package-relocation",
@@ -22,7 +22,7 @@
       "line": 10,
       "column": 67,
       "message": "Relocate solid-js/web to @solidjs/web for proven bindings hydrate, isServer.",
-      "guide": "https://github.com/solidjs/solid/blob/a8186e6738b3a6a3341c561f66e9325432d6759b/documentation/solid-2.0/MIGRATION.md#imports-where-things-live-now"
+      "guide": "https://github.com/solidjs/solid/blob/82f71fddb1340cab46167db119da5702038e65ab/documentation/solid-2.0/MIGRATION.md#imports-where-things-live-now"
     }
   ]
 }

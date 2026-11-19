@@ -7,9 +7,9 @@
       "column": 45,
       "severity": "deprecated",
       "headline": "Pick the onClick handler inside a function instead of when the element is created.",
-      "why": "This expression runs once, when the element is created, in Solid 1.x and in Solid 2.0.0 alike. If it reads a signal, store or prop, Solid 2.0.0 dev builds warn STRICT_READ_UNTRACKED, because the handler will not follow later changes.",
+      "why": "This expression runs once, when the element is created, in Solid 1.x and in Solid 2.0.1 alike. If it reads a signal, store or prop, Solid 2.0.1 dev builds warn STRICT_READ_UNTRACKED, because the handler will not follow later changes.",
       "guidance": "If the expression reads reactive state and the handler should follow it, move the read into the handler: onClick={(event) => (selected() ? save : cancel)(event)}. If it only reads constants, nothing changes and this can be left.",
-      "guide": "https://github.com/solidjs/solid/blob/a8186e6738b3a6a3341c561f66e9325432d6759b/documentation/solid-2.0/08-dev-diagnostics.md#strict_read_untracked",
+      "guide": "https://github.com/solidjs/solid/blob/82f71fddb1340cab46167db119da5702038e65ab/documentation/solid-2.0/08-dev-diagnostics.md#strict_read_untracked",
       "lint": []
     }
   ]

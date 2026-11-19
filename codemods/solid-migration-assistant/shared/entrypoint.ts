@@ -1,9 +1,7 @@
 import type { Codemod, SgNode } from "codemod:ast-grep";
 import type TSX from "codemod:ast-grep/langs/tsx";
-import { acquireLock, getState, setState } from "codemod:workflow";
-import { ANALYSIS_STATE_KEY } from "./analysis.ts";
 import type { Finding, Rewrite, RuleFinding } from "./finding.ts";
-import { TRANSFORM_REPORT_STATE_KEY, type TransformChange } from "./transform.ts";
+import type { TransformChange } from "./transform.ts";
 
 type AnalysisRule = (
   rootNode: SgNode<TSX>,
@@ -16,37 +14,30 @@ type TransformRule = (
 ) => TransformChange[];
 
 /**
- * Accumulates entries under one workflow state key, deduplicated by their
- * JSON form (an element with a closing tag reports one rewrite for two
- * edits), so the emitter sees each finding or rewrite exactly once.
+ * Drops entries whose JSON form repeats (an element with a closing tag
+ * reports one rewrite for two edits), so the report lists each once.
  */
-function accumulate<T>(key: string, entries: T[]): void {
-  const release = acquireLock(key);
-  try {
-    const accumulated = getState<T[]>(key) ?? [];
-    const seen = new Set(accumulated.map((entry) => JSON.stringify(entry)));
-    const added = entries.filter((entry) => {
-      const serialized = JSON.stringify(entry);
-      if (seen.has(serialized)) return false;
-      seen.add(serialized);
-      return true;
-    });
-    setState(key, [...accumulated, ...added]);
-  } finally {
-    release();
-  }
+function unique<T>(entries: T[]): T[] {
+  const seen = new Set<string>();
+  return entries.filter((entry) => {
+    const serialized = JSON.stringify(entry);
+    if (seen.has(serialized)) return false;
+    seen.add(serialized);
+    return true;
+  });
 }
 
+/** Rules return their findings as the file's jssg data; the workflow reads them from the step result. */
 export function createAnalysisEntrypoint(ruleId: string, rule: AnalysisRule): Codemod<TSX> {
   return async (root) => {
-    const findings: Finding[] = rule(root.root(), {
+    const findings: Finding[] = unique(rule(root.root(), {
       filename: root.relativeFilename().replaceAll("\\", "/"),
-    }).map((found) => ({ rule: ruleId, ...found }));
-    if (findings.length > 0) accumulate(ANALYSIS_STATE_KEY, findings);
-    return null;
+    }).map((found) => ({ rule: ruleId, ...found })));
+    return findings.length > 0 ? { edit: null, data: { findings } } : null;
   };
 }
 
+/** Transforms return their edit and, as data, the rewrites it made. */
 export function createTransformEntrypoint(ruleId: string, rule: TransformRule): Codemod<TSX> {
   return async (root) => {
     const rootNode = root.root();
@@ -54,8 +45,7 @@ export function createTransformEntrypoint(ruleId: string, rule: TransformRule): 
     const changes = rule(rootNode, filename);
     if (changes.length === 0) return null;
 
-    const rewrites: Rewrite[] = changes.map(({ report }) => ({ rule: ruleId, ...report }));
-    accumulate(TRANSFORM_REPORT_STATE_KEY, rewrites);
-    return rootNode.commitEdits(changes.map(({ edit }) => edit));
+    const rewrites: Rewrite[] = unique(changes.map(({ report }) => ({ rule: ruleId, ...report })));
+    return { edit: rootNode.commitEdits(changes.map(({ edit }) => edit)), data: { rewrites } };
   };
 }

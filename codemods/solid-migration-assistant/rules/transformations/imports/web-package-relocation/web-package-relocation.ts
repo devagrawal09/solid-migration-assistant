@@ -6,8 +6,8 @@ import { rewrite, type RuleRewrite } from "../../../../shared/finding.ts";
 
 /**
  * The upstream Solid commit whose worktree was read to build the allowlist
- * below: the `gitHead` published with `@solidjs/web@2.0.0` and
- * `solid-js@2.0.0` on npm, where `packages/web/package.json` is
+ * below: the `gitHead` published with `@solidjs/web@2.0.1` and
+ * `solid-js@2.0.1` on npm, where `packages/web/package.json` is
  * `@solidjs/web` `2.0.0`. The `v1.9.13` tag in the same repository and
  * the published `solid-js@1.9.13` build supply the legacy `solid-js/web` side
  * of every comparison.

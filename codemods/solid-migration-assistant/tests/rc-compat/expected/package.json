@@ -5,7 +5,7 @@
   "description": "Solid 1.9 input whose transformed form is compiled, typechecked, and server-rendered against the pinned Solid 2 RC",
   "type": "module",
   "dependencies": {
-    "solid-js": "^2.0.0",
-    "@solidjs/web": "^2.0.0"
+    "solid-js": "^2.0.1",
+    "@solidjs/web": "^2.0.1"
   }
 }

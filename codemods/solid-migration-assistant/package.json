@@ -207,10 +207,9 @@
     "test:guards": "node --test ./tests/guards.test.mjs"
   },
   "dependencies": {
-    "codemod": "2.0.0-alpha.3"
+    "codemod": "2.0.0-alpha.4"
   },
   "devDependencies": {
-    "@codemod.com/jssg-types": "1.6.2",
     "typescript": "6.0.3"
   }
 }

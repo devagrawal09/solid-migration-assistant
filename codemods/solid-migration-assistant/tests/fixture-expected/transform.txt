@@ -1,137 +1,137 @@
 [solid-migration-assistant] 66 rewrites applied. Review the diff and run the project's own checks.
 
-package.json:7:1 Move solid-js from 1.9.14 to ^2.0.0.
-  Rule: project/dependencies  Guide: https://github.com/solidjs/solid/blob/a8186e6738b3a6a3341c561f66e9325432d6759b/documentation/solid-2.0/MIGRATION.md#imports-where-things-live-now
-package.json:8:1 Add @solidjs/web ^2.0.0.
-  Rule: project/dependencies  Guide: https://github.com/solidjs/solid/blob/a8186e6738b3a6a3341c561f66e9325432d6759b/documentation/solid-2.0/MIGRATION.md#imports-where-things-live-now
+package.json:7:1 Move solid-js from 1.9.14 to ^2.0.1.
+  Rule: project/dependencies  Guide: https://github.com/solidjs/solid/blob/82f71fddb1340cab46167db119da5702038e65ab/documentation/solid-2.0/MIGRATION.md#imports-where-things-live-now
+package.json:8:1 Add @solidjs/web ^2.0.1.
+  Rule: project/dependencies  Guide: https://github.com/solidjs/solid/blob/82f71fddb1340cab46167db119da5702038e65ab/documentation/solid-2.0/MIGRATION.md#imports-where-things-live-now
 src/class-list.tsx:14:14 Rewrite the classList attribute on <section> to class, preserving its value expression.
-  Rule: jsx/class-list-to-class  Guide: https://github.com/solidjs/solid/blob/a8186e6738b3a6a3341c561f66e9325432d6759b/documentation/solid-2.0/MIGRATION.md#classlist--class-objectarray-forms
+  Rule: jsx/class-list-to-class  Guide: https://github.com/solidjs/solid/blob/82f71fddb1340cab46167db119da5702038e65ab/documentation/solid-2.0/MIGRATION.md#classlist--class-objectarray-forms
 src/class-list.tsx:15:23 Rewrite the classList attribute on <div> to class, preserving its value expression.
-  Rule: jsx/class-list-to-class  Guide: https://github.com/solidjs/solid/blob/a8186e6738b3a6a3341c561f66e9325432d6759b/documentation/solid-2.0/MIGRATION.md#classlist--class-objectarray-forms
+  Rule: jsx/class-list-to-class  Guide: https://github.com/solidjs/solid/blob/82f71fddb1340cab46167db119da5702038e65ab/documentation/solid-2.0/MIGRATION.md#classlist--class-objectarray-forms
 src/class-list.tsx:16:15 Rewrite the classList attribute on <span> to class, preserving its value expression.
-  Rule: jsx/class-list-to-class  Guide: https://github.com/solidjs/solid/blob/a8186e6738b3a6a3341c561f66e9325432d6759b/documentation/solid-2.0/MIGRATION.md#classlist--class-objectarray-forms
+  Rule: jsx/class-list-to-class  Guide: https://github.com/solidjs/solid/blob/82f71fddb1340cab46167db119da5702038e65ab/documentation/solid-2.0/MIGRATION.md#classlist--class-objectarray-forms
 src/class-list.tsx:20:12 Merge the class and classList attributes on <div> into the class array form, preserving the static string and the object literal.
-  Rule: jsx/class-list-to-class  Guide: https://github.com/solidjs/solid/blob/a8186e6738b3a6a3341c561f66e9325432d6759b/documentation/solid-2.0/MIGRATION.md#classlist--class-objectarray-forms
+  Rule: jsx/class-list-to-class  Guide: https://github.com/solidjs/solid/blob/82f71fddb1340cab46167db119da5702038e65ab/documentation/solid-2.0/MIGRATION.md#classlist--class-objectarray-forms
 src/class-list.tsx:22:12 Rename className on <div> to class, the attribute Solid 1 set for it.
-  Rule: jsx/attribute-names  Guide: https://github.com/solidjs/solid/blob/a8186e6738b3a6a3341c561f66e9325432d6759b/documentation/solid-2.0/MIGRATION.md#attributes--events-closer-to-html-and-fewer-namespaces
+  Rule: jsx/attribute-names  Guide: https://github.com/solidjs/solid/blob/82f71fddb1340cab46167db119da5702038e65ab/documentation/solid-2.0/MIGRATION.md#attributes--events-closer-to-html-and-fewer-namespaces
 src/combined.tsx:3:39 Rewrite the Index import from solid-js to For.
-  Rule: jsx/index-to-for  Guide: https://github.com/solidjs/solid/blob/a8186e6738b3a6a3341c561f66e9325432d6759b/documentation/solid-2.0/MIGRATION.md#list-rendering-index-is-gone-and-for-handles-each-keying-mode
+  Rule: jsx/index-to-for  Guide: https://github.com/solidjs/solid/blob/82f71fddb1340cab46167db119da5702038e65ab/documentation/solid-2.0/MIGRATION.md#list-rendering-index-is-gone-and-for-handles-each-keying-mode
 src/combined.tsx:4:33 Relocate solid-js/web to @solidjs/web for proven bindings Dynamic, render. Note: Dynamic is deprecated in Solid 2 in favor of the dynamic(source) factory; it keeps working without a runtime warning.
-  Rule: imports/web-package-relocation  Guide: https://github.com/solidjs/solid/blob/a8186e6738b3a6a3341c561f66e9325432d6759b/documentation/solid-2.0/MIGRATION.md#imports-where-things-live-now
+  Rule: imports/web-package-relocation  Guide: https://github.com/solidjs/solid/blob/82f71fddb1340cab46167db119da5702038e65ab/documentation/solid-2.0/MIGRATION.md#imports-where-things-live-now
 src/combined.tsx:5:32 Relocate solid-js/universal to @solidjs/universal.
-  Rule: imports/legacy-subpath-relocation  Guide: https://github.com/solidjs/solid/blob/a8186e6738b3a6a3341c561f66e9325432d6759b/documentation/solid-2.0/MIGRATION.md#imports-where-things-live-now
+  Rule: imports/legacy-subpath-relocation  Guide: https://github.com/solidjs/solid/blob/82f71fddb1340cab46167db119da5702038e65ab/documentation/solid-2.0/MIGRATION.md#imports-where-things-live-now
 src/combined.tsx:17:5 Rewrite <ThemeContext.Provider> to <ThemeContext>, keeping its value attribute and children unchanged.
-  Rule: jsx/context-provider-to-context  Guide: https://github.com/solidjs/solid/blob/a8186e6738b3a6a3341c561f66e9325432d6759b/documentation/solid-2.0/MIGRATION.md#context-providers-contextprovider--context-is-the-provider
+  Rule: jsx/context-provider-to-context  Guide: https://github.com/solidjs/solid/blob/82f71fddb1340cab46167db119da5702038e65ab/documentation/solid-2.0/MIGRATION.md#context-providers-contextprovider--context-is-the-provider
 src/combined.tsx:18:11 Rewrite the classList attribute on <ul> to class, preserving its value expression.
-  Rule: jsx/class-list-to-class  Guide: https://github.com/solidjs/solid/blob/a8186e6738b3a6a3341c561f66e9325432d6759b/documentation/solid-2.0/MIGRATION.md#classlist--class-objectarray-forms
+  Rule: jsx/class-list-to-class  Guide: https://github.com/solidjs/solid/blob/82f71fddb1340cab46167db119da5702038e65ab/documentation/solid-2.0/MIGRATION.md#classlist--class-objectarray-forms
 src/combined.tsx:18:46 Rewrite the onclick event handler attribute on <ul> to onClick, preserving its value expression.
-  Rule: jsx/lowercase-event-handlers  Guide: https://github.com/solidjs/solid/blob/a8186e6738b3a6a3341c561f66e9325432d6759b/documentation/solid-2.0/MIGRATION.md#attributes--events-closer-to-html-and-fewer-namespaces
+  Rule: jsx/lowercase-event-handlers  Guide: https://github.com/solidjs/solid/blob/82f71fddb1340cab46167db119da5702038e65ab/documentation/solid-2.0/MIGRATION.md#attributes--events-closer-to-html-and-fewer-namespaces
 src/combined.tsx:19:9 Rewrite <Index> to <For keyed={false}>, keeping its each, fallback, and child callback unchanged.
-  Rule: jsx/index-to-for  Guide: https://github.com/solidjs/solid/blob/a8186e6738b3a6a3341c561f66e9325432d6759b/documentation/solid-2.0/MIGRATION.md#list-rendering-index-is-gone-and-for-handles-each-keying-mode
+  Rule: jsx/index-to-for  Guide: https://github.com/solidjs/solid/blob/82f71fddb1340cab46167db119da5702038e65ab/documentation/solid-2.0/MIGRATION.md#list-rendering-index-is-gone-and-for-handles-each-keying-mode
 src/context.tsx:11:5 Rewrite <ThemeContext.Provider> to <ThemeContext>, keeping its value attribute and children unchanged.
-  Rule: jsx/context-provider-to-context  Guide: https://github.com/solidjs/solid/blob/a8186e6738b3a6a3341c561f66e9325432d6759b/documentation/solid-2.0/MIGRATION.md#context-providers-contextprovider--context-is-the-provider
+  Rule: jsx/context-provider-to-context  Guide: https://github.com/solidjs/solid/blob/82f71fddb1340cab46167db119da5702038e65ab/documentation/solid-2.0/MIGRATION.md#context-providers-contextprovider--context-is-the-provider
 src/effects.ts:2:38 Remove the on import from solid-js; every use is now a split createEffect.
-  Rule: reactivity/on-helper-split  Guide: https://github.com/solidjs/solid/blob/a8186e6738b3a6a3341c561f66e9325432d6759b/documentation/solid-2.0/MIGRATION.md#on-helper--split-effects
+  Rule: reactivity/on-helper-split  Guide: https://github.com/solidjs/solid/blob/82f71fddb1340cab46167db119da5702038e65ab/documentation/solid-2.0/MIGRATION.md#on-helper--split-effects
 src/effects.ts:5:1 Rewrite createEffect(on(dep, fn)) as createEffect(compute, apply), keeping the callback unchanged.
-  Rule: reactivity/on-helper-split  Guide: https://github.com/solidjs/solid/blob/a8186e6738b3a6a3341c561f66e9325432d6759b/documentation/solid-2.0/MIGRATION.md#on-helper--split-effects
+  Rule: reactivity/on-helper-split  Guide: https://github.com/solidjs/solid/blob/82f71fddb1340cab46167db119da5702038e65ab/documentation/solid-2.0/MIGRATION.md#on-helper--split-effects
 src/events.tsx:12:15 Rewrite the onclick event handler attribute on <button> to onClick, preserving its value expression.
-  Rule: jsx/lowercase-event-handlers  Guide: https://github.com/solidjs/solid/blob/a8186e6738b3a6a3341c561f66e9325432d6759b/documentation/solid-2.0/MIGRATION.md#attributes--events-closer-to-html-and-fewer-namespaces
+  Rule: jsx/lowercase-event-handlers  Guide: https://github.com/solidjs/solid/blob/82f71fddb1340cab46167db119da5702038e65ab/documentation/solid-2.0/MIGRATION.md#attributes--events-closer-to-html-and-fewer-namespaces
 src/events.tsx:12:33 Rewrite the oninput event handler attribute on <button> to onInput, preserving its value expression.
-  Rule: jsx/lowercase-event-handlers  Guide: https://github.com/solidjs/solid/blob/a8186e6738b3a6a3341c561f66e9325432d6759b/documentation/solid-2.0/MIGRATION.md#attributes--events-closer-to-html-and-fewer-namespaces
+  Rule: jsx/lowercase-event-handlers  Guide: https://github.com/solidjs/solid/blob/82f71fddb1340cab46167db119da5702038e65ab/documentation/solid-2.0/MIGRATION.md#attributes--events-closer-to-html-and-fewer-namespaces
 src/events.tsx:15:19 Rewrite the onpointerdown event handler attribute on <my-element> to onPointerDown, preserving its value expression.
-  Rule: jsx/lowercase-event-handlers  Guide: https://github.com/solidjs/solid/blob/a8186e6738b3a6a3341c561f66e9325432d6759b/documentation/solid-2.0/MIGRATION.md#attributes--events-closer-to-html-and-fewer-namespaces
+  Rule: jsx/lowercase-event-handlers  Guide: https://github.com/solidjs/solid/blob/82f71fddb1340cab46167db119da5702038e65ab/documentation/solid-2.0/MIGRATION.md#attributes--events-closer-to-html-and-fewer-namespaces
 src/legacy/locale-provider.jsx:4:3 Rewrite <LocaleContext.Provider> to <LocaleContext>, keeping its value attribute and children unchanged.
-  Rule: jsx/context-provider-to-context  Guide: https://github.com/solidjs/solid/blob/a8186e6738b3a6a3341c561f66e9325432d6759b/documentation/solid-2.0/MIGRATION.md#context-providers-contextprovider--context-is-the-provider
+  Rule: jsx/context-provider-to-context  Guide: https://github.com/solidjs/solid/blob/82f71fddb1340cab46167db119da5702038e65ab/documentation/solid-2.0/MIGRATION.md#context-providers-contextprovider--context-is-the-provider
 src/lists.tsx:2:24 Rewrite the Index import from solid-js to For.
-  Rule: jsx/index-to-for  Guide: https://github.com/solidjs/solid/blob/a8186e6738b3a6a3341c561f66e9325432d6759b/documentation/solid-2.0/MIGRATION.md#list-rendering-index-is-gone-and-for-handles-each-keying-mode
+  Rule: jsx/index-to-for  Guide: https://github.com/solidjs/solid/blob/82f71fddb1340cab46167db119da5702038e65ab/documentation/solid-2.0/MIGRATION.md#list-rendering-index-is-gone-and-for-handles-each-keying-mode
 src/lists.tsx:9:7 Rewrite <Index> to <For keyed={false}>, keeping its each, fallback, and child callback unchanged.
-  Rule: jsx/index-to-for  Guide: https://github.com/solidjs/solid/blob/a8186e6738b3a6a3341c561f66e9325432d6759b/documentation/solid-2.0/MIGRATION.md#list-rendering-index-is-gone-and-for-handles-each-keying-mode
+  Rule: jsx/index-to-for  Guide: https://github.com/solidjs/solid/blob/82f71fddb1340cab46167db119da5702038e65ab/documentation/solid-2.0/MIGRATION.md#list-rendering-index-is-gone-and-for-handles-each-keying-mode
 src/lists.tsx:13:13 Rewrite <Index> to <For keyed={false}>, keeping its each, fallback, and child callback unchanged.
-  Rule: jsx/index-to-for  Guide: https://github.com/solidjs/solid/blob/a8186e6738b3a6a3341c561f66e9325432d6759b/documentation/solid-2.0/MIGRATION.md#list-rendering-index-is-gone-and-for-handles-each-keying-mode
+  Rule: jsx/index-to-for  Guide: https://github.com/solidjs/solid/blob/82f71fddb1340cab46167db119da5702038e65ab/documentation/solid-2.0/MIGRATION.md#list-rendering-index-is-gone-and-for-handles-each-keying-mode
 src/lists.tsx:17:7 Rewrite <Index> to <For keyed={false}>, keeping its each, fallback, and child callback unchanged.
-  Rule: jsx/index-to-for  Guide: https://github.com/solidjs/solid/blob/a8186e6738b3a6a3341c561f66e9325432d6759b/documentation/solid-2.0/MIGRATION.md#list-rendering-index-is-gone-and-for-handles-each-keying-mode
+  Rule: jsx/index-to-for  Guide: https://github.com/solidjs/solid/blob/82f71fddb1340cab46167db119da5702038e65ab/documentation/solid-2.0/MIGRATION.md#list-rendering-index-is-gone-and-for-handles-each-keying-mode
 src/nested/deep.jsx:4:32 Relocate solid-js/universal to @solidjs/universal.
-  Rule: imports/legacy-subpath-relocation  Guide: https://github.com/solidjs/solid/blob/a8186e6738b3a6a3341c561f66e9325432d6759b/documentation/solid-2.0/MIGRATION.md#imports-where-things-live-now
+  Rule: imports/legacy-subpath-relocation  Guide: https://github.com/solidjs/solid/blob/82f71fddb1340cab46167db119da5702038e65ab/documentation/solid-2.0/MIGRATION.md#imports-where-things-live-now
 src/nested/deep.jsx:5:21 Relocate solid-js/jsx-runtime to @solidjs/web/jsx-runtime.
-  Rule: imports/legacy-subpath-relocation  Guide: https://github.com/solidjs/solid/blob/a8186e6738b3a6a3341c561f66e9325432d6759b/documentation/solid-2.0/MIGRATION.md#imports-where-things-live-now
+  Rule: imports/legacy-subpath-relocation  Guide: https://github.com/solidjs/solid/blob/82f71fddb1340cab46167db119da5702038e65ab/documentation/solid-2.0/MIGRATION.md#imports-where-things-live-now
 src/nested/deep.jsx:6:34 Relocate solid-js/web to @solidjs/web for proven bindings render, isServer.
-  Rule: imports/web-package-relocation  Guide: https://github.com/solidjs/solid/blob/a8186e6738b3a6a3341c561f66e9325432d6759b/documentation/solid-2.0/MIGRATION.md#imports-where-things-live-now
+  Rule: imports/web-package-relocation  Guide: https://github.com/solidjs/solid/blob/82f71fddb1340cab46167db119da5702038e65ab/documentation/solid-2.0/MIGRATION.md#imports-where-things-live-now
 src/nested/deep.jsx:11:41 Rewrite the classList attribute on <div> to class, preserving its value expression.
-  Rule: jsx/class-list-to-class  Guide: https://github.com/solidjs/solid/blob/a8186e6738b3a6a3341c561f66e9325432d6759b/documentation/solid-2.0/MIGRATION.md#classlist--class-objectarray-forms
+  Rule: jsx/class-list-to-class  Guide: https://github.com/solidjs/solid/blob/82f71fddb1340cab46167db119da5702038e65ab/documentation/solid-2.0/MIGRATION.md#classlist--class-objectarray-forms
 src/nested/deep.jsx:17:24 Relocate solid-js/html to @solidjs/html.
-  Rule: imports/legacy-subpath-relocation  Guide: https://github.com/solidjs/solid/blob/a8186e6738b3a6a3341c561f66e9325432d6759b/documentation/solid-2.0/MIGRATION.md#imports-where-things-live-now
+  Rule: imports/legacy-subpath-relocation  Guide: https://github.com/solidjs/solid/blob/82f71fddb1340cab46167db119da5702038e65ab/documentation/solid-2.0/MIGRATION.md#imports-where-things-live-now
 src/plain.js:2:19 Relocate solid-js/h to @solidjs/h.
-  Rule: imports/legacy-subpath-relocation  Guide: https://github.com/solidjs/solid/blob/a8186e6738b3a6a3341c561f66e9325432d6759b/documentation/solid-2.0/MIGRATION.md#imports-where-things-live-now
+  Rule: imports/legacy-subpath-relocation  Guide: https://github.com/solidjs/solid/blob/82f71fddb1340cab46167db119da5702038e65ab/documentation/solid-2.0/MIGRATION.md#imports-where-things-live-now
 src/plain.js:3:22 Relocate solid-js/html to @solidjs/html.
-  Rule: imports/legacy-subpath-relocation  Guide: https://github.com/solidjs/solid/blob/a8186e6738b3a6a3341c561f66e9325432d6759b/documentation/solid-2.0/MIGRATION.md#imports-where-things-live-now
+  Rule: imports/legacy-subpath-relocation  Guide: https://github.com/solidjs/solid/blob/82f71fddb1340cab46167db119da5702038e65ab/documentation/solid-2.0/MIGRATION.md#imports-where-things-live-now
 src/real-world/active-element.tsx:9:40 Rewrite the Index import from solid-js to For.
-  Rule: jsx/index-to-for  Guide: https://github.com/solidjs/solid/blob/a8186e6738b3a6a3341c561f66e9325432d6759b/documentation/solid-2.0/MIGRATION.md#list-rendering-index-is-gone-and-for-handles-each-keying-mode
+  Rule: jsx/index-to-for  Guide: https://github.com/solidjs/solid/blob/82f71fddb1340cab46167db119da5702038e65ab/documentation/solid-2.0/MIGRATION.md#list-rendering-index-is-gone-and-for-handles-each-keying-mode
 src/real-world/active-element.tsx:21:7 Merge the class and classList attributes on <button> into the class array form, preserving the static string and the object literal.
-  Rule: jsx/class-list-to-class  Guide: https://github.com/solidjs/solid/blob/a8186e6738b3a6a3341c561f66e9325432d6759b/documentation/solid-2.0/MIGRATION.md#classlist--class-objectarray-forms
+  Rule: jsx/class-list-to-class  Guide: https://github.com/solidjs/solid/blob/82f71fddb1340cab46167db119da5702038e65ab/documentation/solid-2.0/MIGRATION.md#classlist--class-objectarray-forms
 src/real-world/active-element.tsx:40:7 Rewrite <Index> to <For keyed={false}>, keeping its each, fallback, and child callback unchanged.
-  Rule: jsx/index-to-for  Guide: https://github.com/solidjs/solid/blob/a8186e6738b3a6a3341c561f66e9325432d6759b/documentation/solid-2.0/MIGRATION.md#list-rendering-index-is-gone-and-for-handles-each-keying-mode
+  Rule: jsx/index-to-for  Guide: https://github.com/solidjs/solid/blob/82f71fddb1340cab46167db119da5702038e65ab/documentation/solid-2.0/MIGRATION.md#list-rendering-index-is-gone-and-for-handles-each-keying-mode
 src/real-world/active-element.tsx:49:9 Rewrite the onclick event handler attribute on <button> to onClick, preserving its value expression.
-  Rule: jsx/lowercase-event-handlers  Guide: https://github.com/solidjs/solid/blob/a8186e6738b3a6a3341c561f66e9325432d6759b/documentation/solid-2.0/MIGRATION.md#attributes--events-closer-to-html-and-fewer-namespaces
+  Rule: jsx/lowercase-event-handlers  Guide: https://github.com/solidjs/solid/blob/82f71fddb1340cab46167db119da5702038e65ab/documentation/solid-2.0/MIGRATION.md#attributes--events-closer-to-html-and-fewer-namespaces
 src/relocations.tsx:1:15 Relocate solid-js/h to @solidjs/h.
-  Rule: imports/legacy-subpath-relocation  Guide: https://github.com/solidjs/solid/blob/a8186e6738b3a6a3341c561f66e9325432d6759b/documentation/solid-2.0/MIGRATION.md#imports-where-things-live-now
+  Rule: imports/legacy-subpath-relocation  Guide: https://github.com/solidjs/solid/blob/82f71fddb1340cab46167db119da5702038e65ab/documentation/solid-2.0/MIGRATION.md#imports-where-things-live-now
 src/relocations.tsx:2:18 Relocate solid-js/html to @solidjs/html.
-  Rule: imports/legacy-subpath-relocation  Guide: https://github.com/solidjs/solid/blob/a8186e6738b3a6a3341c561f66e9325432d6759b/documentation/solid-2.0/MIGRATION.md#imports-where-things-live-now
+  Rule: imports/legacy-subpath-relocation  Guide: https://github.com/solidjs/solid/blob/82f71fddb1340cab46167db119da5702038e65ab/documentation/solid-2.0/MIGRATION.md#imports-where-things-live-now
 src/relocations.tsx:3:32 Relocate solid-js/universal to @solidjs/universal.
-  Rule: imports/legacy-subpath-relocation  Guide: https://github.com/solidjs/solid/blob/a8186e6738b3a6a3341c561f66e9325432d6759b/documentation/solid-2.0/MIGRATION.md#imports-where-things-live-now
+  Rule: imports/legacy-subpath-relocation  Guide: https://github.com/solidjs/solid/blob/82f71fddb1340cab46167db119da5702038e65ab/documentation/solid-2.0/MIGRATION.md#imports-where-things-live-now
 src/relocations.tsx:4:21 Relocate solid-js/jsx-runtime to @solidjs/web/jsx-runtime.
-  Rule: imports/legacy-subpath-relocation  Guide: https://github.com/solidjs/solid/blob/a8186e6738b3a6a3341c561f66e9325432d6759b/documentation/solid-2.0/MIGRATION.md#imports-where-things-live-now
+  Rule: imports/legacy-subpath-relocation  Guide: https://github.com/solidjs/solid/blob/82f71fddb1340cab46167db119da5702038e65ab/documentation/solid-2.0/MIGRATION.md#imports-where-things-live-now
 src/relocations.tsx:5:24 Relocate solid-js/jsx-dev-runtime to @solidjs/web/jsx-dev-runtime.
-  Rule: imports/legacy-subpath-relocation  Guide: https://github.com/solidjs/solid/blob/a8186e6738b3a6a3341c561f66e9325432d6759b/documentation/solid-2.0/MIGRATION.md#imports-where-things-live-now
+  Rule: imports/legacy-subpath-relocation  Guide: https://github.com/solidjs/solid/blob/82f71fddb1340cab46167db119da5702038e65ab/documentation/solid-2.0/MIGRATION.md#imports-where-things-live-now
 src/relocations.tsx:7:36 Relocate solid-js/html to @solidjs/html.
-  Rule: imports/legacy-subpath-relocation  Guide: https://github.com/solidjs/solid/blob/a8186e6738b3a6a3341c561f66e9325432d6759b/documentation/solid-2.0/MIGRATION.md#imports-where-things-live-now
+  Rule: imports/legacy-subpath-relocation  Guide: https://github.com/solidjs/solid/blob/82f71fddb1340cab46167db119da5702038e65ab/documentation/solid-2.0/MIGRATION.md#imports-where-things-live-now
 src/relocations.tsx:9:50 Relocate solid-js/universal to @solidjs/universal.
-  Rule: imports/legacy-subpath-relocation  Guide: https://github.com/solidjs/solid/blob/a8186e6738b3a6a3341c561f66e9325432d6759b/documentation/solid-2.0/MIGRATION.md#imports-where-things-live-now
+  Rule: imports/legacy-subpath-relocation  Guide: https://github.com/solidjs/solid/blob/82f71fddb1340cab46167db119da5702038e65ab/documentation/solid-2.0/MIGRATION.md#imports-where-things-live-now
 src/relocations.tsx:10:36 Relocate solid-js/html to @solidjs/html.
-  Rule: imports/legacy-subpath-relocation  Guide: https://github.com/solidjs/solid/blob/a8186e6738b3a6a3341c561f66e9325432d6759b/documentation/solid-2.0/MIGRATION.md#imports-where-things-live-now
+  Rule: imports/legacy-subpath-relocation  Guide: https://github.com/solidjs/solid/blob/82f71fddb1340cab46167db119da5702038e65ab/documentation/solid-2.0/MIGRATION.md#imports-where-things-live-now
 src/relocations.tsx:11:50 Relocate solid-js/universal to @solidjs/universal.
-  Rule: imports/legacy-subpath-relocation  Guide: https://github.com/solidjs/solid/blob/a8186e6738b3a6a3341c561f66e9325432d6759b/documentation/solid-2.0/MIGRATION.md#imports-where-things-live-now
+  Rule: imports/legacy-subpath-relocation  Guide: https://github.com/solidjs/solid/blob/82f71fddb1340cab46167db119da5702038e65ab/documentation/solid-2.0/MIGRATION.md#imports-where-things-live-now
 src/relocations.tsx:12:41 Relocate solid-js/jsx-runtime to @solidjs/web/jsx-runtime.
-  Rule: imports/legacy-subpath-relocation  Guide: https://github.com/solidjs/solid/blob/a8186e6738b3a6a3341c561f66e9325432d6759b/documentation/solid-2.0/MIGRATION.md#imports-where-things-live-now
+  Rule: imports/legacy-subpath-relocation  Guide: https://github.com/solidjs/solid/blob/82f71fddb1340cab46167db119da5702038e65ab/documentation/solid-2.0/MIGRATION.md#imports-where-things-live-now
 src/relocations.tsx:13:37 Relocate solid-js/jsx-dev-runtime to @solidjs/web/jsx-dev-runtime.
-  Rule: imports/legacy-subpath-relocation  Guide: https://github.com/solidjs/solid/blob/a8186e6738b3a6a3341c561f66e9325432d6759b/documentation/solid-2.0/MIGRATION.md#imports-where-things-live-now
+  Rule: imports/legacy-subpath-relocation  Guide: https://github.com/solidjs/solid/blob/82f71fddb1340cab46167db119da5702038e65ab/documentation/solid-2.0/MIGRATION.md#imports-where-things-live-now
 src/relocations.tsx:16:34 Relocate solid-js/h to @solidjs/h.
-  Rule: imports/legacy-subpath-relocation  Guide: https://github.com/solidjs/solid/blob/a8186e6738b3a6a3341c561f66e9325432d6759b/documentation/solid-2.0/MIGRATION.md#imports-where-things-live-now
+  Rule: imports/legacy-subpath-relocation  Guide: https://github.com/solidjs/solid/blob/82f71fddb1340cab46167db119da5702038e65ab/documentation/solid-2.0/MIGRATION.md#imports-where-things-live-now
 src/relocations.tsx:17:15 Relocate solid-js/html to @solidjs/html.
-  Rule: imports/legacy-subpath-relocation  Guide: https://github.com/solidjs/solid/blob/a8186e6738b3a6a3341c561f66e9325432d6759b/documentation/solid-2.0/MIGRATION.md#imports-where-things-live-now
+  Rule: imports/legacy-subpath-relocation  Guide: https://github.com/solidjs/solid/blob/82f71fddb1340cab46167db119da5702038e65ab/documentation/solid-2.0/MIGRATION.md#imports-where-things-live-now
 src/relocations.tsx:19:28 Relocate solid-js/html to @solidjs/html.
-  Rule: imports/legacy-subpath-relocation  Guide: https://github.com/solidjs/solid/blob/a8186e6738b3a6a3341c561f66e9325432d6759b/documentation/solid-2.0/MIGRATION.md#imports-where-things-live-now
+  Rule: imports/legacy-subpath-relocation  Guide: https://github.com/solidjs/solid/blob/82f71fddb1340cab46167db119da5702038e65ab/documentation/solid-2.0/MIGRATION.md#imports-where-things-live-now
 src/relocations.tsx:21:35 Relocate solid-js/universal to @solidjs/universal.
-  Rule: imports/legacy-subpath-relocation  Guide: https://github.com/solidjs/solid/blob/a8186e6738b3a6a3341c561f66e9325432d6759b/documentation/solid-2.0/MIGRATION.md#imports-where-things-live-now
+  Rule: imports/legacy-subpath-relocation  Guide: https://github.com/solidjs/solid/blob/82f71fddb1340cab46167db119da5702038e65ab/documentation/solid-2.0/MIGRATION.md#imports-where-things-live-now
 src/relocations.tsx:22:28 Relocate solid-js/jsx-runtime to @solidjs/web/jsx-runtime.
-  Rule: imports/legacy-subpath-relocation  Guide: https://github.com/solidjs/solid/blob/a8186e6738b3a6a3341c561f66e9325432d6759b/documentation/solid-2.0/MIGRATION.md#imports-where-things-live-now
+  Rule: imports/legacy-subpath-relocation  Guide: https://github.com/solidjs/solid/blob/82f71fddb1340cab46167db119da5702038e65ab/documentation/solid-2.0/MIGRATION.md#imports-where-things-live-now
 src/relocations.tsx:25:60 Relocate solid-js/web to @solidjs/web for proven bindings render, hydrate.
-  Rule: imports/web-package-relocation  Guide: https://github.com/solidjs/solid/blob/a8186e6738b3a6a3341c561f66e9325432d6759b/documentation/solid-2.0/MIGRATION.md#imports-where-things-live-now
+  Rule: imports/web-package-relocation  Guide: https://github.com/solidjs/solid/blob/82f71fddb1340cab46167db119da5702038e65ab/documentation/solid-2.0/MIGRATION.md#imports-where-things-live-now
 src/relocations.tsx:26:41 Relocate solid-js/web to @solidjs/web for proven bindings isServer.
-  Rule: imports/web-package-relocation  Guide: https://github.com/solidjs/solid/blob/a8186e6738b3a6a3341c561f66e9325432d6759b/documentation/solid-2.0/MIGRATION.md#imports-where-things-live-now
+  Rule: imports/web-package-relocation  Guide: https://github.com/solidjs/solid/blob/82f71fddb1340cab46167db119da5702038e65ab/documentation/solid-2.0/MIGRATION.md#imports-where-things-live-now
 src/relocations.tsx:27:46 Relocate solid-js/web to @solidjs/web for proven bindings hydrate.
-  Rule: imports/web-package-relocation  Guide: https://github.com/solidjs/solid/blob/a8186e6738b3a6a3341c561f66e9325432d6759b/documentation/solid-2.0/MIGRATION.md#imports-where-things-live-now
+  Rule: imports/web-package-relocation  Guide: https://github.com/solidjs/solid/blob/82f71fddb1340cab46167db119da5702038e65ab/documentation/solid-2.0/MIGRATION.md#imports-where-things-live-now
 src/relocations.tsx:28:45 Relocate solid-js/web to @solidjs/web for proven bindings Dynamic. Note: Dynamic is deprecated in Solid 2 in favor of the dynamic(source) factory; it keeps working without a runtime warning.
-  Rule: imports/web-package-relocation  Guide: https://github.com/solidjs/solid/blob/a8186e6738b3a6a3341c561f66e9325432d6759b/documentation/solid-2.0/MIGRATION.md#imports-where-things-live-now
+  Rule: imports/web-package-relocation  Guide: https://github.com/solidjs/solid/blob/82f71fddb1340cab46167db119da5702038e65ab/documentation/solid-2.0/MIGRATION.md#imports-where-things-live-now
 src/relocations.tsx:30:47 Relocate solid-js/web to @solidjs/web for proven bindings render.
-  Rule: imports/web-package-relocation  Guide: https://github.com/solidjs/solid/blob/a8186e6738b3a6a3341c561f66e9325432d6759b/documentation/solid-2.0/MIGRATION.md#imports-where-things-live-now
+  Rule: imports/web-package-relocation  Guide: https://github.com/solidjs/solid/blob/82f71fddb1340cab46167db119da5702038e65ab/documentation/solid-2.0/MIGRATION.md#imports-where-things-live-now
 src/store-merge.ts:6:1 Rewrite this path-style store setter call with a literal value as a draft write.
-  Rule: store/setter-literal-paths  Guide: https://github.com/solidjs/solid/blob/a8186e6738b3a6a3341c561f66e9325432d6759b/documentation/solid-2.0/MIGRATION.md#draft-first-setters
+  Rule: store/setter-literal-paths  Guide: https://github.com/solidjs/solid/blob/82f71fddb1340cab46167db119da5702038e65ab/documentation/solid-2.0/MIGRATION.md#draft-first-setters
 src/store.ts:3:29 Relocate solid-js/store to solid-js for createStore: every setter call in this file is now a draft write.
-  Rule: store/setter-literal-paths  Guide: https://github.com/solidjs/solid/blob/a8186e6738b3a6a3341c561f66e9325432d6759b/documentation/solid-2.0/MIGRATION.md#draft-first-setters
+  Rule: store/setter-literal-paths  Guide: https://github.com/solidjs/solid/blob/82f71fddb1340cab46167db119da5702038e65ab/documentation/solid-2.0/MIGRATION.md#draft-first-setters
 src/store.ts:6:1 Rewrite this path-style store setter call with a literal value as a draft write.
-  Rule: store/setter-literal-paths  Guide: https://github.com/solidjs/solid/blob/a8186e6738b3a6a3341c561f66e9325432d6759b/documentation/solid-2.0/MIGRATION.md#draft-first-setters
+  Rule: store/setter-literal-paths  Guide: https://github.com/solidjs/solid/blob/82f71fddb1340cab46167db119da5702038e65ab/documentation/solid-2.0/MIGRATION.md#draft-first-setters
 src/store.ts:7:1 Rewrite this path-style store setter call with a literal value as a draft write.
-  Rule: store/setter-literal-paths  Guide: https://github.com/solidjs/solid/blob/a8186e6738b3a6a3341c561f66e9325432d6759b/documentation/solid-2.0/MIGRATION.md#draft-first-setters
+  Rule: store/setter-literal-paths  Guide: https://github.com/solidjs/solid/blob/82f71fddb1340cab46167db119da5702038e65ab/documentation/solid-2.0/MIGRATION.md#draft-first-setters
 src/theme-provider.tsx:7:10 Rewrite <ThemeContext.Provider> to <ThemeContext>, keeping its value attribute and children unchanged.
-  Rule: jsx/context-provider-to-context  Guide: https://github.com/solidjs/solid/blob/a8186e6738b3a6a3341c561f66e9325432d6759b/documentation/solid-2.0/MIGRATION.md#context-providers-contextprovider--context-is-the-provider
+  Rule: jsx/context-provider-to-context  Guide: https://github.com/solidjs/solid/blob/82f71fddb1340cab46167db119da5702038e65ab/documentation/solid-2.0/MIGRATION.md#context-providers-contextprovider--context-is-the-provider
 src/types-element.tsx:3:10 Move JSXElement from solid-js to @solidjs/web. JSXElement becomes JSX, and its 3 type reference(s) become JSX.Element.
-  Rule: imports/jsx-type-relocation  Guide: https://github.com/solidjs/solid/blob/a8186e6738b3a6a3341c561f66e9325432d6759b/documentation/solid-2.0/MIGRATION.md#typescript-jsx-solid-js--renderer-package
+  Rule: imports/jsx-type-relocation  Guide: https://github.com/solidjs/solid/blob/82f71fddb1340cab46167db119da5702038e65ab/documentation/solid-2.0/MIGRATION.md#typescript-jsx-solid-js--renderer-package
 src/types.tsx:1:1 Rewrite the @jsxImportSource pragma from solid-js to @solidjs/web.
-  Rule: imports/jsx-type-relocation  Guide: https://github.com/solidjs/solid/blob/a8186e6738b3a6a3341c561f66e9325432d6759b/documentation/solid-2.0/MIGRATION.md#typescript-jsx-solid-js--renderer-package
+  Rule: imports/jsx-type-relocation  Guide: https://github.com/solidjs/solid/blob/82f71fddb1340cab46167db119da5702038e65ab/documentation/solid-2.0/MIGRATION.md#typescript-jsx-solid-js--renderer-package
 src/types.tsx:4:15 Move JSX from solid-js to @solidjs/web.
-  Rule: imports/jsx-type-relocation  Guide: https://github.com/solidjs/solid/blob/a8186e6738b3a6a3341c561f66e9325432d6759b/documentation/solid-2.0/MIGRATION.md#typescript-jsx-solid-js--renderer-package
+  Rule: imports/jsx-type-relocation  Guide: https://github.com/solidjs/solid/blob/82f71fddb1340cab46167db119da5702038e65ab/documentation/solid-2.0/MIGRATION.md#typescript-jsx-solid-js--renderer-package
 src/types.tsx:5:15 Move JSX from solid-js to @solidjs/web.
-  Rule: imports/jsx-type-relocation  Guide: https://github.com/solidjs/solid/blob/a8186e6738b3a6a3341c561f66e9325432d6759b/documentation/solid-2.0/MIGRATION.md#typescript-jsx-solid-js--renderer-package
+  Rule: imports/jsx-type-relocation  Guide: https://github.com/solidjs/solid/blob/82f71fddb1340cab46167db119da5702038e65ab/documentation/solid-2.0/MIGRATION.md#typescript-jsx-solid-js--renderer-package
 
 [solid-migration-assistant] Summary: 66 rewrites in 17 files
   22  imports/legacy-subpath-relocation in 4 files
@@ -176,8 +176,8 @@ src/types.tsx:5:15 Move JSX from solid-js to @solidjs/web.
          1  Relocate solid-js/store to solid-js for createStore: every setter call in this file is now a draft write.
       sites: src/store-merge.ts:6:1, src/store.ts:3:29, src/store.ts:6:1, src/store.ts:7:1
    2  project/dependencies in 1 file
-         1  Add @solidjs/web ^2.0.0.
-         1  Move solid-js from 1.9.14 to ^2.0.0.
+         1  Add @solidjs/web ^2.0.1.
+         1  Move solid-js from 1.9.14 to ^2.0.1.
       sites: package.json:7:1, package.json:8:1
    2  reactivity/on-helper-split in 1 file
          1  Remove the on import from solid-js; every use is now a split createEffect.
@@ -191,169 +191,169 @@ src/types.tsx:5:15 Move JSX from solid-js to @solidjs/web.
 
 src/class-list.tsx:19:25 [build] Migrate this intrinsic JSX classList attribute to class.
   Rule: jsx/class-list
-  Why: Solid 2.0.0 removes the JSX classList attribute in favor of the class attribute's object and array forms; on a native element the compiler now rejects classList with an error that names the replacement.
+  Why: Solid 2.0.1 removes the JSX classList attribute in favor of the class attribute's object and array forms; on a native element the compiler now rejects classList with an error that names the replacement.
   Guidance: Read this complete intrinsic element, its classList value, and every class source. Move the classList value into the class attribute's object or array form, preserve static classes and conditional truthiness, and deliberately merge any existing class attribute on the same element. Stop without proposing a rewrite when the value or another class source is spread or forwarded, duplicate class sources have unclear precedence, getters or side effects could change evaluation order or frequency, or a focused rendering test does not prove the resulting static and conditional class tokens. Ask for the smallest focused rendering test or runtime observation that exposes the rendered class attribute across relevant states.
   Lint: eslint-plugin-solid's solid/removed-api and solid/prefer-structured-class (v2 config) keeps reporting this site after migration.
-  Guide: https://github.com/solidjs/solid/blob/a8186e6738b3a6a3341c561f66e9325432d6759b/documentation/solid-2.0/MIGRATION.md#classlist--class-objectarray-forms
+  Guide: https://github.com/solidjs/solid/blob/82f71fddb1340cab46167db119da5702038e65ab/documentation/solid-2.0/MIGRATION.md#classlist--class-objectarray-forms
 
 src/class-list.tsx:21:24 [build] Migrate this intrinsic JSX classList attribute to class.
   Rule: jsx/class-list
-  Why: Solid 2.0.0 removes the JSX classList attribute in favor of the class attribute's object and array forms; on a native element the compiler now rejects classList with an error that names the replacement.
+  Why: Solid 2.0.1 removes the JSX classList attribute in favor of the class attribute's object and array forms; on a native element the compiler now rejects classList with an error that names the replacement.
   Guidance: Read this complete intrinsic element, its classList value, and every class source. Move the classList value into the class attribute's object or array form, preserve static classes and conditional truthiness, and deliberately merge any existing class attribute on the same element. Stop without proposing a rewrite when the value or another class source is spread or forwarded, duplicate class sources have unclear precedence, getters or side effects could change evaluation order or frequency, or a focused rendering test does not prove the resulting static and conditional class tokens. Ask for the smallest focused rendering test or runtime observation that exposes the rendered class attribute across relevant states.
   Lint: eslint-plugin-solid's solid/removed-api and solid/prefer-structured-class (v2 config) keeps reporting this site after migration.
-  Guide: https://github.com/solidjs/solid/blob/a8186e6738b3a6a3341c561f66e9325432d6759b/documentation/solid-2.0/MIGRATION.md#classlist--class-objectarray-forms
+  Guide: https://github.com/solidjs/solid/blob/82f71fddb1340cab46167db119da5702038e65ab/documentation/solid-2.0/MIGRATION.md#classlist--class-objectarray-forms
 
 src/class-list.tsx:22:25 [build] Migrate this intrinsic JSX classList attribute to class.
   Rule: jsx/class-list
-  Why: Solid 2.0.0 removes the JSX classList attribute in favor of the class attribute's object and array forms; on a native element the compiler now rejects classList with an error that names the replacement.
+  Why: Solid 2.0.1 removes the JSX classList attribute in favor of the class attribute's object and array forms; on a native element the compiler now rejects classList with an error that names the replacement.
   Guidance: Read this complete intrinsic element, its classList value, and every class source. Move the classList value into the class attribute's object or array form, preserve static classes and conditional truthiness, and deliberately merge any existing class attribute on the same element. Stop without proposing a rewrite when the value or another class source is spread or forwarded, duplicate class sources have unclear precedence, getters or side effects could change evaluation order or frequency, or a focused rendering test does not prove the resulting static and conditional class tokens. Ask for the smallest focused rendering test or runtime observation that exposes the rendered class attribute across relevant states.
   Lint: eslint-plugin-solid's solid/removed-api and solid/prefer-structured-class (v2 config) keeps reporting this site after migration.
-  Guide: https://github.com/solidjs/solid/blob/a8186e6738b3a6a3341c561f66e9325432d6759b/documentation/solid-2.0/MIGRATION.md#classlist--class-objectarray-forms
+  Guide: https://github.com/solidjs/solid/blob/82f71fddb1340cab46167db119da5702038e65ab/documentation/solid-2.0/MIGRATION.md#classlist--class-objectarray-forms
 
 src/class-list.tsx:23:12 [build] Migrate this intrinsic JSX classList attribute to class.
   Rule: jsx/class-list
-  Why: Solid 2.0.0 removes the JSX classList attribute in favor of the class attribute's object and array forms; on a native element the compiler now rejects classList with an error that names the replacement.
+  Why: Solid 2.0.1 removes the JSX classList attribute in favor of the class attribute's object and array forms; on a native element the compiler now rejects classList with an error that names the replacement.
   Guidance: Read this complete intrinsic element, its classList value, and every class source. Move the classList value into the class attribute's object or array form, preserve static classes and conditional truthiness, and deliberately merge any existing class attribute on the same element. Stop without proposing a rewrite when the value or another class source is spread or forwarded, duplicate class sources have unclear precedence, getters or side effects could change evaluation order or frequency, or a focused rendering test does not prove the resulting static and conditional class tokens. Ask for the smallest focused rendering test or runtime observation that exposes the rendered class attribute across relevant states.
   Lint: eslint-plugin-solid's solid/removed-api and solid/prefer-structured-class (v2 config) keeps reporting this site after migration.
-  Guide: https://github.com/solidjs/solid/blob/a8186e6738b3a6a3341c561f66e9325432d6759b/documentation/solid-2.0/MIGRATION.md#classlist--class-objectarray-forms
+  Guide: https://github.com/solidjs/solid/blob/82f71fddb1340cab46167db119da5702038e65ab/documentation/solid-2.0/MIGRATION.md#classlist--class-objectarray-forms
 
 src/class-list.tsx:24:24 [build] Migrate this intrinsic JSX classList attribute to class.
   Rule: jsx/class-list
-  Why: Solid 2.0.0 removes the JSX classList attribute in favor of the class attribute's object and array forms; on a native element the compiler now rejects classList with an error that names the replacement.
+  Why: Solid 2.0.1 removes the JSX classList attribute in favor of the class attribute's object and array forms; on a native element the compiler now rejects classList with an error that names the replacement.
   Guidance: Read this complete intrinsic element, its classList value, and every class source. Move the classList value into the class attribute's object or array form, preserve static classes and conditional truthiness, and deliberately merge any existing class attribute on the same element. Stop without proposing a rewrite when the value or another class source is spread or forwarded, duplicate class sources have unclear precedence, getters or side effects could change evaluation order or frequency, or a focused rendering test does not prove the resulting static and conditional class tokens. Ask for the smallest focused rendering test or runtime observation that exposes the rendered class attribute across relevant states.
   Lint: eslint-plugin-solid's solid/removed-api and solid/prefer-structured-class (v2 config) keeps reporting this site after migration.
-  Guide: https://github.com/solidjs/solid/blob/a8186e6738b3a6a3341c561f66e9325432d6759b/documentation/solid-2.0/MIGRATION.md#classlist--class-objectarray-forms
+  Guide: https://github.com/solidjs/solid/blob/82f71fddb1340cab46167db119da5702038e65ab/documentation/solid-2.0/MIGRATION.md#classlist--class-objectarray-forms
 
 src/class-list.tsx:25:12 [build] Migrate this intrinsic JSX classList attribute to class.
   Rule: jsx/class-list
-  Why: Solid 2.0.0 removes the JSX classList attribute in favor of the class attribute's object and array forms; on a native element the compiler now rejects classList with an error that names the replacement.
+  Why: Solid 2.0.1 removes the JSX classList attribute in favor of the class attribute's object and array forms; on a native element the compiler now rejects classList with an error that names the replacement.
   Guidance: Read this complete intrinsic element, its classList value, and every class source. Move the classList value into the class attribute's object or array form, preserve static classes and conditional truthiness, and deliberately merge any existing class attribute on the same element. Stop without proposing a rewrite when the value or another class source is spread or forwarded, duplicate class sources have unclear precedence, getters or side effects could change evaluation order or frequency, or a focused rendering test does not prove the resulting static and conditional class tokens. Ask for the smallest focused rendering test or runtime observation that exposes the rendered class attribute across relevant states.
   Lint: eslint-plugin-solid's solid/removed-api and solid/prefer-structured-class (v2 config) keeps reporting this site after migration.
-  Guide: https://github.com/solidjs/solid/blob/a8186e6738b3a6a3341c561f66e9325432d6759b/documentation/solid-2.0/MIGRATION.md#classlist--class-objectarray-forms
+  Guide: https://github.com/solidjs/solid/blob/82f71fddb1340cab46167db119da5702038e65ab/documentation/solid-2.0/MIGRATION.md#classlist--class-objectarray-forms
 
 src/class-list.tsx:25:30 [build] Migrate this intrinsic JSX classList attribute to class.
   Rule: jsx/class-list
-  Why: Solid 2.0.0 removes the JSX classList attribute in favor of the class attribute's object and array forms; on a native element the compiler now rejects classList with an error that names the replacement.
+  Why: Solid 2.0.1 removes the JSX classList attribute in favor of the class attribute's object and array forms; on a native element the compiler now rejects classList with an error that names the replacement.
   Guidance: Read this complete intrinsic element, its classList value, and every class source. Move the classList value into the class attribute's object or array form, preserve static classes and conditional truthiness, and deliberately merge any existing class attribute on the same element. Stop without proposing a rewrite when the value or another class source is spread or forwarded, duplicate class sources have unclear precedence, getters or side effects could change evaluation order or frequency, or a focused rendering test does not prove the resulting static and conditional class tokens. Ask for the smallest focused rendering test or runtime observation that exposes the rendered class attribute across relevant states.
   Lint: eslint-plugin-solid's solid/removed-api and solid/prefer-structured-class (v2 config) keeps reporting this site after migration.
-  Guide: https://github.com/solidjs/solid/blob/a8186e6738b3a6a3341c561f66e9325432d6759b/documentation/solid-2.0/MIGRATION.md#classlist--class-objectarray-forms
+  Guide: https://github.com/solidjs/solid/blob/82f71fddb1340cab46167db119da5702038e65ab/documentation/solid-2.0/MIGRATION.md#classlist--class-objectarray-forms
 
 src/class-list.tsx:26:12 [build] Migrate this intrinsic JSX classList attribute to class.
   Rule: jsx/class-list
-  Why: Solid 2.0.0 removes the JSX classList attribute in favor of the class attribute's object and array forms; on a native element the compiler now rejects classList with an error that names the replacement.
+  Why: Solid 2.0.1 removes the JSX classList attribute in favor of the class attribute's object and array forms; on a native element the compiler now rejects classList with an error that names the replacement.
   Guidance: Read this complete intrinsic element, its classList value, and every class source. Move the classList value into the class attribute's object or array form, preserve static classes and conditional truthiness, and deliberately merge any existing class attribute on the same element. Stop without proposing a rewrite when the value or another class source is spread or forwarded, duplicate class sources have unclear precedence, getters or side effects could change evaluation order or frequency, or a focused rendering test does not prove the resulting static and conditional class tokens. Ask for the smallest focused rendering test or runtime observation that exposes the rendered class attribute across relevant states.
   Lint: eslint-plugin-solid's solid/removed-api and solid/prefer-structured-class (v2 config) keeps reporting this site after migration.
-  Guide: https://github.com/solidjs/solid/blob/a8186e6738b3a6a3341c561f66e9325432d6759b/documentation/solid-2.0/MIGRATION.md#classlist--class-objectarray-forms
+  Guide: https://github.com/solidjs/solid/blob/82f71fddb1340cab46167db119da5702038e65ab/documentation/solid-2.0/MIGRATION.md#classlist--class-objectarray-forms
 
 src/class-list.tsx:27:12 [build] Migrate this intrinsic JSX classList attribute to class.
   Rule: jsx/class-list
-  Why: Solid 2.0.0 removes the JSX classList attribute in favor of the class attribute's object and array forms; on a native element the compiler now rejects classList with an error that names the replacement.
+  Why: Solid 2.0.1 removes the JSX classList attribute in favor of the class attribute's object and array forms; on a native element the compiler now rejects classList with an error that names the replacement.
   Guidance: Read this complete intrinsic element, its classList value, and every class source. Move the classList value into the class attribute's object or array form, preserve static classes and conditional truthiness, and deliberately merge any existing class attribute on the same element. Stop without proposing a rewrite when the value or another class source is spread or forwarded, duplicate class sources have unclear precedence, getters or side effects could change evaluation order or frequency, or a focused rendering test does not prove the resulting static and conditional class tokens. Ask for the smallest focused rendering test or runtime observation that exposes the rendered class attribute across relevant states.
   Lint: eslint-plugin-solid's solid/removed-api and solid/prefer-structured-class (v2 config) keeps reporting this site after migration.
-  Guide: https://github.com/solidjs/solid/blob/a8186e6738b3a6a3341c561f66e9325432d6759b/documentation/solid-2.0/MIGRATION.md#classlist--class-objectarray-forms
+  Guide: https://github.com/solidjs/solid/blob/82f71fddb1340cab46167db119da5702038e65ab/documentation/solid-2.0/MIGRATION.md#classlist--class-objectarray-forms
 
 src/combined.tsx:21:13 [deprecated] Replace this deprecated Dynamic element with a dynamic() factory.
   Rule: jsx/dynamic-component
-  Why: Solid 2.0.0 keeps <Dynamic component={...}> working but deprecates it (no runtime warning): the tag travels in the props bag, so every instance pays a merge at the call site, an omit inside, and a fresh factory memo that a JSX wrapper cannot hoist.
+  Why: Solid 2.0.1 keeps <Dynamic component={...}> working but deprecates it (no runtime warning): the tag travels in the props bag, so every instance pays a merge at the call site, an omit inside, and a fresh factory memo that a JSX wrapper cannot hoist.
   Guidance: Hoist const Tag = dynamic(() => <the component expression>) to the component body, or to the module for a constant tag, and render <Tag {...the remaining props} />; inside a For callback the callback body is the place to hoist. Keep Dynamic as is when the migration is staged and the deprecation is acceptable for now.
-  Guide: https://github.com/solidjs/solid/blob/a8186e6738b3a6a3341c561f66e9325432d6759b/documentation/solid-2.0/MIGRATION.md#dynamic-components-createdynamic--dynamic--dynamic-factory
+  Guide: https://github.com/solidjs/solid/blob/82f71fddb1340cab46167db119da5702038e65ab/documentation/solid-2.0/MIGRATION.md#dynamic-components-createdynamic--dynamic--dynamic-factory
 
 src/context.tsx:12:7 [build] Migrate this Context.Provider JSX site to direct context provider syntax.
   Rule: jsx/context-provider
-  Why: Solid 2.0.0 removes the Context.Provider pattern (createContext now returns the provider component itself, and .Provider is undefined); use the context value directly as a JSX component: <ImportedContext value={...}>.
+  Why: Solid 2.0.1 removes the Context.Provider pattern (createContext now returns the provider component itself, and .Provider is undefined); use the context value directly as a JSX component: <ImportedContext value={...}>.
   Guidance: Replace <ImportedContext.Provider value={...}> with <ImportedContext value={...}>. Remove the .Provider suffix — the context itself is now the provider component. The value prop and children remain unchanged, but confirm the value is never undefined: Solid 2 treats value={undefined} as no provider, so a default-less context then throws ContextNotFoundError instead of falling back as 1.x did; use null as an explicit empty value.
-  Guide: https://github.com/solidjs/solid/blob/a8186e6738b3a6a3341c561f66e9325432d6759b/documentation/solid-2.0/MIGRATION.md#context-providers-contextprovider--context-is-the-provider
+  Guide: https://github.com/solidjs/solid/blob/82f71fddb1340cab46167db119da5702038e65ab/documentation/solid-2.0/MIGRATION.md#context-providers-contextprovider--context-is-the-provider
 
 src/context.tsx:13:9 [build] Migrate this Context.Provider JSX site to direct context provider syntax.
   Rule: jsx/context-provider
-  Why: Solid 2.0.0 removes the Context.Provider pattern (createContext now returns the provider component itself, and .Provider is undefined); use the context value directly as a JSX component: <CounterContext value={...}>.
+  Why: Solid 2.0.1 removes the Context.Provider pattern (createContext now returns the provider component itself, and .Provider is undefined); use the context value directly as a JSX component: <CounterContext value={...}>.
   Guidance: Replace <CounterContext.Provider value={...}> with <CounterContext value={...}>. Remove the .Provider suffix — the context itself is now the provider component. The value prop and children remain unchanged, but confirm the value is never undefined: Solid 2 treats value={undefined} as no provider, so a default-less context then throws ContextNotFoundError instead of falling back as 1.x did; use null as an explicit empty value.
-  Guide: https://github.com/solidjs/solid/blob/a8186e6738b3a6a3341c561f66e9325432d6759b/documentation/solid-2.0/MIGRATION.md#context-providers-contextprovider--context-is-the-provider
+  Guide: https://github.com/solidjs/solid/blob/82f71fddb1340cab46167db119da5702038e65ab/documentation/solid-2.0/MIGRATION.md#context-providers-contextprovider--context-is-the-provider
 
 src/context.tsx:23:7 [build] Migrate this Context.Provider JSX site to direct context provider syntax.
   Rule: jsx/context-provider
-  Why: Solid 2.0.0 removes the Context.Provider pattern (createContext now returns the provider component itself, and .Provider is undefined); use the context value directly as a JSX component: <ThemeContext value={...}>.
+  Why: Solid 2.0.1 removes the Context.Provider pattern (createContext now returns the provider component itself, and .Provider is undefined); use the context value directly as a JSX component: <ThemeContext value={...}>.
   Guidance: Replace <ThemeContext.Provider value={...}> with <ThemeContext value={...}>. Remove the .Provider suffix — the context itself is now the provider component. The value prop and children remain unchanged, but confirm the value is never undefined: Solid 2 treats value={undefined} as no provider, so a default-less context then throws ContextNotFoundError instead of falling back as 1.x did; use null as an explicit empty value.
-  Guide: https://github.com/solidjs/solid/blob/a8186e6738b3a6a3341c561f66e9325432d6759b/documentation/solid-2.0/MIGRATION.md#context-providers-contextprovider--context-is-the-provider
+  Guide: https://github.com/solidjs/solid/blob/82f71fddb1340cab46167db119da5702038e65ab/documentation/solid-2.0/MIGRATION.md#context-providers-contextprovider--context-is-the-provider
 
 src/context.tsx:24:7 [build] Migrate this Context.Provider JSX site to direct context provider syntax.
   Rule: jsx/context-provider
-  Why: Solid 2.0.0 removes the Context.Provider pattern (createContext now returns the provider component itself, and .Provider is undefined); use the context value directly as a JSX component: <ThemeContext value={...}>.
+  Why: Solid 2.0.1 removes the Context.Provider pattern (createContext now returns the provider component itself, and .Provider is undefined); use the context value directly as a JSX component: <ThemeContext value={...}>.
   Guidance: Replace <ThemeContext.Provider value={...}> with <ThemeContext value={...}>. Remove the .Provider suffix — the context itself is now the provider component. The value prop and children remain unchanged, but confirm the value is never undefined: Solid 2 treats value={undefined} as no provider, so a default-less context then throws ContextNotFoundError instead of falling back as 1.x did; use null as an explicit empty value.
-  Guide: https://github.com/solidjs/solid/blob/a8186e6738b3a6a3341c561f66e9325432d6759b/documentation/solid-2.0/MIGRATION.md#context-providers-contextprovider--context-is-the-provider
+  Guide: https://github.com/solidjs/solid/blob/82f71fddb1340cab46167db119da5702038e65ab/documentation/solid-2.0/MIGRATION.md#context-providers-contextprovider--context-is-the-provider
 
 src/context.tsx:25:7 [build] Migrate this Context.Provider JSX site to direct context provider syntax.
   Rule: jsx/context-provider
-  Why: Solid 2.0.0 removes the Context.Provider pattern (createContext now returns the provider component itself, and .Provider is undefined); use the context value directly as a JSX component: <ThemeContext value={...}>.
+  Why: Solid 2.0.1 removes the Context.Provider pattern (createContext now returns the provider component itself, and .Provider is undefined); use the context value directly as a JSX component: <ThemeContext value={...}>.
   Guidance: Replace <ThemeContext.Provider value={...}> with <ThemeContext value={...}>. Remove the .Provider suffix — the context itself is now the provider component. The value prop and children remain unchanged, but confirm the value is never undefined: Solid 2 treats value={undefined} as no provider, so a default-less context then throws ContextNotFoundError instead of falling back as 1.x did; use null as an explicit empty value.
-  Guide: https://github.com/solidjs/solid/blob/a8186e6738b3a6a3341c561f66e9325432d6759b/documentation/solid-2.0/MIGRATION.md#context-providers-contextprovider--context-is-the-provider
+  Guide: https://github.com/solidjs/solid/blob/82f71fddb1340cab46167db119da5702038e65ab/documentation/solid-2.0/MIGRATION.md#context-providers-contextprovider--context-is-the-provider
 
 src/context.tsx:31:10 [build] Migrate this Context.Provider JSX site to direct context provider syntax.
   Rule: jsx/context-provider
-  Why: Solid 2.0.0 removes the Context.Provider pattern (createContext now returns the provider component itself, and .Provider is undefined); use the context value directly as a JSX component: <CounterContext value={...}>.
+  Why: Solid 2.0.1 removes the Context.Provider pattern (createContext now returns the provider component itself, and .Provider is undefined); use the context value directly as a JSX component: <CounterContext value={...}>.
   Guidance: Replace <CounterContext.Provider value={...}> with <CounterContext value={...}>. Remove the .Provider suffix — the context itself is now the provider component. The value prop and children remain unchanged, but confirm the value is never undefined: Solid 2 treats value={undefined} as no provider, so a default-less context then throws ContextNotFoundError instead of falling back as 1.x did; use null as an explicit empty value.
-  Guide: https://github.com/solidjs/solid/blob/a8186e6738b3a6a3341c561f66e9325432d6759b/documentation/solid-2.0/MIGRATION.md#context-providers-contextprovider--context-is-the-provider
+  Guide: https://github.com/solidjs/solid/blob/82f71fddb1340cab46167db119da5702038e65ab/documentation/solid-2.0/MIGRATION.md#context-providers-contextprovider--context-is-the-provider
 
 src/effects.ts:5:1 [build] Migrate this two-argument createEffect call.
   Rule: reactivity/create-effect
   Why: Solid 1 reads the second argument as the initial value, but Solid 2's signature is createEffect(compute, effectFn, options), so the second argument is the apply callback that receives each computed value.
   Guidance: If the second argument is a Solid 1 initial value, move it to a default parameter of the compute callback and pass the side effect as the second argument: createEffect((prev = INITIAL_VALUE) => compute(prev), (value) => { ... }). If the second argument is already the apply callback, the call is split and needs no change. Stop and ask when you cannot tell which of the two it is.
-  Guide: https://github.com/solidjs/solid/blob/a8186e6738b3a6a3341c561f66e9325432d6759b/documentation/solid-2.0/MIGRATION.md#effects-lifecycle-and-cleanup
+  Guide: https://github.com/solidjs/solid/blob/82f71fddb1340cab46167db119da5702038e65ab/documentation/solid-2.0/MIGRATION.md#effects-lifecycle-and-cleanup
 
 src/events.tsx:16:15 [behavior] Migrate this lowercase onclick attribute to a camelCase event handler.
   Rule: jsx/dom-lowercase-events
-  Why: Solid 2.0.0 binds an event only for on followed by an uppercase letter; a lowercase onclick on a native element is a plain attribute in the browser, in SSR output, and through spreads, so a function value is stringified into the attribute instead of listening for click as Solid 1.x did.
+  Why: Solid 2.0.1 binds an event only for on followed by an uppercase letter; a lowercase onclick on a native element is a plain attribute in the browser, in SSR output, and through spreads, so a function value is stringified into the attribute instead of listening for click as Solid 1.x did.
   Guidance: Rename onclick to the camelCase handler spelled by Solid's JSX types (for example onClick, onDblClick, onPointerDown) and keep the handler expression unchanged. Keep a string value only if an HTML inline-handler attribute is intended. For a custom event name or native listener options, use a ref callback that calls addEventListener. Stop without proposing a rewrite when a spread attribute or another on-prefixed attribute on this element could bind the same event, or when the intended camelCase spelling is unclear.
   Lint: eslint-plugin-solid's solid/event-handlers (v2 config) keeps reporting this site after migration.
-  Guide: https://github.com/solidjs/solid/blob/a8186e6738b3a6a3341c561f66e9325432d6759b/documentation/solid-2.0/MIGRATION.md#attributes--events-closer-to-html-and-fewer-namespaces
+  Guide: https://github.com/solidjs/solid/blob/82f71fddb1340cab46167db119da5702038e65ab/documentation/solid-2.0/MIGRATION.md#attributes--events-closer-to-html-and-fewer-namespaces
 
 src/events.tsx:17:15 [build] Migrate this on:event namespace attribute to Solid 2 event handling.
   Rule: jsx/dom-event-namespaces
-  Why: Solid 2.0.0 removes the on: and oncapture: event namespaces (the compiler rejects them on native elements, and through a spread they become plain attributes); use camelCase event handler attributes or ref callbacks for native listener options.
+  Why: Solid 2.0.1 removes the on: and oncapture: event namespaces (the compiler rejects them on native elements, and through a spread they become plain attributes); use camelCase event handler attributes or ref callbacks for native listener options.
   Guidance: Replace on:click with the appropriate camelCase event handler attribute (onClick, onInput, etc.). Solid 2 events are camelCase only (onClick, never onclick, which is now a plain attribute); for capture-phase listeners, custom event names, or native options like passive/once, use a ref callback that calls addEventListener directly.
-  Guide: https://github.com/solidjs/solid/blob/a8186e6738b3a6a3341c561f66e9325432d6759b/documentation/solid-2.0/MIGRATION.md#attributes--events-closer-to-html-and-fewer-namespaces
+  Guide: https://github.com/solidjs/solid/blob/82f71fddb1340cab46167db119da5702038e65ab/documentation/solid-2.0/MIGRATION.md#attributes--events-closer-to-html-and-fewer-namespaces
 
 src/events.tsx:17:34 [behavior] Migrate this lowercase onclick attribute to a camelCase event handler.
   Rule: jsx/dom-lowercase-events
-  Why: Solid 2.0.0 binds an event only for on followed by an uppercase letter; a lowercase onclick on a native element is a plain attribute in the browser, in SSR output, and through spreads, so a function value is stringified into the attribute instead of listening for click as Solid 1.x did.
+  Why: Solid 2.0.1 binds an event only for on followed by an uppercase letter; a lowercase onclick on a native element is a plain attribute in the browser, in SSR output, and through spreads, so a function value is stringified into the attribute instead of listening for click as Solid 1.x did.
   Guidance: Rename onclick to the camelCase handler spelled by Solid's JSX types (for example onClick, onDblClick, onPointerDown) and keep the handler expression unchanged. Keep a string value only if an HTML inline-handler attribute is intended. For a custom event name or native listener options, use a ref callback that calls addEventListener. Stop without proposing a rewrite when a spread attribute or another on-prefixed attribute on this element could bind the same event, or when the intended camelCase spelling is unclear.
   Lint: eslint-plugin-solid's solid/event-handlers (v2 config) keeps reporting this site after migration.
-  Guide: https://github.com/solidjs/solid/blob/a8186e6738b3a6a3341c561f66e9325432d6759b/documentation/solid-2.0/MIGRATION.md#attributes--events-closer-to-html-and-fewer-namespaces
+  Guide: https://github.com/solidjs/solid/blob/82f71fddb1340cab46167db119da5702038e65ab/documentation/solid-2.0/MIGRATION.md#attributes--events-closer-to-html-and-fewer-namespaces
 
 src/events.tsx:18:27 [behavior] Migrate this lowercase onclick attribute to a camelCase event handler.
   Rule: jsx/dom-lowercase-events
-  Why: Solid 2.0.0 binds an event only for on followed by an uppercase letter; a lowercase onclick on a native element is a plain attribute in the browser, in SSR output, and through spreads, so a function value is stringified into the attribute instead of listening for click as Solid 1.x did.
+  Why: Solid 2.0.1 binds an event only for on followed by an uppercase letter; a lowercase onclick on a native element is a plain attribute in the browser, in SSR output, and through spreads, so a function value is stringified into the attribute instead of listening for click as Solid 1.x did.
   Guidance: Rename onclick to the camelCase handler spelled by Solid's JSX types (for example onClick, onDblClick, onPointerDown) and keep the handler expression unchanged. Keep a string value only if an HTML inline-handler attribute is intended. For a custom event name or native listener options, use a ref callback that calls addEventListener. Stop without proposing a rewrite when a spread attribute or another on-prefixed attribute on this element could bind the same event, or when the intended camelCase spelling is unclear.
   Lint: eslint-plugin-solid's solid/event-handlers (v2 config) keeps reporting this site after migration.
-  Guide: https://github.com/solidjs/solid/blob/a8186e6738b3a6a3341c561f66e9325432d6759b/documentation/solid-2.0/MIGRATION.md#attributes--events-closer-to-html-and-fewer-namespaces
+  Guide: https://github.com/solidjs/solid/blob/82f71fddb1340cab46167db119da5702038e65ab/documentation/solid-2.0/MIGRATION.md#attributes--events-closer-to-html-and-fewer-namespaces
 
 src/events.tsx:19:27 [behavior] Migrate this lowercase onload attribute to a camelCase event handler.
   Rule: jsx/dom-lowercase-events
-  Why: Solid 2.0.0 binds an event only for on followed by an uppercase letter; a lowercase onload on a native element is a plain attribute in the browser, in SSR output, and through spreads, so a function value is stringified into the attribute instead of listening for load as Solid 1.x did.
+  Why: Solid 2.0.1 binds an event only for on followed by an uppercase letter; a lowercase onload on a native element is a plain attribute in the browser, in SSR output, and through spreads, so a function value is stringified into the attribute instead of listening for load as Solid 1.x did.
   Guidance: Rename onload to the camelCase handler spelled by Solid's JSX types (for example onClick, onDblClick, onPointerDown) and keep the handler expression unchanged. Keep a string value only if an HTML inline-handler attribute is intended. For a custom event name or native listener options, use a ref callback that calls addEventListener. Stop without proposing a rewrite when a spread attribute or another on-prefixed attribute on this element could bind the same event, or when the intended camelCase spelling is unclear.
   Lint: eslint-plugin-solid's solid/event-handlers (v2 config) keeps reporting this site after migration.
-  Guide: https://github.com/solidjs/solid/blob/a8186e6738b3a6a3341c561f66e9325432d6759b/documentation/solid-2.0/MIGRATION.md#attributes--events-closer-to-html-and-fewer-namespaces
+  Guide: https://github.com/solidjs/solid/blob/82f71fddb1340cab46167db119da5702038e65ab/documentation/solid-2.0/MIGRATION.md#attributes--events-closer-to-html-and-fewer-namespaces
 
 src/events.tsx:20:15 [behavior] Migrate this lowercase onmycustomevent attribute to a camelCase event handler.
   Rule: jsx/dom-lowercase-events
-  Why: Solid 2.0.0 binds an event only for on followed by an uppercase letter; a lowercase onmycustomevent on a native element is a plain attribute in the browser, in SSR output, and through spreads, so a function value is stringified into the attribute instead of listening for mycustomevent as Solid 1.x did.
+  Why: Solid 2.0.1 binds an event only for on followed by an uppercase letter; a lowercase onmycustomevent on a native element is a plain attribute in the browser, in SSR output, and through spreads, so a function value is stringified into the attribute instead of listening for mycustomevent as Solid 1.x did.
   Guidance: Rename onmycustomevent to the camelCase handler spelled by Solid's JSX types (for example onClick, onDblClick, onPointerDown) and keep the handler expression unchanged. Keep a string value only if an HTML inline-handler attribute is intended. For a custom event name or native listener options, use a ref callback that calls addEventListener. Stop without proposing a rewrite when a spread attribute or another on-prefixed attribute on this element could bind the same event, or when the intended camelCase spelling is unclear.
   Lint: eslint-plugin-solid's solid/event-handlers (v2 config) keeps reporting this site after migration.
-  Guide: https://github.com/solidjs/solid/blob/a8186e6738b3a6a3341c561f66e9325432d6759b/documentation/solid-2.0/MIGRATION.md#attributes--events-closer-to-html-and-fewer-namespaces
+  Guide: https://github.com/solidjs/solid/blob/82f71fddb1340cab46167db119da5702038e65ab/documentation/solid-2.0/MIGRATION.md#attributes--events-closer-to-html-and-fewer-namespaces
 
 src/lists-refused.tsx:10:7 [build] Migrate this imported Index JSX site to For keyed={false}.
   Rule: jsx/component-renames
   Why: Solid 2 removes Index; its direct replacement is For with keyed={false}, whose child callback receives an item accessor and a stable numeric index.
   Guidance: Read the complete list site, its each value, child callback, props, and corresponding import. Replace the unaliased named Index import and this JSX component with For, add the literal keyed={false} mode, and review the callback so the item remains an accessor and the index remains a stable number. Stop without proposing a rewrite when props are spread or forwarded, each or the child callback is indirect, callback parameters escape to unknown code, item identity or index behavior is unclear, or focused list-update tests do not prove state preservation. Ask for the smallest focused test or runtime observation that covers insertion, removal, reordering, and item updates.
   Lint: eslint-plugin-solid's solid/removed-api (v2 config) keeps reporting this site after migration.
-  Guide: https://github.com/solidjs/solid/blob/a8186e6738b3a6a3341c561f66e9325432d6759b/documentation/solid-2.0/MIGRATION.md#list-rendering-index-is-gone-and-for-handles-each-keying-mode
+  Guide: https://github.com/solidjs/solid/blob/82f71fddb1340cab46167db119da5702038e65ab/documentation/solid-2.0/MIGRATION.md#list-rendering-index-is-gone-and-for-handles-each-keying-mode
 
 src/lists-refused.tsx:11:7 [build] Migrate this imported Index JSX site to For keyed={false}.
   Rule: jsx/component-renames
   Why: Solid 2 removes Index; its direct replacement is For with keyed={false}, whose child callback receives an item accessor and a stable numeric index.
   Guidance: Read the complete list site, its each value, child callback, props, and corresponding import. Replace the unaliased named Index import and this JSX component with For, add the literal keyed={false} mode, and review the callback so the item remains an accessor and the index remains a stable number. Stop without proposing a rewrite when props are spread or forwarded, each or the child callback is indirect, callback parameters escape to unknown code, item identity or index behavior is unclear, or focused list-update tests do not prove state preservation. Ask for the smallest focused test or runtime observation that covers insertion, removal, reordering, and item updates.
   Lint: eslint-plugin-solid's solid/removed-api (v2 config) keeps reporting this site after migration.
-  Guide: https://github.com/solidjs/solid/blob/a8186e6738b3a6a3341c561f66e9325432d6759b/documentation/solid-2.0/MIGRATION.md#list-rendering-index-is-gone-and-for-handles-each-keying-mode
+  Guide: https://github.com/solidjs/solid/blob/82f71fddb1340cab46167db119da5702038e65ab/documentation/solid-2.0/MIGRATION.md#list-rendering-index-is-gone-and-for-handles-each-keying-mode
 
 src/negative.ts:2:31 [build] Move this Solid 2 legacy subpath static import.
   Rule: imports/beta32-subpaths
@@ -361,7 +361,7 @@ src/negative.ts:2:31 [build] Move this Solid 2 legacy subpath static import.
     [native code]
 }.
   Guidance: Change only this static import's module source and preserve its import form and quote style.
-  Guide: https://github.com/solidjs/solid/blob/a8186e6738b3a6a3341c561f66e9325432d6759b/documentation/solid-2.0/MIGRATION.md#imports-where-things-live-now
+  Guide: https://github.com/solidjs/solid/blob/82f71fddb1340cab46167db119da5702038e65ab/documentation/solid-2.0/MIGRATION.md#imports-where-things-live-now
 
 src/negative.ts:3:28 [build] Move this Solid 2 legacy subpath static import.
   Rule: imports/beta32-subpaths
@@ -369,7 +369,7 @@ src/negative.ts:3:28 [build] Move this Solid 2 legacy subpath static import.
     [native code]
 }.
   Guidance: Change only this static import's module source and preserve its import form and quote style.
-  Guide: https://github.com/solidjs/solid/blob/a8186e6738b3a6a3341c561f66e9325432d6759b/documentation/solid-2.0/MIGRATION.md#imports-where-things-live-now
+  Guide: https://github.com/solidjs/solid/blob/82f71fddb1340cab46167db119da5702038e65ab/documentation/solid-2.0/MIGRATION.md#imports-where-things-live-now
 
 src/negative.ts:4:34 [build] Move this Solid 2 legacy subpath static import.
   Rule: imports/beta32-subpaths
@@ -377,148 +377,148 @@ src/negative.ts:4:34 [build] Move this Solid 2 legacy subpath static import.
     [native code]
 }.
   Guidance: Change only this static import's module source and preserve its import form and quote style.
-  Guide: https://github.com/solidjs/solid/blob/a8186e6738b3a6a3341c561f66e9325432d6759b/documentation/solid-2.0/MIGRATION.md#imports-where-things-live-now
+  Guide: https://github.com/solidjs/solid/blob/82f71fddb1340cab46167db119da5702038e65ab/documentation/solid-2.0/MIGRATION.md#imports-where-things-live-now
 
 src/negative.ts:5:25 [build] Move this Solid 2 legacy subpath static import.
   Rule: imports/beta32-subpaths
   Why: Solid 2 publishes __proto__ from [object Object].
   Guidance: Change only this static import's module source and preserve its import form and quote style.
-  Guide: https://github.com/solidjs/solid/blob/a8186e6738b3a6a3341c561f66e9325432d6759b/documentation/solid-2.0/MIGRATION.md#imports-where-things-live-now
+  Guide: https://github.com/solidjs/solid/blob/82f71fddb1340cab46167db119da5702038e65ab/documentation/solid-2.0/MIGRATION.md#imports-where-things-live-now
 
 src/negative.ts:6:16 [build] Move this Solid 2 legacy subpath re-export.
   Rule: imports/beta32-subpaths
   Why: Solid 2 publishes solid-js/h from @solidjs/h.
   Guidance: Change only this re-export's module source and preserve its export form and quote style.
-  Guide: https://github.com/solidjs/solid/blob/a8186e6738b3a6a3341c561f66e9325432d6759b/documentation/solid-2.0/MIGRATION.md#imports-where-things-live-now
+  Guide: https://github.com/solidjs/solid/blob/82f71fddb1340cab46167db119da5702038e65ab/documentation/solid-2.0/MIGRATION.md#imports-where-things-live-now
 
 src/negative.ts:10:29 [build] Move this Solid 2 legacy subpath static import.
   Rule: imports/beta32-subpaths
   Why: Solid 2 publishes solid-js/store from solid-js.
   Guidance: Change only this static import's module source and preserve its import form and quote style. Stop: do not blindly rewrite this source. The plain createStore setter in Solid 2 accepts only a draft callback, setStore(state => { ... }); 1.x path setters such as setStore("user", "name", value) and object merges such as setStore({ count: 1 }) must become draft writes, reconcile(value, options) became reconcile(value, key), and unwrap, produce, createMutable, and modifyMutable are renamed or removed. Migrate those call sites first, then move the surviving store imports to solid-js.
   Lint: eslint-plugin-solid's solid/removed-api (v2 config) keeps reporting this site after migration.
-  Guide: https://github.com/solidjs/solid/blob/a8186e6738b3a6a3341c561f66e9325432d6759b/documentation/solid-2.0/MIGRATION.md#imports-where-things-live-now
+  Guide: https://github.com/solidjs/solid/blob/82f71fddb1340cab46167db119da5702038e65ab/documentation/solid-2.0/MIGRATION.md#imports-where-things-live-now
 
 src/negative.ts:11:22 [build] Move this Solid web renderer static import.
   Rule: imports/web-import
   Why: Solid 2 publishes the web renderer from @solidjs/web instead of the solid-js/web subpath.
   Guidance: Change only this static import's module source to @solidjs/web and preserve its import form and quote style. If this code reads Suspense, ErrorBoundary, SuspenseList, mergeProps, Index, createDynamic, renderToStringAsync or clearDelegatedEvents from the module, replace those first; @solidjs/web does not export them.
   Lint: eslint-plugin-solid's solid/removed-api (v2 config) keeps reporting this site after migration.
-  Guide: https://github.com/solidjs/solid/blob/a8186e6738b3a6a3341c561f66e9325432d6759b/documentation/solid-2.0/MIGRATION.md#imports-where-things-live-now
+  Guide: https://github.com/solidjs/solid/blob/82f71fddb1340cab46167db119da5702038e65ab/documentation/solid-2.0/MIGRATION.md#imports-where-things-live-now
 
 src/negative.ts:17:26 [build] Move this Solid 2 legacy subpath require() call.
   Rule: imports/beta32-subpaths
   Why: Solid 2 publishes solid-js/html from @solidjs/html.
   Guidance: Change only this require call's module source and preserve its quote style.
-  Guide: https://github.com/solidjs/solid/blob/a8186e6738b3a6a3341c561f66e9325432d6759b/documentation/solid-2.0/MIGRATION.md#imports-where-things-live-now
+  Guide: https://github.com/solidjs/solid/blob/82f71fddb1340cab46167db119da5702038e65ab/documentation/solid-2.0/MIGRATION.md#imports-where-things-live-now
 
 src/negative.ts:18:29 [build] Move this Solid web renderer require() call.
   Rule: imports/web-import
   Why: Solid 2 publishes the web renderer from @solidjs/web instead of the solid-js/web subpath.
   Guidance: Change only this require call's module source to @solidjs/web and preserve its quote style. If this code reads Suspense, ErrorBoundary, SuspenseList, mergeProps, Index, createDynamic, renderToStringAsync or clearDelegatedEvents from the module, replace those first; @solidjs/web does not export them.
   Lint: eslint-plugin-solid's solid/removed-api (v2 config) keeps reporting this site after migration.
-  Guide: https://github.com/solidjs/solid/blob/a8186e6738b3a6a3341c561f66e9325432d6759b/documentation/solid-2.0/MIGRATION.md#imports-where-things-live-now
+  Guide: https://github.com/solidjs/solid/blob/82f71fddb1340cab46167db119da5702038e65ab/documentation/solid-2.0/MIGRATION.md#imports-where-things-live-now
 
 src/nested/deep.jsx:7:26 [build] Move this Solid web renderer static import.
   Rule: imports/web-import
   Why: Solid 2 publishes the web renderer from @solidjs/web instead of the solid-js/web subpath.
   Guidance: Do not move Suspense with the module source: replace Suspense with Loading from solid-js. Nothing else in this statement moves to @solidjs/web.
   Lint: eslint-plugin-solid's solid/removed-api (v2 config) keeps reporting this site after migration.
-  Guide: https://github.com/solidjs/solid/blob/a8186e6738b3a6a3341c561f66e9325432d6759b/documentation/solid-2.0/MIGRATION.md#imports-where-things-live-now
+  Guide: https://github.com/solidjs/solid/blob/82f71fddb1340cab46167db119da5702038e65ab/documentation/solid-2.0/MIGRATION.md#imports-where-things-live-now
 
 src/plain.js:4:21 [build] Move this Solid web renderer require() call.
   Rule: imports/web-import
   Why: Solid 2 publishes the web renderer from @solidjs/web instead of the solid-js/web subpath.
   Guidance: Change only this require call's module source to @solidjs/web and preserve its quote style. If this code reads Suspense, ErrorBoundary, SuspenseList, mergeProps, Index, createDynamic, renderToStringAsync or clearDelegatedEvents from the module, replace those first; @solidjs/web does not export them.
   Lint: eslint-plugin-solid's solid/removed-api (v2 config) keeps reporting this site after migration.
-  Guide: https://github.com/solidjs/solid/blob/a8186e6738b3a6a3341c561f66e9325432d6759b/documentation/solid-2.0/MIGRATION.md#imports-where-things-live-now
+  Guide: https://github.com/solidjs/solid/blob/82f71fddb1340cab46167db119da5702038e65ab/documentation/solid-2.0/MIGRATION.md#imports-where-things-live-now
 
 src/real-world/active-element.tsx:20:7 [build] Migrate this use: directive to a ref directive factory.
   Rule: jsx/dom-use-directive
-  Why: Solid 2.0.0 removes use: directives (the compiler rejects them on native elements); custom element behaviors use ref directive factories with a two-phase pattern: an owned setup phase that creates primitives, effects, and onCleanup registrations, which returns an unowned apply callback that receives the element.
+  Why: Solid 2.0.1 removes use: directives (the compiler rejects them on native elements); custom element behaviors use ref directive factories with a two-phase pattern: an owned setup phase that creates primitives, effects, and onCleanup registrations, which returns an unowned apply callback that receives the element.
   Guidance: Replace use:focus={options} with ref={focus(options)} (or ref={focus} when the directive takes no options; arrays compose as ref={[a, b]}). Rewrite the directive itself as a factory function that performs its setup in the owned body and returns the element callback (el) => { ... } for DOM writes. Read the directive's source, identify its element setup and teardown logic, and port them to that pattern.
-  Guide: https://github.com/solidjs/solid/blob/a8186e6738b3a6a3341c561f66e9325432d6759b/documentation/solid-2.0/MIGRATION.md#directives-use--ref-directive-factories-two-phase-pattern
+  Guide: https://github.com/solidjs/solid/blob/82f71fddb1340cab46167db119da5702038e65ab/documentation/solid-2.0/MIGRATION.md#directives-use--ref-directive-factories-two-phase-pattern
 
 src/relocations.tsx:29:57 [build] Move this Solid web renderer static import.
   Rule: imports/web-import
   Why: Solid 2 publishes the web renderer from @solidjs/web instead of the solid-js/web subpath.
   Guidance: Do not move createDynamic with the module source: replace createDynamic(source, props) with the dynamic(source) factory from @solidjs/web. Nothing else in this statement moves to @solidjs/web.
   Lint: eslint-plugin-solid's solid/removed-api (v2 config) keeps reporting this site after migration.
-  Guide: https://github.com/solidjs/solid/blob/a8186e6738b3a6a3341c561f66e9325432d6759b/documentation/solid-2.0/MIGRATION.md#imports-where-things-live-now
+  Guide: https://github.com/solidjs/solid/blob/82f71fddb1340cab46167db119da5702038e65ab/documentation/solid-2.0/MIGRATION.md#imports-where-things-live-now
 
 src/relocations.tsx:31:37 [build] Move this Solid web renderer static import.
   Rule: imports/web-import
   Why: Solid 2 publishes the web renderer from @solidjs/web instead of the solid-js/web subpath.
   Guidance: Change only this static import's module source to @solidjs/web and preserve its import form and quote style.
   Lint: eslint-plugin-solid's solid/removed-api (v2 config) keeps reporting this site after migration.
-  Guide: https://github.com/solidjs/solid/blob/a8186e6738b3a6a3341c561f66e9325432d6759b/documentation/solid-2.0/MIGRATION.md#imports-where-things-live-now
+  Guide: https://github.com/solidjs/solid/blob/82f71fddb1340cab46167db119da5702038e65ab/documentation/solid-2.0/MIGRATION.md#imports-where-things-live-now
 
 src/relocations.tsx:32:60 [build] Move this Solid web renderer static import.
   Rule: imports/web-import
   Why: Solid 2 publishes the web renderer from @solidjs/web instead of the solid-js/web subpath.
   Guidance: Change only this static import's module source to @solidjs/web and preserve its import form and quote style.
   Lint: eslint-plugin-solid's solid/removed-api (v2 config) keeps reporting this site after migration.
-  Guide: https://github.com/solidjs/solid/blob/a8186e6738b3a6a3341c561f66e9325432d6759b/documentation/solid-2.0/MIGRATION.md#imports-where-things-live-now
+  Guide: https://github.com/solidjs/solid/blob/82f71fddb1340cab46167db119da5702038e65ab/documentation/solid-2.0/MIGRATION.md#imports-where-things-live-now
 
 src/relocations.tsx:33:31 [build] Move this Solid web renderer static import.
   Rule: imports/web-import
   Why: Solid 2 publishes the web renderer from @solidjs/web instead of the solid-js/web subpath.
   Guidance: Change only this static import's module source to @solidjs/web and preserve its import form and quote style. If this code reads Suspense, ErrorBoundary, SuspenseList, mergeProps, Index, createDynamic, renderToStringAsync or clearDelegatedEvents from the module, replace those first; @solidjs/web does not export them.
   Lint: eslint-plugin-solid's solid/removed-api (v2 config) keeps reporting this site after migration.
-  Guide: https://github.com/solidjs/solid/blob/a8186e6738b3a6a3341c561f66e9325432d6759b/documentation/solid-2.0/MIGRATION.md#imports-where-things-live-now
+  Guide: https://github.com/solidjs/solid/blob/82f71fddb1340cab46167db119da5702038e65ab/documentation/solid-2.0/MIGRATION.md#imports-where-things-live-now
 
 src/relocations.tsx:34:24 [build] Move this Solid web renderer static import.
   Rule: imports/web-import
   Why: Solid 2 publishes the web renderer from @solidjs/web instead of the solid-js/web subpath.
   Guidance: Change only this static import's module source to @solidjs/web and preserve its import form and quote style. If this code reads Suspense, ErrorBoundary, SuspenseList, mergeProps, Index, createDynamic, renderToStringAsync or clearDelegatedEvents from the module, replace those first; @solidjs/web does not export them.
   Lint: eslint-plugin-solid's solid/removed-api (v2 config) keeps reporting this site after migration.
-  Guide: https://github.com/solidjs/solid/blob/a8186e6738b3a6a3341c561f66e9325432d6759b/documentation/solid-2.0/MIGRATION.md#imports-where-things-live-now
+  Guide: https://github.com/solidjs/solid/blob/82f71fddb1340cab46167db119da5702038e65ab/documentation/solid-2.0/MIGRATION.md#imports-where-things-live-now
 
 src/relocations.tsx:35:27 [build] Move this Solid web renderer dynamic import().
   Rule: imports/web-import
   Why: Solid 2 publishes the web renderer from @solidjs/web instead of the solid-js/web subpath.
   Guidance: Change only this dynamic import's module source to @solidjs/web and preserve its quote style. If this code reads Suspense, ErrorBoundary, SuspenseList, mergeProps, Index, createDynamic, renderToStringAsync or clearDelegatedEvents from the module, replace those first; @solidjs/web does not export them.
   Lint: eslint-plugin-solid's solid/removed-api (v2 config) keeps reporting this site after migration.
-  Guide: https://github.com/solidjs/solid/blob/a8186e6738b3a6a3341c561f66e9325432d6759b/documentation/solid-2.0/MIGRATION.md#imports-where-things-live-now
+  Guide: https://github.com/solidjs/solid/blob/82f71fddb1340cab46167db119da5702038e65ab/documentation/solid-2.0/MIGRATION.md#imports-where-things-live-now
 
 src/relocations.tsx:38:50 [build] Move this Solid 2 legacy subpath static import.
   Rule: imports/beta32-subpaths
   Why: Solid 2 publishes solid-js/store from solid-js.
   Guidance: Change only this static import's module source and preserve its import form and quote style. Stop: do not blindly rewrite this source. The plain createStore setter in Solid 2 accepts only a draft callback, setStore(state => { ... }); 1.x path setters such as setStore("user", "name", value) and object merges such as setStore({ count: 1 }) must become draft writes, reconcile(value, options) became reconcile(value, key), and unwrap, produce, createMutable, and modifyMutable are renamed or removed. Migrate those call sites first, then move the surviving store imports to solid-js.
   Lint: eslint-plugin-solid's solid/removed-api (v2 config) keeps reporting this site after migration.
-  Guide: https://github.com/solidjs/solid/blob/a8186e6738b3a6a3341c561f66e9325432d6759b/documentation/solid-2.0/MIGRATION.md#imports-where-things-live-now
+  Guide: https://github.com/solidjs/solid/blob/82f71fddb1340cab46167db119da5702038e65ab/documentation/solid-2.0/MIGRATION.md#imports-where-things-live-now
 
 src/store-merge.ts:3:29 [build] Move this Solid 2 legacy subpath static import.
   Rule: imports/beta32-subpaths
   Why: Solid 2 publishes solid-js/store from solid-js.
   Guidance: Change only this static import's module source and preserve its import form and quote style. Stop: do not blindly rewrite this source. The plain createStore setter in Solid 2 accepts only a draft callback, setStore(state => { ... }); 1.x path setters such as setStore("user", "name", value) and object merges such as setStore({ count: 1 }) must become draft writes, reconcile(value, options) became reconcile(value, key), and unwrap, produce, createMutable, and modifyMutable are renamed or removed. Migrate those call sites first, then move the surviving store imports to solid-js.
   Lint: eslint-plugin-solid's solid/removed-api (v2 config) keeps reporting this site after migration.
-  Guide: https://github.com/solidjs/solid/blob/a8186e6738b3a6a3341c561f66e9325432d6759b/documentation/solid-2.0/MIGRATION.md#imports-where-things-live-now
+  Guide: https://github.com/solidjs/solid/blob/82f71fddb1340cab46167db119da5702038e65ab/documentation/solid-2.0/MIGRATION.md#imports-where-things-live-now
 
 src/store-merge.ts:7:1 [build] Rewrite this object-merge store setter call as draft assignments.
   Rule: store/setter-calls
-  Why: The argument is an object. Solid 2.0.0's plain store setter accepts only a draft callback, setStore(state => { ... }); Solid 1.x also accepted a path followed by a value, an object to merge, and a function whose returned object was merged into the store, while a value returned from the 2.0 draft callback is adopted as the whole new state instead.
+  Why: The argument is an object. Solid 2.0.1's plain store setter accepts only a draft callback, setStore(state => { ... }); Solid 1.x also accepted a path followed by a value, an object to merge, and a function whose returned object was merged into the store, while a value returned from the 2.0 draft callback is adopted as the whole new state instead.
   Guidance: Read the argument and the store shape. Replace the call with setStore(state => { ... }) that assigns each top-level key of the argument onto the draft; nested objects that 1.x merged shallowly must be assigned per key too if other keys at that level must survive.
-  Guide: https://github.com/solidjs/solid/blob/a8186e6738b3a6a3341c561f66e9325432d6759b/documentation/solid-2.0/MIGRATION.md#draft-first-setters
+  Guide: https://github.com/solidjs/solid/blob/82f71fddb1340cab46167db119da5702038e65ab/documentation/solid-2.0/MIGRATION.md#draft-first-setters
 
 src/types.tsx:7:10 [build] Move this JSXElement type import off solid-js.
   Rule: imports/jsx-types
-  Why: Solid 2.0.0 no longer exports the JSX namespace or the JSXElement alias from solid-js; renderer packages own JSX types, and web projects import JSX from @solidjs/web.
+  Why: Solid 2.0.1 no longer exports the JSX namespace or the JSXElement alias from solid-js; renderer packages own JSX types, and web projects import JSX from @solidjs/web.
   Guidance: Replace JSXElement with JSX.Element from @solidjs/web, or with Element from solid-js for renderer-neutral component code. Also set compilerOptions.jsxImportSource to @solidjs/web in tsconfig.json, which this analyzer does not scan.
-  Guide: https://github.com/solidjs/solid/blob/a8186e6738b3a6a3341c561f66e9325432d6759b/documentation/solid-2.0/MIGRATION.md#typescript-jsx-solid-js--renderer-package
+  Guide: https://github.com/solidjs/solid/blob/82f71fddb1340cab46167db119da5702038e65ab/documentation/solid-2.0/MIGRATION.md#typescript-jsx-solid-js--renderer-package
 
 src/untouched.ts:2:29 [build] Move this Solid 2 legacy subpath static import.
   Rule: imports/beta32-subpaths
   Why: Solid 2 publishes solid-js/store from solid-js.
   Guidance: Change only this static import's module source and preserve its import form and quote style. Stop: do not blindly rewrite this source. The plain createStore setter in Solid 2 accepts only a draft callback, setStore(state => { ... }); 1.x path setters such as setStore("user", "name", value) and object merges such as setStore({ count: 1 }) must become draft writes, reconcile(value, options) became reconcile(value, key), and unwrap, produce, createMutable, and modifyMutable are renamed or removed. Migrate those call sites first, then move the surviving store imports to solid-js.
   Lint: eslint-plugin-solid's solid/removed-api (v2 config) keeps reporting this site after migration.
-  Guide: https://github.com/solidjs/solid/blob/a8186e6738b3a6a3341c561f66e9325432d6759b/documentation/solid-2.0/MIGRATION.md#imports-where-things-live-now
+  Guide: https://github.com/solidjs/solid/blob/82f71fddb1340cab46167db119da5702038e65ab/documentation/solid-2.0/MIGRATION.md#imports-where-things-live-now
 
 src/untouched.ts:3:24 [build] Move this Solid web renderer static import.
   Rule: imports/web-import
   Why: Solid 2 publishes the web renderer from @solidjs/web instead of the solid-js/web subpath.
   Guidance: Change only this static import's module source to @solidjs/web and preserve its import form and quote style.
   Lint: eslint-plugin-solid's solid/removed-api (v2 config) keeps reporting this site after migration.
-  Guide: https://github.com/solidjs/solid/blob/a8186e6738b3a6a3341c561f66e9325432d6759b/documentation/solid-2.0/MIGRATION.md#imports-where-things-live-now
+  Guide: https://github.com/solidjs/solid/blob/82f71fddb1340cab46167db119da5702038e65ab/documentation/solid-2.0/MIGRATION.md#imports-where-things-live-now
 
 [solid-migration-assistant] Summary: 49 findings in 14 files
 Will not build or run on Solid 2: 43 findings
@@ -570,4 +570,4 @@ Deprecated but still working: 1 finding
 [solid-migration-assistant] Nothing was installed (--no-install), so the project wasn't typechecked against Solid 2.
 
 Next:
-- Install with your package manager, then typecheck: package.json now targets Solid 2.0.0.
+- Install with your package manager, then typecheck: package.json now targets Solid 2.0.1.

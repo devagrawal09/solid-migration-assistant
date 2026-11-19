@@ -16,9 +16,9 @@ const packageMetadata = JSON.parse(
   readFileSync(resolve(packageDirectory, "package.json"), "utf8"),
 );
 
-const SOLID_VERSION = "2.0.0";
+const SOLID_VERSION = "2.0.1";
 const SOLID_TARGET = `solid-js@${SOLID_VERSION}`;
-const SOLID_SOURCE_COMMIT = "a8186e6738b3a6a3341c561f66e9325432d6759b";
+const SOLID_SOURCE_COMMIT = "82f71fddb1340cab46167db119da5702038e65ab";
 const MIGRATION_GUIDE = `https://github.com/solidjs/solid/blob/${SOLID_SOURCE_COMMIT}/documentation/solid-2.0/MIGRATION.md`;
 const FEEDBACK_URL =
   "https://github.com/devagrawal09/solid-migration-assistant/issues";

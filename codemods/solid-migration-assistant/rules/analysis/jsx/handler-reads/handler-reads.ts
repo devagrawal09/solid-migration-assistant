@@ -11,7 +11,7 @@ const DIAGNOSTICS_GUIDE = MIGRATION_GUIDE_URL.replace("MIGRATION.md", "08-dev-di
  * Reports event handler expressions on native elements that call something
  * to pick the handler, such as `onClick={selected() ? a : b}`. Both 1.9 and
  * 2.0.0 compile the expression to one read when the element is created
- * (checked with babel-preset-solid 1.9 and @solidjs/babel-plugin 2.0.0), so
+ * (checked with babel-preset-solid 1.9 and @solidjs/babel-plugin 2.0.1), so
  * behavior is the same; 2.0.0 dev builds add a STRICT_READ_UNTRACKED warning
  * when the read touches reactive state. `.bind(...)` and calls inside a
  * function literal are not counted, and so are calls with arguments, which

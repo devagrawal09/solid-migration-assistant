@@ -7,9 +7,9 @@
       "column": 1,
       "severity": "build",
       "headline": "Rewrite this path-style store setter call as a draft write.",
-      "why": "This call passes 3 arguments. Solid 2.0.0's plain store setter accepts only a draft callback, setStore(state => { ... }); Solid 1.x also accepted a path followed by a value, an object to merge, and a function whose returned object was merged into the store, while a value returned from the 2.0 draft callback is adopted as the whole new state instead.",
+      "why": "This call passes 3 arguments. Solid 2.0.1's plain store setter accepts only a draft callback, setStore(state => { ... }); Solid 1.x also accepted a path followed by a value, an object to merge, and a function whose returned object was merged into the store, while a value returned from the 2.0 draft callback is adopted as the whole new state instead.",
       "guidance": "Read the path segments and the final value. Replace the call with setStore(state => { ... }) that walks the same path on the draft: a string or number segment becomes a property access, an array of keys becomes a loop over those keys, a range becomes a loop over its indices, a filter function becomes a loop with an if, and a final function value becomes a read-modify-write of the draft property: in 1.x an object it returned was merged into the existing node, so on the draft assign only the properties it changed (assigning a whole object replaces the node). Setting undefined to remove a key becomes delete.",
-      "guide": "https://github.com/solidjs/solid/blob/a8186e6738b3a6a3341c561f66e9325432d6759b/documentation/solid-2.0/MIGRATION.md#draft-first-setters",
+      "guide": "https://github.com/solidjs/solid/blob/82f71fddb1340cab46167db119da5702038e65ab/documentation/solid-2.0/MIGRATION.md#draft-first-setters",
       "lint": []
     },
     {
@@ -19,9 +19,9 @@
       "column": 1,
       "severity": "build",
       "headline": "Rewrite this path-style store setter call as a draft write.",
-      "why": "This call passes 4 arguments. Solid 2.0.0's plain store setter accepts only a draft callback, setStore(state => { ... }); Solid 1.x also accepted a path followed by a value, an object to merge, and a function whose returned object was merged into the store, while a value returned from the 2.0 draft callback is adopted as the whole new state instead.",
+      "why": "This call passes 4 arguments. Solid 2.0.1's plain store setter accepts only a draft callback, setStore(state => { ... }); Solid 1.x also accepted a path followed by a value, an object to merge, and a function whose returned object was merged into the store, while a value returned from the 2.0 draft callback is adopted as the whole new state instead.",
       "guidance": "Read the path segments and the final value. Replace the call with setStore(state => { ... }) that walks the same path on the draft: a string or number segment becomes a property access, an array of keys becomes a loop over those keys, a range becomes a loop over its indices, a filter function becomes a loop with an if, and a final function value becomes a read-modify-write of the draft property: in 1.x an object it returned was merged into the existing node, so on the draft assign only the properties it changed (assigning a whole object replaces the node). Setting undefined to remove a key becomes delete.",
-      "guide": "https://github.com/solidjs/solid/blob/a8186e6738b3a6a3341c561f66e9325432d6759b/documentation/solid-2.0/MIGRATION.md#draft-first-setters",
+      "guide": "https://github.com/solidjs/solid/blob/82f71fddb1340cab46167db119da5702038e65ab/documentation/solid-2.0/MIGRATION.md#draft-first-setters",
       "lint": []
     },
     {
@@ -31,9 +31,9 @@
       "column": 1,
       "severity": "build",
       "headline": "Rewrite this object-merge store setter call as draft assignments.",
-      "why": "The argument is an object. Solid 2.0.0's plain store setter accepts only a draft callback, setStore(state => { ... }); Solid 1.x also accepted a path followed by a value, an object to merge, and a function whose returned object was merged into the store, while a value returned from the 2.0 draft callback is adopted as the whole new state instead.",
+      "why": "The argument is an object. Solid 2.0.1's plain store setter accepts only a draft callback, setStore(state => { ... }); Solid 1.x also accepted a path followed by a value, an object to merge, and a function whose returned object was merged into the store, while a value returned from the 2.0 draft callback is adopted as the whole new state instead.",
       "guidance": "Read the argument and the store shape. Replace the call with setStore(state => { ... }) that assigns each top-level key of the argument onto the draft; nested objects that 1.x merged shallowly must be assigned per key too if other keys at that level must survive.",
-      "guide": "https://github.com/solidjs/solid/blob/a8186e6738b3a6a3341c561f66e9325432d6759b/documentation/solid-2.0/MIGRATION.md#draft-first-setters",
+      "guide": "https://github.com/solidjs/solid/blob/82f71fddb1340cab46167db119da5702038e65ab/documentation/solid-2.0/MIGRATION.md#draft-first-setters",
       "lint": []
     },
     {
@@ -43,9 +43,9 @@
       "column": 1,
       "severity": "behavior",
       "headline": "Review the value this store setter callback returns.",
-      "why": "Solid 2.0.0's plain store setter accepts only a draft callback, setStore(state => { ... }); Solid 1.x also accepted a path followed by a value, an object to merge, and a function whose returned object was merged into the store, while a value returned from the 2.0 draft callback is adopted as the whole new state instead.",
+      "why": "Solid 2.0.1's plain store setter accepts only a draft callback, setStore(state => { ... }); Solid 1.x also accepted a path followed by a value, an object to merge, and a function whose returned object was merged into the store, while a value returned from the 2.0 draft callback is adopted as the whole new state instead.",
       "guidance": "Read the callback's return value and every key it omits. If it was spreading the previous state to produce a merged object, mutate the draft in place and return nothing. If it intentionally replaces the whole store, keep the return but confirm every consumer accepts the replacement, since keys missing from the returned object no longer survive.",
-      "guide": "https://github.com/solidjs/solid/blob/a8186e6738b3a6a3341c561f66e9325432d6759b/documentation/solid-2.0/MIGRATION.md#draft-first-setters",
+      "guide": "https://github.com/solidjs/solid/blob/82f71fddb1340cab46167db119da5702038e65ab/documentation/solid-2.0/MIGRATION.md#draft-first-setters",
       "lint": []
     },
     {
@@ -55,9 +55,9 @@
       "column": 1,
       "severity": "behavior",
       "headline": "Review the value this store setter callback returns.",
-      "why": "Solid 2.0.0's plain store setter accepts only a draft callback, setStore(state => { ... }); Solid 1.x also accepted a path followed by a value, an object to merge, and a function whose returned object was merged into the store, while a value returned from the 2.0 draft callback is adopted as the whole new state instead.",
+      "why": "Solid 2.0.1's plain store setter accepts only a draft callback, setStore(state => { ... }); Solid 1.x also accepted a path followed by a value, an object to merge, and a function whose returned object was merged into the store, while a value returned from the 2.0 draft callback is adopted as the whole new state instead.",
       "guidance": "Read the callback's return value and every key it omits. If it was spreading the previous state to produce a merged object, mutate the draft in place and return nothing. If it intentionally replaces the whole store, keep the return but confirm every consumer accepts the replacement, since keys missing from the returned object no longer survive.",
-      "guide": "https://github.com/solidjs/solid/blob/a8186e6738b3a6a3341c561f66e9325432d6759b/documentation/solid-2.0/MIGRATION.md#draft-first-setters",
+      "guide": "https://github.com/solidjs/solid/blob/82f71fddb1340cab46167db119da5702038e65ab/documentation/solid-2.0/MIGRATION.md#draft-first-setters",
       "lint": []
     },
     {
@@ -67,9 +67,9 @@
       "column": 41,
       "severity": "behavior",
       "headline": "Trace this store setter that is passed as a value.",
-      "why": "Solid 2.0.0's plain store setter accepts only a draft callback, setStore(state => { ... }); Solid 1.x also accepted a path followed by a value, an object to merge, and a function whose returned object was merged into the store, while a value returned from the 2.0 draft callback is adopted as the whole new state instead.",
+      "why": "Solid 2.0.1's plain store setter accepts only a draft callback, setStore(state => { ... }); Solid 1.x also accepted a path followed by a value, an object to merge, and a function whose returned object was merged into the store, while a value returned from the 2.0 draft callback is adopted as the whole new state instead.",
       "guidance": "Find every call made through this reference (an event handler, a helper, a child component prop) and classify its arguments as above: paths and object merges become draft callbacks, and returned objects replace instead of merge. Stop and ask for the call sites when the reference escapes to code outside this project.",
-      "guide": "https://github.com/solidjs/solid/blob/a8186e6738b3a6a3341c561f66e9325432d6759b/documentation/solid-2.0/MIGRATION.md#draft-first-setters",
+      "guide": "https://github.com/solidjs/solid/blob/82f71fddb1340cab46167db119da5702038e65ab/documentation/solid-2.0/MIGRATION.md#draft-first-setters",
       "lint": []
     },
     {
@@ -79,9 +79,9 @@
       "column": 27,
       "severity": "behavior",
       "headline": "Trace this store setter that is passed as a value.",
-      "why": "Solid 2.0.0's plain store setter accepts only a draft callback, setStore(state => { ... }); Solid 1.x also accepted a path followed by a value, an object to merge, and a function whose returned object was merged into the store, while a value returned from the 2.0 draft callback is adopted as the whole new state instead.",
+      "why": "Solid 2.0.1's plain store setter accepts only a draft callback, setStore(state => { ... }); Solid 1.x also accepted a path followed by a value, an object to merge, and a function whose returned object was merged into the store, while a value returned from the 2.0 draft callback is adopted as the whole new state instead.",
       "guidance": "Find every call made through this reference (an event handler, a helper, a child component prop) and classify its arguments as above: paths and object merges become draft callbacks, and returned objects replace instead of merge. Stop and ask for the call sites when the reference escapes to code outside this project.",
-      "guide": "https://github.com/solidjs/solid/blob/a8186e6738b3a6a3341c561f66e9325432d6759b/documentation/solid-2.0/MIGRATION.md#draft-first-setters",
+      "guide": "https://github.com/solidjs/solid/blob/82f71fddb1340cab46167db119da5702038e65ab/documentation/solid-2.0/MIGRATION.md#draft-first-setters",
       "lint": []
     }
   ]

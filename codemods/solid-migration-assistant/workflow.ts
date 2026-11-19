@@ -1,4 +1,4 @@
-import { approval, forEachFile, getState, jssg, shell, step } from "codemod/workflow";
+import { approval, forEachFile, jssg, shell, step } from "codemod/workflow";
 import { DEPENDENCY_MAP } from "./shared/dependencies.mjs";
 import { bumpManifest, bumpTsconfig } from "./shared/manifest.mjs";
 import { bumpCatalogs } from "./shared/catalog.mjs";
@@ -6,8 +6,10 @@ import { byLocation, renderText } from "./shared/format.mjs";
 import { ANALYSIS_STEPS, TRANSFORM_STEPS } from "./shared/steps.generated.ts";
 import { MIGRATION_GUIDE_URL, SOLID_TARGET_VERSION } from "./shared/target.ts";
 
-// The Solid 1.9 -> 2 assistant on the code-first engine
-// (codemod/codemod#2485, engine/code-first 9c91ebf, published as 2.0.0-alpha.3).
+// The Solid 1.9 -> 2 assistant on the code-first engine (codemod/codemod#2485,
+// published as codemod@2.0.0-alpha.4). The engine keeps no workflow state:
+// rules return findings and rewrites as jssg data, and shell steps print
+// their result as one JSON line that the workflow parses.
 
 const OUTSIDE_PROJECT = ["**/node_modules/**", "**/dist/**", "**/build/**", "**/coverage/**"];
 const SOURCES = {
@@ -20,8 +22,6 @@ const PROJECT_CONFIGS = {
   include: ["package.json", "tsconfig.json", "tsconfig.*.json", "jsconfig.json"],
   exclude: OUTSIDE_PROJECT,
 };
-const FINDINGS = "solid-migration-assistant-guidance";
-const REWRITES = "solid-migration-assistant-transform-report";
 
 type DependencyEntry = {
   name: string;
@@ -147,9 +147,9 @@ export default async function main({ params }: { params: Params }) {
   }));
 
   // A shell step runs where Codemod was started unless given a cwd, which is
-  // relative to the target.
+  // relative to the target. The script prints its summary as JSON on stdout.
   const lint = async (label: string, key: string) =>
-    step(label, shell({ cwd: "." })`sh ${import.meta.dirname}/verify/eslint-solid-v2.sh ${key}`);
+    lastJsonLine((await step(label, shell({ cwd: "." })`sh ${import.meta.dirname}/verify/eslint-solid-v2.sh ${key}`)).stdout);
 
   // jssg rules run on exactly the stage's files. Paths are passed as globs, so
   // brackets in route files like src/routes/[id].tsx are escaped.
@@ -159,8 +159,11 @@ export default async function main({ params }: { params: Params }) {
       jssg(script, { semanticAnalysis: "workspace" }),
     ));
   const failures: { step: string; path: string; error: string }[] = [];
+  const found: any[] = [];
+  const rewritten: any[] = [];
 
-  if (verify) await lint("Lint with eslint-plugin-solid v2 (before)", "lintBefore");
+  const before = verify ? await lint("Lint with eslint-plugin-solid v2 (before)", "lintBefore") : undefined;
+  let after: any;
 
   const analyze = async () => {
     for (const stage of plan) {
@@ -168,6 +171,7 @@ export default async function main({ params }: { params: Params }) {
       for (const rule of stage.analyses) {
         const label = `${stage.name}: ${rule}`;
         const result = await runRule(label, `./scripts/analysis/${rule}.ts`, stage.files);
+        for (const entry of result.data) found.push(...((entry.data as any)?.findings ?? []));
         failures.push(...result.failures.map((f) => ({ step: label, ...f })));
       }
     }
@@ -178,6 +182,7 @@ export default async function main({ params }: { params: Params }) {
 
   const projectRewrites: any[] = [];
   const dependencySkips: any[] = [];
+  let afterMigrate: any = migrate ? { install: { skipped: "--no-install" }, typecheck: [] } : undefined;
   if (migrate) {
     if (blocked.length > 0) {
       await step(approval(`${blocked.join(", ")} ${blocked.length === 1 ? "has" : "have"} no Solid 2 release. Apply the source rewrites anyway?`));
@@ -187,6 +192,7 @@ export default async function main({ params }: { params: Params }) {
       for (const rule of stage.rewrites) {
         const label = `${stage.name}: ${rule}`;
         const result = await runRule(label, `./scripts/transformations/${rule}.ts`, stage.files);
+        for (const entry of result.data) rewritten.push(...((entry.data as any)?.rewrites ?? []));
         failures.push(...result.failures.map((f) => ({ step: label, ...f })));
       }
     }
@@ -259,28 +265,24 @@ export default async function main({ params }: { params: Params }) {
       }));
     }
     failures.push(...project.failures.map((f) => ({ step: "Move package.json and tsconfig.json to Solid 2", ...f })));
-    // Shell steps come before the analysis: with a large project's findings in
-    // the run's state, starting a shell step failed with "Argument list too long".
     if (install) {
-      await step("Install and typecheck", shell({ cwd: "." })`node ${import.meta.dirname}/verify/after-migrate.mjs install afterMigrate`);
+      const installed = await step("Install and typecheck", shell({ cwd: "." })`node ${import.meta.dirname}/verify/after-migrate.mjs install`);
+      // A dry run skips shell steps; the report then says to install by hand.
+      if (!installed.skipped) afterMigrate = lastJsonLine(installed.stdout) ?? { install: { ok: false, error: "The install step printed no result." }, typecheck: [] };
     }
-    if (verify) await lint("Lint with eslint-plugin-solid v2 (after)", "lintAfter");
+    if (verify) after = await lint("Lint with eslint-plugin-solid v2 (after)", "lintAfter");
     await analyze();
   }
 
-  const findings = byLocation((getState(FINDINGS) ?? []) as any[]);
-  const afterMigrate = migrate ? ((getState("afterMigrate") as any) ?? { install: { skipped: "--no-install" }, typecheck: [] }) : undefined;
-
-  const rewrites = byLocation([...((getState(REWRITES) ?? []) as any[]), ...projectRewrites]);
-  const before = getState("lintBefore") as any;
-  const after = getState("lintAfter") as any;
+  const findings = byLocation(found);
+  const rewrites = byLocation([...rewritten, ...projectRewrites]);
 
   // Each finding names the eslint-plugin-solid rules that keep reporting it.
   // removed-api reports the import rather than each call, so agreement is
   // checked per file, and disagreements are listed by rule.
-  const lintSites = new Set((before?.messages ?? []).map((m: any) => `${m.file}:${m.rule}`));
+  const lintSites = new Set<string>(before?.sites ?? []);
   const withLint = findings.filter((f) => f.lint.length > 0);
-  const unconfirmed = withLint.filter((f) => !f.lint.some((rule: string) => lintSites.has(`${f.file}:solid/${rule}`)));
+  const unconfirmed = withLint.filter((f) => !f.lint.some((rule: string) => lintSites.has(`${f.file}\tsolid/${rule}`)));
 
   if (params.report !== "none") {
     const text = renderText({ findings, rewrites, afterMigrate, solidVersion: SOLID_TARGET_VERSION });
@@ -312,6 +314,21 @@ export default async function main({ params }: { params: Params }) {
       findingsTheLinterMisses: tally(unconfirmed.map((f) => `${f.rule} (expects ${f.lint.join(", ")})`)),
     } : "skipped",
   };
+}
+
+/**
+ * The JSON a shell step printed as its last line, or undefined when there is
+ * none: a dry run skips shell steps, and only the last 1 MiB of output comes
+ * back.
+ */
+function lastJsonLine(stdout: string | undefined): any {
+  const line = stdout?.trimEnd().split("\n").pop();
+  if (!line) return undefined;
+  try {
+    return JSON.parse(line);
+  } catch {
+    return undefined;
+  }
 }
 
 function literalGlob(path: string): string {
