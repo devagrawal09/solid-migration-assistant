@@ -1,8 +1,8 @@
 // After migrate rewrites a project: installs its dependencies with its own
 // package manager, then typechecks it with its own TypeScript. Run from the
-// target directory; `node after-migrate.mjs install`. The result is one JSON
-// line on stdout, which the workflow reads from the step's output; progress
-// goes to stderr.
+// target directory; `node after-migrate.mjs install [changed package.json
+// paths...]`. The result is one JSON line on stdout, which the workflow reads
+// from the step's output; progress goes to stderr.
 import { spawnSync } from "node:child_process";
 import { existsSync, readFileSync } from "node:fs";
 import { dirname, join, relative, resolve } from "node:path";
@@ -32,6 +32,66 @@ export function installPlan(target, gitRoot = target) {
   }
   const declared = readJson(join(target, "package.json"))?.packageManager?.split("@")[0];
   return { directory: target, manager: ["pnpm", "yarn", "bun", "npm"].includes(declared) ? declared : "npm" };
+}
+
+/**
+ * The command that installs only what migrate changed. Outside a workspace
+ * that is `<manager> install` where the lockfile is. In a workspace (a
+ * pnpm-workspace.yaml or a package.json `workspaces` field where the
+ * lockfile is), a whole-workspace install can be hundreds of packages, so
+ * the install is scoped to the packages whose package.json migrate changed
+ * (`changed`, relative to the target; the target's own when none), with
+ * their workspace dependencies: pnpm `--filter "{dir}..."`, npm `-w dir`.
+ * Yarn and Bun, and a change to the workspace root's own package.json, are
+ * not installed: `skipped` says why and `command` is what to run.
+ */
+export function installCommand(target, plan, changed) {
+  const manifest = readJson(join(plan.directory, "package.json"));
+  const workspace = existsSync(join(plan.directory, "pnpm-workspace.yaml")) || manifest?.workspaces !== undefined;
+  if (!workspace) return { args: ["install"], command: `${plan.manager} install` };
+  const directories = [...new Set((changed.length > 0 ? changed : ["package.json"]).map((file) => relative(plan.directory, dirname(join(target, file))).replaceAll("\\", "/") || "."))];
+  const names = directories.map((directory) => readJson(join(plan.directory, directory, "package.json"))?.name ?? directory);
+  if (directories.includes(".")) {
+    return { skipped: "migrate changed the workspace root's package.json, and installing there installs every workspace package", command: `${plan.manager} install` };
+  }
+  if (plan.manager === "pnpm") {
+    const args = ["install", ...directories.flatMap((directory) => ["--filter", `{${directory}}...`])];
+    return { args, command: `pnpm ${args.map((arg) => (arg.includes("{") ? `"${arg}"` : arg)).join(" ")}` };
+  }
+  if (plan.manager === "npm") {
+    const args = ["install", ...directories.flatMap((directory) => ["-w", directory])];
+    return { args, command: `npm ${args.join(" ")}` };
+  }
+  const command = plan.manager === "yarn" ? `yarn workspaces focus ${names.join(" ")}` : `bun install ${names.map((name) => `--filter ${name}`).join(" ")}`;
+  return { skipped: `this is a ${plan.manager} workspace, and a whole-workspace install can be large`, command };
+}
+
+/**
+ * Where solid-js and @solidjs/web resolve from the target, looked up the
+ * way Node does (each node_modules from the target up), with their versions.
+ * A problem when one isn't found, is found above the install directory (a
+ * stray copy in a parent folder), or isn't on Solid 2: a typecheck would
+ * then check against the wrong types.
+ */
+export function resolutionProblem(target, installDirectory) {
+  for (const name of ["solid-js", "@solidjs/web"]) {
+    let found;
+    for (let directory = target; ; directory = dirname(directory)) {
+      const manifest = readJson(join(directory, "node_modules", name, "package.json"));
+      if (manifest !== undefined) {
+        found = { directory, version: String(manifest.version ?? "") };
+        break;
+      }
+      if (dirname(directory) === directory) break;
+    }
+    if (found === undefined) return `${name} isn't installed where the project can resolve it`;
+    const where = relative(target, join(found.directory, "node_modules", name)) || ".";
+    if (relative(installDirectory, found.directory).startsWith("..")) {
+      return `${name} resolves to ${found.version} at ${where}, above the project, not the copy this install put in place`;
+    }
+    if (!/^2\./.test(found.version)) return `${name} resolves to ${found.version} at ${where}, not Solid 2`;
+  }
+  return null;
 }
 
 /**
@@ -87,13 +147,15 @@ export function projectTsc(target, configDirectory) {
   }
 }
 
-function install(target) {
+function install(target, changed) {
   const gitRoot = spawnSync("git", ["rev-parse", "--show-toplevel"], { cwd: target, encoding: "utf8" });
   const plan = installPlan(target, gitRoot.status === 0 ? gitRoot.stdout.trim() : target);
-  const command = `${plan.manager} install`;
   const where = relative(target, plan.directory) || ".";
+  const scoped = installCommand(target, plan, changed);
+  const command = scoped.command;
+  if (scoped.skipped !== undefined) return { skipped: `${scoped.skipped}; run ${command} in ${where === "." ? "the project root" : where}`, command, directory: where };
   console.error(`Installing with ${command} in ${where}`);
-  const result = spawnSync(plan.manager, ["install"], {
+  const result = spawnSync(plan.manager, scoped.args, {
     cwd: plan.directory,
     encoding: "utf8",
     stdio: ["ignore", "pipe", "pipe"],
@@ -109,6 +171,7 @@ function install(target) {
   return {
     command,
     directory: where,
+    root: plan.directory,
     ok,
     ...(ok ? {} : { error: result.error ? String(result.error.message) : installError(output) }),
     ...(ignoredBuilds ? { warning: installError(output) } : {}),
@@ -130,11 +193,12 @@ export function installError(output) {
   return lines.slice(start, start + ERROR_LINES).join("\n");
 }
 
-function typecheck(target) {
+function typecheck(target, skipped) {
   const tracked = spawnSync("git", ["ls-files", "--cached", "--others", "--exclude-standard", "*tsconfig.json"], { cwd: target, encoding: "utf8" });
   const files = tracked.status === 0 ? tracked.stdout.split("\n").filter((file) => file !== "" && !file.includes("node_modules/")) : ["tsconfig.json"].filter((file) => existsSync(join(target, file)));
   return typecheckConfigs(target, files).map((config) => {
     const configDirectory = dirname(join(target, config));
+    if (skipped !== null) return { config, skipped };
     const tsc = projectTsc(target, configDirectory);
     if (tsc === undefined) return { config, skipped: "TypeScript isn't installed" };
     console.error(`Typechecking ${config}`);
@@ -158,9 +222,14 @@ function readJson(path) {
 
 if (process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href) {
   const target = process.cwd();
-  const installed = install(target);
+  const { root, ...installed } = install(target, process.argv.slice(3));
   // After a failed install, node_modules still holds Solid 1's types, so a
-  // typecheck would report against the wrong version.
-  const result = { install: installed, typecheck: installed.ok ? typecheck(target) : [] };
+  // typecheck would report against the wrong version; so does a solid-js
+  // that resolves from elsewhere (a stray copy in a parent folder).
+  const problem = installed.ok ? resolutionProblem(target, root) : null;
+  const result = {
+    install: installed,
+    typecheck: installed.ok ? typecheck(target, problem === null ? null : `${problem}, so a typecheck would not check against Solid 2`) : [],
+  };
   console.log(JSON.stringify(result));
 }

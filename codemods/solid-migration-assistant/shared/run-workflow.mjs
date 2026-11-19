@@ -445,7 +445,9 @@ export function nextSteps({ dependencySkips = [], afterMigrate, rewrites = [] })
   const install = afterMigrate?.install;
   const movedSolid = rewrites.find((rewrite) => rewrite.rule === "project/dependencies" && rewrite.message.startsWith("Move solid-js "));
   const moved = movedSolid === undefined ? "" : `: ${movedSolid.file?.endsWith("pnpm-workspace.yaml") ? "the workspace catalog" : "package.json"} now targets Solid ${SOLID_VERSION}`;
-  if (install?.skipped) {
+  if (install?.skipped && install.command !== undefined) {
+    steps.push(`Run ${install.command} in ${placeOf(install.directory)}, then typecheck${moved}.`);
+  } else if (install?.skipped) {
     steps.push(`Install with your package manager, then typecheck${moved}.`);
   } else if (install && !install.ok) {
     steps.push(`Run ${install.command} in ${placeOf(install.directory)} once the install error above is fixed, then typecheck.`);

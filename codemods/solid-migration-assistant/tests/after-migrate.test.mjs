@@ -3,7 +3,7 @@ import { mkdirSync, mkdtempSync, rmSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { dirname, join } from "node:path";
 import { test } from "node:test";
-import { installError, installPlan, parseTscOutput, typecheckConfigs } from "../verify/after-migrate.mjs";
+import { installCommand, installError, installPlan, parseTscOutput, resolutionProblem, typecheckConfigs } from "../verify/after-migrate.mjs";
 import { renderAfterMigrate } from "../shared/format.mjs";
 
 function tree(files) {
@@ -92,4 +92,58 @@ test("an install that only skipped pnpm build scripts shows pnpm's message under
   const output = '[ERR_PNPM_IGNORED_BUILDS] Ignored build scripts: esbuild@0.25.11\nRun "pnpm approve-builds" to pick which dependencies should be allowed to run scripts.';
   const text = renderAfterMigrate({ install: { command: "pnpm install", directory: ".", ok: true, warning: installError(output) }, typecheck: [] });
   assert.match(text, /Installed with `pnpm install` in the project root\.\n  \[ERR_PNPM_IGNORED_BUILDS\] Ignored build scripts: esbuild/);
+});
+
+test("installs a workspace package and its workspace dependencies, not the whole workspace", () => {
+  const files = {
+    "pnpm-workspace.yaml": "packages:\n  - packages/*\n",
+    "pnpm-lock.yaml": "",
+    "package.json": '{ "name": "root", "private": true }',
+    "packages/solid-pacer/package.json": '{ "name": "@tanstack/solid-pacer" }',
+    "packages/react-pacer/package.json": '{ "name": "@tanstack/react-pacer" }',
+  };
+  withTree(files, (root) => {
+    const target = join(root, "packages/solid-pacer");
+    const plan = installPlan(target, root);
+    assert.deepEqual(installCommand(target, plan, ["package.json"]), {
+      args: ["install", "--filter", "{packages/solid-pacer}..."],
+      command: 'pnpm install --filter "{packages/solid-pacer}..."',
+    });
+    // From the root, the packages migrate changed.
+    assert.deepEqual(installCommand(root, installPlan(root, root), ["packages/solid-pacer/package.json"]).args, ["install", "--filter", "{packages/solid-pacer}..."]);
+    assert.match(installCommand(root, installPlan(root, root), ["package.json"]).skipped, /workspace root's package\.json/);
+  });
+});
+
+test("scopes an npm workspace install with -w, and leaves yarn and bun workspaces to the user", () => {
+  const files = { "package-lock.json": "{}", "package.json": '{ "name": "root", "workspaces": ["apps/*"] }', "apps/web/package.json": '{ "name": "web" }' };
+  withTree(files, (root) => {
+    const target = join(root, "apps/web");
+    assert.deepEqual(installCommand(target, installPlan(target, root), []).args, ["install", "-w", "apps/web"]);
+    assert.deepEqual(installCommand(target, { directory: root, manager: "yarn" }, []), {
+      skipped: "this is a yarn workspace, and a whole-workspace install can be large",
+      command: "yarn workspaces focus web",
+    });
+  });
+  withTree({ "package-lock.json": "{}", "package.json": '{ "name": "app" }' }, (root) => {
+    assert.deepEqual(installCommand(root, installPlan(root, root), ["package.json"]), { args: ["install"], command: "npm install" });
+  });
+});
+
+test("distrusts a typecheck when solid-js resolves from above the project or isn't Solid 2", () => {
+  const files = {
+    "node_modules/solid-js/package.json": '{ "version": "1.9.4" }',
+    "project/package.json": "{}",
+    "project/node_modules/@solidjs/web/package.json": '{ "version": "2.0.3" }',
+  };
+  withTree(files, (root) => {
+    const target = join(root, "project");
+    assert.equal(resolutionProblem(target, target), "solid-js resolves to 1.9.4 at ../node_modules/solid-js, above the project, not the copy this install put in place");
+    writeFileSync(join(root, "node_modules/solid-js/package.json"), '{ "version": "2.0.3" }');
+    mkdirSync(join(target, "node_modules/solid-js"), { recursive: true });
+    writeFileSync(join(target, "node_modules/solid-js/package.json"), '{ "version": "1.9.18" }');
+    assert.equal(resolutionProblem(target, target), "solid-js resolves to 1.9.18 at node_modules/solid-js, not Solid 2");
+    writeFileSync(join(target, "node_modules/solid-js/package.json"), '{ "version": "2.0.3" }');
+    assert.equal(resolutionProblem(target, target), null);
+  });
 });

@@ -328,7 +328,9 @@ export default async function main({ params }: { params: Params }) {
     }
     failures.push(...project.failures.map((f) => ({ step: "Move package.json and tsconfig.json to Solid 2", ...f })));
     if (install) {
-      const installed = await step("Install and typecheck", shell({ cwd: "." })`node ${import.meta.dirname}/verify/after-migrate.mjs install`);
+      // In a workspace the install is scoped to the packages migrate changed.
+      const changedManifests = [...new Set(projectRewrites.map((rewrite) => rewrite.file).filter((file: string) => file.endsWith("package.json")))];
+      const installed = await step("Install and typecheck", shell({ cwd: "." })`node ${import.meta.dirname}/verify/after-migrate.mjs install ${changedManifests}`);
       // A dry run skips shell steps; the report then says to install by hand.
       if (!installed.skipped) {
         try {
