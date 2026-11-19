@@ -1,0 +1,28 @@
+{
+  "findings": [
+    {
+      "rule": "jsx/boolean-attribute-values",
+      "file": "analysis/jsx/boolean-attribute-values/fixtures/real-world-lucide-icon-test.fixture.tsx",
+      "line": 16,
+      "column": 54,
+      "severity": "behavior",
+      "headline": "Check how this component renders aria-hidden={false}.",
+      "why": "Solid 1 rendered a boolean aria-hidden as the text \"true\" or \"false\" on whatever element received it. Solid 2.0.3 renders true as an empty value and removes the attribute for false, so when Icon passes this prop on to an element, aria-hidden=\"false\" disappears.",
+      "guidance": "If the component spreads or forwards aria-hidden to an element, pass the string: aria-hidden=\"false\". If the component reads it as a boolean prop, keep it.",
+      "guide": "https://github.com/solidjs/solid/blob/68406c2077eff22c67f71db4a16bf7026ddceee1/documentation/solid-2.0/MIGRATION.md#attributes--events-closer-to-html-and-fewer-namespaces",
+      "lint": []
+    },
+    {
+      "rule": "jsx/boolean-attribute-values",
+      "file": "analysis/jsx/boolean-attribute-values/fixtures/real-world-lucide-icon-test.fixture.tsx",
+      "line": 17,
+      "column": 17,
+      "severity": "behavior",
+      "headline": "Check how this component renders data-active={true}.",
+      "why": "Solid 1 rendered a boolean data-active as the text \"true\" or \"false\" on whatever element received it. Solid 2.0.3 renders true as an empty value and removes the attribute for false, so when Icons.Icon passes this prop on to an element, data-active=\"\" no longer says true.",
+      "guidance": "If the component spreads or forwards data-active to an element, pass the string: data-active=\"true\". If the component reads it as a boolean prop, keep it.",
+      "guide": "https://github.com/solidjs/solid/blob/68406c2077eff22c67f71db4a16bf7026ddceee1/documentation/solid-2.0/MIGRATION.md#attributes--events-closer-to-html-and-fewer-namespaces",
+      "lint": []
+    }
+  ]
+}

@@ -28,6 +28,11 @@ type Site = { node: SgNode<TSX>; filename: string; scope: number };
  * field the write provably leaves alone (a path setter's first key, an
  * object merge's keys, or the `draft.key` uses of a draft callback) is not
  * reported. Reads through a memo or a helper function are not traced.
+ *
+ * In tests, the DOM and effects lag the same way: a write followed in the
+ * same body by an `expect(...)` or `assert...(...)` call, with no flush()
+ * between and no direct read reported for it, is reported at the assertion
+ * (lucide's "set a signal, check the attribute" tests).
  */
 export function analyzeReadAfterWrite(
   rootNode: SgNode<TSX>,
@@ -35,6 +40,20 @@ export function analyzeReadAfterWrite(
 ): RuleFinding[] {
   const flushes = findImportedCalls(rootNode, "solid-js", "flush").map(({ call, filename }) => site(call, filename));
   const findings = new Map<string, RuleFinding>();
+  const assertions = rootNode
+    .findAll({ rule: { kind: "call_expression" } })
+    .filter((call) => /^(expect|assert)(\.\w+)?$/.test(call.field("function")?.text() ?? ""))
+    .map((call) => site(call, context.filename));
+  // An await between the write and the assertion lets the batch flush.
+  const awaits = rootNode.findAll({ rule: { kind: "await_expression" } }).map((node) => site(node, context.filename));
+  const flushedBefore = (write: Site, end: number, at: SgNode<TSX>) =>
+    [...flushes, ...(at.kind() === "call_expression" && assertions.some((assertion) => assertion.node.id() === at.id()) ? awaits : [])].some(
+      (flush) =>
+        flush.filename === write.filename &&
+        flush.scope === write.scope &&
+        flush.node.range().start.index >= end &&
+        flush.node.range().start.index < at.range().start.index,
+    );
 
   for (const pair of statePairs(rootNode)) {
     const writes = uses(pair.setter).filter(({ node }) => calleeOf(node) !== null);
@@ -53,15 +72,31 @@ export function analyzeReadAfterWrite(
           candidate.scope === write.scope &&
           candidate.node.range().start.index >= end &&
           !onOtherBranch(call, candidate.node) &&
-          !flushes.some(
-            (flush) =>
-              flush.filename === write.filename &&
-              flush.scope === write.scope &&
-              flush.node.range().start.index >= end &&
-              flush.node.range().start.index < candidate.node.range().start.index,
-          ),
+          !flushedBefore(write, end, candidate.node),
       );
-      if (read === undefined) continue;
+      if (read === undefined) {
+        const assertion = assertions.find(
+          (candidate) =>
+            candidate.filename === write.filename &&
+            candidate.scope === write.scope &&
+            candidate.node.range().start.index >= end &&
+            !onOtherBranch(call, candidate.node) &&
+            !flushedBefore(write, end, candidate.node),
+        );
+        const key = assertion === undefined ? "" : `${assertion.filename}:${assertion.node.id()}`;
+        if (assertion === undefined || findings.has(key)) continue;
+        findings.set(
+          key,
+          finding(assertion.filename, assertion.node, {
+            severity: "behavior",
+            headline: `This assertion runs before the DOM and effects see ${pair.setter.text()} on line ${call.range().start.line + 1}.`,
+            why: `In Solid ${SOLID_TARGET_VERSION} a setter queues its write, and rendered DOM, effects and memos update when the batch flushes in a microtask or flush() runs. Solid 1.x applied the write and its DOM updates at once outside batch, so this test checked the new state.`,
+            guidance: `Import flush from solid-js and call flush() after the write, before the assertion; that is what flush is for in tests. If the test awaits something after the write instead, the microtask has run and no flush is needed.`,
+            guide: MIGRATION_GUIDE,
+          }),
+        );
+        continue;
+      }
       const key = `${read.filename}:${read.node.id()}`;
       if (findings.has(key)) continue;
       const name = pair.getter.text();

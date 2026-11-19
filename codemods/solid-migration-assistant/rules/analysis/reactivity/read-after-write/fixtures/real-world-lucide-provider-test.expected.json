@@ -1,0 +1,16 @@
+{
+  "findings": [
+    {
+      "rule": "reactivity/read-after-write",
+      "file": "analysis/reactivity/read-after-write/fixtures/real-world-lucide-provider-test.fixture.tsx",
+      "line": 27,
+      "column": 5,
+      "severity": "behavior",
+      "headline": "This assertion runs before the DOM and effects see setSize on line 25.",
+      "why": "In Solid 2.0.3 a setter queues its write, and rendered DOM, effects and memos update when the batch flushes in a microtask or flush() runs. Solid 1.x applied the write and its DOM updates at once outside batch, so this test checked the new state.",
+      "guidance": "Import flush from solid-js and call flush() after the write, before the assertion; that is what flush is for in tests. If the test awaits something after the write instead, the microtask has run and no flush is needed.",
+      "guide": "https://github.com/solidjs/solid/blob/68406c2077eff22c67f71db4a16bf7026ddceee1/documentation/solid-2.0/MIGRATION.md#batching--reads-values-update-after-flush",
+      "lint": []
+    }
+  ]
+}
