@@ -174,6 +174,7 @@ test("uses normal analyzer end-to-end fixtures", () => {
     "cli.test.mjs",
     "corpus",
     "corpus.test.mjs",
+    "create-vite.test.mjs",
     "empty",
     "fixture",
     "fixture-expected",

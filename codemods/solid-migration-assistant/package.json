@@ -208,8 +208,9 @@
     "test:transform": "node ./tests/transform.test.mjs",
     "test:rc-compat": "node --test ./tests/rc-compat.test.mjs",
     "test:corpus": "node --test ./tests/corpus.test.mjs",
+    "test:create-vite": "node --test ./tests/create-vite.test.mjs",
     "corpus:update-baseline": "node ./tests/corpus.test.mjs --update-baseline",
-    "test:release": "pnpm test:rc-compat && pnpm test:corpus",
+    "test:release": "pnpm test:rc-compat && pnpm test:create-vite && pnpm test:corpus",
     "fixtures:update": "node ./tests/rule-fixtures.test.mjs --update && node ./tests/workflow.test.mjs --update && node ./tests/transform.test.mjs --update",
     "generate": "node ./tools/generate.mjs",
     "test:guards": "node --test ./tests/guards.test.mjs"
