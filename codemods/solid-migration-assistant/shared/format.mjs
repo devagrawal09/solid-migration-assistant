@@ -99,7 +99,10 @@ export function renderAfterMigrate({ install, typecheck }) {
       `${PREFIX} \`${install.command}\` failed in ${placeOf(install.directory)}, so the project wasn't typechecked. Fix the install and run it again:`,
       ...install.error.split("\n").map((line) => `  ${line}`),
     );
-  } else lines.push(`${PREFIX} Installed with \`${install.command}\` in ${placeOf(install.directory)}.`);
+  } else {
+    lines.push(`${PREFIX} Installed with \`${install.command}\` in ${placeOf(install.directory)}.`);
+    if (install.warning) lines.push(...install.warning.split("\n").map((line) => `  ${line}`));
+  }
   for (const check of typecheck) {
     if (check.skipped) {
       lines.push(`TypeScript (${check.config}): skipped, ${check.skipped}.`);

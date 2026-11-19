@@ -3,7 +3,7 @@ import { mkdirSync, mkdtempSync, rmSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { dirname, join } from "node:path";
 import { test } from "node:test";
-import { installError, installPlan, parseTscOutput, typecheckConfigs } from "../verify/after-migrate.mjs";
+import { ignoredBuildsOnly, installError, installPlan, parseTscOutput, typecheckConfigs } from "../verify/after-migrate.mjs";
 import { renderAfterMigrate } from "../shared/format.mjs";
 
 function tree(files) {
@@ -86,4 +86,13 @@ test("a failed install keeps the lines that name the conflict and drops npm's lo
       'npm error peer solid-js@"^1.6.12" from @solid-primitives/i18n@2.2.1',
     ].join("\n"),
   );
+});
+
+test("pnpm's ignored build scripts alone don't fail the install, and the report shows them", () => {
+  const output = '[ERR_PNPM_IGNORED_BUILDS] Ignored build scripts: esbuild@0.25.11\nRun "pnpm approve-builds" to pick which dependencies should be allowed to run scripts.';
+  assert.equal(ignoredBuildsOnly(output), true);
+  assert.equal(ignoredBuildsOnly(`${output}\nERR_PNPM_FETCH_404 not found`), false);
+  assert.equal(ignoredBuildsOnly("npm error code ERESOLVE"), false);
+  const text = renderAfterMigrate({ install: { command: "pnpm install", directory: ".", ok: true, warning: installError(output) }, typecheck: [] });
+  assert.match(text, /Installed with `pnpm install` in the project root\.\n  \[ERR_PNPM_IGNORED_BUILDS\] Ignored build scripts: esbuild/);
 });
