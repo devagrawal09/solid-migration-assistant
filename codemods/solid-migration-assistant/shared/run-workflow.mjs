@@ -5,10 +5,10 @@ import { tmpdir } from "node:os";
 import { basename, dirname, join, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 import { byLocation, placeOf, renderAgentReport, renderText, summaryOf } from "./format.mjs";
-import { DEPENDENCY_MAP, DEPENDENCY_VERIFIED_ON, dependencyHeadline } from "./dependencies.mjs";
-import { allowsSolid2, isSolid2Only } from "./peers.mjs";
+import { DEPENDENCY_MAP } from "./dependencies.mjs";
+import { allowsSolid2 } from "./peers.mjs";
 import { settleUnknownDependencies } from "./registry.mjs";
-import { catalogName, readCatalogs } from "./catalog.mjs";
+import { configFindings, manifestFindings, MIGRATION_GUIDE, parseJsonLike, SOLID_SOURCE_COMMIT } from "./project.mjs";
 
 const packageDirectory = resolve(dirname(fileURLToPath(import.meta.url)), "..");
 const require = createRequire(import.meta.url);
@@ -18,8 +18,6 @@ const packageMetadata = JSON.parse(
 
 const SOLID_VERSION = "2.0.3";
 const SOLID_TARGET = `solid-js@${SOLID_VERSION}`;
-const SOLID_SOURCE_COMMIT = "68406c2077eff22c67f71db4a16bf7026ddceee1";
-const MIGRATION_GUIDE = `https://github.com/solidjs/solid/blob/${SOLID_SOURCE_COMMIT}/documentation/solid-2.0/MIGRATION.md`;
 const FEEDBACK_URL =
   "https://github.com/devagrawal09/solid-migration-assistant/issues";
 
@@ -34,41 +32,31 @@ Feedback: ${FEEDBACK_URL}
 [solid-migration-assistant] End final disclosure`;
 
 /**
- * Read-only findings for the two files every migration must edit that the
- * JSSG analyzers never see, in every workspace package: each package.json
- * and tsconfig.json. They are read, never written; a missing or unparsable
- * file produces no finding. The guidance mirrors the official Solid 2 templates
- * (solidjs/templates, `solid-v2` group), which depend on `solid-js` and
- * `@solidjs/web` at the same version, build with `@solidjs/vite-plugin`, and set
- * `jsxImportSource` to `@solidjs/web`.
+ * Read-only findings for the files every migration must edit that the JSSG
+ * analyzers never see, in every workspace package: each package.json and
+ * tsconfig (`shared/project.mjs`, shared with the registry workflow), plus,
+ * which only the launcher can check, each Solid library the dependency table
+ * doesn't know whose installed copy rules out Solid 2. Files are read, never
+ * written; a missing or unparsable file produces no finding.
  */
 export function projectFindings(target) {
   const files = projectFiles(target);
   const manifests = files.filter((file) => basename(file) === "package.json");
-  const workspaceNames = new Set(manifests.map((file) => readJsonLike(resolve(target, file))?.name).filter(Boolean));
-  const catalogs = readCatalogs(readText(resolve(target, "pnpm-workspace.yaml")) ?? "");
+  const workspaceNames = new Set(manifests.map((file) => parseJsonLike(readText(resolve(target, file)))?.name).filter(Boolean));
+  const workspaceYaml = readText(resolve(target, "pnpm-workspace.yaml")) ?? "";
   const findings = [];
-  for (const file of manifests) findings.push(...manifestFindings(target, file, workspaceNames, catalogs));
+  for (const file of manifests) {
+    const text = readText(resolve(target, file));
+    const manifest = parseJsonLike(text);
+    if (!manifest || typeof manifest !== "object") continue;
+    findings.push(...manifestFindings(file, text, workspaceYaml), ...peerFindings(target, file, manifest, text, workspaceNames));
+  }
   for (const file of files.filter((file) => basename(file) !== "package.json")) {
-    const jsxImportSource = readJsonLike(resolve(target, file))?.compilerOptions?.jsxImportSource;
-    if (jsxImportSource !== "solid-js") continue;
-    findings.push({
-      rule: "project/jsx-import-source",
-      file,
-      line: 1,
-      column: 1,
-      severity: "build",
-      headline: "Point jsxImportSource at the Solid 2 renderer package.",
-      why: 'compilerOptions.jsxImportSource is "solid-js", but Solid 2 no longer ships JSX runtime type entries from solid-js; web projects take them from @solidjs/web (hyperscript projects from @solidjs/h).',
-      guidance: 'Set compilerOptions.jsxImportSource to "@solidjs/web" (keep "jsx": "preserve"), and move any import type { JSX } from "solid-js" to @solidjs/web; the transform workflow makes this edit in migrate mode.',
-      lint: [],
-      guide: `${MIGRATION_GUIDE}#typescript-jsx-solid-js--renderer-package`,
-    });
+    findings.push(...configFindings(file, readText(resolve(target, file))));
   }
   return byLocation(findings);
 }
 
-const PLAIN_RANGE = /^[\s^~<>=v]*\d/;
 const PROJECT_CONFIG = /^(package\.json|tsconfig(\..+)?\.json|jsconfig\.json)$/;
 const OUTSIDE_PROJECT = new Set(["node_modules", "dist", "build", "coverage"]);
 
@@ -103,49 +91,6 @@ function projectFiles(target) {
   };
   walk("");
   return files.sort();
-}
-
-function manifestFindings(target, file, workspaceNames, catalogs) {
-  const manifest = readJsonLike(resolve(target, file));
-  if (!manifest || typeof manifest !== "object") return [];
-  const text = readFileSync(resolve(target, file), "utf8");
-  const findings = [];
-  const declared = { ...(manifest.dependencies ?? {}), ...(manifest.devDependencies ?? {}) };
-  const solid = declared["solid-js"];
-  const web = declared["@solidjs/web"];
-  const catalog = catalogName(solid);
-  const resolved = catalog === null ? solid : catalogs.get(catalog)?.get("solid-js")?.range;
-  const where = catalog === null ? "" : catalog === "" ? "the default catalog in pnpm-workspace.yaml" : `the ${catalog} catalog in pnpm-workspace.yaml`;
-  const declaredAs = catalog === null ? `is declared as ${JSON.stringify(solid)}` : `comes from ${where} at ${JSON.stringify(resolved)}`;
-  const problems = [];
-  if (typeof solid === "string" && catalog !== null && resolved === undefined) {
-    problems.push(`solid-js comes from ${JSON.stringify(solid)}, a workspace catalog this analyzer couldn't read, so check that it moves to ${SOLID_VERSION} there`);
-  } else if (typeof resolved === "string" && PLAIN_RANGE.test(resolved) && !isSolid2Only(resolved)) {
-    problems.push(`solid-js ${declaredAs}, a Solid 1 range`);
-  } else if (typeof resolved === "string" && !PLAIN_RANGE.test(resolved) && web === undefined) {
-    // workspace:, link: and tags name no version this analyzer can read.
-    problems.push(`solid-js ${declaredAs}, which this analyzer can't compare with Solid 2`);
-  }
-  if (typeof solid === "string" && web === undefined) {
-    problems.push("@solidjs/web, the Solid 2 web renderer package, is not declared");
-  }
-  if (problems.length > 0) {
-    findings.push({
-      rule: "project/solid-version",
-      file,
-      line: 1,
-      column: 1,
-      severity: "build",
-      headline: `Move this project's Solid dependencies to ${SOLID_TARGET}.`,
-      why: `${problems.join("; ")}. Solid 2 splits the web renderer into @solidjs/web, versions it in lockstep with solid-js, and compiles JSX through @solidjs/vite-plugin (or @solidjs/babel-plugin), which is what the official solid-v2 templates use.`,
-      guidance: `Move solid-js to ^${SOLID_VERSION}${catalog === null ? "" : ` in ${where || "the workspace catalog"} (migrate edits pnpm catalogs)`} and add @solidjs/web at the same range (the two release in lockstep), move the other Solid dependencies as the per-package findings describe, and run this analyzer before installing, since Solid 1 source is the input this version understands.`,
-      lint: [],
-      guide: `${MIGRATION_GUIDE}#imports-where-things-live-now`,
-    });
-  }
-  findings.push(...dependencyFindings(manifest, text, file));
-  findings.push(...peerFindings(target, file, manifest, text, workspaceNames));
-  return findings;
 }
 
 /**
@@ -194,72 +139,17 @@ const NOT_LIBRARIES = new Set(["solid-js", "@solidjs/web", "eslint-plugin-solid"
 function installedManifest(target, directory, name) {
   const root = resolve(target);
   for (let current = directory; ; current = dirname(current)) {
-    const manifest = readJsonLike(join(current, "node_modules", name, "package.json"));
+    const manifest = parseJsonLike(readText(join(current, "node_modules", name, "package.json")));
     if (manifest !== undefined) return manifest;
     if (current === root || dirname(current) === current) return undefined;
   }
 }
 
-/**
- * One finding per dependency in `shared/dependencies.mjs` that the manifest
- * declares on its Solid 1 line (or at all, for packages with no Solid 2
- * line), located at the dependency's line so editors can jump to it. A
- * workspace, catalog, or git range cannot be compared and is reported with a
- * note to check it.
- */
-function dependencyFindings(manifest, text, file) {
-  const findings = [];
-  const sections = [manifest.dependencies, manifest.devDependencies, manifest.peerDependencies];
-  const lines = text.split("\n");
-  for (const entry of DEPENDENCY_MAP) {
-    const range = sections.map((section) => section?.[entry.name]).find((value) => typeof value === "string");
-    if (range === undefined) continue;
-    const comparable = /^[\s^~<>=v]*\d/.test(range);
-    if (entry.legacy !== null && comparable && !entry.legacy(range)) continue;
-    const lineIndex = lines.findIndex((line) => line.includes(`"${entry.name}"`));
-    const note = comparable ? "" : ` The declared range ${JSON.stringify(range)} could not be compared, so check which line it resolves to.`;
-    findings.push({
-      rule: "project/dependencies",
-      file,
-      line: lineIndex === -1 ? 1 : lineIndex + 1,
-      column: lineIndex === -1 ? 1 : lines[lineIndex].indexOf(`"${entry.name}"`) + 1,
-      severity: "build",
-      headline: dependencyHeadline(entry),
-      why: `package.json declares ${entry.name} ${JSON.stringify(range)}. Checked against the npm registry on ${DEPENDENCY_VERIFIED_ON}: ${entry.replacement === null ? "no Solid 2 release exists" : `the Solid 2 counterpart is ${entry.replacement}`}.${note}`,
-      guidance: entry.guidance,
-      lint: [],
-      guide: `${MIGRATION_GUIDE}#imports-where-things-live-now`,
-    });
-  }
-  return byLocation(findings);
-}
-
-/**
- * Parses a JSON file that may carry comments and trailing commas (tsconfig
- * does); returns undefined when the file is missing or still unparsable.
- */
 function readText(path) {
   try {
     return readFileSync(path, "utf8");
   } catch {
     return undefined;
-  }
-}
-
-function readJsonLike(path) {
-  const text = readText(path);
-  if (text === undefined) return undefined;
-  try {
-    return JSON.parse(text);
-  } catch {
-    const stripped = text
-      .replace(/("(?:[^"\\]|\\.)*")|\/\*[\s\S]*?\*\/|\/\/[^\n]*/g, (match, string) => string ?? "")
-      .replace(/,(\s*[}\]])/g, "$1");
-    try {
-      return JSON.parse(stripped);
-    } catch {
-      return undefined;
-    }
   }
 }
 

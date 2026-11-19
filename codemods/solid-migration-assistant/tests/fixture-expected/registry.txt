@@ -1,4 +1,10 @@
-[solid-migration-assistant] 33 findings for Solid 2.0.3. Each is a manual edit for you (or your agent) to make and validate; this analyzer never edits or runs the target project.
+[solid-migration-assistant] 35 findings for Solid 2.0.3. Each is a manual edit for you (or your agent) to make and validate; this analyzer never edits or runs the target project.
+
+package.json:1:1 [build] Move this project's Solid dependencies to solid-js@2.0.3.
+  Rule: project/solid-version
+  Why: solid-js is declared as "1.9.14", a Solid 1 range; @solidjs/web, the Solid 2 web renderer package, is not declared. Solid 2 splits the web renderer into @solidjs/web, versions it in lockstep with solid-js, and compiles JSX through @solidjs/vite-plugin (or @solidjs/babel-plugin), which is what the official solid-v2 templates use.
+  Guidance: Move solid-js to ^2.0.3 and add @solidjs/web at the same range (the two release in lockstep), move the other Solid dependencies as the per-package findings describe, and run this analyzer before installing, since Solid 1 source is the input this version understands.
+  Guide: https://github.com/solidjs/solid/blob/68406c2077eff22c67f71db4a16bf7026ddceee1/documentation/solid-2.0/MIGRATION.md#imports-where-things-live-now
 
 src/events.tsx:7:13 [behavior] Migrate this lowercase onclick attribute to a camelCase event handler.
   Rule: jsx/dom-lowercase-events
@@ -226,8 +232,14 @@ src/workspace-reference.tsx:3:32 [build] Migrate this mergeProps call to a revie
   Lint: eslint-plugin-solid's solid/removed-api (v2 config) keeps reporting this site after migration.
   Guide: https://github.com/solidjs/solid/blob/68406c2077eff22c67f71db4a16bf7026ddceee1/documentation/solid-2.0/MIGRATION.md#mergeprops--splitprops--merge--omit
 
-[solid-migration-assistant] Summary: 33 findings in 8 files
-Will not build or run on Solid 2: 30 findings
+tsconfig.json:1:1 [build] Point jsxImportSource at the Solid 2 renderer package.
+  Rule: project/jsx-import-source
+  Why: compilerOptions.jsxImportSource is "solid-js", but Solid 2 no longer ships JSX runtime type entries from solid-js; web projects take them from @solidjs/web (hyperscript projects from @solidjs/h).
+  Guidance: Set compilerOptions.jsxImportSource to "@solidjs/web" (keep "jsx": "preserve"), and move any import type { JSX } from "solid-js" to @solidjs/web; the transform workflow makes this edit in migrate mode.
+  Guide: https://github.com/solidjs/solid/blob/68406c2077eff22c67f71db4a16bf7026ddceee1/documentation/solid-2.0/MIGRATION.md#typescript-jsx-solid-js--renderer-package
+
+[solid-migration-assistant] Summary: 35 findings in 10 files
+Will not build or run on Solid 2: 32 findings
    6  imports/web-import in 3 files
          2  Move this Solid web renderer dynamic import().
          2  Move this Solid web renderer static import.
@@ -267,6 +279,12 @@ Will not build or run on Solid 2: 30 findings
    1  lifecycle/on-mount in 1 file
          1  Migrate this onMount lifecycle callback.
       sites: src/migration-sites.tsx:36:1
+   1  project/jsx-import-source in 1 file
+         1  Point jsxImportSource at the Solid 2 renderer package.
+      sites: tsconfig.json:1:1
+   1  project/solid-version in 1 file
+         1  Move this project's Solid dependencies to solid-js@2.0.3.
+      sites: package.json:1:1
    1  props/split-props in 1 file
          1  Migrate this splitProps tuple to reviewed omit-based values.
       sites: src/migration-sites.tsx:20:33

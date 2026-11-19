@@ -5,7 +5,8 @@
  *   node tools/bump-target.mjs <version> <source-commit>
  *
  * The commit must be the `gitHead` npm records for `solid-js@<version>`.
- * The script rewrites the two constants in `shared/target.ts` and
+ * The script rewrites the two constants in `shared/target.ts` and their
+ * copies in `shared/project.mjs`, `shared/manifest.mjs` and
  * `shared/run-workflow.mjs`, then replaces the previous commit everywhere
  * and the previous version wherever the text marks it as Solid's (see
  * `target-version.mjs`), and lists the other lines that still cite the old

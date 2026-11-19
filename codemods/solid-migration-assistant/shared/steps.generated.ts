@@ -53,6 +53,7 @@ export const ANALYSIS_STEPS = [
   { rule: "store/produce", name: "analyzeProduce" },
   { rule: "store/setter-calls", name: "analyzeStoreSetterCalls" },
   { rule: "store/unwrap", name: "analyzeUnwrap" },
+  { rule: "tooling/build-config", name: "analyzeBuildToolConfig" },
 ] as const;
 
 export const TRANSFORM_STEPS = [
@@ -67,4 +68,6 @@ export const TRANSFORM_STEPS = [
   { rule: "jsx/lowercase-event-handlers", name: "rewriteLowercaseEventHandlers" },
   { rule: "reactivity/on-helper-split", name: "rewriteOnHelper" },
   { rule: "store/setter-literal-paths", name: "rewriteStoreSetterLiteralPaths" },
+  { rule: "tooling/package-renames", name: "relocateRenamedPackages" },
+  { rule: "tooling/package-renames", name: "rewriteJsxImportSourceOption" },
 ] as const;

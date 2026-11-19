@@ -19,6 +19,10 @@
  * - `blocked`: no Solid 2 release was found, so the dependency blocks the
  *   migration until it ships one or is replaced.
  *
+ * A `replace` entry with `rename: true` is the same package under a new
+ * name: migrate swaps it for `replacement` in package.json, and reports the
+ * config or import edits that go with it.
+ *
  * The launcher reports one finding per declared entry, located at the
  * dependency's line in package.json. Re-verify this table the same way:
  * read the manifests, not the ranges.
@@ -73,17 +77,30 @@ export const DEPENDENCY_MAP = Object.freeze([
     legacy: null,
     status: "replace",
     replacement: "@solidjs/vite-plugin@3.0.1",
+    rename: true,
     guidance:
-      "vite-plugin-solid was renamed to @solidjs/vite-plugin. Install @solidjs/vite-plugin@3.0.1 (npm latest) and change the vite.config import; it requires Vite 8 or 9 and Node 22.12 or newer.",
+      "vite-plugin-solid was renamed to @solidjs/vite-plugin. Install @solidjs/vite-plugin@3.0.1 (npm latest) and change the vite.config import; it requires Vite 8 or 9 and Node 22.12 or newer. Its default export is still the plugin factory and solid() needs no options; include, exclude, dev, ssr and extensions keep their meaning, hot is gone (HMR is the refresh option), the solid compiler options changed, and the babel option now needs @babel/core installed. Migrate makes both edits and reports the options to check.",
   },
   {
     name: "babel-preset-solid",
     legacy: null,
     status: "replace",
     replacement: "@solidjs/babel-plugin@2.0.2",
+    rename: true,
     guidance:
-      "Replace babel-preset-solid with @solidjs/babel-plugin@2.0.2 (npm latest) in custom Babel pipelines, or rely on @solidjs/vite-plugin, which compiles JSX with @solidjs/compiler. babel-preset-solid's own next tag is a stale 2.0.0-rc.2.",
+      "Replace babel-preset-solid with @solidjs/babel-plugin@2.0.2 (npm latest), which is a Babel plugin rather than a preset: change presets: [\"solid\"] (or \"babel-preset-solid\") to plugins: [\"@solidjs/babel-plugin\"] in the Babel config, or rely on @solidjs/vite-plugin, which compiles JSX with @solidjs/compiler. babel-preset-solid's own next tag is a stale 2.0.0-rc.2. Migrate swaps the package and reports each config that still names the preset.",
   },
+  ...[
+    ["esbuild-plugin-solid", "0.6.0"],
+    ["tsup-preset-solid", "2.2.0"],
+    ["rollup-preset-solid", "3.0.0"],
+  ].map(([name, latest]) => ({
+    name,
+    legacy: null,
+    status: "replace",
+    replacement: "a build step that runs @solidjs/babel-plugin@2.0.2",
+    guidance: `${name} ${latest} (npm latest) compiles with babel-preset-solid 1.x, which emits Solid 1 code. Build with @solidjs/vite-plugin (Vite library mode), or keep this bundler and run @solidjs/babel-plugin@2.0.2 through its Babel hook, and set jsxImportSource or the plugin's moduleName to @solidjs/web.`,
+  })),
   {
     name: "@solidjs/testing-library",
     legacy: (range) => !/(^|[^0-9.])1\.0\.0-/.test(range),
@@ -97,7 +114,8 @@ export const DEPENDENCY_MAP = Object.freeze([
     legacy: null,
     status: "replace",
     replacement: "@solidjs/testing-library@1.0.0-rc.2",
-    guidance: "solid-testing-library is deprecated; replace it with @solidjs/testing-library@1.0.0-rc.2.",
+    rename: true,
+    guidance: "solid-testing-library is the old name of @solidjs/testing-library; replace it with @solidjs/testing-library@1.0.0-rc.2 (the Solid 2 line) and change its imports. Migrate makes both edits; set the test environment to jsdom yourself, since @solidjs/vite-plugin no longer sets it.",
   },
   {
     name: "@solid-primitives/storage",

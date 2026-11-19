@@ -13,7 +13,8 @@ const PLAIN_RANGE = /^[\s^~<>=v]*\d/;
  * table at its verified version. A stable version gets a caret so patches
  * install; a prerelease stays exact, since a caret on it would also accept
  * later, possibly breaking, prereleases. `replace`, `use-core` and `blocked` entries
- * need code or config changes, so they are reported and never edited.
+ * need code or config changes, so they are reported and never edited, except
+ * the renamed packages in `RENAMES`.
  */
 export const BUMPS = Object.freeze({
   "solid-js": SOLID_RANGE,
@@ -26,6 +27,22 @@ export const BUMPS = Object.freeze({
       }),
   ),
 });
+
+/**
+ * Packages that migrate swaps for their Solid 2 successor, which is the same
+ * package under a new name (`rename: true` in the dependency table), keyed by
+ * the old name: the new name and the range it gets, a caret for a stable
+ * release and the exact version for a prerelease, as in `BUMPS`.
+ */
+export const RENAMES = Object.freeze(
+  Object.fromEntries(
+    DEPENDENCY_MAP.filter((entry) => entry.rename === true).map((entry) => {
+      const at = entry.replacement.lastIndexOf("@");
+      const version = entry.replacement.slice(at + 1);
+      return [entry.name, { name: entry.replacement.slice(0, at), range: version.includes("-") ? version : `^${version}` }];
+    }),
+  ),
+);
 
 // A dependency already on its Solid 2 line keeps its range, so a newer
 // minor than the table's is never moved back.
@@ -40,7 +57,9 @@ export const alreadyMoved = (dependency, range) => ALREADY_MOVED[dependency]?.(r
  * it changes, so formatting, key order and every other line stay as written.
  *
  * In `dependencies` and `devDependencies`, solid-js and each package in
- * `BUMPS` move to their Solid 2 version, and @solidjs/web is added right after
+ * `BUMPS` move to their Solid 2 version, each package in `RENAMES` is
+ * replaced in place by its successor (unless the manifest already declares
+ * the successor), and @solidjs/web is added right after
  * solid-js when it is missing. A range that is not plain semver (workspace:,
  * catalog:, git, link:, npm: aliases, tags) is left alone and reported in
  * `skipped`, as are peerDependencies, whose range is the library author's
@@ -61,6 +80,26 @@ export function bumpManifest(text) {
   const skipped = [];
   for (const name of SECTIONS) {
     for (const [dependency, range] of Object.entries(manifest[name] ?? {})) {
+      const rename = RENAMES[dependency];
+      if (rename !== undefined && typeof range === "string") {
+        if (!PLAIN_RANGE.test(range)) {
+          skipped.push({ name: dependency, range, reason: `it isn't a plain semver range; replace it with ${rename.name} ${rename.range}` });
+          continue;
+        }
+        if (SECTIONS.some((section) => manifest[section]?.[rename.name] !== undefined)) {
+          skipped.push({ name: dependency, range, reason: `${rename.name} is declared too, so remove ${dependency}` });
+          continue;
+        }
+        const edit = valueEdit(text, name, dependency, range, rename.range);
+        if (edit === null) {
+          skipped.push({ name: dependency, range, reason: "it couldn't be located in the file" });
+          continue;
+        }
+        // The whole "name": "range" pair becomes the successor's.
+        edits.push({ start: edit.pairStart, end: edit.end, text: `${JSON.stringify(rename.name)}: ${JSON.stringify(rename.range)}` });
+        changes.push({ name: dependency, from: range, to: rename.range, renamedTo: rename.name, line: edit.line });
+        continue;
+      }
       const target = BUMPS[dependency];
       if (target === undefined || typeof range !== "string" || range === target) continue;
       if (!PLAIN_RANGE.test(range)) {
@@ -136,9 +175,10 @@ function valueEdit(text, section, dependency, range, target) {
   const body = text.slice(open, close);
   const matches = [...body.matchAll(pattern)];
   if (matches.length !== 1) return null;
-  const start = open + matches[0].index + matches[0][1].length;
+  const pairStart = open + matches[0].index;
+  const start = pairStart + matches[0][1].length;
   const end = start + JSON.stringify(range).length;
-  return { start, end, text: JSON.stringify(target), line: text.slice(0, start).split("\n").length };
+  return { pairStart, start, end, text: JSON.stringify(target), line: text.slice(0, start).split("\n").length };
 }
 
 /**

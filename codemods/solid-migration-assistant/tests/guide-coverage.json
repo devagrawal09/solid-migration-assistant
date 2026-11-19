@@ -9,7 +9,7 @@
     },
     {
       "anchor": "typescript-jsx-solid-js--renderer-package",
-      "rules": ["imports/jsx-types", "imports/jsx-type-relocation", "project/jsx-import-source"]
+      "rules": ["imports/jsx-types", "imports/jsx-type-relocation", "project/jsx-import-source", "project/module-resolution", "tooling/build-config", "tooling/package-renames"]
     },
     {
       "anchor": "batching--reads-values-update-after-flush",
@@ -172,6 +172,8 @@
     { "rule": "jsx/handler-reads", "reason": "A STRICT_READ_UNTRACKED dev warning from the 2.0 compiler changelog and the diagnostics reference; the guide does not mention it." },
     { "rule": "imports/ecosystem-apis", "reason": "Router, Start and Meta APIs, which the guide leaves to those packages." },
     { "rule": "project/solid-version", "reason": "The guide does not cover moving the dependency itself." },
-    { "rule": "project/dependencies", "reason": "Ecosystem packages' Solid 2 lines, which the guide does not cover." }
+    { "rule": "project/dependencies", "reason": "Ecosystem packages' Solid 2 lines, which the guide does not cover." },
+    { "rule": "tooling/build-config", "reason": "Build tool configuration (the Vite plugin rename, Babel presets, bundler externals), which the guide does not cover beyond jsxImportSource." },
+    { "rule": "tooling/package-renames", "reason": "Imports of packages renamed for Solid 2 (vite-plugin-solid, solid-testing-library), which the guide does not cover." }
   ]
 }

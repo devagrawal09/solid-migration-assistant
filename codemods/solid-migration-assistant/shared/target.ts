@@ -1,8 +1,9 @@
 /**
  * The single pinned Solid 2 migration destination. Every rule's guidance and
- * report line cites this version and commit; `shared/run-workflow.mjs`
- * repeats the two values for the launcher's disclosure (it cannot import a
- * TypeScript module), and the architecture test proves the copies agree. Bump
+ * report line cites this version and commit; `shared/project.mjs` repeats
+ * the commit and `shared/manifest.mjs` and `shared/run-workflow.mjs` the
+ * version for the JavaScript modules (they cannot import a TypeScript
+ * module), and the architecture test proves the copies agree. Bump
  * both with `node tools/bump-target.mjs <version> <commit>`.
  */
 export const SOLID_TARGET_VERSION = "2.0.3";

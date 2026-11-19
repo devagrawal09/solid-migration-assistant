@@ -1,0 +1,52 @@
+{
+  "findings": [
+    {
+      "rule": "tooling/build-config",
+      "file": "analysis/tooling/build-config/fixtures/real-world-lucide-rollup.fixture.tsx",
+      "line": 17,
+      "column": 9,
+      "severity": "build",
+      "headline": "Replace the babel-preset-solid preset with the @solidjs/babel-plugin plugin.",
+      "why": "babel-preset-solid compiles JSX for Solid 1. Its Solid 2 successor, @solidjs/babel-plugin 2.0.2, is a Babel plugin, not a preset, so it goes in plugins, and it emits code for @solidjs/web.",
+      "guidance": "Remove this preset and add \"@solidjs/babel-plugin\" to plugins (carry over options such as generate and hydratable; moduleName now defaults to \"@solidjs/web\"), and swap the package in package.json; migrate swaps the package but not this config. Projects built with @solidjs/vite-plugin don't need a Babel preset for JSX at all.",
+      "guide": "https://github.com/solidjs/solid/blob/68406c2077eff22c67f71db4a16bf7026ddceee1/documentation/solid-2.0/MIGRATION.md#imports-where-things-live-now",
+      "lint": []
+    },
+    {
+      "rule": "tooling/build-config",
+      "file": "analysis/tooling/build-config/fixtures/real-world-lucide-rollup.fixture.tsx",
+      "line": 29,
+      "column": 28,
+      "severity": "build",
+      "headline": "Point this jsxImportSource option at @solidjs/web.",
+      "why": "Solid 2 no longer ships JSX runtime entries from solid-js; web projects take them from @solidjs/web, so a build tool that resolves JSX through solid-js fails to resolve solid-js/jsx-runtime.",
+      "guidance": "Set it to \"@solidjs/web\", as in tsconfig.json; migrate makes this edit.",
+      "guide": "https://github.com/solidjs/solid/blob/68406c2077eff22c67f71db4a16bf7026ddceee1/documentation/solid-2.0/MIGRATION.md#typescript-jsx-solid-js--renderer-package",
+      "lint": []
+    },
+    {
+      "rule": "tooling/build-config",
+      "file": "analysis/tooling/build-config/fixtures/real-world-lucide-rollup.fixture.tsx",
+      "line": 35,
+      "column": 26,
+      "severity": "behavior",
+      "headline": "Update 'solid-js/web' in this module list to @solidjs/web.",
+      "why": "Solid 2.0.3 has no solid-js/web module, so this entry no longer matches anything. A bundler external or dependency-optimizer list that misses the Solid 2 package bundles a second copy of the runtime, which breaks reactivity and context across the copies.",
+      "guidance": "Replace the entry with @solidjs/web. A regular expression or a function that matches solid-js/ also needs @solidjs/ added.",
+      "guide": "https://github.com/solidjs/solid/blob/68406c2077eff22c67f71db4a16bf7026ddceee1/documentation/solid-2.0/MIGRATION.md#imports-where-things-live-now",
+      "lint": []
+    },
+    {
+      "rule": "tooling/build-config",
+      "file": "analysis/tooling/build-config/fixtures/real-world-lucide-rollup.fixture.tsx",
+      "line": 35,
+      "column": 42,
+      "severity": "behavior",
+      "headline": "Update 'solid-js/store' in this module list to solid-js (stores are part of it).",
+      "why": "Solid 2.0.3 has no solid-js/store module, so this entry no longer matches anything. A bundler external or dependency-optimizer list that misses the Solid 2 package bundles a second copy of the runtime, which breaks reactivity and context across the copies.",
+      "guidance": "Replace the entry with solid-js (stores are part of it), or remove it when solid-js is already listed. A regular expression or a function that matches solid-js/ also needs @solidjs/ added.",
+      "guide": "https://github.com/solidjs/solid/blob/68406c2077eff22c67f71db4a16bf7026ddceee1/documentation/solid-2.0/MIGRATION.md#imports-where-things-live-now",
+      "lint": []
+    }
+  ]
+}

@@ -43,6 +43,7 @@ import { analyzeCreateMutable, analyzeModifyMutable } from "../rules/analysis/st
 import { analyzeProduce } from "../rules/analysis/store/produce/produce.ts";
 import { analyzeStoreSetterCalls } from "../rules/analysis/store/setter-calls/setter-calls.ts";
 import { analyzeUnwrap } from "../rules/analysis/store/unwrap/unwrap.ts";
+import { analyzeBuildToolConfig } from "../rules/analysis/tooling/build-config/build-config.ts";
 import { relocateJsxTypes } from "../rules/transformations/imports/jsx-type-relocation/jsx-type-relocation.ts";
 import { relocateLegacySubpaths } from "../rules/transformations/imports/legacy-subpath-relocation/legacy-subpath-relocation.ts";
 import { relocateWebPackage } from "../rules/transformations/imports/web-package-relocation/web-package-relocation.ts";
@@ -54,6 +55,7 @@ import { rewriteIndexToFor } from "../rules/transformations/jsx/index-to-for/ind
 import { rewriteLowercaseEventHandlers } from "../rules/transformations/jsx/lowercase-event-handlers/lowercase-event-handlers.ts";
 import { rewriteOnHelper } from "../rules/transformations/reactivity/on-helper-split/on-helper-split.ts";
 import { rewriteStoreSetterLiteralPaths } from "../rules/transformations/store/setter-literal-paths/setter-literal-paths.ts";
+import { relocateRenamedPackages, rewriteJsxImportSourceOption } from "../rules/transformations/tooling/package-renames/package-renames.ts";
 
 export const ANALYSIS_RULES = {
   "context/default-less-context": [analyzeDefaultLessContext],
@@ -100,6 +102,7 @@ export const ANALYSIS_RULES = {
   "store/produce": [analyzeProduce],
   "store/setter-calls": [analyzeStoreSetterCalls],
   "store/unwrap": [analyzeUnwrap],
+  "tooling/build-config": [analyzeBuildToolConfig],
 };
 
 export const TRANSFORM_RULES = {
@@ -114,4 +117,5 @@ export const TRANSFORM_RULES = {
   "jsx/lowercase-event-handlers": [rewriteLowercaseEventHandlers],
   "reactivity/on-helper-split": [rewriteOnHelper],
   "store/setter-literal-paths": [rewriteStoreSetterLiteralPaths],
+  "tooling/package-renames": [relocateRenamedPackages, rewriteJsxImportSourceOption],
 };

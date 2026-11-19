@@ -1,0 +1,76 @@
+{
+  "findings": [
+    {
+      "rule": "tooling/build-config",
+      "file": "analysis/tooling/build-config/fixtures/plugin-options.fixture.tsx",
+      "line": 6,
+      "column": 25,
+      "severity": "build",
+      "headline": "Import the Solid 2 Vite plugin from @solidjs/vite-plugin.",
+      "why": "vite-plugin-solid 2.x compiles JSX for Solid 1 and peers on solid-js ^1.7.2, so it won't install beside solid-js 2.0.3. It was renamed @solidjs/vite-plugin; 3.0.1 is the Solid 2 release, needs Vite 8 or 9 and Node 22.12 or newer, and still exports the plugin factory as its default.",
+      "guidance": "Change this import to @solidjs/vite-plugin and swap the package in package.json; migrate makes both edits. solid() with no options keeps working; the options that changed are reported at each call.",
+      "guide": "https://github.com/solidjs/solid/blob/68406c2077eff22c67f71db4a16bf7026ddceee1/documentation/solid-2.0/MIGRATION.md#imports-where-things-live-now",
+      "lint": []
+    },
+    {
+      "rule": "tooling/build-config",
+      "file": "analysis/tooling/build-config/fixtures/plugin-options.fixture.tsx",
+      "line": 12,
+      "column": 7,
+      "severity": "build",
+      "headline": "Remove the hot option; @solidjs/vite-plugin has none.",
+      "why": "vite-plugin-solid 2.x took hot to turn off solid-refresh. @solidjs/vite-plugin 3 replaces it with refresh, and its option types reject hot.",
+      "guidance": "Delete hot. If it was false, set refresh: false instead.",
+      "guide": "https://github.com/solidjs/solid/blob/68406c2077eff22c67f71db4a16bf7026ddceee1/documentation/solid-2.0/MIGRATION.md#imports-where-things-live-now",
+      "lint": []
+    },
+    {
+      "rule": "tooling/build-config",
+      "file": "analysis/tooling/build-config/fixtures/plugin-options.fixture.tsx",
+      "line": 16,
+      "column": 7,
+      "severity": "build",
+      "headline": "Install @babel/core for this babel option, and check the plugins it adds.",
+      "why": "@solidjs/vite-plugin 3 compiles JSX with its native compiler and loads @babel/core only for the babel option, as an optional peer it doesn't install. Without it the build fails when the plugin first transforms a file; Babel plugins written against babel-preset-solid's Solid 1 output may also no longer apply.",
+      "guidance": "Add @babel/core to devDependencies, or drop the option when it only configured JSX. Check each Babel plugin it adds against Solid 2's compiled output.",
+      "guide": "https://github.com/solidjs/solid/blob/68406c2077eff22c67f71db4a16bf7026ddceee1/documentation/solid-2.0/MIGRATION.md#imports-where-things-live-now",
+      "lint": []
+    },
+    {
+      "rule": "tooling/build-config",
+      "file": "analysis/tooling/build-config/fixtures/plugin-options.fixture.tsx",
+      "line": 17,
+      "column": 16,
+      "severity": "build",
+      "headline": "Set solid.moduleName to \"@solidjs/web\" or remove it.",
+      "why": "The compiler imports its runtime helpers from moduleName, and Solid 2 has no solid-js/web module; @solidjs/web is the default.",
+      "guidance": "Delete the option to take the default, or set it to \"@solidjs/web\".",
+      "guide": "https://github.com/solidjs/solid/blob/68406c2077eff22c67f71db4a16bf7026ddceee1/documentation/solid-2.0/MIGRATION.md#imports-where-things-live-now",
+      "lint": []
+    },
+    {
+      "rule": "tooling/build-config",
+      "file": "analysis/tooling/build-config/fixtures/plugin-options.fixture.tsx",
+      "line": 17,
+      "column": 79,
+      "severity": "build",
+      "headline": "Remove solid.omitServerOnlyTemplates; Solid 2's compiler has no such option.",
+      "why": "@solidjs/compiler, which @solidjs/vite-plugin 3 runs, dropped omitServerOnlyTemplates, and the plugin's option types reject it.",
+      "guidance": "Delete the option.",
+      "guide": "https://github.com/solidjs/solid/blob/68406c2077eff22c67f71db4a16bf7026ddceee1/documentation/solid-2.0/MIGRATION.md#imports-where-things-live-now",
+      "lint": []
+    },
+    {
+      "rule": "tooling/build-config",
+      "file": "analysis/tooling/build-config/fixtures/plugin-options.fixture.tsx",
+      "line": 19,
+      "column": 13,
+      "severity": "build",
+      "headline": "Remove the hot option; @solidjs/vite-plugin has none.",
+      "why": "vite-plugin-solid 2.x took hot to turn off solid-refresh. @solidjs/vite-plugin 3 replaces it with refresh, and its option types reject hot.",
+      "guidance": "Delete hot. If it was false, set refresh: false instead.",
+      "guide": "https://github.com/solidjs/solid/blob/68406c2077eff22c67f71db4a16bf7026ddceee1/documentation/solid-2.0/MIGRATION.md#imports-where-things-live-now",
+      "lint": []
+    }
+  ]
+}

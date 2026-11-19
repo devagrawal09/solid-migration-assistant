@@ -28,8 +28,31 @@ test("keeps a dependency whose Solid 2 release is a prerelease exact", () => {
 });
 
 test("leaves a dependency that needs replacing as it is", () => {
-  const text = manifest({ "solid-js": "^1.9.5" }, { devDependencies: { "vite-plugin-solid": "^2.11.0" } });
-  assert.equal(bumped(text).devDependencies["vite-plugin-solid"], "^2.11.0");
+  const text = manifest({ "solid-js": "^1.9.5", "@solidjs/start": "^1.1.0" });
+  assert.equal(bumped(text).dependencies["@solidjs/start"], "^1.1.0");
+});
+
+test("swaps a renamed package for its successor in place", () => {
+  const text = manifest({ "solid-js": "^1.9.5" }, { devDependencies: { "vite-plugin-solid": "^2.11.0", vite: "^8.0.0" } });
+  const result = bumpManifest(text);
+  assert.deepEqual(Object.entries(JSON.parse(result.text).devDependencies), [["@solidjs/vite-plugin", "^3.0.1"], ["vite", "^8.0.0"]]);
+  assert.deepEqual(result.changes.find((change) => change.name === "vite-plugin-solid"), {
+    name: "vite-plugin-solid", from: "^2.11.0", to: "^3.0.1", renamedTo: "@solidjs/vite-plugin", line: 7,
+  });
+});
+
+test("swaps babel-preset-solid and solid-testing-library, keeping a prerelease exact", () => {
+  const { devDependencies } = bumped(manifest({ "solid-js": "^1.9.5" }, { devDependencies: { "babel-preset-solid": "^1.9.0", "solid-testing-library": "^0.5.1" } }));
+  assert.deepEqual(devDependencies, { "@solidjs/babel-plugin": "^2.0.2", "@solidjs/testing-library": "1.0.0-rc.2" });
+});
+
+test("reports a renamed package instead of swapping it when its successor is declared or its range isn't semver", () => {
+  const result = bumpManifest(manifest({ "solid-js": "^1.9.5", "solid-testing-library": "^0.5.1", "@solidjs/testing-library": "^0.8.0", "vite-plugin-solid": "catalog:" }));
+  assert.deepEqual(result.skipped.map((skip) => `${skip.name}: ${skip.reason}`), [
+    "solid-testing-library: @solidjs/testing-library is declared too, so remove solid-testing-library",
+    "vite-plugin-solid: it isn't a plain semver range; replace it with @solidjs/vite-plugin ^3.0.1",
+  ]);
+  assert.equal(JSON.parse(result.text).dependencies["solid-testing-library"], "^0.5.1");
 });
 
 test("reports a workspace or catalog range instead of editing it", () => {

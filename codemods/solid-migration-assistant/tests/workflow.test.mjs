@@ -16,11 +16,14 @@ import { output, treeSnapshot } from "./helpers.mjs";
  *   that only workspace-semantic analysis can resolve), with the temporary
  *   target path written as `<target>`;
  * - `registry.txt`: the workflow's own text report when Codemod runs it
- *   directly, as registry users do, without the launcher's project findings.
+ *   directly, as registry users do, with the package.json and tsconfig
+ *   findings it shares with the launcher (`shared/project.mjs`) but none of
+ *   the launcher's npm lookups.
  *
  * It also proves byte-identical output across two runs, a clean run on a
- * project with no supported sites, a relative --target, and that no run
- * writes into the target or leaves analyzer artifacts there.
+ * project with no supported sites, that a direct run says why it skipped a
+ * project, a relative --target, and that no run writes into the target or
+ * leaves analyzer artifacts there.
  * `pnpm fixtures:update` rewrites the expected files; review the diff.
  */
 const packageDirectory = resolve(dirname(fileURLToPath(import.meta.url)), "..");
@@ -66,11 +69,7 @@ try {
 
   // Run directly through Codemod, as a registry user would, the workflow
   // prints its own text report: the same source findings, no project ones.
-  const direct = spawnSync(
-    process.execPath,
-    [resolveCodemodLauncher(), "--disable-analytics", "workflow", "run", "-w", packageDirectory, "-t", target, "--allow-dirty", "--no-interactive", "--param", "verify=false"],
-    { cwd: packageDirectory, encoding: "utf8", maxBuffer: 64 * 1024 * 1024, env: { ...process.env, NO_COLOR: "1" } },
-  );
+  const direct = runDirect(target);
   assert.equal(direct.status, 0, output(direct));
   compare("registry.txt", stepOutput(normalize(`${direct.stdout}\n${direct.stderr}`)));
   assert.deepEqual(treeSnapshot(target), before, "the direct run changed the target");
@@ -93,6 +92,21 @@ try {
   assertFinalDisclosure(emptyRun.stderr);
   assert.deepEqual(treeSnapshot(empty), emptyBefore, "the empty run changed the target");
   assertNoPersistentArtifacts(empty);
+
+  // Run directly, a project the workflow skips says why, instead of
+  // finishing with no output.
+  const notSolid = runDirect(empty);
+  assert.equal(notSolid.status, 0, output(notSolid));
+  assert.equal(
+    stepOutput(stripAnsi(`${notSolid.stdout}\n${notSolid.stderr}`)),
+    "[solid-migration-assistant] Nothing to analyze: solid-js is not a dependency of this project. This workflow moves Solid 1.9 projects to Solid 2.0.3, and everything it detects or rewrites is Solid 1 code, so it scanned no source files. This is not proof that the project is ready for Solid 2; run its own type, build, and test checks.\n",
+  );
+  const migrated = join(temporaryRoot, "migrated");
+  cpSync(emptyDirectory, migrated, { recursive: true });
+  writeFileSync(join(migrated, "package.json"), JSON.stringify({ dependencies: { "solid-js": "^2.0.3", "@solidjs/web": "^2.0.3" } }));
+  const onSolid2 = runDirect(migrated);
+  assert.equal(onSolid2.status, 0, output(onSolid2));
+  assert.match(stripAnsi(`${onSolid2.stdout}\n${onSolid2.stderr}`), /^\[solid-migration-assistant\] Nothing to analyze: solid-js is already \^2\.0\.3\. /m);
 } finally {
   rmSync(temporaryRoot, { recursive: true, force: true });
 }
@@ -128,6 +142,14 @@ function stepOutput(text) {
     .filter((line) => !/^(?:[▸✓◐✗] |Run [0-9a-f-]{36}$|Done\b)/.test(line))
     .join("\n")
     .trim()}\n`;
+}
+
+function runDirect(target) {
+  return spawnSync(
+    process.execPath,
+    [resolveCodemodLauncher(), "--disable-analytics", "workflow", "run", "-w", packageDirectory, "-t", target, "--allow-dirty", "--no-interactive", "--param", "verify=false"],
+    { cwd: packageDirectory, encoding: "utf8", maxBuffer: 64 * 1024 * 1024, env: { ...process.env, NO_COLOR: "1" } },
+  );
 }
 
 function runAnalyzer(argumentsList, cwd = packageDirectory) {

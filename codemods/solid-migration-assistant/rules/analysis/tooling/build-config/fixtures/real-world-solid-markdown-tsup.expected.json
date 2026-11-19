@@ -1,0 +1,16 @@
+{
+  "findings": [
+    {
+      "rule": "tooling/build-config",
+      "file": "analysis/tooling/build-config/fixtures/real-world-solid-markdown-tsup.fixture.tsx",
+      "line": 7,
+      "column": 25,
+      "severity": "build",
+      "headline": "Replace tsup-preset-solid, which compiles JSX for Solid 1.",
+      "why": "tsup-preset-solid runs babel-preset-solid 1.x, whose output imports solid-js/web and the Solid 1 runtime helpers, which Solid 2.0.3 doesn't have. No release of it targets Solid 2.",
+      "guidance": "Build with @solidjs/vite-plugin (Vite library mode for a library), or keep this bundler and run @solidjs/babel-plugin@2.0.2 through its Babel hook with moduleName \"@solidjs/web\". Stop and ask before changing a published library's build output.",
+      "guide": "https://github.com/solidjs/solid/blob/68406c2077eff22c67f71db4a16bf7026ddceee1/documentation/solid-2.0/MIGRATION.md#imports-where-things-live-now",
+      "lint": []
+    }
+  ]
+}

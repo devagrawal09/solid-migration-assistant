@@ -1,0 +1,60 @@
+{
+  "rewrites": [
+    {
+      "rule": "tooling/package-renames",
+      "file": "transformations/tooling/package-renames/fixtures/forms.fixture.tsx",
+      "line": 4,
+      "column": 32,
+      "message": "Relocate solid-testing-library to @solidjs/testing-library, its current name.",
+      "guide": "https://github.com/solidjs/solid/blob/68406c2077eff22c67f71db4a16bf7026ddceee1/documentation/solid-2.0/MIGRATION.md#imports-where-things-live-now"
+    },
+    {
+      "rule": "tooling/package-renames",
+      "file": "transformations/tooling/package-renames/fixtures/forms.fixture.tsx",
+      "line": 5,
+      "column": 19,
+      "message": "Import the Solid 2 Vite plugin from @solidjs/vite-plugin; its default export is still the plugin factory.",
+      "guide": "https://github.com/solidjs/solid/blob/68406c2077eff22c67f71db4a16bf7026ddceee1/documentation/solid-2.0/MIGRATION.md#imports-where-things-live-now"
+    },
+    {
+      "rule": "tooling/package-renames",
+      "file": "transformations/tooling/package-renames/fixtures/forms.fixture.tsx",
+      "line": 6,
+      "column": 25,
+      "message": "Relocate solid-testing-library to @solidjs/testing-library, its current name.",
+      "guide": "https://github.com/solidjs/solid/blob/68406c2077eff22c67f71db4a16bf7026ddceee1/documentation/solid-2.0/MIGRATION.md#imports-where-things-live-now"
+    },
+    {
+      "rule": "tooling/package-renames",
+      "file": "transformations/tooling/package-renames/fixtures/forms.fixture.tsx",
+      "line": 8,
+      "column": 33,
+      "message": "Import the Solid 2 Vite plugin from @solidjs/vite-plugin; its default export is still the plugin factory.",
+      "guide": "https://github.com/solidjs/solid/blob/68406c2077eff22c67f71db4a16bf7026ddceee1/documentation/solid-2.0/MIGRATION.md#imports-where-things-live-now"
+    },
+    {
+      "rule": "tooling/package-renames",
+      "file": "transformations/tooling/package-renames/fixtures/forms.fixture.tsx",
+      "line": 9,
+      "column": 39,
+      "message": "Import the Solid 2 Vite plugin from @solidjs/vite-plugin; its default export is still the plugin factory.",
+      "guide": "https://github.com/solidjs/solid/blob/68406c2077eff22c67f71db4a16bf7026ddceee1/documentation/solid-2.0/MIGRATION.md#imports-where-things-live-now"
+    },
+    {
+      "rule": "tooling/package-renames",
+      "file": "transformations/tooling/package-renames/fixtures/forms.fixture.tsx",
+      "line": 11,
+      "column": 60,
+      "message": "Point this jsxImportSource option at @solidjs/web.",
+      "guide": "https://github.com/solidjs/solid/blob/68406c2077eff22c67f71db4a16bf7026ddceee1/documentation/solid-2.0/MIGRATION.md#typescript-jsx-solid-js--renderer-package"
+    },
+    {
+      "rule": "tooling/package-renames",
+      "file": "transformations/tooling/package-renames/fixtures/forms.fixture.tsx",
+      "line": 12,
+      "column": 60,
+      "message": "Point this jsxImportSource option at @solidjs/web.",
+      "guide": "https://github.com/solidjs/solid/blob/68406c2077eff22c67f71db4a16bf7026ddceee1/documentation/solid-2.0/MIGRATION.md#typescript-jsx-solid-js--renderer-package"
+    }
+  ]
+}

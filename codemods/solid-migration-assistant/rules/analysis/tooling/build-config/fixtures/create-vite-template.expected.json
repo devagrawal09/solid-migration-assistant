@@ -1,0 +1,16 @@
+{
+  "findings": [
+    {
+      "rule": "tooling/build-config",
+      "file": "analysis/tooling/build-config/fixtures/create-vite-template.fixture.tsx",
+      "line": 6,
+      "column": 19,
+      "severity": "build",
+      "headline": "Import the Solid 2 Vite plugin from @solidjs/vite-plugin.",
+      "why": "vite-plugin-solid 2.x compiles JSX for Solid 1 and peers on solid-js ^1.7.2, so it won't install beside solid-js 2.0.3. It was renamed @solidjs/vite-plugin; 3.0.1 is the Solid 2 release, needs Vite 8 or 9 and Node 22.12 or newer, and still exports the plugin factory as its default.",
+      "guidance": "Change this import to @solidjs/vite-plugin and swap the package in package.json; migrate makes both edits. solid() with no options keeps working; the options that changed are reported at each call.",
+      "guide": "https://github.com/solidjs/solid/blob/68406c2077eff22c67f71db4a16bf7026ddceee1/documentation/solid-2.0/MIGRATION.md#imports-where-things-live-now",
+      "lint": []
+    }
+  ]
+}

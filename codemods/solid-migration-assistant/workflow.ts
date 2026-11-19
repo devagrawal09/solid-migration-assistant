@@ -3,6 +3,7 @@ import { DEPENDENCY_MAP } from "./shared/dependencies.mjs";
 import { bumpManifest, bumpTsconfig } from "./shared/manifest.mjs";
 import { bumpCatalogs } from "./shared/catalog.mjs";
 import { byLocation, renderText } from "./shared/format.mjs";
+import { configFindings, manifestFindings } from "./shared/project.mjs";
 import { ANALYSIS_STEPS, TRANSFORM_STEPS } from "./shared/steps.generated.ts";
 import { MIGRATION_GUIDE_URL, SOLID_TARGET_VERSION } from "./shared/target.ts";
 
@@ -19,8 +20,17 @@ const SOURCES = {
 // create-vite's Solid TypeScript template keeps jsxImportSource in
 // tsconfig.app.json; tsconfig.json there only lists references.
 const PROJECT_CONFIGS = {
-  include: ["package.json", "tsconfig.json", "tsconfig.*.json", "jsconfig.json"],
+  include: ["**/package.json", "**/tsconfig.json", "**/tsconfig.*.json", "**/jsconfig.json"],
   exclude: OUTSIDE_PROJECT,
+};
+// Build tool configs, which SOURCES leaves out when they are .mjs, .cjs,
+// .mts or .cts files (lucide's rollup.config.mjs, vitest.config.mts).
+const BUILD_CONFIGS = {
+  include: ["vite", "vitest", "rollup", "tsup", "tsdown", "esbuild", "babel", "webpack", "app"].flatMap((tool) =>
+    ["js", "mjs", "cjs", "ts", "mts", "cts"].map((extension) => `**/${tool}.config.${extension}`),
+  ),
+  exclude: OUTSIDE_PROJECT,
+  containing: "solid",
 };
 
 type DependencyEntry = {
@@ -33,14 +43,18 @@ type DependencyEntry = {
 const DEPENDENCIES = DEPENDENCY_MAP as readonly DependencyEntry[];
 
 const ECOSYSTEM = ["@solidjs/router", "@solidjs/meta", "@solidjs/start", "vinxi"];
+// Source files that import a renamed package; build configs always run.
+const RENAMED = ["vite-plugin-solid", "solid-testing-library"];
 
 // One stage per group of rule domains (rules/<kind>/<domain>/<rule>). `needs`
 // is the dependency guard; `scan` is the file guard: rules in the stage only
 // see files whose text contains one of these strings (null: every source
 // file, for JSX rules that match syntax rather than imports). The steps come
 // from shared/steps.generated.ts, which `pnpm generate` derives from rules/.
-const STAGES: { name: string; needs: string[]; scan: string[] | null; rules: (rule: string) => boolean }[] = [
+// `configs` adds the build config files (BUILD_CONFIGS) to the stage's files.
+const STAGES: { name: string; needs: string[]; scan: string[] | null; configs?: boolean; rules: (rule: string) => boolean }[] = [
   { name: "Imports", needs: ["solid-js"], scan: ["solid-js"], rules: (r) => r.startsWith("imports/") && r !== "imports/ecosystem-apis" },
+  { name: "Context", needs: ["solid-js"], scan: ["solid-js"], rules: (r) => r.startsWith("context/") },
   { name: "JSX", needs: ["solid-js"], scan: null, rules: (r) => r.startsWith("jsx/") },
   {
     name: "Reactivity, lifecycle and props",
@@ -50,6 +64,7 @@ const STAGES: { name: string; needs: string[]; scan: string[] | null; rules: (ru
   },
   { name: "Stores", needs: ["solid-js"], scan: ["solid-js/store"], rules: (r) => r.startsWith("store/") },
   { name: "Router, meta and start", needs: ECOSYSTEM, scan: ECOSYSTEM, rules: (r) => r === "imports/ecosystem-apis" },
+  { name: "Build tooling", needs: ["solid-js"], scan: RENAMED, configs: true, rules: (r) => r.startsWith("tooling/") },
 ];
 
 // Stand-in for the dependency analysis task being built on #2485. It reads
@@ -57,6 +72,8 @@ const STAGES: { name: string; needs: string[]; scan: string[] | null; rules: (ru
 // package-lock.json; the real task adds pnpm/yarn lockfiles, workspaces and
 // the transitive graph, and should replace this function one for one.
 function readDependencies(path: string, text: string) {
+  // The workspace file is kept as text for the project checks' catalogs.
+  if (path.endsWith("pnpm-workspace.yaml")) return { path, workspaceYaml: text };
   const json = JSON.parse(text);
   if (path.endsWith("package-lock.json")) {
     const resolved: Record<string, string> = {};
@@ -100,27 +117,36 @@ export default async function main({ params }: { params: Params }) {
   const manifests = await step(
     "Read dependencies",
     forEachFile(
-      { include: ["package.json", "package-lock.json"], exclude: OUTSIDE_PROJECT },
+      { include: ["package.json", "package-lock.json", "pnpm-workspace.yaml"], exclude: OUTSIDE_PROJECT },
       (file) => readDependencies(file.path, file.text),
     ),
   );
   const declared: Record<string, string> = {};
   const resolved: Record<string, string> = {};
   const solidRanges: string[] = [];
+  let workspaceYaml = "";
   for (const m of manifests.outputs as any[]) {
     Object.assign(declared, m.declared ?? {});
     Object.assign(resolved, m.resolved ?? {});
     if (typeof m.declared?.["solid-js"] === "string") solidRanges.push(m.declared["solid-js"]);
+    if (typeof m.workspaceYaml === "string" && m.path === "pnpm-workspace.yaml") workspaceYaml = m.workspaceYaml;
   }
 
   // Guard: this workflow only knows the Solid 1 -> 2 move. In a workspace,
-  // one package on Solid 1 is enough to run.
+  // one package on Solid 1 is enough to run. Codemod prints nothing about a
+  // workflow that returns early, so the report says why.
+  const skip = (reason: string) => {
+    if (params.report !== "none") {
+      console.log(`[solid-migration-assistant] Nothing to ${migrate ? "migrate" : "analyze"}: ${reason}. This workflow moves Solid 1.9 projects to Solid ${SOLID_TARGET_VERSION}, and everything it detects or rewrites is Solid 1 code, so it scanned no source files. This is not proof that the project is ready for Solid 2; run its own type, build, and test checks.`);
+    }
+    return { skipped: reason };
+  };
   const solid = resolved["solid-js"] ?? declared["solid-js"];
-  if (solid === undefined) return { skipped: "solid-js is not a dependency of this project" };
+  if (solid === undefined) return skip("solid-js is not a dependency of this project");
   // A range without a version (latest, *, workspace:) goes by the lockfile.
   const onSolid2 = solidRanges.every((range) => (major(range) ?? major(resolved["solid-js"]) ?? 1) >= 2)
     && (major(resolved["solid-js"]) ?? 2) >= 2;
-  if (onSolid2) return { skipped: `solid-js is already ${solid}` };
+  if (onSolid2) return skip(`solid-js is already ${solid}`);
 
   const dependencyPlan = DEPENDENCIES.filter((d) => typeof declared[d.name] === "string")
     .filter((d) => d.legacy === null || d.legacy(declared[d.name]!))
@@ -138,13 +164,32 @@ export default async function main({ params }: { params: Params }) {
     }),
   );
   const files = scanned.outputs as { path: string; hits: string[] }[];
-  const plan = STAGES.map((stage) => ({
-    ...stage,
-    analyses: ANALYSIS_STEPS.filter((s) => stage.rules(s.rule)).map((s) => s.name),
-    rewrites: TRANSFORM_STEPS.filter((s) => stage.rules(s.rule)).map((s) => s.name),
-    run: stage.needs.some((name) => declared[name] !== undefined),
-    files: stage.scan === null ? files.map((f) => f.path) : files.filter((f) => f.hits.some((h) => stage.scan!.includes(h))).map((f) => f.path),
-  }));
+  const configs = await step("Find build configs", forEachFile(BUILD_CONFIGS, (file) => file.path));
+  const configFiles = configs.outputs;
+  const plan = STAGES.map((stage) => {
+    const scannedFiles = stage.scan === null ? files.map((f) => f.path) : files.filter((f) => f.hits.some((h) => stage.scan!.includes(h))).map((f) => f.path);
+    return {
+      ...stage,
+      analyses: ANALYSIS_STEPS.filter((s) => stage.rules(s.rule)).map((s) => s.name),
+      rewrites: TRANSFORM_STEPS.filter((s) => stage.rules(s.rule)).map((s) => s.name),
+      run: stage.needs.some((name) => declared[name] !== undefined),
+      files: stage.configs === true ? [...new Set([...configFiles, ...scannedFiles])] : scannedFiles,
+    };
+  });
+
+  // package.json and tsconfig findings: the Solid version, the dependency
+  // table, Vite, a library's peers and module resolution (shared/project.mjs,
+  // the same checks the npm launcher runs). Migrate reads them after its
+  // edits, so they are what it left.
+  const checkProject = async (workspace: string) => {
+    const checked = await step(
+      "Check package.json and tsconfig.json",
+      forEachFile(PROJECT_CONFIGS, (file) =>
+        file.path.endsWith("package.json") ? manifestFindings(file.path, file.text, workspace) : configFindings(file.path, file.text),
+      ),
+    );
+    return checked.outputs.flat();
+  };
 
   // A shell step runs where Codemod was started unless given a cwd, which is
   // relative to the target. The script prints its summary as JSON on stdout.
@@ -171,6 +216,7 @@ export default async function main({ params }: { params: Params }) {
   const rewritten: any[] = [];
 
   const before = verify ? await lint("Lint with eslint-plugin-solid v2 (before)", "lintBefore") : undefined;
+  let projectFound: any[] = migrate ? [] : await checkProject(workspaceYaml);
   let after: any;
 
   const analyze = async () => {
@@ -210,12 +256,13 @@ export default async function main({ params }: { params: Params }) {
     }
     const project = await step(
       "Move package.json and tsconfig.json to Solid 2",
-      forEachFile(PROJECT_CONFIGS, (file) => {
+      forEachFile({ ...PROJECT_CONFIGS, include: [...PROJECT_CONFIGS.include, "pnpm-workspace.yaml"] }, (file) => {
         if (file.path.endsWith("pnpm-workspace.yaml")) {
           const bumped = bumpCatalogs(file.text);
           if (bumped === null) return undefined;
           if (bumped.changes.length > 0) file.write(bumped.text);
           return {
+            workspaceYaml: bumped.text,
             rewrites: bumped.changes.map((change: any) => ({
               rule: "project/dependencies",
               file: file.path,
@@ -241,7 +288,9 @@ export default async function main({ params }: { params: Params }) {
               column: 1,
               message: change.from === null
                 ? `Add ${change.name} ${change.to}.`
-                : `Move ${change.name} from ${change.from} to ${change.to}.`,
+                : change.renamedTo !== undefined
+                  ? `Replace ${change.name} ${change.from} with ${change.renamedTo} ${change.to}, its Solid 2 successor.`
+                  : `Move ${change.name} from ${change.from} to ${change.to}.`,
               guide: `${MIGRATION_GUIDE_URL}#imports-where-things-live-now`,
             })),
             skipped: bumped.skipped.map((skip: any) => ({ file: file.path, ...skip })),
@@ -270,6 +319,7 @@ export default async function main({ params }: { params: Params }) {
         .map((rewrite: any) => `${rewrite.catalog}:${rewrite.name}`),
     );
     for (const output of project.outputs as any[]) {
+      if (typeof output.workspaceYaml === "string") workspaceYaml = output.workspaceYaml;
       projectRewrites.push(...output.rewrites.map(({ catalog, name, ...rewrite }: any) => rewrite));
       dependencySkips.push(...output.skipped.filter((skip: any) => {
         const catalog = /^catalog:(.*)$/.exec(skip.range)?.[1];
@@ -290,6 +340,7 @@ export default async function main({ params }: { params: Params }) {
     }
     if (verify) after = await lint("Lint with eslint-plugin-solid v2 (after)", "lintAfter");
     await analyze();
+    projectFound = await checkProject(workspaceYaml);
   }
 
   const findings = byLocation(found);
@@ -302,9 +353,15 @@ export default async function main({ params }: { params: Params }) {
   const withLint = findings.filter((f) => f.lint.length > 0);
   const unconfirmed = withLint.filter((f) => !f.lint.some((rule: string) => lintSites.has(`${f.file}\tsolid/${rule}`)));
 
+  // The launcher (report=none) reads package.json and tsconfig itself, with
+  // the npm lookups the workflow can't make, so only this report adds them.
   if (params.report !== "none") {
-    const text = renderText({ findings, rewrites, afterMigrate, solidVersion: SOLID_TARGET_VERSION });
-    if (text !== "") console.log(text);
+    const text = renderText({ findings: byLocation([...projectFound, ...findings]), rewrites, afterMigrate, solidVersion: SOLID_TARGET_VERSION });
+    console.log(
+      text !== ""
+        ? text
+        : `[solid-migration-assistant] ${migrate ? "Nothing to rewrite." : "No supported migration sites found."} This is not proof that the project is ready for Solid 2; run its own type, build, and test checks.`,
+    );
   }
   if (params.report !== "none" && dependencySkips.length > 0) {
     console.log(`Left these dependency ranges as they are; move them by hand:\n${dependencySkips.map((s) => `  ${s.file}: ${s.name} ${JSON.stringify(s.range)} (${s.reason})`).join("\n")}`);
@@ -322,6 +379,7 @@ export default async function main({ params }: { params: Params }) {
     findingsByRule: tally(findings.map((f) => f.rule)),
     rewritesByRule: tally(rewrites.map((r) => r.rule)),
     findings,
+    projectFindings: byLocation(projectFound),
     rewrites,
     ...(afterMigrate ? { afterMigrate } : {}),
     failures: [...manifests.failures.map((f) => ({ step: "Read dependencies", ...f })), ...failures],

@@ -1,0 +1,12 @@
+{
+  "rewrites": [
+    {
+      "rule": "tooling/package-renames",
+      "file": "transformations/tooling/package-renames/fixtures/create-vite-template.fixture.tsx",
+      "line": 6,
+      "column": 19,
+      "message": "Import the Solid 2 Vite plugin from @solidjs/vite-plugin; its default export is still the plugin factory.",
+      "guide": "https://github.com/solidjs/solid/blob/68406c2077eff22c67f71db4a16bf7026ddceee1/documentation/solid-2.0/MIGRATION.md#imports-where-things-live-now"
+    }
+  ]
+}
