@@ -18,6 +18,7 @@ export const ANALYSIS_STEPS = [
   { rule: "jsx/dynamic-component", name: "analyzeDynamicComponent" },
   { rule: "jsx/handler-reads", name: "analyzeHandlerReads" },
   { rule: "jsx/once-marker", name: "analyzeOnceMarker" },
+  { rule: "jsx/portal", name: "analyzePortal" },
   { rule: "jsx/ref-callback-scope", name: "analyzeRefCallbackScope" },
   { rule: "lifecycle/on-cleanup", name: "analyzeOnCleanup" },
   { rule: "lifecycle/on-mount", name: "analyzeOnMount" },

@@ -61,7 +61,7 @@ export function analyzeDefaultLessContext(
       return [
         finding(filename, call, {
           severity: "behavior",
-          headline: `${hook.name.text()} now throws outside a Provider instead of returning undefined; useContext(${target.text()}) has no default.`,
+          headline: `Keep ${hook.name.text()} optional: useContext(${target.text()}) now throws outside a Provider instead of returning undefined.`,
           why: `${target.text()} is created without a default, and ${hook.name.text()} returns useContext(${target.text()}) as is, ${optionalType ? `declaring ${annotation.replace(/^:\s*/, "")}` : `and ${checkedBy} checks its result for undefined`}, so code outside a Provider relies on getting undefined. Solid 1.x returned undefined from useContext outside a Provider; Solid ${SOLID_TARGET_VERSION} throws ContextNotFoundError instead.`,
           guidance: `Give the context an explicit empty value, createContext<T | null>(null), and map it back in the hook: return useContext(${target.text()}) ?? undefined, so callers keep their contract. undefined is never a context value in Solid 2, so createContext<T | undefined>(undefined) still throws. If every caller is always inside a Provider, drop undefined from the hook's type instead.`,
           guide: MIGRATION_GUIDE,

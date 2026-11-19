@@ -12,7 +12,9 @@ const MIGRATION_GUIDE =
  * inside the callback of a legacy one-argument `createEffect` /
  * `createRenderEffect` / `createComputed`, or of an `onMount`, all imported
  * from Solid. Those scopes become a split effect's apply callback or
- * `onSettled`, which take cleanup as a returned function. In a component
+ * `onSettled`, which take cleanup as a returned function. An `onCleanup`
+ * already inside an `onSettled` callback (an onMount moved by hand) throws
+ * CLEANUP_IN_FORBIDDEN_SCOPE and is reported as a build break. In a component
  * body, a custom hook, `createRoot`, or a memo, `onCleanup` is still valid in
  * Solid 2 and is not reported. Calls inside inline ref callbacks are reported
  * by the ref-callback analyzer instead, and a cleanup registered by a helper
@@ -23,12 +25,12 @@ export function analyzeOnCleanup(
   context: { filename: string },
 ): RuleFinding[] {
   const changedScopes = new Map<string, string>();
-  for (const name of ["createEffect", "createRenderEffect", "createComputed", "onMount"]) {
+  for (const name of ["createEffect", "createRenderEffect", "createComputed", "onMount", "onSettled"]) {
     for (const { call, argumentNodes } of findImportedCalls(rootNode, ["solid-js", "solid-js/web"], name)) {
       const callback = argumentNodes[0];
       if (callback === undefined) continue;
       if (callback.kind() !== "arrow_function" && callback.kind() !== "function_expression") continue;
-      if (name !== "onMount" && argumentNodes.length !== 1) continue;
+      if (name !== "onMount" && name !== "onSettled" && argumentNodes.length !== 1) continue;
       changedScopes.set(String(callback.id()), name);
     }
   }
@@ -44,6 +46,15 @@ export function analyzeOnCleanup(
       const owner = scope === null ? undefined : changedScopes.get(String(scope.id()));
       if (owner === undefined) return [];
       const start = call.range().start;
+      if (owner === "onSettled") {
+        return [finding(filename, start, {
+        severity: "build",
+        headline: `Return this cleanup from the onSettled callback instead of calling onCleanup.`,
+        why: `Solid ${SOLID_TARGET_VERSION} runs onSettled's callback outside an owner that accepts cleanups: onCleanup there throws CLEANUP_IN_FORBIDDEN_SCOPE. onSettled takes cleanup as the function its callback returns.`,
+        guidance: `Return the cleanup function from the onSettled callback and drop the onCleanup wrapper; if the callback already returns something, combine both into one returned cleanup.`,
+        guide: MIGRATION_GUIDE,
+      })];
+      }
       if (owner === "onMount") {
         return [finding(filename, start, {
         severity: "behavior",

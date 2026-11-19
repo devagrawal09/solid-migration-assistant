@@ -173,6 +173,7 @@
     { "rule": "imports/ecosystem-apis", "reason": "Router, Start and Meta APIs, which the guide leaves to those packages." },
     { "rule": "project/solid-version", "reason": "The guide does not cover moving the dependency itself." },
     { "rule": "project/dependencies", "reason": "Ecosystem packages' Solid 2 lines, which the guide does not cover." },
+    { "rule": "jsx/portal", "reason": "Portal lost its wrapper element and its ref, useShadow and isSVG props in @solidjs/web; the guide only covers Portal's event delegation." },
     { "rule": "tooling/build-config", "reason": "Build tool configuration (the Vite plugin rename, Babel presets, bundler externals), which the guide does not cover beyond jsxImportSource." },
     { "rule": "tooling/package-renames", "reason": "Imports of packages renamed for Solid 2 (vite-plugin-solid, solid-testing-library), which the guide does not cover." }
   ]

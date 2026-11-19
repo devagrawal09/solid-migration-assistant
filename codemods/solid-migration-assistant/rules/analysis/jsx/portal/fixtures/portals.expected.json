@@ -1,0 +1,52 @@
+{
+  "findings": [
+    {
+      "rule": "jsx/portal",
+      "file": "analysis/jsx/portal/fixtures/portals.fixture.tsx",
+      "line": 12,
+      "column": 13,
+      "severity": "build",
+      "headline": "Remove ref from this Portal; Solid 2's Portal takes only mount and children.",
+      "why": "Solid 1.x passed the Portal's wrapper <div> to ref. Solid 2.0.3's Portal has no wrapper element and no ref prop: it inserts its children directly into mount.",
+      "guidance": "Put the ref on an element you render inside the Portal (wrap the children in your own <div ref={...}> if code needs one element), or pass mount an element you hold a ref to.",
+      "guide": "https://github.com/solidjs/solid/blob/68406c2077eff22c67f71db4a16bf7026ddceee1/documentation/solid-2.0/MIGRATION.md#imports-where-things-live-now",
+      "lint": []
+    },
+    {
+      "rule": "jsx/portal",
+      "file": "analysis/jsx/portal/fixtures/portals.fixture.tsx",
+      "line": 15,
+      "column": 13,
+      "severity": "build",
+      "headline": "Remove useShadow from this Portal; Solid 2's Portal takes only mount and children.",
+      "why": "Solid 2.0.3's Portal has no useShadow option; it inserts its children directly into mount and attaches no shadow root.",
+      "guidance": "Create the shadow root yourself (host.attachShadow({ mode: \"open\" })) and pass it, or an element inside it, as mount.",
+      "guide": "https://github.com/solidjs/solid/blob/68406c2077eff22c67f71db4a16bf7026ddceee1/documentation/solid-2.0/MIGRATION.md#imports-where-things-live-now",
+      "lint": []
+    },
+    {
+      "rule": "jsx/portal",
+      "file": "analysis/jsx/portal/fixtures/portals.fixture.tsx",
+      "line": 15,
+      "column": 23,
+      "severity": "build",
+      "headline": "Remove isSVG from this Portal; Solid 2's Portal takes only mount and children.",
+      "why": "Solid 2.0.3's Portal has no isSVG option; it inserts its children directly into mount, so SVG content goes into an SVG mount as is.",
+      "guidance": "Pass an SVG element as mount and render SVG children; there is no wrapper <g> to opt into.",
+      "guide": "https://github.com/solidjs/solid/blob/68406c2077eff22c67f71db4a16bf7026ddceee1/documentation/solid-2.0/MIGRATION.md#imports-where-things-live-now",
+      "lint": []
+    },
+    {
+      "rule": "jsx/portal",
+      "file": "analysis/jsx/portal/fixtures/portals.fixture.tsx",
+      "line": 18,
+      "column": 5,
+      "severity": "behavior",
+      "headline": "Check code and CSS that find this Portal's content through its wrapper <div>.",
+      "why": "Solid 1.x rendered a Portal's children inside a <div> it appended to mount. Solid 2.0.3's Portal (still imported from @solidjs/web) inserts the children directly into mount between empty text nodes, and renders nothing on the server, so mount.firstChild, #root > div selectors and styles on that div no longer match.",
+      "guidance": "If anything relied on the wrapper, render your own element inside the Portal and target it. Async reads inside a Portal start on the client; give them their own <Loading> boundary.",
+      "guide": "https://github.com/solidjs/solid/blob/68406c2077eff22c67f71db4a16bf7026ddceee1/documentation/solid-2.0/MIGRATION.md#imports-where-things-live-now",
+      "lint": []
+    }
+  ]
+}

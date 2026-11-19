@@ -1,0 +1,16 @@
+{
+  "findings": [
+    {
+      "rule": "lifecycle/on-cleanup",
+      "file": "analysis/lifecycle/on-cleanup/fixtures/on-settled.fixture.tsx",
+      "line": 10,
+      "column": 5,
+      "severity": "build",
+      "headline": "Return this cleanup from the onSettled callback instead of calling onCleanup.",
+      "why": "Solid 2.0.3 runs onSettled's callback outside an owner that accepts cleanups: onCleanup there throws CLEANUP_IN_FORBIDDEN_SCOPE. onSettled takes cleanup as the function its callback returns.",
+      "guidance": "Return the cleanup function from the onSettled callback and drop the onCleanup wrapper; if the callback already returns something, combine both into one returned cleanup.",
+      "guide": "https://github.com/solidjs/solid/blob/68406c2077eff22c67f71db4a16bf7026ddceee1/documentation/solid-2.0/MIGRATION.md#effects-lifecycle-and-cleanup",
+      "lint": []
+    }
+  ]
+}
