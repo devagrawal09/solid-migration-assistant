@@ -1,0 +1,28 @@
+{
+  "findings": [
+    {
+      "rule": "reactivity/owned-write",
+      "file": "analysis/reactivity/owned-write/fixtures/real-world-solid-zustand.fixture.tsx",
+      "line": 22,
+      "column": 5,
+      "severity": "behavior",
+      "headline": "This api.subscribe listener writes setSignal; Solid 2 throws when the store notifies from an owned scope.",
+      "why": "The external store calls this listener synchronously from whatever changed it. When that is a component body, a createMemo compute function or a createRoot callback (or, with an immediate option, the computation that subscribes), Solid 2.0.3 throws REACTIVE_WRITE_IN_OWNED_SCOPE in development builds and halts the reactive system. Solid 1.x allowed these writes.",
+      "guidance": "This signal bridges an external store into Solid, so create it with the ownedWrite option: createSignal(initial, { ownedWrite: true }); that is what the option is for. Box a value that may be a function ({ value }) so the setter doesn't run it as an updater. Alternatively read the store through a memo that re-runs on a version signal, as long as nothing in this project updates the store from an owned scope.",
+      "guide": "https://github.com/solidjs/solid/blob/68406c2077eff22c67f71db4a16bf7026ddceee1/documentation/solid-2.0/MIGRATION.md#write-inside-reactive-scope-owned-scope",
+      "lint": []
+    },
+    {
+      "rule": "reactivity/owned-write",
+      "file": "analysis/reactivity/owned-write/fixtures/real-world-solid-zustand.fixture.tsx",
+      "line": 34,
+      "column": 5,
+      "severity": "behavior",
+      "headline": "This api.subscribe listener writes setState; Solid 2 throws when the store notifies from an owned scope.",
+      "why": "The external store calls this listener synchronously from whatever changed it. When that is a component body, a createMemo compute function or a createRoot callback (or, with an immediate option, the computation that subscribes), Solid 2.0.3 throws REACTIVE_WRITE_IN_OWNED_SCOPE in development builds and halts the reactive system. Solid 1.x allowed these writes.",
+      "guidance": "This signal bridges an external store into Solid, so create it with the ownedWrite option: createSignal(initial, { ownedWrite: true }); that is what the option is for. Box a value that may be a function ({ value }) so the setter doesn't run it as an updater. Alternatively read the store through a memo that re-runs on a version signal, as long as nothing in this project updates the store from an owned scope.",
+      "guide": "https://github.com/solidjs/solid/blob/68406c2077eff22c67f71db4a16bf7026ddceee1/documentation/solid-2.0/MIGRATION.md#write-inside-reactive-scope-owned-scope",
+      "lint": []
+    }
+  ]
+}

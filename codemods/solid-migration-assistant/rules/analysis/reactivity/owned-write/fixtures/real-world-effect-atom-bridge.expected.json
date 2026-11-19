@@ -1,0 +1,28 @@
+{
+  "findings": [
+    {
+      "rule": "reactivity/owned-write",
+      "file": "analysis/reactivity/owned-write/fixtures/real-world-effect-atom-bridge.fixture.tsx",
+      "line": 17,
+      "column": 52,
+      "severity": "behavior",
+      "headline": "This registry.subscribe listener writes setValue; Solid 2 throws when the store notifies from an owned scope.",
+      "why": "The external store calls this listener synchronously from whatever changed it. When that is a component body, a createMemo compute function or a createRoot callback (or, with an immediate option, the computation that subscribes), Solid 2.0.3 throws REACTIVE_WRITE_IN_OWNED_SCOPE in development builds and halts the reactive system. Solid 1.x allowed these writes.",
+      "guidance": "This signal bridges an external store into Solid, so create it with the ownedWrite option: createSignal(initial, { ownedWrite: true }); that is what the option is for. Box a value that may be a function ({ value }) so the setter doesn't run it as an updater. Alternatively read the store through a memo that re-runs on a version signal, as long as nothing in this project updates the store from an owned scope.",
+      "guide": "https://github.com/solidjs/solid/blob/68406c2077eff22c67f71db4a16bf7026ddceee1/documentation/solid-2.0/MIGRATION.md#write-inside-reactive-scope-owned-scope",
+      "lint": []
+    },
+    {
+      "rule": "reactivity/owned-write",
+      "file": "analysis/reactivity/owned-write/fixtures/real-world-effect-atom-bridge.fixture.tsx",
+      "line": 30,
+      "column": 3,
+      "severity": "behavior",
+      "headline": "Move this setCount call out of the useCounter hook body (hooks run in the calling component's body); Solid 2 throws on writes there in dev.",
+      "why": "Solid 2.0.3 treats a component body, a createMemo compute function and a createRoot callback as owned scopes. A write to a signal or store there throws REACTIVE_WRITE_IN_OWNED_SCOPE in development builds and halts the reactive system; production builds let it through. Solid 1.x allowed these writes.",
+      "guidance": "If the write sets a starting value, pass it to createSignal or createStore instead. If it derives state from props or other state, use createMemo, or createSignal(fn) when the derived value must stay writable. If it reacts to a change, move it into an event handler or the apply callback of a split createEffect. Keep the ownedWrite option for an internal signal that has to be written while rendering.",
+      "guide": "https://github.com/solidjs/solid/blob/68406c2077eff22c67f71db4a16bf7026ddceee1/documentation/solid-2.0/MIGRATION.md#write-inside-reactive-scope-owned-scope",
+      "lint": []
+    }
+  ]
+}

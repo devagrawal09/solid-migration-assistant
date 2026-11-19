@@ -1,0 +1,52 @@
+{
+  "findings": [
+    {
+      "rule": "reactivity/function-initial-value",
+      "file": "analysis/reactivity/function-initial-value/fixtures/caller-typed.fixture.tsx",
+      "line": 28,
+      "column": 30,
+      "severity": "behavior",
+      "headline": "Check whether value can be a function; createSignal would run it as a derived signal.",
+      "why": "value is a parameter typed T, so the caller decides what it holds and it can be a function. Solid 1.x stored a function passed to createSignal as the initial value. Solid 2.0.3 treats createSignal(fn) as a derived signal and calls fn, so the value becomes whatever fn returns.",
+      "guidance": "If it can hold a function, pass createSignal(() => value): the derived form returns value unchanged whether or not it is a function. Setters have the same rule in both versions: pass setX(() => next) when next can be a function. If it can never be a function, narrow its type so the reader can tell.",
+      "guide": "https://github.com/solidjs/solid/blob/68406c2077eff22c67f71db4a16bf7026ddceee1/documentation/solid-2.0/MIGRATION.md#new-function-forms-createsignalfn-and-createstorefn",
+      "lint": []
+    },
+    {
+      "rule": "reactivity/function-initial-value",
+      "file": "analysis/reactivity/function-initial-value/fixtures/caller-typed.fixture.tsx",
+      "line": 30,
+      "column": 38,
+      "severity": "behavior",
+      "headline": "Check whether make<T>() can be a function; createSignal would run it as a derived signal.",
+      "why": "createSignal is typed with T, so the caller decides what it holds and it can be a function. Solid 1.x stored a function passed to createSignal as the initial value. Solid 2.0.3 treats createSignal(fn) as a derived signal and calls fn, so the value becomes whatever fn returns.",
+      "guidance": "If it can hold a function, pass createSignal(() => make<T>()): the derived form returns make<T>() unchanged whether or not it is a function. Setters have the same rule in both versions: pass setX(() => next) when next can be a function. If it can never be a function, narrow its type so the reader can tell.",
+      "guide": "https://github.com/solidjs/solid/blob/68406c2077eff22c67f71db4a16bf7026ddceee1/documentation/solid-2.0/MIGRATION.md#new-function-forms-createsignalfn-and-createstorefn",
+      "lint": []
+    },
+    {
+      "rule": "reactivity/function-initial-value",
+      "file": "analysis/reactivity/function-initial-value/fixtures/caller-typed.fixture.tsx",
+      "line": 35,
+      "column": 28,
+      "severity": "behavior",
+      "headline": "Check whether input can be a function; createSignal would run it as a derived signal.",
+      "why": "input is a parameter typed unknown, so the caller decides what it holds and it can be a function. Solid 1.x stored a function passed to createSignal as the initial value. Solid 2.0.3 treats createSignal(fn) as a derived signal and calls fn, so the value becomes whatever fn returns.",
+      "guidance": "If it can hold a function, pass createSignal(() => input): the derived form returns input unchanged whether or not it is a function. Setters have the same rule in both versions: pass setX(() => next) when next can be a function. If it can never be a function, narrow its type so the reader can tell.",
+      "guide": "https://github.com/solidjs/solid/blob/68406c2077eff22c67f71db4a16bf7026ddceee1/documentation/solid-2.0/MIGRATION.md#new-function-forms-createsignalfn-and-createstorefn",
+      "lint": []
+    },
+    {
+      "rule": "reactivity/function-initial-value",
+      "file": "analysis/reactivity/function-initial-value/fixtures/caller-typed.fixture.tsx",
+      "line": 21,
+      "column": 31,
+      "severity": "behavior",
+      "headline": "Check whether initialValue can be a function; createStore would run it as a derived store.",
+      "why": "initialValue is what the selector parameter returns, so the caller decides what it holds and it can be a function. Solid 1.x stored a function passed to createStore as the initial value. Solid 2.0.3 treats createStore(fn) as a derived store and calls fn, so the value becomes whatever fn returns.",
+      "guidance": "A store's initial value must be an object or array. If initialValue can be a function (or a primitive), box it, createStore({ value: initialValue }), or keep it in a signal instead.",
+      "guide": "https://github.com/solidjs/solid/blob/68406c2077eff22c67f71db4a16bf7026ddceee1/documentation/solid-2.0/MIGRATION.md#new-function-forms-createsignalfn-and-createstorefn",
+      "lint": []
+    }
+  ]
+}
