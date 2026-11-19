@@ -1,0 +1,18 @@
+{
+  "findings": [
+    {
+      "rule": "reactivity/create-effect",
+      "file": "analysis/reactivity/create-effect/fixtures/real-world-solid-markdown-reconcile.fixture.tsx",
+      "line": 18,
+      "column": 3,
+      "severity": "build",
+      "headline": "Replace this one-argument createRenderEffect, which only writes setNode from other state, with a derivation.",
+      "why": "Solid 2 requires separate compute and apply callbacks, and an effect that only copies state into setNode runs after the values it reads, so readers see the old value until it does. Solid 2 derives state instead: a memo, a writable derived signal, or a projection for a store.",
+      "guidance": "Delete the effect and derive the value where setNode's state is created: createMemo(() => ...) for a value, createSignal(() => ...) when it must stay writable, or createProjection(() => ...) for a store (it reconciles the returned value, so reconcile(...) is no longer needed). If the write must stay an effect, split it: createRenderEffect(() => source(), (value) => setNode(value)).",
+      "lint": [
+        "no-single-arg-create-effect"
+      ],
+      "guide": "https://github.com/solidjs/solid/blob/68406c2077eff22c67f71db4a16bf7026ddceee1/documentation/solid-2.0/MIGRATION.md#effects-lifecycle-and-cleanup"
+    }
+  ]
+}

@@ -1,0 +1,32 @@
+{
+  "findings": [
+    {
+      "rule": "reactivity/create-effect",
+      "file": "analysis/reactivity/create-effect/fixtures/real-world-pacer-render-effect.fixture.tsx",
+      "line": 16,
+      "column": 3,
+      "severity": "build",
+      "headline": "Restructure this one-argument createEffect before splitting it.",
+      "why": "Solid 2 requires separate compute and apply callbacks, and this callback registers onCleanup, so it cannot be split by moving reads alone.",
+      "guidance": "Return the cleanup function from the apply callback instead of calling onCleanup. Then move the reactive reads into the compute callback and the imperative work into the apply callback.",
+      "lint": [
+        "no-single-arg-create-effect"
+      ],
+      "guide": "https://github.com/solidjs/solid/blob/68406c2077eff22c67f71db4a16bf7026ddceee1/documentation/solid-2.0/MIGRATION.md#effects-lifecycle-and-cleanup"
+    },
+    {
+      "rule": "reactivity/create-effect",
+      "file": "analysis/reactivity/create-effect/fixtures/real-world-pacer-render-effect.fixture.tsx",
+      "line": 11,
+      "column": 3,
+      "severity": "build",
+      "headline": "Split this one-argument createRenderEffect into compute and apply callbacks (simple shape).",
+      "why": "Solid 2 requires separate compute and apply callbacks. This callback takes no previous value, registers no cleanup, creates no reactive primitives, and is not async, so the split is usually mechanical.",
+      "guidance": "Move the reactive reads into the compute callback and return what the side effect needs, then perform the imperative work in the apply callback: createRenderEffect(() => [a(), b()], ([a, b]) => { ... }). Reads left in the apply callback are no longer tracked.",
+      "lint": [
+        "no-single-arg-create-effect"
+      ],
+      "guide": "https://github.com/solidjs/solid/blob/68406c2077eff22c67f71db4a16bf7026ddceee1/documentation/solid-2.0/MIGRATION.md#effects-lifecycle-and-cleanup"
+    }
+  ]
+}

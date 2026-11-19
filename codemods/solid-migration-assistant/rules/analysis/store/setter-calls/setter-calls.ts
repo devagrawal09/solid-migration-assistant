@@ -2,6 +2,7 @@ import type { SgNode } from "codemod:ast-grep";
 import type TSX from "codemod:ast-grep/langs/tsx";
 import { stringLiteralValue } from "../../../../shared/analysis.ts";
 import { finding, type RuleFinding } from "../../../../shared/finding.ts";
+import { namedImports } from "../../../../shared/imports.ts";
 import { migrationGuide, SOLID_TARGET_VERSION } from "../../../../shared/target.ts";
 import { referencesOf } from "../../../../shared/semantic.ts";
 
@@ -10,7 +11,7 @@ const MIGRATION_GUIDE = migrationGuide("draft-first-setters");
 type SetterSite = {
   node: SgNode<TSX>;
   filename: string;
-  shape: "path" | "merge" | "returns" | "value";
+  shape: "path" | "merge" | "returns" | "reconcile" | "value";
   detail: string;
 };
 
@@ -31,7 +32,12 @@ type SetterSite = {
  * or shadowed names are never mistaken for it. Four shapes are reported:
  *
  * - **path**: two or more arguments (`setStore("user", "name", v)`);
- * - **merge**: one non-function argument (`setStore({ count: 1 })`);
+ * - **merge**: one non-function argument (`setStore({ count: 1 })`), except
+ *   a `reconcile(...)` call, which returns a draft function in Solid 2
+ *   (`reconcile(value, key?)` returns `(state) => T`) and is the Solid 2 way
+ *   to replace a store from new data;
+ * - **reconcile**: `setStore(reconcile(value, options))`, whose 1.x options
+ *   object (`{ key, merge }`) Solid 2 replaced with a key argument;
  * - **returns**: one function argument that returns a value (an expression
  *   body, or a block containing a `return` with a value), whose 1.x merge
  *   semantics differ from the 2.0 replacement semantics; and
@@ -121,6 +127,17 @@ function classify(use: SgNode<TSX>, filename: string): SetterSite | null {
   if (only.kind() === "arrow_function" || only.kind() === "function_expression") {
     return returnsValue(only) ? { node: parent, filename, shape: "returns", detail: "" } : null;
   }
+  // reconcile from the store module, as the file imports it: a draft
+  // function on Solid 2, so only a second argument needs a change.
+  const callee = only.kind() === "call_expression" ? only.field("function") : null;
+  const rootNode = use.getRoot().root();
+  const reconcile = ["solid-js/store", "solid-js"].flatMap((module) => namedImports(rootNode, module, "reconcile"));
+  if (callee !== null && callee.kind() === "identifier" && reconcile.some((imported) => imported.local === callee.text())) {
+    const reconcileArguments = (only.field("arguments")?.children() ?? []).filter((child) => child.isNamed() && child.kind() !== "comment");
+    const options = reconcileArguments[1];
+    if (options === undefined || options.kind() !== "object") return null;
+    return { node: parent, filename, shape: "reconcile", detail: ` reconcile gets ${options.text()}.` };
+  }
   const kind = only.kind().replaceAll("_", " ");
   return { node: parent, filename, shape: "merge", detail: ` The argument is ${/^[aeiou]/.test(kind) ? "an" : "a"} ${kind}.` };
 }
@@ -164,6 +181,14 @@ function guidance({ node, filename, shape, detail }: SetterSite): RuleFinding {
         headline: "Rewrite this object-merge store setter call as draft assignments.",
         why: `${detail.trim()} ${WHY}`,
         guidance: `Read the argument and the store shape. Replace the call with setStore(state => { ... }) that assigns each top-level key of the argument onto the draft; nested objects that 1.x merged shallowly must be assigned per key too if other keys at that level must survive.`,
+        guide: MIGRATION_GUIDE,
+      });
+    case "reconcile":
+      return finding(filename, node, {
+        severity: "build",
+        headline: "Pass reconcile's key as a string; Solid 2 takes no options object.",
+        why: `${detail.trim()} Solid 1.x's reconcile(value, { key, merge }) took an options object; Solid ${SOLID_TARGET_VERSION}'s reconcile(value, key) takes the key (a property name or a function of the item) as its second argument and returns a draft function, so setStore(reconcile(value, key)) stays valid.`,
+        guidance: `Replace the options object with its key: reconcile(value, { key: "id" }) becomes reconcile(value, "id"), and { key: null } becomes null. Solid 2 has no merge option; if the code relied on merge: true, stop and ask how the store's consumers use object identity before choosing a replacement.`,
         guide: MIGRATION_GUIDE,
       });
     case "returns":

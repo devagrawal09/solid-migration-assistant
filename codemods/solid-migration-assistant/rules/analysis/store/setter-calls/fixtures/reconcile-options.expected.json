@@ -1,0 +1,28 @@
+{
+  "findings": [
+    {
+      "rule": "store/setter-calls",
+      "file": "analysis/store/setter-calls/fixtures/reconcile-options.fixture.tsx",
+      "line": 9,
+      "column": 3,
+      "severity": "build",
+      "headline": "Pass reconcile's key as a string; Solid 2 takes no options object.",
+      "why": "reconcile gets { key: \"id\", merge: true }. Solid 1.x's reconcile(value, { key, merge }) took an options object; Solid 2.0.3's reconcile(value, key) takes the key (a property name or a function of the item) as its second argument and returns a draft function, so setStore(reconcile(value, key)) stays valid.",
+      "guidance": "Replace the options object with its key: reconcile(value, { key: \"id\" }) becomes reconcile(value, \"id\"), and { key: null } becomes null. Solid 2 has no merge option; if the code relied on merge: true, stop and ask how the store's consumers use object identity before choosing a replacement.",
+      "guide": "https://github.com/solidjs/solid/blob/68406c2077eff22c67f71db4a16bf7026ddceee1/documentation/solid-2.0/MIGRATION.md#draft-first-setters",
+      "lint": []
+    },
+    {
+      "rule": "store/setter-calls",
+      "file": "analysis/store/setter-calls/fixtures/reconcile-options.fixture.tsx",
+      "line": 19,
+      "column": 3,
+      "severity": "build",
+      "headline": "Rewrite this object-merge store setter call as draft assignments.",
+      "why": "The argument is a call expression. Solid 2.0.3's plain store setter accepts only a draft callback, setStore(state => { ... }); Solid 1.x also accepted a path followed by a value, an object to merge, and a function whose returned object was merged into the store, while a value returned from the 2.0 draft callback is adopted as the whole new state instead.",
+      "guidance": "Read the argument and the store shape. Replace the call with setStore(state => { ... }) that assigns each top-level key of the argument onto the draft; nested objects that 1.x merged shallowly must be assigned per key too if other keys at that level must survive.",
+      "guide": "https://github.com/solidjs/solid/blob/68406c2077eff22c67f71db4a16bf7026ddceee1/documentation/solid-2.0/MIGRATION.md#draft-first-setters",
+      "lint": []
+    }
+  ]
+}

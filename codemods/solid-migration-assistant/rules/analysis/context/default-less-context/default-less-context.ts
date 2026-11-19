@@ -2,6 +2,8 @@ import type { SgNode } from "codemod:ast-grep";
 import type TSX from "codemod:ast-grep/langs/tsx";
 import { enclosingFunction, findImportedCalls } from "../../../../shared/analysis.ts";
 import { finding, type RuleFinding } from "../../../../shared/finding.ts";
+import { provenImport } from "../../../../shared/imports.ts";
+import { importedConstDeclaration } from "../../../../shared/provenance.ts";
 import { referencesOf } from "../../../../shared/semantic.ts";
 import { migrationGuide, SOLID_TARGET_VERSION } from "../../../../shared/target.ts";
 
@@ -19,6 +21,14 @@ const EMPTY = new Set(["undefined", "null"]);
  * on the call itself or on the one const it is assigned to. When every check
  * only throws, the hook was a type-narrowing wrapper and the finding is a
  * cleanup; otherwise the fallback branch is dead and behavior changes.
+ *
+ * A hook that returns the result unchecked is reported too when the
+ * undefined is its contract: its declared return type includes undefined
+ * or null, or a caller the semantic provider finds checks its result. Those
+ * are optional contexts, and on Solid 2 the provider-less path throws.
+ *
+ * The context is declared in this file, or in the project file a named
+ * import resolves to (`importedConstDeclaration`).
  */
 export function analyzeDefaultLessContext(
   rootNode: SgNode<TSX>,
@@ -38,9 +48,26 @@ export function analyzeDefaultLessContext(
 
   return findImportedCalls(rootNode, "solid-js", "useContext").flatMap(({ call, argumentNodes, filename }) => {
     const target = argumentNodes[0];
-    if (target === undefined || !contextReferences.has(`${filename}:${target.id()}`)) return [];
+    if (target === undefined) return [];
+    if (!contextReferences.has(`${filename}:${target.id()}`) && !importedDefaultLess(rootNode, target)) return [];
     const checks = undefinedChecks(call);
-    if (checks.length === 0) return [];
+    if (checks.length === 0) {
+      const hook = returningHook(call);
+      if (hook === null) return [];
+      const annotation = hook.fn.field("return_type")?.text() ?? "";
+      const optionalType = /\b(undefined|null)\b/.test(annotation);
+      const checkedBy = optionalType ? null : checkingCaller(hook.name);
+      if (!optionalType && checkedBy === null) return [];
+      return [
+        finding(filename, call, {
+          severity: "behavior",
+          headline: `${hook.name.text()} now throws outside a Provider instead of returning undefined; useContext(${target.text()}) has no default.`,
+          why: `${target.text()} is created without a default, and ${hook.name.text()} returns useContext(${target.text()}) as is, ${optionalType ? `declaring ${annotation.replace(/^:\s*/, "")}` : `and ${checkedBy} checks its result for undefined`}, so code outside a Provider relies on getting undefined. Solid 1.x returned undefined from useContext outside a Provider; Solid ${SOLID_TARGET_VERSION} throws ContextNotFoundError instead.`,
+          guidance: `Give the context an explicit empty value, createContext<T | null>(null), and map it back in the hook: return useContext(${target.text()}) ?? undefined, so callers keep their contract. undefined is never a context value in Solid 2, so createContext<T | undefined>(undefined) still throws. If every caller is always inside a Provider, drop undefined from the hook's type instead.`,
+          guide: MIGRATION_GUIDE,
+        }),
+      ];
+    }
     const onlyThrows = checks.every(throwsWhenEmpty);
     const line = checks[0]!.range().start.line + 1;
     return [
@@ -57,6 +84,59 @@ export function analyzeDefaultLessContext(
       }),
     ];
   });
+}
+
+/**
+ * Whether `target`, a context passed to useContext, is a default-less
+ * createContext from solid-js declared in another project file and imported
+ * here by name.
+ */
+function importedDefaultLess(rootNode: SgNode<TSX>, target: SgNode<TSX>): boolean {
+  if (target.kind() !== "identifier") return false;
+  const declaration = importedConstDeclaration(rootNode, target.text());
+  const value = declaration?.declarator.field("value");
+  if (declaration === null || value === null || value === undefined || value.kind() !== "call_expression") return false;
+  // The declaring file is re-parsed without a semantic provider, so its
+  // createContext import is proven syntactically: the single, unshadowed one.
+  const createContext = provenImport(declaration.rootNode, "solid-js", "createContext");
+  if (createContext === null || value.field("function")?.text() !== createContext.local) return false;
+  const argumentNodes = value.field("arguments")?.children().filter((child) => child.isNamed() && child.kind() !== "comment") ?? [];
+  return argumentNodes.length === 0 || (argumentNodes.length === 1 && argumentNodes[0]!.text() === "undefined");
+}
+
+/**
+ * The named function that returns the call's result as is, as an arrow
+ * body, a `return` argument, or a const that it returns, with its name.
+ */
+function returningHook(call: SgNode<TSX>): { fn: SgNode<TSX>; name: SgNode<TSX> } | null {
+  const fn = enclosingFunction(call);
+  if (fn === null) return null;
+  const parent = call.parent();
+  const declarator = parent?.kind() === "variable_declarator" ? parent.field("name") : null;
+  const returned =
+    fn.field("body")?.id() === call.id() ||
+    parent?.kind() === "return_statement" ||
+    (declarator?.kind() === "identifier" &&
+      fn.findAll({ rule: { kind: "return_statement" } }).some((statement) => statement.child(1)?.text() === declarator.text()));
+  if (!returned) return null;
+  const own = fn.field("name");
+  if (own !== null) return { fn, name: own };
+  const holder = fn.parent();
+  const name = holder?.kind() === "variable_declarator" ? holder.field("name") : null;
+  return name?.kind() === "identifier" ? { fn, name } : null;
+}
+
+/** `file:line` of the first call of the hook whose result is checked for undefined, or null. */
+function checkingCaller(name: SgNode<TSX>): string | null {
+  for (const { root, nodes } of referencesOf(name)) {
+    for (const reference of nodes) {
+      const call = reference.parent();
+      if (call?.kind() !== "call_expression" || call.field("function")?.id() !== reference.id()) continue;
+      const checks = undefinedChecks(call);
+      if (checks.length > 0) return `${root.relativeFilename().replaceAll("\\", "/")}:${checks[0]!.range().start.line + 1}`;
+    }
+  }
+  return null;
 }
 
 /** The nodes that test the call's result for emptiness. */

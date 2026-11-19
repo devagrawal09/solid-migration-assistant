@@ -1,0 +1,28 @@
+{
+  "findings": [
+    {
+      "rule": "context/default-less-context",
+      "file": "analysis/context/default-less-context/fixtures/real-world-clerk-instance.fixture.tsx",
+      "line": 21,
+      "column": 3,
+      "severity": "behavior",
+      "headline": "usePortalRoot now throws outside a Provider instead of returning undefined; useContext(PortalContext) has no default.",
+      "why": "PortalContext is created without a default, and usePortalRoot returns useContext(PortalContext) as is, declaring GetContainer | undefined, so code outside a Provider relies on getting undefined. Solid 1.x returned undefined from useContext outside a Provider; Solid 2.0.3 throws ContextNotFoundError instead.",
+      "guidance": "Give the context an explicit empty value, createContext<T | null>(null), and map it back in the hook: return useContext(PortalContext) ?? undefined, so callers keep their contract. undefined is never a context value in Solid 2, so createContext<T | undefined>(undefined) still throws. If every caller is always inside a Provider, drop undefined from the hook's type instead.",
+      "guide": "https://github.com/solidjs/solid/blob/68406c2077eff22c67f71db4a16bf7026ddceee1/documentation/solid-2.0/MIGRATION.md#usecontext-on-a-default-less-context-returns-t-not-t--undefined",
+      "lint": []
+    },
+    {
+      "rule": "context/default-less-context",
+      "file": "analysis/context/default-less-context/fixtures/real-world-clerk-instance.fixture.tsx",
+      "line": 26,
+      "column": 18,
+      "severity": "behavior",
+      "headline": "useOutletParent now throws outside a Provider instead of returning undefined; useContext(OutletContext) has no default.",
+      "why": "OutletContext is created without a default, and useOutletParent returns useContext(OutletContext) as is, and analysis/context/default-less-context/fixtures/real-world-clerk-consumers.fixture.tsx:34 checks its result for undefined, so code outside a Provider relies on getting undefined. Solid 1.x returned undefined from useContext outside a Provider; Solid 2.0.3 throws ContextNotFoundError instead.",
+      "guidance": "Give the context an explicit empty value, createContext<T | null>(null), and map it back in the hook: return useContext(OutletContext) ?? undefined, so callers keep their contract. undefined is never a context value in Solid 2, so createContext<T | undefined>(undefined) still throws. If every caller is always inside a Provider, drop undefined from the hook's type instead.",
+      "guide": "https://github.com/solidjs/solid/blob/68406c2077eff22c67f71db4a16bf7026ddceee1/documentation/solid-2.0/MIGRATION.md#usecontext-on-a-default-less-context-returns-t-not-t--undefined",
+      "lint": []
+    }
+  ]
+}
