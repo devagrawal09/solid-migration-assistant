@@ -189,11 +189,19 @@ function nameOf(node) {
   return node.type === "array" && node.items.length > 0 ? node.items[0] : node;
 }
 
-/** The span that removes `list[index]` (array items or object pairs) with one separating comma. */
+/**
+ * The span that removes `list[index]` (array items or object pairs) with one
+ * separating comma: from the previous entry's end, or for the first entry
+ * through the comma after it and the whitespace that follows, so comments
+ * that belong to the next entry stay.
+ */
 function removal(text, list, index) {
-  if (index < list.length - 1) return { start: list[index].start, end: list[index + 1].start, text: "" };
   if (index > 0) return { start: list[index - 1].end, end: list[index].end, text: "" };
-  return { start: list[index].start, end: list[index].end, text: "" };
+  const item = list[index];
+  if (index === list.length - 1) return { start: item.start, end: item.end, text: "" };
+  const comma = text.indexOf(",", item.end);
+  const after = /^\s*/.exec(text.slice(comma + 1))[0].length;
+  return { start: item.start, end: comma + 1 + after, text: "" };
 }
 
 /** Appends `entry` to an array node, on its own line when the array spans lines. */

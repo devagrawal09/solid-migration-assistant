@@ -130,13 +130,17 @@ export function rewriteBabelPresets(
     return name !== undefined && name.is("string") ? stringLiteralValue(name) : null;
   };
   const span = (start: SgNode<TSX>, end: SgNode<TSX>, insertedText = "") => ({ startPos: start.range().start.index, endPos: end.range().end.index, insertedText });
-  // Removes list[index] (array items or object members) with one separating comma.
+  // Removes list[index] (array items or object members) with one separating
+  // comma: from the previous entry's end, or for the first entry up to
+  // whatever follows its comma, so comments that belong to the next entry stay.
   const removal = (list: SgNode<TSX>[], index: number) => {
-    const next = list[index + 1];
     const previous = list[index - 1];
     const item = list[index]!;
-    if (next !== undefined) return { startPos: item.range().start.index, endPos: next.range().start.index, insertedText: "" };
-    return previous !== undefined ? { startPos: previous.range().end.index, endPos: item.range().end.index, insertedText: "" } : span(item, item);
+    if (previous !== undefined) return { startPos: previous.range().end.index, endPos: item.range().end.index, insertedText: "" };
+    const comma = item.next();
+    const following = comma?.text() === "," ? comma.next() : null;
+    if (list[index + 1] === undefined || following === null || following === undefined) return span(item, item);
+    return { startPos: item.range().start.index, endPos: following.range().start.index, insertedText: "" };
   };
 
   const changes: TransformChange[] = [];

@@ -15,6 +15,7 @@ import { basename, dirname, join, resolve } from "node:path";
 import { test } from "node:test";
 import { fileURLToPath } from "node:url";
 import ts from "typescript";
+import { parseJsonLike } from "../shared/project.mjs";
 import { output, skipOrFail, treeSnapshot } from "./helpers.mjs";
 import { compileErrors, countTypeErrors, installRc, linkRc, renderOnServer } from "./rc-check.mjs";
 
@@ -196,7 +197,12 @@ for (const entry of corpus) {
             continue;
           }
           if (/(?:^|\/)(?:tsconfig(?:\..+)?|jsconfig)\.json$/.test(file)) continue;
-          assert.match(file, /\.(?:js|jsx|ts|tsx)$/, `${file}: the transform edited a non-source file`);
+          // JSON Babel configs, which Babel reads with comments allowed.
+          if (/(?:^|\/)(?:\.babelrc(?:\.json)?|babel\.config\.json)$/.test(file)) {
+            assert.notEqual(parseJsonLike(readFileSync(join(copy, file), "utf8")), undefined, `${file} is no longer valid JSON`);
+            continue;
+          }
+          assert.match(file, /\.(?:[mc]?js|jsx|[mc]?ts|tsx)$/, `${file}: the transform edited a non-source file`);
           const diagnostics = parseDiagnostics(file, readFileSync(join(copy, file), "utf8"));
           assert.deepEqual(
             diagnostics,

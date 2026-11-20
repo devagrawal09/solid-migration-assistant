@@ -69,6 +69,29 @@ test("moves babel-preset-solid to plugins in a .babelrc, keeping comments and la
   assert.deepEqual(bumped.left, []);
 });
 
+test("keeps the comments of the presets around the one it moves (templates' with-jest .babelrc)", () => {
+  const text = `{
+  "presets": [
+    "@babel/preset-env",
+    "babel-preset-solid",
+    // only if you use TS with solid-jest
+    "@babel/preset-typescript"
+  ]
+}
+`;
+  assert.equal(bumpBabelConfig(text).text, `{
+  "presets": [
+    "@babel/preset-env",
+    // only if you use TS with solid-jest
+    "@babel/preset-typescript"
+  ],
+  "plugins": ["@solidjs/babel-plugin"]
+}
+`);
+  const first = '{ "presets": ["solid", /* types */ "@babel/preset-typescript"] }';
+  assert.equal(bumpBabelConfig(first).text, '{ "presets": [/* types */ "@babel/preset-typescript"], "plugins": ["@solidjs/babel-plugin"] }');
+});
+
 test("moves the preset with its options into an existing plugins list, in env and overrides", () => {
   const text = `{
   "presets": ["@babel/preset-env", ["babel-preset-solid", { "generate": "ssr", "hydratable": true, "moduleName": "solid-js/web" }], "@babel/preset-typescript"],

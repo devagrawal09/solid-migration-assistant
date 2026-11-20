@@ -25,11 +25,15 @@ const PROJECT_CONFIGS = {
   exclude: OUTSIDE_PROJECT,
 };
 // Build tool configs, which SOURCES leaves out when they are .mjs, .cjs,
-// .mts or .cts files (lucide's rollup.config.mjs, vitest.config.mts).
+// .mts or .cts files (lucide's rollup.config.mjs, vitest.config.mts), and
+// Babel's file-relative JavaScript configs, which it leaves out by name.
 const BUILD_CONFIGS = {
-  include: ["vite", "vitest", "rollup", "tsup", "tsdown", "esbuild", "babel", "webpack", "app"].flatMap((tool) =>
-    ["js", "mjs", "cjs", "ts", "mts", "cts"].map((extension) => `**/${tool}.config.${extension}`),
-  ),
+  include: [
+    ...["vite", "vitest", "rollup", "tsup", "tsdown", "esbuild", "babel", "webpack", "app"].flatMap((tool) =>
+      ["js", "mjs", "cjs", "ts", "mts", "cts"].map((extension) => `**/${tool}.config.${extension}`),
+    ),
+    ...["js", "mjs", "cjs"].map((extension) => `**/.babelrc.${extension}`),
+  ],
   exclude: OUTSIDE_PROJECT,
   containing: "solid",
 };
@@ -370,10 +374,6 @@ export default async function main({ params }: { params: Params }) {
     projectRewrites.push(...babel.outputs.flat());
     failures.push(...babel.failures.map((f) => ({ step: "Move Babel's JSON configs to @solidjs/babel-plugin", ...f })));
 
-    // A renamed package's imports move only where its package.json now names
-    // the successor, so no file imports a package nothing depends on (a
-    // catalog outside the target can't be swapped). Keyed by every package
-    // directory, so a file goes by its nearest package.json.
     for (const stage of plan) {
       if (!stage.run || stage.files.length === 0) continue;
       for (const rule of stage.rewrites) {

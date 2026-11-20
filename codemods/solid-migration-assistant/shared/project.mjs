@@ -1,7 +1,7 @@
 /**
  * Findings for the files every migration must edit that the JSSG analyzers
  * never see: each package.json, tsconfig.json, tsconfig.*.json and
- * jsconfig.json. Pure functions of a file's path and text, so the launcher
+ * jsconfig.json, and each JSON Babel config. Pure functions of a file's path and text, so the launcher
  * (`shared/run-workflow.mjs`, which reads the files itself) and the registry
  * workflow (`workflow.ts`, which reads them in a `forEachFile` step) report
  * the same thing. A file that doesn't parse produces no finding. The

@@ -85,6 +85,8 @@ try {
     "packages/legacy/package.json": `${JSON.stringify({ name: "legacy", private: true, dependencies: { "solid-js": "^1.9.18" }, devDependencies: { "babel-preset-solid": "latest" } }, null, 2)}\n`,
     "packages/legacy/babel.config.json": '{ "presets": ["solid"] }\n',
     "packages/legacy/babel.config.js": 'export default { presets: ["solid"] };\n',
+    // Babel's file-relative JavaScript config, which the source glob skips by name.
+    "packages/legacy/.babelrc.mjs": 'export default { presets: ["solid"] };\n',
   };
   for (const [path, text] of Object.entries(files)) {
     mkdirSync(dirname(join(workspace, path)), { recursive: true });
@@ -119,6 +121,7 @@ try {
   // The package left on babel-preset-solid keeps its configs, which are still to do.
   assert.match(report, /^packages\/legacy\/babel\.config\.json:1:15 \[build\] Replace the babel-preset-solid preset/m);
   assert.match(report, /^packages\/legacy\/babel\.config\.js:1:28 \[build\] Replace the babel-preset-solid preset/m);
+  assert.match(report, /^packages\/legacy\/\.babelrc\.mjs:1:28 \[build\] Replace the babel-preset-solid preset/m);
   assert.doesNotMatch(report.replace(/^.*packages\/legacy.*$/gm, ""), /project\/solid-version|Replace vite-plugin-solid with its Solid 2 successor\./);
 
   // The same app as the target, with the workspace file above it (as the

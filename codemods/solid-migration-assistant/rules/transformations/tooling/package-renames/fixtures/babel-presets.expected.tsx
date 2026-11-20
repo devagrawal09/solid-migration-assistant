@@ -24,5 +24,14 @@ module.exports = {
     { test: "*.tsx", presets: ['@babel/preset-typescript'], plugins: ['@solidjs/babel-plugin'] },
     { test: "*.jsx", plugins: ["@solidjs/babel-plugin"] },
     { test: "*.mjs", presets: ["@babel/preset-typescript"], plugins: ["@solidjs/babel-plugin"] },
+    {
+      test: "*.cjs",
+      // Comments that belong to the presets around it stay.
+      presets: [
+        // TypeScript last
+        "@babel/preset-typescript",
+      ],
+      plugins: ["@solidjs/babel-plugin"],
+    },
   ],
 };
