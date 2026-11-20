@@ -70,5 +70,6 @@ export const TRANSFORM_STEPS = [
   { rule: "reactivity/on-helper-split", name: "rewriteOnHelper" },
   { rule: "store/setter-literal-paths", name: "rewriteStoreSetterLiteralPaths" },
   { rule: "tooling/package-renames", name: "relocateRenamedPackages" },
+  { rule: "tooling/package-renames", name: "rewriteBabelPresets" },
   { rule: "tooling/package-renames", name: "rewriteJsxImportSourceOption" },
 ] as const;

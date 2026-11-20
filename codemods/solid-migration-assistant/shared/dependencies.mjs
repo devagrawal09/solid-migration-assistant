@@ -88,7 +88,7 @@ export const DEPENDENCY_MAP = Object.freeze([
     replacement: "@solidjs/babel-plugin@2.0.2",
     rename: true,
     guidance:
-      "Replace babel-preset-solid with @solidjs/babel-plugin@2.0.2 (npm latest), which is a Babel plugin rather than a preset: change presets: [\"solid\"] (or \"babel-preset-solid\") to plugins: [\"@solidjs/babel-plugin\"] in the Babel config, or rely on @solidjs/vite-plugin, which compiles JSX with @solidjs/compiler. babel-preset-solid's own next tag is a stale 2.0.0-rc.2. Migrate swaps the package and reports each config that still names the preset.",
+      "Replace babel-preset-solid with @solidjs/babel-plugin@2.0.2 (npm latest), which is a Babel plugin rather than a preset: change presets: [\"solid\"] (or \"babel-preset-solid\") to plugins: [\"@solidjs/babel-plugin\"] in the Babel config, or rely on @solidjs/vite-plugin, which compiles JSX with @solidjs/compiler. babel-preset-solid's own next tag is a stale 2.0.0-rc.2. Migrate swaps the package and moves the preset to plugins in each Babel config where its options carry over unchanged; it reports the configs it leaves.",
   },
   ...[
     ["esbuild-plugin-solid", "0.6.0"],

@@ -1,9 +1,10 @@
 import { approval, forEachFile, jssg, shell, step } from "codemod/workflow";
 import { DEPENDENCY_MAP } from "./shared/dependencies.mjs";
 import { bumpManifest, bumpTsconfig } from "./shared/manifest.mjs";
+import { bumpBabelConfig } from "./shared/babel.mjs";
 import { bumpCatalogs, catalogPlan } from "./shared/catalog.mjs";
 import { byLocation, renderText } from "./shared/format.mjs";
-import { configFindings, manifestFindings } from "./shared/project.mjs";
+import { babelConfigFindings, configFindings, manifestFindings } from "./shared/project.mjs";
 import { ANALYSIS_STEPS, TRANSFORM_STEPS } from "./shared/steps.generated.ts";
 import { MIGRATION_GUIDE_URL, SOLID_TARGET_VERSION } from "./shared/target.ts";
 
@@ -29,6 +30,12 @@ const BUILD_CONFIGS = {
   include: ["vite", "vitest", "rollup", "tsup", "tsdown", "esbuild", "babel", "webpack", "app"].flatMap((tool) =>
     ["js", "mjs", "cjs", "ts", "mts", "cts"].map((extension) => `**/${tool}.config.${extension}`),
   ),
+  exclude: OUTSIDE_PROJECT,
+  containing: "solid",
+};
+// Babel's JSON configs, which jssg can't parse as TSX (shared/babel.mjs).
+const BABEL_JSON_CONFIGS = {
+  include: ["**/.babelrc", "**/.babelrc.json", "**/babel.config.json"],
   exclude: OUTSIDE_PROJECT,
   containing: "solid",
 };
@@ -188,7 +195,8 @@ export default async function main({ params }: { params: Params }) {
         file.path.endsWith("package.json") ? manifestFindings(file.path, file.text, workspace) : configFindings(file.path, file.text),
       ),
     );
-    return checked.outputs.flat();
+    const babel = await step("Check Babel's JSON configs", forEachFile(BABEL_JSON_CONFIGS, (file) => babelConfigFindings(file.path, file.text)));
+    return [...checked.outputs.flat(), ...babel.outputs.flat()];
   };
 
   // A shell step runs where Codemod was started unless given a cwd, which is
@@ -334,6 +342,33 @@ export default async function main({ params }: { params: Params }) {
       }));
     }
     failures.push(...project.failures.map((f) => ({ step: "Move package.json and tsconfig.json to Solid 2", ...f })));
+
+    // A JSON Babel config moves babel-preset-solid to plugins only in a
+    // package whose package.json now names @solidjs/babel-plugin, like the
+    // renamed imports below; JavaScript configs move in tooling/package-renames.
+    const babel = await step(
+      "Move Babel's JSON configs to @solidjs/babel-plugin",
+      forEachFile(BABEL_JSON_CONFIGS, (file) => {
+        const nearest = Object.keys(renamedIn)
+          .filter((directory) => directory === "." || file.path.startsWith(`${directory}/`))
+          .sort((left, right) => (left === "." ? 0 : left.length) - (right === "." ? 0 : right.length))
+          .pop();
+        if (nearest === undefined || !renamedIn[nearest]?.includes("babel-preset-solid")) return [];
+        const bumped = bumpBabelConfig(file.text);
+        if (bumped === null || bumped.moved.length === 0) return [];
+        file.write(bumped.text);
+        return bumped.moved.map(({ line, column }) => ({
+          rule: "tooling/package-renames",
+          file: file.path,
+          line,
+          column,
+          message: "Move babel-preset-solid from presets to plugins as @solidjs/babel-plugin, its Solid 2 successor.",
+          guide: `${MIGRATION_GUIDE_URL}#imports-where-things-live-now`,
+        }));
+      }),
+    );
+    projectRewrites.push(...babel.outputs.flat());
+    failures.push(...babel.failures.map((f) => ({ step: "Move Babel's JSON configs to @solidjs/babel-plugin", ...f })));
 
     // A renamed package's imports move only where its package.json now names
     // the successor, so no file imports a package nothing depends on (a

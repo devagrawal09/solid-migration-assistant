@@ -10,6 +10,7 @@
  * same version, build with `@solidjs/vite-plugin`, and set `jsxImportSource`
  * to `@solidjs/web`.
  */
+import { bumpBabelConfig } from "./babel.mjs";
 import { catalogName, readCatalogs } from "./catalog.mjs";
 import { DEPENDENCY_MAP, DEPENDENCY_VERIFIED_ON, dependencyHeadline } from "./dependencies.mjs";
 import { byLocation } from "./format.mjs";
@@ -195,6 +196,33 @@ export function configFindings(file, text) {
     });
   }
   return findings;
+}
+
+/**
+ * The findings for one JSON Babel config (.babelrc, .babelrc.json,
+ * babel.config.json), which no jssg rule can parse: each babel-preset-solid
+ * entry in a presets list, with what migrate does about it
+ * (`shared/babel.mjs`). tooling/build-config reports the same preset in
+ * JavaScript configs.
+ */
+export function babelConfigFindings(file, text) {
+  const bumped = bumpBabelConfig(text);
+  if (bumped === null) return [];
+  const entries = [...bumped.moved.map((site) => ({ ...site, reason: null })), ...bumped.left];
+  return entries.map(({ line, column, reason }) => ({
+    rule: "tooling/build-config",
+    file,
+    line,
+    column,
+    severity: "build",
+    headline: "Replace the babel-preset-solid preset with the @solidjs/babel-plugin plugin.",
+    why: "babel-preset-solid compiles JSX for Solid 1. Its Solid 2 successor, @solidjs/babel-plugin 2.0.2, is a Babel plugin, not a preset, so it goes in plugins, and it emits code for @solidjs/web.",
+    guidance: reason === null
+      ? 'Remove this preset, add "@solidjs/babel-plugin" to plugins with the same options, and swap the package in package.json; migrate makes both edits.'
+      : `Remove this preset, add "@solidjs/babel-plugin" to plugins, and swap the package in package.json. Migrate swaps the package but leaves this config, because ${reason}.`,
+    lint: [],
+    guide: `${MIGRATION_GUIDE}#imports-where-things-live-now`,
+  }));
 }
 
 /**

@@ -1,0 +1,52 @@
+{
+  "rewrites": [
+    {
+      "rule": "tooling/package-renames",
+      "file": "transformations/tooling/package-renames/fixtures/babel-presets.fixture.tsx",
+      "line": 7,
+      "column": 13,
+      "message": "Move babel-preset-solid from presets to plugins as @solidjs/babel-plugin, its Solid 2 successor.",
+      "guide": "https://github.com/solidjs/solid/blob/68406c2077eff22c67f71db4a16bf7026ddceee1/documentation/solid-2.0/MIGRATION.md#imports-where-things-live-now"
+    },
+    {
+      "rule": "tooling/package-renames",
+      "file": "transformations/tooling/package-renames/fixtures/babel-presets.fixture.tsx",
+      "line": 10,
+      "column": 18,
+      "message": "Move babel-preset-solid from presets to plugins as @solidjs/babel-plugin, its Solid 2 successor.",
+      "guide": "https://github.com/solidjs/solid/blob/68406c2077eff22c67f71db4a16bf7026ddceee1/documentation/solid-2.0/MIGRATION.md#imports-where-things-live-now"
+    },
+    {
+      "rule": "tooling/package-renames",
+      "file": "transformations/tooling/package-renames/fixtures/babel-presets.fixture.tsx",
+      "line": 15,
+      "column": 9,
+      "message": "Move babel-preset-solid from presets to plugins as @solidjs/babel-plugin, its Solid 2 successor.",
+      "guide": "https://github.com/solidjs/solid/blob/68406c2077eff22c67f71db4a16bf7026ddceee1/documentation/solid-2.0/MIGRATION.md#imports-where-things-live-now"
+    },
+    {
+      "rule": "tooling/package-renames",
+      "file": "transformations/tooling/package-renames/fixtures/babel-presets.fixture.tsx",
+      "line": 24,
+      "column": 32,
+      "message": "Move babel-preset-solid from presets to plugins as @solidjs/babel-plugin, its Solid 2 successor.",
+      "guide": "https://github.com/solidjs/solid/blob/68406c2077eff22c67f71db4a16bf7026ddceee1/documentation/solid-2.0/MIGRATION.md#imports-where-things-live-now"
+    },
+    {
+      "rule": "tooling/package-renames",
+      "file": "transformations/tooling/package-renames/fixtures/babel-presets.fixture.tsx",
+      "line": 25,
+      "column": 34,
+      "message": "Move babel-preset-solid from presets to plugins as @solidjs/babel-plugin, its Solid 2 successor.",
+      "guide": "https://github.com/solidjs/solid/blob/68406c2077eff22c67f71db4a16bf7026ddceee1/documentation/solid-2.0/MIGRATION.md#imports-where-things-live-now"
+    },
+    {
+      "rule": "tooling/package-renames",
+      "file": "transformations/tooling/package-renames/fixtures/babel-presets.fixture.tsx",
+      "line": 26,
+      "column": 32,
+      "message": "Move babel-preset-solid from presets to plugins as @solidjs/babel-plugin, its Solid 2 successor.",
+      "guide": "https://github.com/solidjs/solid/blob/68406c2077eff22c67f71db4a16bf7026ddceee1/documentation/solid-2.0/MIGRATION.md#imports-where-things-live-now"
+    }
+  ]
+}

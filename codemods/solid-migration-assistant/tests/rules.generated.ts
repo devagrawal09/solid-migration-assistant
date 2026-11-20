@@ -56,7 +56,7 @@ import { rewriteIndexToFor } from "../rules/transformations/jsx/index-to-for/ind
 import { rewriteLowercaseEventHandlers } from "../rules/transformations/jsx/lowercase-event-handlers/lowercase-event-handlers.ts";
 import { rewriteOnHelper } from "../rules/transformations/reactivity/on-helper-split/on-helper-split.ts";
 import { rewriteStoreSetterLiteralPaths } from "../rules/transformations/store/setter-literal-paths/setter-literal-paths.ts";
-import { relocateRenamedPackages, rewriteJsxImportSourceOption } from "../rules/transformations/tooling/package-renames/package-renames.ts";
+import { relocateRenamedPackages, rewriteBabelPresets, rewriteJsxImportSourceOption } from "../rules/transformations/tooling/package-renames/package-renames.ts";
 
 export const ANALYSIS_RULES = {
   "context/default-less-context": [analyzeDefaultLessContext],
@@ -119,5 +119,5 @@ export const TRANSFORM_RULES = {
   "jsx/lowercase-event-handlers": [rewriteLowercaseEventHandlers],
   "reactivity/on-helper-split": [rewriteOnHelper],
   "store/setter-literal-paths": [rewriteStoreSetterLiteralPaths],
-  "tooling/package-renames": [relocateRenamedPackages, rewriteJsxImportSourceOption],
+  "tooling/package-renames": [relocateRenamedPackages, rewriteBabelPresets, rewriteJsxImportSourceOption],
 };

@@ -8,7 +8,7 @@ import { byLocation, placeOf, renderAgentReport, renderText, summaryOf } from ".
 import { DEPENDENCY_MAP } from "./dependencies.mjs";
 import { allowsSolid2 } from "./peers.mjs";
 import { settleUnknownDependencies } from "./registry.mjs";
-import { configFindings, manifestFindings, MIGRATION_GUIDE, parseJsonLike, SOLID_SOURCE_COMMIT } from "./project.mjs";
+import { babelConfigFindings, configFindings, manifestFindings, MIGRATION_GUIDE, parseJsonLike, SOLID_SOURCE_COMMIT } from "./project.mjs";
 
 const packageDirectory = resolve(dirname(fileURLToPath(import.meta.url)), "..");
 const require = createRequire(import.meta.url);
@@ -33,8 +33,8 @@ Feedback: ${FEEDBACK_URL}
 
 /**
  * Read-only findings for the files every migration must edit that the JSSG
- * analyzers never see, in every workspace package: each package.json and
- * tsconfig (`shared/project.mjs`, shared with the registry workflow), plus,
+ * analyzers never see, in every workspace package: each package.json,
+ * tsconfig and JSON Babel config (`shared/project.mjs`, shared with the registry workflow), plus,
  * which only the launcher can check, each Solid library the dependency table
  * doesn't know whose installed copy rules out Solid 2. Files are read, never
  * written; a missing or unparsable file produces no finding.
@@ -52,17 +52,19 @@ export function projectFindings(target) {
     findings.push(...manifestFindings(file, text, workspaceYaml), ...peerFindings(target, file, manifest, text, workspaceNames));
   }
   for (const file of files.filter((file) => basename(file) !== "package.json")) {
-    findings.push(...configFindings(file, readText(resolve(target, file))));
+    const text = readText(resolve(target, file));
+    findings.push(...(BABEL_JSON_CONFIG.test(basename(file)) ? babelConfigFindings(file, text) : configFindings(file, text)));
   }
   return byLocation(findings);
 }
 
-const PROJECT_CONFIG = /^(package\.json|tsconfig(\..+)?\.json|jsconfig\.json)$/;
+const BABEL_JSON_CONFIG = /^(\.babelrc(\.json)?|babel\.config\.json)$/;
+const PROJECT_CONFIG = /^(package\.json|tsconfig(\..+)?\.json|jsconfig\.json|\.babelrc(\.json)?|babel\.config\.json)$/;
 const OUTSIDE_PROJECT = new Set(["node_modules", "dist", "build", "coverage"]);
 
 /**
- * Every package.json, tsconfig.json, tsconfig.*.json and jsconfig.json the
- * workflow also sees: with git, the tracked and untracked files git doesn't
+ * Every package.json, tsconfig.json, tsconfig.*.json, jsconfig.json and JSON
+ * Babel config the workflow also sees: with git, the tracked and untracked files git doesn't
  * ignore; otherwise a walk that skips dot directories and node_modules, dist,
  * build and coverage. Paths are relative to the target.
  */

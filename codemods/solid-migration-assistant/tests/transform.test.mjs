@@ -73,10 +73,18 @@ try {
   const files = {
     "package.json": `${JSON.stringify({ name: "root", private: true }, null, 2)}\n`,
     "pnpm-workspace.yaml": "packages:\n  - packages/*\ncatalog:\n  solid-js: ^1.9.18\n  vite-plugin-solid: ^2.11.15 # Vite plugin\n",
-    "packages/app/package.json": `${JSON.stringify({ name: "app", private: true, dependencies: { "solid-js": "catalog:" }, devDependencies: { vite: "^8.3.6", "vite-plugin-solid": "catalog:", "solid-testing-library": "^0.5.1" } }, null, 2)}\n`,
+    "packages/app/package.json": `${JSON.stringify({ name: "app", private: true, dependencies: { "solid-js": "catalog:" }, devDependencies: { vite: "^8.3.6", "vite-plugin-solid": "catalog:", "solid-testing-library": "^0.5.1", "babel-preset-solid": "^1.9.19" } }, null, 2)}\n`,
     "packages/app/vite.config.ts": "import { defineConfig } from 'vite'\nimport solid from 'vite-plugin-solid'\n\nexport default defineConfig({\n  plugins: [solid()],\n})\n",
     "packages/app/vitest.config.mts": 'import solidPlugin from "vite-plugin-solid";\nexport default { plugins: [solidPlugin({ hot: false })], esbuild: { jsxImportSource: "solid-js" } };\n',
     "packages/app/src/App.test.tsx": 'import { render } from "solid-testing-library";\nexport const mount = () => render(() => <p />);\n',
+    // Babel for the tests: a JSON config and a JavaScript one. babel-preset-solid
+    // moves to plugins with the package swap.
+    "packages/app/.babelrc": '{\n  // Solid for Jest\n  "presets": [["solid", { "generate": "ssr" }], "@babel/preset-typescript"]\n}\n',
+    "packages/app/babel.config.cjs": 'module.exports = { presets: ["babel-preset-solid"], plugins: ["macros"] };\n',
+    // A package whose babel-preset-solid range migrate can't swap keeps its config.
+    "packages/legacy/package.json": `${JSON.stringify({ name: "legacy", private: true, dependencies: { "solid-js": "^1.9.18" }, devDependencies: { "babel-preset-solid": "latest" } }, null, 2)}\n`,
+    "packages/legacy/babel.config.json": '{ "presets": ["solid"] }\n',
+    "packages/legacy/babel.config.js": 'export default { presets: ["solid"] };\n',
   };
   for (const [path, text] of Object.entries(files)) {
     mkdirSync(dirname(join(workspace, path)), { recursive: true });
@@ -94,15 +102,24 @@ try {
     name: "app",
     private: true,
     dependencies: { "solid-js": "catalog:", "@solidjs/web": "catalog:" },
-    devDependencies: { vite: "^8.3.6", "@solidjs/vite-plugin": "catalog:", "@solidjs/testing-library": "1.0.0-rc.2" },
+    devDependencies: { vite: "^8.3.6", "@solidjs/vite-plugin": "catalog:", "@solidjs/testing-library": "1.0.0-rc.2", "@solidjs/babel-plugin": "^2.0.2" },
   });
+  assert.equal(read("packages/app/.babelrc"), '{\n  // Solid for Jest\n  "presets": ["@babel/preset-typescript"],\n  "plugins": [["@solidjs/babel-plugin", { "generate": "ssr" }]]\n}\n');
+  assert.equal(read("packages/app/babel.config.cjs"), 'module.exports = { plugins: ["macros", "@solidjs/babel-plugin"] };\n');
+  assert.equal(read("packages/legacy/babel.config.json"), files["packages/legacy/babel.config.json"]);
+  assert.equal(read("packages/legacy/babel.config.js"), files["packages/legacy/babel.config.js"]);
   assert.equal(read("packages/app/vite.config.ts"), files["packages/app/vite.config.ts"].replace("'vite-plugin-solid'", "'@solidjs/vite-plugin'"));
   assert.equal(read("packages/app/vitest.config.mts"), files["packages/app/vitest.config.mts"].replace('"vite-plugin-solid"', '"@solidjs/vite-plugin"').replace('"solid-js"', '"@solidjs/web"'));
   assert.equal(read("packages/app/src/App.test.tsx"), files["packages/app/src/App.test.tsx"].replace("solid-testing-library", "@solidjs/testing-library"));
   // What's left is the plugin option that changed, in the Still to do list.
   const report = stepOutput(normalize(`${migrated.stdout}\n${migrated.stderr}`, workspace));
   assert.match(report, /^packages\/app\/vitest\.config\.mts:2:42 \[build\] Remove the hot option; @solidjs\/vite-plugin has none\.$/m);
-  assert.doesNotMatch(report, /project\/solid-version|Replace vite-plugin-solid with its Solid 2 successor\.|by hand/);
+  assert.match(report, /^packages\/app\/\.babelrc:3:16 Move babel-preset-solid from presets to plugins as @solidjs\/babel-plugin, its Solid 2 successor\.$/m);
+  assert.match(report, /^packages\/app\/babel\.config\.cjs:1:30 Move babel-preset-solid from presets to plugins/m);
+  // The package left on babel-preset-solid keeps its configs, which are still to do.
+  assert.match(report, /^packages\/legacy\/babel\.config\.json:1:15 \[build\] Replace the babel-preset-solid preset/m);
+  assert.match(report, /^packages\/legacy\/babel\.config\.js:1:28 \[build\] Replace the babel-preset-solid preset/m);
+  assert.doesNotMatch(report.replace(/^.*packages\/legacy.*$/gm, ""), /project\/solid-version|Replace vite-plugin-solid with its Solid 2 successor\./);
 
   // The same app as the target, with the workspace file above it (as the
   // corpus runs codeimage): migrate can't swap the catalog, so it leaves the

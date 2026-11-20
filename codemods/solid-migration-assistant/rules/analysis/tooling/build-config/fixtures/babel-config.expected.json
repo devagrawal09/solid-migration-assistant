@@ -8,7 +8,7 @@
       "severity": "build",
       "headline": "Replace the babel-preset-solid preset with the @solidjs/babel-plugin plugin.",
       "why": "babel-preset-solid compiles JSX for Solid 1. Its Solid 2 successor, @solidjs/babel-plugin 2.0.2, is a Babel plugin, not a preset, so it goes in plugins, and it emits code for @solidjs/web.",
-      "guidance": "Remove this preset and add \"@solidjs/babel-plugin\" to plugins (carry over options such as generate and hydratable; moduleName now defaults to \"@solidjs/web\"), and swap the package in package.json; migrate swaps the package but not this config. Projects built with @solidjs/vite-plugin don't need a Babel preset for JSX at all.",
+      "guidance": "Remove this preset, add \"@solidjs/babel-plugin\" to plugins, and swap the package in package.json. Options such as generate, hydratable, delegateEvents and wrapConditionals carry over; moduleName now defaults to \"@solidjs/web\"; builtIns, staticMarker and omitServerOnlyTemplates changed or are gone. Migrate makes the move when the options all carry over and no preset other than TypeScript's is listed after this one (those ran before it, and a plugin runs before every preset); it leaves the rest to you. Projects built with @solidjs/vite-plugin don't need a Babel preset for JSX at all.",
       "guide": "https://github.com/solidjs/solid/blob/68406c2077eff22c67f71db4a16bf7026ddceee1/documentation/solid-2.0/MIGRATION.md#imports-where-things-live-now",
       "lint": []
     },
@@ -20,7 +20,7 @@
       "severity": "build",
       "headline": "Replace the babel-preset-solid preset with the @solidjs/babel-plugin plugin.",
       "why": "babel-preset-solid compiles JSX for Solid 1. Its Solid 2 successor, @solidjs/babel-plugin 2.0.2, is a Babel plugin, not a preset, so it goes in plugins, and it emits code for @solidjs/web.",
-      "guidance": "Remove this preset and add \"@solidjs/babel-plugin\" to plugins (carry over options such as generate and hydratable; moduleName now defaults to \"@solidjs/web\"), and swap the package in package.json; migrate swaps the package but not this config. Projects built with @solidjs/vite-plugin don't need a Babel preset for JSX at all.",
+      "guidance": "Remove this preset, add \"@solidjs/babel-plugin\" to plugins, and swap the package in package.json. Options such as generate, hydratable, delegateEvents and wrapConditionals carry over; moduleName now defaults to \"@solidjs/web\"; builtIns, staticMarker and omitServerOnlyTemplates changed or are gone. Migrate makes the move when the options all carry over and no preset other than TypeScript's is listed after this one (those ran before it, and a plugin runs before every preset); it leaves the rest to you. Projects built with @solidjs/vite-plugin don't need a Babel preset for JSX at all.",
       "guide": "https://github.com/solidjs/solid/blob/68406c2077eff22c67f71db4a16bf7026ddceee1/documentation/solid-2.0/MIGRATION.md#imports-where-things-live-now",
       "lint": []
     }

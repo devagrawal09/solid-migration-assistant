@@ -1,8 +1,10 @@
-// Specs for the package.json and tsconfig checks the launcher and the
-// registry workflow share (shared/project.mjs).
+// Specs for the package.json, tsconfig and JSON Babel config checks the
+// launcher and the registry workflow share (shared/project.mjs), and the
+// JSON Babel config edit migrate makes (shared/babel.mjs).
 import assert from "node:assert/strict";
 import { test } from "node:test";
-import { configFindings, manifestFindings } from "../shared/project.mjs";
+import { bumpBabelConfig } from "../shared/babel.mjs";
+import { babelConfigFindings, configFindings, manifestFindings } from "../shared/project.mjs";
 
 const manifest = (fields) => `${JSON.stringify({ name: "app", ...fields }, null, 2)}\n`;
 const headlines = (findings) => findings.map((finding) => `${finding.line}:${finding.column} ${finding.rule} ${finding.headline}`);
@@ -53,4 +55,68 @@ test("reports a moduleResolution that ignores package exports, at its line", () 
 test("a file that doesn't parse has no findings", () => {
   assert.deepEqual(manifestFindings("package.json", "{ not json", ""), []);
   assert.deepEqual(configFindings("tsconfig.json", "also not json"), []);
+});
+
+test("moves babel-preset-solid to plugins in a .babelrc, keeping comments and layout", () => {
+  const text = `{
+  // Solid's JSX
+  "presets": ["solid"],
+}
+`;
+  const bumped = bumpBabelConfig(text);
+  assert.equal(bumped.text, text.replace('"presets": ["solid"]', '"plugins": ["@solidjs/babel-plugin"]'));
+  assert.deepEqual(bumped.moved, [{ line: 3, column: 15 }]);
+  assert.deepEqual(bumped.left, []);
+});
+
+test("moves the preset with its options into an existing plugins list, in env and overrides", () => {
+  const text = `{
+  "presets": ["@babel/preset-env", ["babel-preset-solid", { "generate": "ssr", "hydratable": true, "moduleName": "solid-js/web" }], "@babel/preset-typescript"],
+  "plugins": [
+    "@babel/plugin-syntax-decorators"
+  ],
+  "env": { "test": { "presets": ["solid", "@babel/preset-typescript"] } },
+  "overrides": [{ "test": "*.jsx", "presets": ["solid"], "plugins": ["@solidjs/babel-plugin"] }]
+}
+`;
+  assert.equal(bumpBabelConfig(text).text, `{
+  "presets": ["@babel/preset-env", "@babel/preset-typescript"],
+  "plugins": [
+    "@babel/plugin-syntax-decorators",
+    ["@solidjs/babel-plugin", { "generate": "ssr", "hydratable": true, "moduleName": "@solidjs/web" }]
+  ],
+  "env": { "test": { "presets": ["@babel/preset-typescript"], "plugins": ["@solidjs/babel-plugin"] } },
+  "overrides": [{ "test": "*.jsx", "plugins": ["@solidjs/babel-plugin"] }]
+}
+`);
+  // A second run has nothing left to move.
+  assert.equal(bumpBabelConfig(bumpBabelConfig(text).text), null);
+});
+
+test("leaves a Babel preset whose options changed or that a later preset ran before, with the reason", () => {
+  const left = (presets, extra = "") => bumpBabelConfig(`{ "presets": ${presets}${extra} }`).left.map((entry) => entry.reason);
+  assert.match(left('[["solid", { "builtIns": ["For"] }]]')[0], /^builtIns lists Solid 1 components/);
+  assert.match(left('[["solid", { "omitServerOnlyTemplates": true }]]')[0], /no omitServerOnlyTemplates option/);
+  assert.match(left('[["solid", { "staticMarker": "@once" }]]')[0], /static marker changed/);
+  assert.match(left('[["solid", { "moduleName": "solid-three" }]]')[0], /custom renderer/);
+  assert.match(left('[["solid", { "dev": true }]]')[0], /^dev isn't a babel-preset-solid option/);
+  assert.match(left('[["solid", "ssr"]]')[0], /aren't an object literal/);
+  assert.match(left('["solid", "@babel/preset-env"]')[0], /^@babel\/preset-env ran before it/);
+  assert.match(left('["solid"]', ', "plugins": "macros"')[0], /isn't an array literal/);
+  assert.match(left('[["solid", { "generate": "ssr" }]]', ', "plugins": ["@solidjs/babel-plugin"]')[0], /already names/);
+  assert.deepEqual(left('["solid", "babel-preset-solid"]').length, 2);
+  // Nothing to move, or not JSON: no edit.
+  assert.equal(bumpBabelConfig('{ "presets": ["@babel/preset-env"] }'), null);
+  assert.equal(bumpBabelConfig("module.exports = {}"), null);
+});
+
+test("reports a JSON Babel config's Solid preset with what migrate does about it", () => {
+  const findings = babelConfigFindings("babel.config.json", '{\n  "presets": ["solid", "@babel/preset-env"],\n  "env": { "test": { "presets": ["solid"] } }\n}\n');
+  assert.deepEqual(headlines(findings), [
+    "3:34 tooling/build-config Replace the babel-preset-solid preset with the @solidjs/babel-plugin plugin.",
+    "2:15 tooling/build-config Replace the babel-preset-solid preset with the @solidjs/babel-plugin plugin.",
+  ]);
+  assert.match(findings[0].guidance, /migrate makes both edits/);
+  assert.match(findings[1].guidance, /leaves this config, because @babel\/preset-env ran before it/);
+  assert.deepEqual(babelConfigFindings(".babelrc", '{ "presets": ["@babel/preset-env"] }'), []);
 });
