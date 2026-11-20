@@ -29,12 +29,26 @@ const EMPTY = new Set(["undefined", "null"]);
  *
  * The context is declared in this file, or in the project file a named
  * import resolves to (`importedConstDeclaration`).
+ *
+ * Factories that return a context or its hooks in a tuple (Clerk's
+ * `createContextProviderAndHook`, `const [Provider, useX] = factory(...)`)
+ * are followed through the semantic provider: a default-less context
+ * returned in the tuple is followed to every `useContext` of the binding
+ * callers destructure it into, in any project file, and an unchecked hook
+ * returned there counts as optional when a caller of its destructured
+ * binding checks the result, or when a hook beside it in the same tuple
+ * throws when that context is missing (the unchecked one is then the
+ * variant meant to return undefined outside a Provider).
  */
 export function analyzeDefaultLessContext(
   rootNode: SgNode<TSX>,
   context: { filename: string },
 ): RuleFinding[] {
   const contextReferences = new Set<string>();
+  // useContext calls in other project files on a context this file returns
+  // in a tuple. The callee is proven the file's one unshadowed solid-js
+  // useContext import, syntactically, as for imported contexts.
+  const otherFiles: { call: SgNode<TSX>; argumentNodes: SgNode<TSX>[]; filename: string }[] = [];
   for (const { call, argumentNodes } of findImportedCalls(rootNode, "solid-js", "createContext")) {
     if (argumentNodes.length > 0 && !(argumentNodes.length === 1 && argumentNodes[0]!.text() === "undefined")) continue;
     const declarator = call.parent();
@@ -44,25 +58,60 @@ export function analyzeDefaultLessContext(
       const filename = root.relativeFilename().replaceAll("\\", "/");
       for (const node of nodes) contextReferences.add(`${filename}:${node.id()}`);
     }
+    // Returned in a tuple: the bindings callers destructure it into, in
+    // whatever file reads them.
+    const tuple = returnedTuple(name);
+    for (const alias of tuple === null ? [] : tupleAliases(tuple)) {
+      for (const { root, nodes } of referencesOf(alias)) {
+        const filename = root.relativeFilename().replaceAll("\\", "/");
+        const useContext = provenImport(root.root(), "solid-js", "useContext");
+        for (const node of nodes) {
+          contextReferences.add(`${filename}:${node.id()}`);
+          const call = node.parent()?.parent();
+          const argumentNodes = call?.field("arguments")?.children().filter((child) => child.isNamed() && child.kind() !== "comment") ?? [];
+          if (filename === context.filename || useContext === null || call === null || call === undefined || call.kind() !== "call_expression") continue;
+          if (call.field("function")?.text() === useContext.local && argumentNodes[0]?.id() === node.id()) otherFiles.push({ call, argumentNodes, filename });
+        }
+      }
+    }
   }
 
-  return findImportedCalls(rootNode, "solid-js", "useContext").flatMap(({ call, argumentNodes, filename }) => {
+  const ownFile = findImportedCalls(rootNode, "solid-js", "useContext");
+  const ownReads = new Set(ownFile.map(({ call }) => call.id()));
+  const followed = new Set(otherFiles.map(({ call }) => call));
+  return [...ownFile, ...otherFiles].flatMap(({ call, argumentNodes, filename }) => {
     const target = argumentNodes[0];
     if (target === undefined) return [];
-    if (!contextReferences.has(`${filename}:${target.id()}`) && !importedDefaultLess(rootNode, target)) return [];
+    if (!followed.has(call) && !contextReferences.has(`${filename}:${target.id()}`) && !importedDefaultLess(rootNode, target)) return [];
     const checks = undefinedChecks(call);
     if (checks.length === 0) {
       const hook = returningHook(call);
       if (hook === null) return [];
       const annotation = hook.fn.field("return_type")?.text() ?? "";
       const optionalType = /\b(undefined|null)\b/.test(annotation);
-      const checkedBy = optionalType ? null : checkingCaller(hook.name);
-      if (!optionalType && checkedBy === null) return [];
+      const tuple = optionalType ? null : returnedTuple(hook.name);
+      let checkedBy = optionalType ? null : checkingCaller(hook.name);
+      if (checkedBy === null && tuple !== null) {
+        for (const alias of tupleAliases(tuple)) {
+          const caller = checkingCaller(alias);
+          if (caller === null) continue;
+          checkedBy = `${caller}, through the ${alias.text()} it destructures from ${tuple.factory}(),`;
+          break;
+        }
+      }
+      // The sibling is looked for in this file's factory only (ownReads are this file's calls).
+      const throwingSibling = checkedBy !== null || tuple === null || filename !== context.filename ? null : throwingTupleSibling(tuple, target.text(), ownReads);
+      if (!optionalType && checkedBy === null && throwingSibling === null) return [];
+      const contract = optionalType
+        ? `declaring ${annotation.replace(/^:\s*/, "")}`
+        : checkedBy !== null
+          ? `and ${checkedBy} checks its result for undefined`
+          : `and ${tuple?.factory}() returns it beside ${throwingSibling}, which throws when the context is missing, so it is the variant that returns undefined outside a Provider`;
       return [
         finding(filename, call, {
           severity: "behavior",
           headline: `Keep ${hook.name.text()} optional: useContext(${target.text()}) now throws outside a Provider instead of returning undefined.`,
-          why: `${target.text()} is created without a default, and ${hook.name.text()} returns useContext(${target.text()}) as is, ${optionalType ? `declaring ${annotation.replace(/^:\s*/, "")}` : `and ${checkedBy} checks its result for undefined`}, so code outside a Provider relies on getting undefined. Solid 1.x returned undefined from useContext outside a Provider; Solid ${SOLID_TARGET_VERSION} throws ContextNotFoundError instead.`,
+          why: `${target.text()} is created without a default, and ${hook.name.text()} returns useContext(${target.text()}) as is, ${contract}, so code outside a Provider relies on getting undefined. Solid 1.x returned undefined from useContext outside a Provider; Solid ${SOLID_TARGET_VERSION} throws ContextNotFoundError instead.`,
           guidance: `Give the context an explicit empty value, createContext<T | null>(null), and map it back in the hook: return useContext(${target.text()}) ?? undefined, so callers keep their contract. undefined is never a context value in Solid 2, so createContext<T | undefined>(undefined) still throws. If every caller is always inside a Provider, drop undefined from the hook's type instead.`,
           guide: MIGRATION_GUIDE,
         }),
@@ -124,6 +173,83 @@ function returningHook(call: SgNode<TSX>): { fn: SgNode<TSX>; name: SgNode<TSX> 
   const holder = fn.parent();
   const name = holder?.kind() === "variable_declarator" ? holder.field("name") : null;
   return name?.kind() === "identifier" ? { fn, name } : null;
+}
+
+/**
+ * The array literal a named function returns `name` in (`return [a, name]`,
+ * `as const` allowed, or an arrow's body), with `name`'s index and the
+ * function's name, or null. A spread before it leaves the index unknown.
+ */
+function returnedTuple(name: SgNode<TSX>): { array: SgNode<TSX>; index: number; factory: string; factoryName: SgNode<TSX> } | null {
+  const owner = enclosingFunction(name);
+  for (const { nodes } of referencesOf(name)) {
+    for (const reference of nodes) {
+      const array = reference.parent();
+      if (array?.kind() !== "array" || enclosingFunction(array)?.id() !== owner?.id() || owner === null) continue;
+      let returned = array;
+      let parent = array.parent();
+      while (parent !== null && ["as_expression", "satisfies_expression", "parenthesized_expression"].includes(parent.kind())) {
+        returned = parent;
+        parent = parent.parent();
+      }
+      if (parent?.kind() !== "return_statement" && owner.field("body")?.id() !== returned.id()) continue;
+      const elements = array.children().filter((child) => child.isNamed() && child.kind() !== "comment");
+      const index = elements.findIndex((element) => element.id() === reference.id());
+      if (elements.slice(0, index).some((element) => element.kind() === "spread_element")) return null;
+      const holder = owner.parent();
+      const factoryName = owner.field("name") ?? (holder?.kind() === "variable_declarator" ? holder.field("name") : null);
+      if (factoryName === null || factoryName.kind() !== "identifier") return null;
+      return { array, index, factory: factoryName.text(), factoryName };
+    }
+  }
+  return null;
+}
+
+/**
+ * The identifiers callers bind the tuple's element to: every call of the
+ * factory, found through the semantic provider in any project file, whose
+ * result is destructured, `const [a, b] = factory(...)`, binds the element's
+ * index to a plain identifier (holes count; a rest element ends the match).
+ */
+function tupleAliases(tuple: { index: number; factoryName: SgNode<TSX> }): SgNode<TSX>[] {
+  const aliases: SgNode<TSX>[] = [];
+  for (const { nodes } of referencesOf(tuple.factoryName)) {
+    for (const reference of nodes) {
+      const call = reference.parent();
+      if (call?.kind() !== "call_expression" || call.field("function")?.id() !== reference.id()) continue;
+      const declarator = call.parent();
+      const pattern = declarator?.kind() === "variable_declarator" ? declarator.field("name") : null;
+      if (pattern?.kind() !== "array_pattern") continue;
+      let position = 0;
+      for (const child of pattern.children()) {
+        if (child.text() === ",") position += 1;
+        else if (child.kind() === "rest_pattern") break;
+        else if (position === tuple.index && child.kind() === "identifier") aliases.push(child);
+      }
+    }
+  }
+  return aliases;
+}
+
+/**
+ * The name of another hook in the same returned tuple, declared in the same
+ * factory, that reads useContext(`target`) (one of `reads`, the file's
+ * proven solid-js useContext calls) and throws when it is empty, or null.
+ */
+function throwingTupleSibling(tuple: { array: SgNode<TSX>; index: number }, target: string, reads: ReadonlySet<number>): string | null {
+  const factory = enclosingFunction(tuple.array);
+  if (factory === null) return null;
+  const elements = tuple.array.children().filter((child) => child.isNamed() && child.kind() !== "comment");
+  for (const element of elements) {
+    if (element.kind() !== "identifier" || elements.indexOf(element) === tuple.index) continue;
+    const declarator = factory.find({ rule: { kind: "variable_declarator", has: { field: "name", regex: `^${element.text().replace(/\$/g, "\\$")}$` } } });
+    const value = declarator?.field("value");
+    if (value === null || value === undefined || !["arrow_function", "function_expression"].includes(value.kind())) continue;
+    const read = value.findAll({ rule: { kind: "call_expression" } })
+      .filter((call) => reads.has(call.id()) && call.field("arguments")?.children().find((child) => child.isNamed())?.text() === target);
+    if (read.some((call) => undefinedChecks(call).some(throwsWhenEmpty))) return element.text();
+  }
+  return null;
 }
 
 /** `file:line` of the first call of the hook whose result is checked for undefined, or null. */

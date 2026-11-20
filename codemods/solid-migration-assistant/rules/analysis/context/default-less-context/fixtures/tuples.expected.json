@@ -1,0 +1,28 @@
+{
+  "findings": [
+    {
+      "rule": "context/default-less-context",
+      "file": "analysis/context/default-less-context/fixtures/tuples.fixture.tsx",
+      "line": 10,
+      "column": 26,
+      "severity": "behavior",
+      "headline": "Keep useMaybe optional: useContext(Context) now throws outside a Provider instead of returning undefined.",
+      "why": "Context is created without a default, and useMaybe returns useContext(Context) as is, and analysis/context/default-less-context/fixtures/tuples-consumers.fixture.tsx:22, through the useMaybeTheme it destructures from createContextAndHook(), checks its result for undefined, so code outside a Provider relies on getting undefined. Solid 1.x returned undefined from useContext outside a Provider; Solid 2.0.3 throws ContextNotFoundError instead.",
+      "guidance": "Give the context an explicit empty value, createContext<T | null>(null), and map it back in the hook: return useContext(Context) ?? undefined, so callers keep their contract. undefined is never a context value in Solid 2, so createContext<T | undefined>(undefined) still throws. If every caller is always inside a Provider, drop undefined from the hook's type instead.",
+      "guide": "https://github.com/solidjs/solid/blob/68406c2077eff22c67f71db4a16bf7026ddceee1/documentation/solid-2.0/MIGRATION.md#usecontext-on-a-default-less-context-returns-t-not-t--undefined",
+      "lint": []
+    },
+    {
+      "rule": "context/default-less-context",
+      "file": "analysis/context/default-less-context/fixtures/tuples-consumers.fixture.tsx",
+      "line": 13,
+      "column": 17,
+      "severity": "deprecated",
+      "headline": "Drop the undefined check on line 14; useContext(ThemeContext) now throws without a Provider.",
+      "why": "ThemeContext is created without a default. Solid 1.x returned undefined from useContext outside a Provider; Solid 2.0.3 types the result as the context's type and throws ContextNotFoundError instead.",
+      "guidance": "Delete the check and return the useContext result directly; the hook only existed to narrow the type. If many callers use the hook, keeping it as a one-line alias is fine.",
+      "guide": "https://github.com/solidjs/solid/blob/68406c2077eff22c67f71db4a16bf7026ddceee1/documentation/solid-2.0/MIGRATION.md#usecontext-on-a-default-less-context-returns-t-not-t--undefined",
+      "lint": []
+    }
+  ]
+}
