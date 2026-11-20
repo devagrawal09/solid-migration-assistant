@@ -6,7 +6,7 @@ The migration target is pinned to Solid `2.0.3` at upstream commit [`68406c20`](
 
 ## Run from the Codemod Registry
 
-> **Scope:** version `0.4.4` targets Solid `2.0.3` and implements only the detections and rewrites documented below. A clean run is not proof that a project is ready for Solid 2.
+> **Scope:** version `0.4.5` targets Solid `2.0.3` and implements only the detections and rewrites documented below. A clean run is not proof that a project is ready for Solid 2.
 
 This workflow runs on Codemod workflow v2, which is in alpha: run it with `codemod@alpha` (the 2.0 alpha CLI, `2.0.0-alpha.4` at this release), because plain `codemod` / `codemod@latest` is still the 1.x CLI and cannot run it. From the root of a Solid 1.9 project in a clean git checkout:
 
@@ -24,6 +24,16 @@ The current directory is the target; pass `--target <path>` to run on another on
 The registry report lists the source findings together with the `package.json` and `tsconfig` findings the npm launcher prints (`shared/project.mjs`: the Solid version, one finding per dependency-table entry at its line, Vite, a library's peers, `jsxImportSource` and `moduleResolution`); only the launcher's npm lookups for Solid libraries the table doesn't know are missing. When the workflow skips a project (no `solid-js`, or `solid-js` already on Solid 2) it prints one line saying why, and an analyze with nothing to report says so instead of printing nothing.
 
 Codemod ends a run with its own summary, for example `Modified 6` and `Unmodified 105`. Those counts are Codemod's, not this workflow's: they add up every file each `forEachFile` step visited (about 60 steps, most of them read-only), so a file is counted once per step that saw it, and a file two rewrite steps changed counts twice. The workflow's own report above it lists each rewrite once; `git status` shows which files changed.
+
+### Troubleshooting: `YAML error: invalid type: string "import { ...`
+
+That error means the Codemod CLI that ran is too old for this package: plain `codemod` / `codemod@latest` (the 1.x CLI) and `2.0.0-alpha.1` read the TypeScript workflow as YAML, and `2.0.0-alpha.2` rejects it with "forEachFile's callback must be written inline". `npx` re-resolves `@alpha` on every run, so an old alpha usually comes from a registry mirror or an npm `prefer-offline` setting; `npm view codemod dist-tags.alpha` shows what your registry resolves it to. Pin the exact CLI instead (`codemod --version` prints `1.18.7` even on the 2.0 alpha, so it can't tell them apart):
+
+```sh
+npx codemod@2.0.0-alpha.4 run solid-migration-assistant
+# or
+pnpm dlx codemod@alpha run solid-migration-assistant
+```
 
 ## Analyze with npm
 
