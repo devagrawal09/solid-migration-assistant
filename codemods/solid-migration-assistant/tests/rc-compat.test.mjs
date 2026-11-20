@@ -20,6 +20,12 @@ import { guideAnchors, output, skipOrFail, treeSnapshot } from "./helpers.mjs";
  * at runtime: that is the evidence that each rewrite is both required and
  * correct for this target.
  *
+ * The renamed build packages are proven the same way: the migrated
+ * vite.config.ts builds the fixture with @solidjs/vite-plugin on Vite 8, and
+ * the migrated babel.config.json (babel-preset-solid moved to plugins as
+ * @solidjs/babel-plugin) compiles it to exactly what the plugin configured
+ * by hand produces.
+ *
  * Two behavioral scenarios run on both runtimes: each untransformed 1.x
  * scenario on `solid-js@1.9.13`, and its transformed output on the pinned RC.
  * `store-scenario.js` must record identical store snapshots after every
@@ -39,6 +45,8 @@ const PINNED_PACKAGES = [
   "@solidjs/web@2.0.3",
   "@solidjs/h@2.0.2",
   "@solidjs/babel-plugin@2.0.2",
+  "@solidjs/vite-plugin@3.0.1",
+  "vite@8.3.8",
   "@tsrx/core@0.1.63",
   "@babel/core@7.29.7",
   "@babel/preset-typescript@7.29.7",
@@ -188,6 +196,7 @@ test(
       // 4. The RC compiler accepts the transformed source in DOM and SSR mode
       //    and rejects the untransformed input at its classList attribute.
       writeFileSync(join(target, "legacy.tsx"), legacySource);
+      writeFileSync(join(target, "legacy.babel.config.json"), readFileSync(join(projectDirectory, "babel.config.json"), "utf8"));
       writeFileSync(join(target, "compile.mjs"), COMPILE_SCRIPT);
       const compile = run(process.execPath, ["compile.mjs"], target);
       assert.equal(compile.status, 0, output(compile));
@@ -199,6 +208,12 @@ test(
       // emits an `onclick` attribute write.
       assert.match(compiled.dom.code, /_\$\$click|"click"/);
       assert.doesNotMatch(compiled.dom.code, /"onclick"/);
+      // The migrated babel.config.json compiles exactly as the plugin
+      // configured by hand for SSR; the 1.9 config names a preset that
+      // isn't installed.
+      assert.equal(compiled.configured.error, null, compiled.configured.error);
+      assert.equal(compiled.configured.code, compiled.ssr.code);
+      assert.match(compiled.legacyConfig.error ?? "", /Cannot find (?:module|package) 'babel-preset-solid'/);
 
       // 5. The server build renders the context value, the keyed={false}
       //    rows with numeric indexes, the Dynamic child, and the object class.
@@ -214,6 +229,10 @@ test(
       //    through the browser builds so effects and stores are reactive.
       const legacy = join(temporaryRoot, "legacy");
       cpSync(projectDirectory, legacy, { recursive: true });
+      // Only the runtime: the build tooling isn't part of the scenarios.
+      const legacyManifest = JSON.parse(readFileSync(join(legacy, "package.json"), "utf8"));
+      delete legacyManifest.devDependencies;
+      writeFileSync(join(legacy, "package.json"), `${JSON.stringify(legacyManifest, null, 2)}\n`);
       const legacyInstall = run(
         "npm",
         ["install", "--no-audit", "--no-fund", "--package-lock=false", "--save-exact", LEGACY_SOLID],
@@ -240,6 +259,18 @@ test(
       const onRc = observe(target, "on-scenario", "rc");
       assert.deepEqual(byEffect(onRc), byEffect(onLegacy), "on() rewrites changed what an effect observes");
       assert.ok(Object.keys(byEffect(onLegacy)).length === 3 && onLegacy.length > 10, "the on() scenario must exercise all three effects");
+
+      // 7. The migrated vite.config.ts loads @solidjs/vite-plugin, whose
+      //    default export is still the plugin factory, and Vite 8 builds the
+      //    fixture with it, compiling JSX for @solidjs/web.
+      writeFileSync(join(target, "vite-build.mjs"), VITE_BUILD_SCRIPT);
+      const vite = run(process.execPath, ["vite-build.mjs"], target);
+      assert.equal(vite.status, 0, output(vite));
+      const built = JSON.parse(vite.stdout.trim().split("\n").pop());
+      assert.ok(built.plugins.some((name) => /solid/i.test(name)), `no Solid plugin among ${built.plugins.join(", ")}`);
+      assert.match(built.code, /from "@solidjs\/web"/);
+      assert.match(built.code, /template\(/);
+      assert.doesNotMatch(built.code, /solid-js\/web/);
     } finally {
       rmSync(temporaryRoot, { recursive: true, force: true });
     }
@@ -268,11 +299,41 @@ async function compile(file, generate) {
   }
 }
 
+// With a project Babel config instead of options.
+async function configured(configFile) {
+  try {
+    const result = await transformAsync(readFileSync("src/app.tsx", "utf8"), { filename: "src/app.tsx", babelrc: false, configFile });
+    return { code: result.code, error: null };
+  } catch (error) {
+    return { code: null, error: error.message.split("\\n")[0] };
+  }
+}
+
 const dom = await compile("src/app.tsx", "dom");
 const ssr = await compile("src/app.tsx", "ssr");
 const legacy = await compile("legacy.tsx", "dom");
+const configuredSsr = await configured("./babel.config.json");
+const legacyConfig = await configured("./legacy.babel.config.json");
 if (ssr.code) writeFileSync("app.ssr.mjs", ssr.code);
-console.log(JSON.stringify({ dom, ssr, legacy }));
+console.log(JSON.stringify({ dom, ssr, legacy, configured: configuredSsr, legacyConfig }));
+`;
+
+const VITE_BUILD_SCRIPT = `import { build, loadConfigFromFile } from "vite";
+
+const loaded = await loadConfigFromFile({ command: "build", mode: "production" }, "vite.config.ts");
+const plugins = (loaded?.config.plugins ?? []).flat(Infinity).filter(Boolean).map((plugin) => plugin.name);
+const result = await build({
+  configFile: "vite.config.ts",
+  logLevel: "silent",
+  build: {
+    write: false,
+    minify: false,
+    lib: { entry: "src/app.tsx", formats: ["es"], fileName: "app" },
+    rollupOptions: { external: [/^solid-js/, /^@solidjs\\/web/] },
+  },
+});
+const outputs = (Array.isArray(result) ? result : [result]).flatMap((entry) => entry.output);
+console.log(JSON.stringify({ plugins, code: outputs.filter((chunk) => chunk.type === "chunk").map((chunk) => chunk.code).join("\\n") }));
 `;
 
 const RENDER_SCRIPT = `import { createContext } from "solid-js";

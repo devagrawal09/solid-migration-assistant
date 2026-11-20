@@ -1,0 +1,7 @@
+{
+  // The SSR build's Babel options, with Solid's preset ahead of TypeScript's.
+  "presets": [
+    ["@babel/preset-typescript", { "isTSX": true, "allExtensions": true }]
+  ],
+  "plugins": [["@solidjs/babel-plugin", { "generate": "ssr" }]]
+}
