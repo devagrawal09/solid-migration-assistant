@@ -6,7 +6,7 @@ The assistant scans project-owned `.js`, `.jsx`, `.ts`, and `.tsx` source, retur
 
 ## Run the analyzer and transform
 
-> **Scope:** version `0.4.3` targets Solid `2.0.3` and covers only the detections and rewrites documented below. A clean analyzer run is not proof that a project is ready for Solid 2.
+> **Scope:** version `0.4.4` targets Solid `2.0.3` and covers only the detections and rewrites documented below. A clean analyzer run is not proof that a project is ready for Solid 2.
 
 Run it from the Codemod Registry with `codemod@alpha`, the Codemod 2.0 alpha CLI (`2.0.0-alpha.4` at this release); plain `codemod` / `codemod@latest` is still the 1.x CLI and cannot run workflow v2 packages. From the root of a Solid 1.9 project in a clean git checkout:
 
@@ -44,7 +44,7 @@ The supported rules detect the complete Solid 2 migration quick rename / removal
 **Reactivity & lifecycle** — `createComputed`, `createEffect`, `createMemo`, `batch`, `createResource`, `on`, `onError`/`catchError`/`resetErrorBoundaries`, `startTransition`/`useTransition`/`createDeferred` (which keeps its name with a new meaning), `createSelector`/`indexArray`, `createDynamic`/`from`/`observable` (`from` now returns an async iterable for a memo), `onCleanup` ownership review, and `equalFn`/`getListener`/`writeSignal`/`enableScheduling`.
 **Props & store** — `mergeProps`/`splitProps`, `onMount`, `unwrap`, `produce`, `createMutable`/`modifyMutable`, and every 1.x store setter call shape that the draft-only 2.0 setter no longer accepts.
 **Ownership** — inline ref callbacks doing owner-dependent work, nested `createRoot` calls, and deprecated `<Dynamic>` elements.
-**Project files** — the launcher reads `package.json` and `tsconfig.json` and reports a Solid 1 `solid-js` range, a missing `@solidjs/web`, a `solid-js` `jsxImportSource`, and each common Solid 1 dependency with its verified Solid 2 counterpart or the fact that none exists yet.
+**Project files** — the launcher reads `package.json` and `tsconfig.json` and reports a Solid 1 `solid-js` range, a missing `@solidjs/web`, a `solid-js` `jsxImportSource`, and each common Solid 1 dependency with its verified Solid 2 counterpart or the fact that none exists yet. Migrate swaps the packages that were only renamed (`vite-plugin-solid`, `babel-preset-solid`, `solid-testing-library`) and moves their imports with them, and moves `babel-preset-solid` from a Babel config's `presets` to `plugins` as `@solidjs/babel-plugin` (JSON and JavaScript configs) when its options carry over unchanged.
 **Ecosystem imports** — Solid 1 imports from `@solidjs/router`, `@solidjs/meta`, `@solidjs/start`, and `vinxi`, each with its audited Solid 2 replacement.
 Coverage is deliberately limited. Even when no guidance is printed, review the documented exclusions and perform the application's normal type, build, and behavior validation; a clean analyzer run is not a readiness result.
 
