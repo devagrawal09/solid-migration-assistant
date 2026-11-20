@@ -29,10 +29,11 @@
       "jsx/context-provider-to-context: Rewrite <StoreContext.Provider> to <StoreContext>, keeping its value attribute and children unchanged.": 1,
       "project/dependencies: Add @solidjs/web ^2.0.3.": 1,
       "project/dependencies: Move solid-js from ^1.3.3 to ^2.0.3.": 1,
-      "project/dependencies: Replace babel-preset-solid ^1.3.2 with @solidjs/babel-plugin ^2.0.2, its Solid 2 successor.": 1
+      "project/dependencies: Replace babel-preset-solid ^1.3.2 with @solidjs/babel-plugin ^2.0.2, its Solid 2 successor.": 1,
+      "tooling/package-renames: Move babel-preset-solid from presets to plugins as @solidjs/babel-plugin, its Solid 2 successor.": 1
     },
-    "changedFiles": 5,
-    "transformedAnalyzerFindings": 54,
+    "changedFiles": 6,
+    "transformedAnalyzerFindings": 53,
     "rcTypeErrors": 0,
     "rcCompileErrors": 1
   },
@@ -64,7 +65,8 @@
       "project/solid-version: Move this project's Solid dependencies to solid-js@2.0.3.": 15,
       "reactivity/create-effect: Split this one-argument createEffect into compute and apply callbacks (simple shape).": 2,
       "store/setter-calls: Rewrite this path-style store setter call as a draft write.": 4,
-      "tooling/build-config: Import the Solid 2 Vite plugin from @solidjs/vite-plugin.": 15
+      "tooling/build-config: Import the Solid 2 Vite plugin from @solidjs/vite-plugin.": 15,
+      "tooling/build-config: Replace the babel-preset-solid preset with the @solidjs/babel-plugin plugin.": 1
     },
     "rewrites": {
       "imports/web-package-relocation: Relocate solid-js/web to @solidjs/web for proven bindings render.": 12,
@@ -85,9 +87,10 @@
       "project/dependencies: Replace vite-plugin-solid ^2.11.9 with @solidjs/vite-plugin ^3.0.1, its Solid 2 successor.": 3,
       "project/dependencies: Replace vite-plugin-solid 2.11.9 with @solidjs/vite-plugin ^3.0.1, its Solid 2 successor.": 2,
       "project/jsx-import-source: Point jsxImportSource at @solidjs/web.": 15,
-      "tooling/package-renames: Import the Solid 2 Vite plugin from @solidjs/vite-plugin; its default export is still the plugin factory.": 15
+      "tooling/package-renames: Import the Solid 2 Vite plugin from @solidjs/vite-plugin; its default export is still the plugin factory.": 15,
+      "tooling/package-renames: Move babel-preset-solid from presets to plugins as @solidjs/babel-plugin, its Solid 2 successor.": 1
     },
-    "changedFiles": 63,
+    "changedFiles": 64,
     "transformedAnalyzerFindings": 53,
     "rcTypeErrors": 12,
     "rcCompileErrors": 0
