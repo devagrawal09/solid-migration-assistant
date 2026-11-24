@@ -235,7 +235,7 @@
       "tooling/package-renames: Import the Solid 2 Vite plugin from @solidjs/vite-plugin; its default export is still the plugin factory.": 1
     },
     "changedFiles": 10,
-    "transformedAnalyzerFindings": 6,
+    "transformedAnalyzerFindings": 191,
     "rcTypeErrors": 98,
     "rcCompileErrors": 1
   },
@@ -435,7 +435,7 @@
       "tooling/package-renames: Import the Solid 2 Vite plugin from @solidjs/vite-plugin; its default export is still the plugin factory.": 1
     },
     "changedFiles": 28,
-    "transformedAnalyzerFindings": 1,
+    "transformedAnalyzerFindings": 66,
     "rcTypeErrors": 68,
     "rcCompileErrors": 0
   },
@@ -581,7 +581,7 @@
       "tooling/package-renames: Import the Solid 2 Vite plugin from @solidjs/vite-plugin; its default export is still the plugin factory.": 1
     },
     "changedFiles": 20,
-    "transformedAnalyzerFindings": 10,
+    "transformedAnalyzerFindings": 93,
     "rcTypeErrors": 56,
     "rcCompileErrors": 3
   },
@@ -639,7 +639,7 @@
       "project/jsx-import-source: Point jsxImportSource at @solidjs/web.": 1
     },
     "changedFiles": 17,
-    "transformedAnalyzerFindings": 7,
+    "transformedAnalyzerFindings": 77,
     "rcTypeErrors": 34,
     "rcCompileErrors": 1
   },
@@ -727,6 +727,7 @@
       "jsx/class-list-to-class: Rewrite the classList attribute on <div> to class, preserving its value expression.": 2,
       "jsx/context-provider-to-context: Rewrite <ChatFactoryContext.Provider> to <ChatFactoryContext>, keeping its value attribute and children unchanged.": 3,
       "jsx/context-provider-to-context: Rewrite <ConfigContext.Provider> to <ConfigContext>, keeping its value attribute and children unchanged.": 1,
+      "jsx/context-provider-to-context: Rewrite <EventContext.Provider> to <EventContext>, keeping its value attribute and children unchanged.": 1,
       "jsx/context-provider-to-context: Rewrite <ReadyContext.Provider> to <ReadyContext>, keeping its value attribute and children unchanged.": 1,
       "project/dependencies: Add @solidjs/web ^2.0.3.": 1,
       "project/dependencies: Move @solidjs/router from ^0.13.0 to ^2.0.0.": 1,
@@ -737,9 +738,9 @@
       "reactivity/on-helper-split: Rewrite createEffect(on(dep, fn)) as createEffect(compute, apply), keeping the callback unchanged.": 4,
       "tooling/package-renames: Import the Solid 2 Vite plugin from @solidjs/vite-plugin; its default export is still the plugin factory.": 1
     },
-    "changedFiles": 26,
-    "transformedAnalyzerFindings": 9,
-    "rcTypeErrors": 76,
+    "changedFiles": 27,
+    "transformedAnalyzerFindings": 105,
+    "rcTypeErrors": 74,
     "rcCompileErrors": 2
   },
   "exodium": {
@@ -821,7 +822,7 @@
       "tooling/package-renames: Import the Solid 2 Vite plugin from @solidjs/vite-plugin; its default export is still the plugin factory.": 2
     },
     "changedFiles": 45,
-    "transformedAnalyzerFindings": 4,
+    "transformedAnalyzerFindings": 217,
     "rcTypeErrors": 155,
     "rcCompileErrors": 0
   },
@@ -869,6 +870,7 @@
       "reactivity/create-resource: Migrate this createResource call to async computations with Loading boundaries.": 5,
       "reactivity/function-initial-value: Check whether initial can be a function; createSignal would run it as a derived signal.": 1,
       "reactivity/on-helper: Migrate this on tracking wrapper to Solid 2 split effects.": 11,
+      "reactivity/owned-write: Move this setMe call out of the Profile component body; Solid 2 throws on writes there in dev.": 1,
       "reactivity/owned-write: Move this setUseLdap call out of the Login component body; Solid 2 throws on writes there in dev.": 1,
       "reactivity/read-after-write: This read of _layout returns its value from before _setLayout on line 315.": 1,
       "reactivity/read-after-write: This read of errorDetail returns its value from before setErrorDetail on line 284.": 1,
@@ -902,7 +904,7 @@
       "tooling/package-renames: Import the Solid 2 Vite plugin from @solidjs/vite-plugin; its default export is still the plugin factory.": 1
     },
     "changedFiles": 25,
-    "transformedAnalyzerFindings": 10,
+    "transformedAnalyzerFindings": 272,
     "rcTypeErrors": 179,
     "rcCompileErrors": 0
   },
