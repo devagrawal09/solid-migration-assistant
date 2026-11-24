@@ -287,7 +287,7 @@ test("runs the pinned package-local Codemod launcher with safe flags", async () 
     resolve(dirname(require.resolve("codemod/package.json")), "codemod"),
   );
   const codemodPackage = require("codemod/package.json");
-  assert.equal(codemodPackage.version, "2.0.0-alpha.4");
+  assert.equal(codemodPackage.version, "2.0.0-alpha.6");
   assert.deepEqual(Object.keys(codemodPackage.optionalDependencies).sort(), [
     "@codemod.com/cli-darwin-arm64",
     "@codemod.com/cli-darwin-x64",

@@ -1,4 +1,7 @@
-import { approval, forEachFile, jssg, shell, step } from "codemod/workflow";
+import { parse } from "codemod/ast-grep";
+import { dependencyGraph } from "codemod/deps";
+import { approval, forEachFile, shell, step, type WorkflowContext } from "codemod/workflow";
+import { ANALYSES, TRANSFORMS } from "./shared/callbacks.generated.ts";
 import { DEPENDENCY_MAP } from "./shared/dependencies.mjs";
 import { bumpManifest, bumpTsconfig } from "./shared/manifest.mjs";
 import { bumpBabelConfig } from "./shared/babel.mjs";
@@ -8,10 +11,10 @@ import { babelConfigFindings, configFindings, manifestFindings } from "./shared/
 import { ANALYSIS_STEPS, TRANSFORM_STEPS } from "./shared/steps.generated.ts";
 import { MIGRATION_GUIDE_URL, SOLID_TARGET_VERSION } from "./shared/target.ts";
 
-// The Solid 1.9 -> 2 assistant on the code-first engine (codemod/codemod#2485,
-// published as codemod@2.0.0-alpha.4). The engine keeps no workflow state:
-// rules return findings and rewrites as jssg data, and shell steps print
-// their result as one JSON line that the workflow parses.
+// The Solid 1.9 -> 2 assistant on the code-first engine (codemod 2.0.0-alpha.6).
+// The engine keeps no workflow state: rules are forEachFile callbacks that
+// return their findings and rewrites, and shell steps print their result as
+// one JSON line that the workflow parses.
 
 const OUTSIDE_PROJECT = ["**/node_modules/**", "**/dist/**", "**/build/**", "**/coverage/**"];
 const SOURCES = {
@@ -37,7 +40,7 @@ const BUILD_CONFIGS = {
   exclude: OUTSIDE_PROJECT,
   containing: "solid",
 };
-// Babel's JSON configs, which jssg can't parse as TSX (shared/babel.mjs).
+// Babel's JSON configs, which the rules can't parse as TSX (shared/babel.mjs).
 const BABEL_JSON_CONFIGS = {
   include: ["**/.babelrc", "**/.babelrc.json", "**/babel.config.json"],
   exclude: OUTSIDE_PROJECT,
@@ -62,8 +65,9 @@ const RENAMED = ["vite-plugin-solid", "solid-testing-library"];
 // see files whose text contains one of these strings (null: every source
 // file, for JSX rules that match syntax rather than imports). The steps come
 // from shared/steps.generated.ts, which `pnpm generate` derives from rules/.
-// `configs` adds the build config files (BUILD_CONFIGS) to the stage's files.
-const STAGES: { name: string; needs: string[]; scan: string[] | null; configs?: boolean; rules: (rule: string) => boolean }[] = [
+// `configs` adds the build config files (BUILD_CONFIGS) to the stage's files;
+// with `imports`, `scan` names modules a file must import.
+const STAGES: { name: string; needs: string[]; scan: string[] | null; configs?: boolean; imports?: true; rules: (rule: string) => boolean }[] = [
   { name: "Imports", needs: ["solid-js"], scan: ["solid-js"], rules: (r) => r.startsWith("imports/") && r !== "imports/ecosystem-apis" },
   { name: "Context", needs: ["solid-js"], scan: ["solid-js"], rules: (r) => r.startsWith("context/") },
   { name: "JSX", needs: ["solid-js"], scan: null, rules: (r) => r.startsWith("jsx/") },
@@ -73,30 +77,23 @@ const STAGES: { name: string; needs: string[]; scan: string[] | null; configs?: 
     scan: ["solid-js"],
     rules: (r) => /^(reactivity|lifecycle|props)\//.test(r),
   },
-  { name: "Stores", needs: ["solid-js"], scan: ["solid-js/store"], rules: (r) => r.startsWith("store/") },
+  // The store rules only follow bindings imported from solid-js/store, so a
+  // file needs an import statement of it, not just the text.
+  { name: "Stores", needs: ["solid-js"], scan: ["solid-js/store"], imports: true, rules: (r) => r.startsWith("store/") },
   { name: "Router, meta and start", needs: ECOSYSTEM, scan: ECOSYSTEM, rules: (r) => r === "imports/ecosystem-apis" },
   { name: "Build tooling", needs: ["solid-js"], scan: RENAMED, configs: true, rules: (r) => r.startsWith("tooling/") },
 ];
 
-// Stand-in for the dependency analysis task being built on #2485. It reads
-// declared ranges from package.json and resolved versions from
-// package-lock.json; the real task adds pnpm/yarn lockfiles, workspaces and
-// the transitive graph, and should replace this function one for one.
+// Declared ranges come from package.json; installed versions come from the
+// root lockfile (npm, pnpm or yarn) through dependencyGraph.
+const LOCKFILES = ["package-lock.json", "pnpm-lock.yaml", "yarn.lock"];
+
 function readDependencies(path: string, text: string) {
   // The workspace file is kept as text for the project checks' catalogs.
   if (path.endsWith("pnpm-workspace.yaml")) return { path, workspaceYaml: text };
+  if (LOCKFILES.includes(path)) return { path, lockfile: true };
+  if (!path.endsWith("package.json")) return undefined;
   const json = JSON.parse(text);
-  if (path.endsWith("package-lock.json")) {
-    const resolved: Record<string, string> = {};
-    for (const [key, entry] of Object.entries<any>(json.packages ?? {})) {
-      const name = key.replace(/^.*node_modules\//, "");
-      // Linked and workspace entries have no version.
-      if (key.startsWith("node_modules/") && typeof entry.version === "string" && !(name in resolved)) {
-        resolved[name] = entry.version;
-      }
-    }
-    return { path, resolved };
-  }
   return { path, declared: { ...json.devDependencies, ...json.peerDependencies, ...json.dependencies } };
 }
 
@@ -119,7 +116,7 @@ type Params = {
   install?: boolean | string;
 };
 
-export default async function main({ params }: { params: Params }) {
+export default async function main({ params }: WorkflowContext<Params>) {
   const migrate = params.mode === "migrate";
   // --param values arrive as JSON when they parse as JSON, so false is a boolean.
   const verify = params.verify !== false && params.verify !== "false";
@@ -128,17 +125,28 @@ export default async function main({ params }: { params: Params }) {
   const manifests = await step(
     "Read dependencies",
     forEachFile(
-      { include: ["package.json", "package-lock.json", "pnpm-workspace.yaml"], exclude: OUTSIDE_PROJECT },
+      { include: ["package.json", "pnpm-workspace.yaml", ...LOCKFILES], exclude: OUTSIDE_PROJECT },
       (file) => readDependencies(file.path, file.text),
     ),
   );
+  // What each of the project's packages resolves a dependency to, root first,
+  // then any installed version (solid-js through a meta-framework).
+  // dependencyGraph fails the step without a lockfile, so it only runs with one.
+  const resolved: Record<string, string> = !manifests.outputs.some((m) => m.lockfile) ? {} : await step(
+    "Read installed versions",
+    dependencyGraph((g) => {
+      const versions: Record<string, string> = {};
+      const edges = g.workspaces().sort((a, b) => (a.dir ?? "").length - (b.dir ?? "").length).flatMap((w) => w.dependencies());
+      for (const edge of edges) if (edge.to && !(edge.name in versions)) versions[edge.name] = edge.to.version;
+      for (const node of g.nodes()) if (!node.local && !(node.name in versions)) versions[node.name] = node.version;
+      return versions;
+    }),
+  );
   const declared: Record<string, string> = {};
-  const resolved: Record<string, string> = {};
   const solidRanges: string[] = [];
   let workspaceYaml = "";
   for (const m of manifests.outputs as any[]) {
     Object.assign(declared, m.declared ?? {});
-    Object.assign(resolved, m.resolved ?? {});
     if (typeof m.declared?.["solid-js"] === "string") solidRanges.push(m.declared["solid-js"]);
     if (typeof m.workspaceYaml === "string" && m.path === "pnpm-workspace.yaml") workspaceYaml = m.workspaceYaml;
   }
@@ -170,8 +178,13 @@ export default async function main({ params }: { params: Params }) {
   const scanned = await step(
     "Find files each stage needs",
     forEachFile(SOURCES, (file) => {
-      const hits = STAGES.flatMap((stage) => stage.scan ?? []).filter((needle) => file.text.includes(needle));
-      return { path: file.path, hits: [...new Set(hits)] };
+      const needles = [...new Set(STAGES.flatMap((stage) => stage.scan ?? []))].filter((needle) => file.text.includes(needle));
+      const modules = STAGES.filter((stage) => stage.imports).flatMap((stage) => stage.scan ?? []);
+      // Parsed only when the text names a module a stage must see imported.
+      const imported = needles.some((needle) => modules.includes(needle))
+        ? parse(file, { language: "tsx" }).root().findAll({ rule: { kind: "import_statement" } }).map((node) => node.field("source")?.text().slice(1, -1))
+        : [];
+      return { path: file.path, hits: needles.filter((needle) => !modules.includes(needle) || imported.includes(needle)) };
     }),
   );
   const files = scanned.outputs as { path: string; hits: string[] }[];
@@ -216,13 +229,10 @@ export default async function main({ params }: { params: Params }) {
     }
   };
 
-  // jssg rules run on exactly the stage's files. Paths are passed as globs, so
-  // brackets in route files like src/routes/[id].tsx are escaped.
-  const runRule = (label: string, script: string, files: string[], ruleParams: Record<string, string> = {}) =>
-    step(label, forEachFile(
-      { include: files.map(literalGlob), language: "tsx" },
-      jssg(script, { semanticAnalysis: "workspace", params: ruleParams }),
-    ));
+  // Rules run on exactly the stage's files, with workspace semantics so
+  // references resolve across them. Paths are passed as globs, so brackets in
+  // route files like src/routes/[id].tsx are escaped.
+  const ruleFiles = (files: string[]) => ({ include: files.map(literalGlob), language: "tsx", semanticAnalysis: "workspace" as const });
   const failures: { step: string; path: string; error: string }[] = [];
   const found: any[] = [];
   const rewritten: any[] = [];
@@ -239,10 +249,8 @@ export default async function main({ params }: { params: Params }) {
       if (!stage.run || stage.files.length === 0) continue;
       for (const rule of stage.analyses) {
         const label = `${stage.name}: ${rule}`;
-        const result = await runRule(label, `./scripts/analysis/${rule}.ts`, stage.files);
-        for (const { data } of result.data) {
-          if (data && typeof data === "object" && !Array.isArray(data) && Array.isArray(data.findings)) found.push(...data.findings);
-        }
+        const result = await step(label, forEachFile(ruleFiles(stage.files), (file) => ANALYSES[rule as keyof typeof ANALYSES](file)));
+        found.push(...result.outputs.flat());
         failures.push(...result.failures.map((f) => ({ step: label, ...f })));
       }
     }
@@ -378,10 +386,9 @@ export default async function main({ params }: { params: Params }) {
       if (!stage.run || stage.files.length === 0) continue;
       for (const rule of stage.rewrites) {
         const label = `${stage.name}: ${rule}`;
-        const result = await runRule(label, `./scripts/transformations/${rule}.ts`, stage.files, { renamed: JSON.stringify(renamedIn) });
-        for (const { data } of result.data) {
-          if (data && typeof data === "object" && !Array.isArray(data) && Array.isArray(data.rewrites)) rewritten.push(...data.rewrites);
-        }
+        const renamed = JSON.stringify(renamedIn);
+        const result = await step(label, forEachFile(ruleFiles(stage.files), (file) => TRANSFORMS[rule as keyof typeof TRANSFORMS](file, { renamed })));
+        rewritten.push(...result.outputs.flat());
         failures.push(...result.failures.map((f) => ({ step: label, ...f })));
       }
     }
@@ -424,7 +431,7 @@ export default async function main({ params }: { params: Params }) {
   if (params.report !== "none" && dependencySkips.length > 0) {
     console.log(`Left these dependency ranges as they are; move them by hand:\n${dependencySkips.map((s) => `  ${s.file}: ${s.name} ${JSON.stringify(s.range)} (${s.reason})`).join("\n")}`);
   }
-  if (failures.length > 0) console.log(`${failures.length} file(s) failed in jssg steps; see failures in the run output.`);
+  if (failures.length > 0) console.log(`${failures.length} file(s) failed in rule steps; see failures in the run output.`);
   if (verify) console.log(`eslint-plugin-solid v2: ${before?.total ?? "?"} messages before${after ? `, ${after.total} after` : ""}; ${withLint.length - unconfirmed.length} of ${withLint.length} findings confirmed by the linter.`);
 
   return {

@@ -6,16 +6,16 @@
  * `relocate*` / `rewrite*` (transformations) function becomes one workflow
  * step, in rule-path order and then source order, and the generator writes:
  *
- * - `scripts/analysis/<name>.ts` and `scripts/transformations/<name>.ts`,
- *   one entrypoint per step;
  * - `shared/steps.generated.ts`, the step list `workflow.ts` runs;
+ * - `shared/callbacks.generated.ts`, each step's `forEachFile` callback by
+ *   name, which the workflow's rule steps call;
  * - the `files` list in `package.json`; and
  * - `tests/rules.generated.ts`, the rule table the fixture runner dispatches on.
  *
  * `pnpm generate --check` (run by the architecture test) fails when any
  * committed file differs from what the generator would write.
  */
-import { existsSync, mkdirSync, readFileSync, readdirSync, rmSync, writeFileSync } from "node:fs";
+import { existsSync, readFileSync, readdirSync, writeFileSync } from "node:fs";
 import { dirname, join, relative, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 
@@ -27,12 +27,14 @@ const KINDS = [
     exportPattern: /^export function (analyze[A-Z][A-Za-z0-9]*)\(/gm,
     factory: "createAnalysisEntrypoint",
     table: "ANALYSIS_STEPS",
+    callbacks: "ANALYSES",
   },
   {
     kind: "transformations",
     exportPattern: /^export function ((?:relocate|rewrite)[A-Z][A-Za-z0-9]*)\(/gm,
     factory: "createTransformEntrypoint",
     table: "TRANSFORM_STEPS",
+    callbacks: "TRANSFORMS",
   },
 ];
 
@@ -81,27 +83,24 @@ export function generatedFiles() {
   const shipped = [...STATIC_FILES];
   const registry = [];
   const tables = [];
+  const callbackImports = [`import { ${KINDS.map((config) => config.factory).join(", ")} } from "./entrypoint.ts";`];
+  const callbackTables = [];
 
   for (const config of KINDS) {
     const rules = discoverRules(config.kind);
     const steps = rules.flatMap((rule) => rule.steps.map((name) => ({ ...rule, name })));
-    for (const step of steps) {
-      const path = `scripts/${config.kind}/${step.name}.ts`;
-      files.set(
-        path,
-        `${GENERATED_HEADER}import { ${step.name} } from "../../${step.source}";\n` +
-          `import { ${config.factory} } from "../../shared/entrypoint.ts";\n\n` +
-          `export default ${config.factory}(${JSON.stringify(step.id)}, ${step.name});\n`,
-      );
-      shipped.push(path);
-    }
+    callbackImports.push(...rules.map((rule) => `import { ${rule.steps.join(", ")} } from "../${rule.source}";`));
+    callbackTables.push(
+      `export const ${config.callbacks} = {\n${steps.map((step) => `  ${step.name}: ${config.factory}(${JSON.stringify(step.id)}, ${step.name}),`).join("\n")}\n};`,
+    );
     shipped.push(...rules.map((rule) => rule.source));
     tables.push(stepTable(config, steps));
     registry.push({ config, rules });
   }
 
   files.set(STEPS_FILE, `${GENERATED_HEADER}${tables.join("\n\n")}\n`);
-  shipped.push(...sharedRuntimeFiles(), STEPS_FILE);
+  files.set(CALLBACKS_FILE, `${GENERATED_HEADER}${callbackImports.join("\n")}\n\n${callbackTables.join("\n\n")}\n`);
+  shipped.push(...sharedRuntimeFiles(), STEPS_FILE, CALLBACKS_FILE);
   files.set("package.json", packageJson(shipped.sort()));
   files.set("tests/rules.generated.ts", ruleTable(registry));
   return files;
@@ -110,11 +109,12 @@ export function generatedFiles() {
 /** shared/ modules the workflows import at runtime (type declarations excluded). */
 function sharedRuntimeFiles() {
   return readdirSync(join(packageDirectory, "shared"))
-    .filter((name) => /\.(?:ts|mjs)$/.test(name) && !name.endsWith(".d.mts") && name !== "steps.generated.ts")
+    .filter((name) => /\.(?:ts|mjs)$/.test(name) && !name.endsWith(".d.mts") && !name.endsWith(".generated.ts"))
     .map((name) => `shared/${name}`);
 }
 
 const STEPS_FILE = "shared/steps.generated.ts";
+const CALLBACKS_FILE = "shared/callbacks.generated.ts";
 
 /** `{ rule, name }` per step, in rule-path order and then source order. */
 function stepTable(config, steps) {
@@ -150,20 +150,12 @@ function sortedDirectories(directory) {
     .sort();
 }
 
-/** Generated files that would be written, changed, or removed. */
+/** Generated files that would be written or changed. */
 export function staleFiles() {
-  const expected = generatedFiles();
   const stale = [];
-  for (const [path, contents] of expected) {
+  for (const [path, contents] of generatedFiles()) {
     const absolute = join(packageDirectory, path);
     if (!existsSync(absolute) || readFileSync(absolute, "utf8") !== contents) stale.push(path);
-  }
-  for (const kind of ["analysis", "transformations"]) {
-    const directory = join(packageDirectory, "scripts", kind);
-    for (const name of existsSync(directory) ? readdirSync(directory) : []) {
-      const path = `scripts/${kind}/${name}`;
-      if (!expected.has(path)) stale.push(path);
-    }
   }
   return stale.sort();
 }
@@ -182,13 +174,8 @@ function main() {
   const expected = generatedFiles();
   for (const path of stale) {
     const absolute = join(packageDirectory, path);
-    if (expected.has(path)) {
-      mkdirSync(dirname(absolute), { recursive: true });
-      writeFileSync(absolute, expected.get(path));
-    } else {
-      rmSync(absolute);
-    }
-    console.log(`${expected.has(path) ? "wrote" : "removed"} ${relative(packageDirectory, absolute)}`);
+    writeFileSync(absolute, expected.get(path));
+    console.log(`wrote ${relative(packageDirectory, absolute)}`);
   }
   if (stale.length === 0) console.log("Generated files are up to date.");
 }

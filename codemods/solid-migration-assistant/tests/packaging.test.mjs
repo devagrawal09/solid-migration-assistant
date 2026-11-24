@@ -68,7 +68,7 @@ test("publishes complete public npm and Codemod metadata", () => {
   assert.equal(packageJson.description, expectedDescription);
   assert.deepEqual(packageJson.keywords, expectedKeywords);
   assert.equal(packageJson.license, "MIT");
-  assert.equal(packageJson.dependencies.codemod, "2.0.0-alpha.4");
+  assert.equal(packageJson.dependencies.codemod, "2.0.0-alpha.6");
   assert.equal(packageJson.engines.node, ">=20.0.0");
   assert.equal(packageJson.publishConfig.access, "public");
   assert.equal(packageJson.os, undefined);
@@ -113,7 +113,7 @@ test("publishes complete public npm and Codemod metadata", () => {
     );
     assert.match(
       contents,
-      /Actual execution support depends on native runtime availability from the pinned Codemod 2\.0\.0-alpha\.4 dependency/,
+      /Actual execution support depends on native runtime availability from the pinned Codemod 2\.0\.0-alpha\.6 dependency/,
     );
     assert.match(
       contents,

@@ -8,7 +8,7 @@ The migration target is pinned to Solid `2.0.3` at upstream commit [`68406c20`](
 
 > **Scope:** version `0.4.5` targets Solid `2.0.3` and implements only the detections and rewrites documented below. A clean run is not proof that a project is ready for Solid 2.
 
-This workflow runs on Codemod workflow v2, which is in alpha: run it with `codemod@alpha` (the 2.0 alpha CLI, `2.0.0-alpha.4` at this release), because plain `codemod` / `codemod@latest` is still the 1.x CLI and cannot run it. From the root of a Solid 1.9 project in a clean git checkout:
+This workflow runs on Codemod workflow v2, which is in alpha: run it with `codemod@alpha` (the 2.0 alpha CLI, `2.0.0-alpha.6` at this release), because plain `codemod` / `codemod@latest` is still the 1.x CLI and cannot run it. From the root of a Solid 1.9 project in a clean git checkout:
 
 ```sh
 # Analyze (default): prints findings and changes nothing.
@@ -27,10 +27,10 @@ Codemod ends a run with its own summary, for example `Modified 6` and `Unmodifie
 
 ### Troubleshooting: `YAML error: invalid type: string "import { ...`
 
-That error means the Codemod CLI that ran is too old for this package: plain `codemod` / `codemod@latest` (the 1.x CLI) and `2.0.0-alpha.1` read the TypeScript workflow as YAML, and `2.0.0-alpha.2` rejects it with "forEachFile's callback must be written inline". `npx` re-resolves `@alpha` on every run, so an old alpha usually comes from a registry mirror or an npm `prefer-offline` setting; `npm view codemod dist-tags.alpha` shows what your registry resolves it to. Pin the exact CLI instead (`codemod --version` prints `1.18.7` even on the 2.0 alpha, so it can't tell them apart):
+That error means the Codemod CLI that ran is too old for this package: plain `codemod` / `codemod@latest` (the 1.x CLI) and `2.0.0-alpha.1` read the TypeScript workflow as YAML, and `2.0.0-alpha.2` rejects it with "forEachFile's callback must be written inline". `npx` re-resolves `@alpha` on every run, so an old alpha usually comes from a registry mirror or an npm `prefer-offline` setting; `npm view codemod dist-tags.alpha` shows what your registry resolves it to. Pin the exact CLI instead (`codemod --version` prints `1.18.7` on the 2.0 alphas before `2.0.0-alpha.6`, so it can't tell those apart.:
 
 ```sh
-npx codemod@2.0.0-alpha.4 run solid-migration-assistant
+npx codemod@2.0.0-alpha.6 run solid-migration-assistant
 # or
 pnpm dlx codemod@alpha run solid-migration-assistant
 ```
@@ -39,7 +39,7 @@ pnpm dlx codemod@alpha run solid-migration-assistant
 
 The npm launcher adds the `--format json` and `--format agent` reports and the dependency lookup described below. It is not yet published at this version: npm `latest` for `solid-migration-assistant` is still `0.2.1`, an older release that targets a Solid 2 release candidate, so use the Codemod Registry commands above until it is. Once it is published, run this from the project root with Node 20 or newer and npm (pnpm is not required):
 
-The assistant itself imposes no operating-system, CPU-architecture, or libc restriction in its npm metadata or launcher. Actual execution support depends on native runtime availability from the pinned Codemod 2.0.0-alpha.4 dependency and on the installing package manager and platform. This project does not claim that Codemod provides a working native runtime for every platform or architecture; installation or launch errors from Codemod remain authoritative.
+The assistant itself imposes no operating-system, CPU-architecture, or libc restriction in its npm metadata or launcher. Actual execution support depends on native runtime availability from the pinned Codemod 2.0.0-alpha.6 dependency and on the installing package manager and platform. This project does not claim that Codemod provides a working native runtime for every platform or architecture; installation or launch errors from Codemod remain authoritative.
 
 ```sh
 npx --yes solid-migration-assistant@latest

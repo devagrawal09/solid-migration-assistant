@@ -28,26 +28,23 @@ test("derives every rule registry from the rule folders", () => {
   assert.ok(analysisSteps.length > 0 && transformSteps.length > 0);
   assert.equal(new Set([...analysisSteps, ...transformSteps]).size, analysisSteps.length + transformSteps.length);
 
-  // Exactly one entrypoint file per step: no strays or leftover central
-  // scripts anywhere under scripts/, and one workflow file.
-  assert.deepEqual(productionScripts(), []);
-  // workflow.yaml is the stub codemod 2.0.0-alpha.4 requires before it starts
+  // One forEachFile callback per step, from shared/callbacks.generated.ts:
+  // no entrypoint scripts, and one workflow file.
+  assert.equal(existsSync(resolve(packageDirectory, "scripts")), false);
+  // workflow.yaml is the stub the 2.0 alpha CLI requires before it starts
   // a registry package; codemod.yaml runs workflow.ts.
   assert.deepEqual(workflowFiles(), ["workflow.ts", "workflow.yaml"]);
+  const callbacks = readFileSync(resolve(packageDirectory, "shared/callbacks.generated.ts"), "utf8");
   assert.deepEqual(
-    readdirSync(resolve(packageDirectory, "scripts/analysis")).sort(),
-    analysisSteps.map((name) => name + ".ts").sort(),
-  );
-  assert.deepEqual(
-    readdirSync(resolve(packageDirectory, "scripts/transformations")).sort(),
-    transformSteps.map((name) => name + ".ts").sort(),
+    [...callbacks.matchAll(/^  (\w+): create(Analysis|Transform)Entrypoint\(/gm)].map((m) => m[1]),
+    [...analysisSteps, ...transformSteps],
   );
 
   // Analysis and transform steps both get workspace semantics, but transforms
   // use them only for positive, cross-file proofs (shared/provenance.ts): a
   // reference set is never used to prove that something has no other uses.
   const workflow = readFileSync(resolve(packageDirectory, "workflow.ts"), "utf8");
-  assert.match(workflow, /jssg\(script, \{ semanticAnalysis: "workspace"(?:, params: ruleParams)? \}\)/);
+  assert.match(workflow, /language: "tsx", semanticAnalysis: "workspace"/);
   assert.doesNotMatch(workflow, /semanticAnalysis: "file"/);
 
   for (const obsolete of ["scripts/analyze.ts", "scripts/transform.ts", "shared/fixture-harness.ts", "transform.yaml", "scripts/emit-report.ts"]) {
@@ -370,15 +367,6 @@ function visit(directory, contents) {
     if (entry.isDirectory()) visit(path, contents);
     if (entry.isFile()) contents.push(readFileSync(path, "utf8"));
   }
-}
-
-function productionScripts() {
-  return readdirSync(resolve(packageDirectory, "scripts"), {
-    withFileTypes: true,
-  })
-    .filter((entry) => entry.isFile() && !entry.name.includes(".test."))
-    .map((entry) => entry.name)
-    .sort();
 }
 
 function workflowFiles() {
