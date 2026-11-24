@@ -1,5 +1,6 @@
-import type { Codemod, SgNode } from "codemod:ast-grep";
+import { parse, type SgNode } from "codemod:ast-grep";
 import type TSX from "codemod:ast-grep/langs/tsx";
+import type { WorkflowFile } from "codemod:workflow";
 import type { Finding, Rewrite, RuleFinding } from "./finding.ts";
 import type { TransformChange } from "./transform.ts";
 
@@ -11,46 +12,41 @@ type AnalysisRule = (
 type TransformRule = (
   rootNode: SgNode<TSX>,
   filename: string,
-  /** The step's jssg params, for a rule the workflow scopes (none in fixtures). */
+  /** Params for a rule the workflow scopes (none in fixtures). */
   params?: Readonly<Record<string, string>>,
 ) => TransformChange[];
 
-/** Rules return their findings as the file's jssg data; the workflow reads them from the step result. */
-export function createAnalysisEntrypoint(ruleId: string, rule: AnalysisRule): Codemod<TSX> {
-  return async (root) => {
-    const seen = new Set<string>();
-    const findings: Finding[] = [];
-    for (const found of rule(root.root(), { filename: root.relativeFilename().replaceAll("\\", "/") })) {
-      const finding = { rule: ruleId, ...found };
-      const key = JSON.stringify(finding);
-      if (!seen.has(key)) {
-        seen.add(key);
-        findings.push(finding);
-      }
-    }
-    return findings.length > 0 ? { edit: null, data: { findings } } : null;
+/** A `forEachFile` callback for one analysis rule: it returns the file's findings, each once. */
+export function createAnalysisEntrypoint(ruleId: string, rule: AnalysisRule) {
+  return (file: WorkflowFile): Finding[] | undefined => {
+    const root = parse<TSX>(file);
+    const findings = unique(rule(root.root(), { filename: file.path }).map((found): Finding => ({ rule: ruleId, ...found })));
+    return findings.length > 0 ? findings : undefined;
   };
 }
 
-/** Transforms return their edit and, as data, the rewrites it made. */
-export function createTransformEntrypoint(ruleId: string, rule: TransformRule): Codemod<TSX> {
-  return async (root, options) => {
-    const rootNode = root.root();
-    const filename = root.relativeFilename().replaceAll("\\", "/");
-    const changes = rule(rootNode, filename, options.params);
-    if (changes.length === 0) return null;
-
-    // An element with a closing tag reports one rewrite for two edits.
-    const seen = new Set<string>();
-    const rewrites: Rewrite[] = [];
-    for (const { report } of changes) {
-      const rewrite = { rule: ruleId, ...report };
-      const key = JSON.stringify(rewrite);
-      if (!seen.has(key)) {
-        seen.add(key);
-        rewrites.push(rewrite);
-      }
-    }
-    return { edit: rootNode.commitEdits(changes.map(({ edit }) => edit)), data: { rewrites } };
+/**
+ * A `forEachFile` callback for one transform rule: it writes the rewritten
+ * file and returns its rewrites, each once (an element with a closing tag
+ * reports one rewrite for two edits).
+ */
+export function createTransformEntrypoint(ruleId: string, rule: TransformRule) {
+  return (file: WorkflowFile, params?: Readonly<Record<string, string>>): Rewrite[] | undefined => {
+    const rootNode = parse<TSX>(file).root();
+    const changes = rule(rootNode, file.path, params);
+    if (changes.length === 0) return undefined;
+    file.write(rootNode.commitEdits(changes.map(({ edit }) => edit)));
+    return unique(changes.map(({ report }): Rewrite => ({ rule: ruleId, ...report })));
   };
+}
+
+/** Entries in first-seen order, each JSON form once. */
+export function unique<T>(entries: readonly T[]): T[] {
+  const seen = new Set<string>();
+  return entries.filter((entry) => {
+    const key = JSON.stringify(entry);
+    if (seen.has(key)) return false;
+    seen.add(key);
+    return true;
+  });
 }
