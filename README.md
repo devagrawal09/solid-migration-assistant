@@ -6,7 +6,7 @@ The assistant scans project-owned `.js`, `.jsx`, `.ts`, and `.tsx` source, retur
 
 ## Run the analyzer and transform
 
-> **Scope:** version `0.4.5` targets Solid `2.0.3` and covers only the detections and rewrites documented below. A clean analyzer run is not proof that a project is ready for Solid 2.
+> **Scope:** version `0.5.0` targets Solid `2.0.3` and covers only the detections and rewrites documented below. A clean analyzer run is not proof that a project is ready for Solid 2.
 
 Run it from the Codemod Registry with `codemod@alpha`, the Codemod 2.0 alpha CLI (`2.0.0-alpha.6` at this release); plain `codemod` / `codemod@latest` is still the 1.x CLI and cannot run workflow v2 packages. From the root of a Solid 1.9 project in a clean git checkout:
 
@@ -23,7 +23,7 @@ Add `--target <path>` to run on another directory, `--param verify=false` to ski
 
 ### Troubleshooting: `YAML error: invalid type: string "import { ...`
 
-That error means the Codemod CLI that ran is too old: plain `codemod` / `codemod@latest` (1.x) and `2.0.0-alpha.1` read the TypeScript workflow as YAML, and `2.0.0-alpha.2` rejects it with "forEachFile's callback must be written inline". An old `@alpha` usually comes from a registry mirror or an npm `prefer-offline` setting (`npm view codemod dist-tags.alpha` shows what yours resolves). Pin the exact CLI with `npx codemod@2.0.0-alpha.6 run solid-migration-assistant`, or use `pnpm dlx codemod@alpha run solid-migration-assistant`. `codemod --version` prints `1.18.7` on the 2.0 alphas before `2.0.0-alpha.6`, so it can't tell those apart.
+That error means the Codemod CLI that ran is too old: plain `codemod` / `codemod@latest` (1.x) and `2.0.0-alpha.1` read the TypeScript workflow as YAML, and `2.0.0-alpha.2` rejects it with "forEachFile's callback must be written inline"; `2.0.0-alpha.3` to `2.0.0-alpha.5` predate the workflow API this release uses. An old `@alpha` usually comes from a registry mirror or an npm `prefer-offline` setting (`npm view codemod dist-tags.alpha` shows what yours resolves). Pin the exact CLI with `npx codemod@2.0.0-alpha.6 run solid-migration-assistant`, or use `pnpm dlx codemod@alpha run solid-migration-assistant`. `codemod --version` prints `1.18.7` on the 2.0 alphas before `2.0.0-alpha.6`, so it can't tell those apart.
 
 ### npm launcher
 

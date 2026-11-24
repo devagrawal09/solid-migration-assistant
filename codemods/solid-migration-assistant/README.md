@@ -6,7 +6,7 @@ The migration target is pinned to Solid `2.0.3` at upstream commit [`68406c20`](
 
 ## Run from the Codemod Registry
 
-> **Scope:** version `0.4.5` targets Solid `2.0.3` and implements only the detections and rewrites documented below. A clean run is not proof that a project is ready for Solid 2.
+> **Scope:** version `0.5.0` targets Solid `2.0.3` and implements only the detections and rewrites documented below. A clean run is not proof that a project is ready for Solid 2.
 
 This workflow runs on Codemod workflow v2, which is in alpha: run it with `codemod@alpha` (the 2.0 alpha CLI, `2.0.0-alpha.6` at this release), because plain `codemod` / `codemod@latest` is still the 1.x CLI and cannot run it. From the root of a Solid 1.9 project in a clean git checkout:
 
@@ -27,7 +27,7 @@ Codemod ends a run with its own summary, for example `Modified 6` and `Unmodifie
 
 ### Troubleshooting: `YAML error: invalid type: string "import { ...`
 
-That error means the Codemod CLI that ran is too old for this package: plain `codemod` / `codemod@latest` (the 1.x CLI) and `2.0.0-alpha.1` read the TypeScript workflow as YAML, and `2.0.0-alpha.2` rejects it with "forEachFile's callback must be written inline". `npx` re-resolves `@alpha` on every run, so an old alpha usually comes from a registry mirror or an npm `prefer-offline` setting; `npm view codemod dist-tags.alpha` shows what your registry resolves it to. Pin the exact CLI instead (`codemod --version` prints `1.18.7` on the 2.0 alphas before `2.0.0-alpha.6`, so it can't tell those apart.:
+That error means the Codemod CLI that ran is too old for this package: plain `codemod` / `codemod@latest` (the 1.x CLI) and `2.0.0-alpha.1` read the TypeScript workflow as YAML, and `2.0.0-alpha.2` rejects it with "forEachFile's callback must be written inline"; `2.0.0-alpha.3` to `2.0.0-alpha.5` predate the workflow API this release uses. `npx` re-resolves `@alpha` on every run, so an old alpha usually comes from a registry mirror or an npm `prefer-offline` setting; `npm view codemod dist-tags.alpha` shows what your registry resolves it to. Pin the exact CLI instead (`codemod --version` prints `1.18.7` on the 2.0 alphas before `2.0.0-alpha.6`, so it can't tell those apart.:
 
 ```sh
 npx codemod@2.0.0-alpha.6 run solid-migration-assistant
